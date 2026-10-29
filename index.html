@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<title>TatoCine - Streaming Gratis</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e50914'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23FFFFFF'/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#000;--text:#fff;--text-muted:rgba(255,255,255,.7);--red:#e50914;--font:'Inter',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background-color:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;margin:0}
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:80px;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);transition:background .3s}
+.top-nav.scrolled{background:rgba(0,0,0,.95);backdrop-filter:blur(10px)}
+.nav-links{display:flex;align-items:center;gap:8px}
+.nav-brand{font-size:22px;font-weight:800;color:#fff;margin-right:20px;letter-spacing:-.5px}
+.nav-item{background:0 0;border:0;color:var(--text-muted);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;padding:8px 16px;border-radius:20px;position:relative;font-family:inherit}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.2)}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:20px;color:var(--text-muted);pointer-events:none;z-index:2;width:20px;height:20px;transition:color .2s}
+.search-input-large{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px;font-weight:500;padding:14px 24px 14px 52px;border-radius:30px;width:380px;outline:0;transition:all .3s;position:relative;z-index:1;font-family:inherit}
+.search-input-large::placeholder{color:var(--text-muted)}
+.search-input-large:focus{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);width:440px}
+.search-wrap:focus-within svg{color:#fff}
+.main-content{padding-bottom:60px}
+.hero{position:relative;width:100%;height:80vh;min-height:550px;overflow:hidden;margin-bottom:30px;background:#111;display:flex;align-items:flex-end}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:center 25%;z-index:1;transition:background-image 0.8s ease-in-out}
+.hero-gradient{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,#000 0%,rgba(0,0,0,.6) 40%,transparent 80%),linear-gradient(to right,rgba(0,0,0,.7) 0%,transparent 60%)}
+.hero-content{position:relative;z-index:3;padding:0 50px 60px;width:100%;max-width:900px;transition:opacity 0.3s ease}
+.hero-content.fading{opacity:0}
+.hero-title{font-size:clamp(40px,5.5vw,80px);font-weight:700;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px;text-shadow:0 4px 15px rgba(0,0,0,.6)}
+.hero-year{font-size:18px;font-weight:500;color:rgba(255,255,255,.8);margin-bottom:16px;text-shadow:0 1px 5px rgba(0,0,0,.5)}
+.hero-desc{font-size:16px;font-weight:400;line-height:1.6;color:rgba(255,255,255,.9);text-shadow:0 1px 5px rgba(0,0,0,.5);margin-bottom:28px;max-width:750px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-actions{display:flex;gap:12px}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;padding:16px 36px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;border:0;transition:transform .2s,background .2s;font-family:inherit}
+.hero-btn:hover{transform:scale(1.03);background:#e5e5e5}
+.rows-container{display:flex;flex-direction:column;gap:32px;padding:0 50px;transition:padding-top 0.3s ease}
+.row{position:relative}
+.row-header{display:flex;align-items:center;margin-bottom:12px}
+.row-title{font-size:20px;font-weight:600;color:#fff;letter-spacing:-.5px}
+.row-scroll{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;padding:5px 0 15px;scroll-behavior:smooth;scrollbar-width:none}
+.row-scroll::-webkit-scrollbar{display:none}
+.card{flex:0 0 260px;height:146px;border-radius:8px;position:relative;overflow:hidden;cursor:pointer;transition:transform .3s cubic-bezier(.2,0,0,1),border-color .3s,box-shadow .3s;background:#111;border:2px solid transparent;will-change:transform;transform:translateZ(0)}
+.card:hover{transform:scale(1.05);border-color:#fff;box-shadow:0 10px 20px rgba(0,0,0,.5);z-index:10}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.card:hover img{transform:scale(1.05)}
+.card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
+.card-title{font-size:14px;font-weight:600;color:#fff;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.save-btn{position:absolute;top:8px;right:8px;z-index:5;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px);opacity:0;transform:translateY(-5px)}
+.card:hover .save-btn{opacity:1;transform:translateY(0)}
+.save-btn:hover{background:#fff;color:#000;transform:scale(1.1)!important}
+.save-btn.saved{background:var(--red);color:#fff;opacity:1;transform:translateY(0)!important}
+.save-btn.saved:hover{background:#ff1a26}
+.row-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:#111;border:2px solid #333;color:#fff;cursor:pointer;z-index:20;display:flex;align-items:center;justify-content:center;font-size:24px;opacity:1;visibility:visible;transition:all .2s;box-shadow:0 4px 10px rgba(0,0,0,.6)}
+.row-nav:hover{background:#fff;color:#000;transform:translateY(-50%) scale(1.1);border-color:#fff}
+.row-nav.prev{left:-22px}
+.row-nav.next{right:-22px}
+.skeleton-card{flex:0 0 260px;height:146px;border-radius:8px;background:linear-gradient(90deg,#111 0%,#222 50%,#111 100%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty-state{padding:60px 40px;text-align:center;color:var(--text-muted)}
+.empty-state h2{font-size:24px;font-weight:500;color:#fff;margin-bottom:12px}
+.empty-state p{font-size:15px;line-height:1.6}
+.modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px}
+.modal.open{display:flex}
+#disclaimer-modal{z-index:3000}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(10px)}
+.modal-content{position:relative;width:100%;max-width:1000px;background:#000;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.9);border:1px solid rgba(255,255,255,.1)}
+.modal-header{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.05)}
+.modal-title{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.modal-close{background:rgba(255,255,255,.1);border:0;color:#fff;cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.2)}
+.modal-body{padding:24px}
+.tv-controls{display:none;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.tv-controls.active{display:flex}
+.tv-select{padding:12px 16px;border-radius:8px;background:#111;color:#fff;border:1px solid #222;font-family:inherit;font-size:14px;font-weight:500;outline:0;cursor:pointer;min-width:150px;transition:all .2s}
+.tv-select:hover{background:#1a1a1a;border-color:#444}
+.sources-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sources-header::before{content:'';width:3px;height:16px;background:#fff;border-radius:4px}
+.sources-title{font-size:16px;font-weight:600;color:#fff}
+.server-switcher{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:20px}
+.server-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:6px;background:#111;border:1px solid #222;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;text-transform:uppercase;letter-spacing:.8px}
+.server-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.server-btn:hover{background:#1a1a1a;border-color:#444;color:#fff}
+.server-btn.active{border-color:#fff;background:#fff;color:#000}
+.player-container{aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;position:relative}
+.player-container iframe{width:100%;height:100%;border:0;position:relative;z-index:2}
+.player-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;z-index:1;background:#000}
+
+/* === ESTILOS LIMPIOS PARA PRÓXIMAMENTE === */
+.card.upcoming { cursor: not-allowed; }
+.card.upcoming img { filter: grayscale(100%) brightness(0.3); } /* Imagen más oscura */
+.card.upcoming:hover { transform: none; border-color: transparent; box-shadow: none; z-index: 1; }
+.card.upcoming .save-btn { display: none; }
+
+.badge-upcoming { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    color: #fff; 
+    font-size: 16px; 
+    font-weight: 900; 
+    letter-spacing: 2px; 
+    z-index: 6; 
+    text-align: center; 
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); /* Sombra para que se lea bien */
+    width: 100%;
+    pointer-events: none;
+}
+/* ========================================= */
+
+@media(max-width:1024px){.search-input-large{width:260px}.search-input-large:focus{width:300px}.hero-content{padding:0 40px 50px}.rows-container{padding:0 40px}}
+@media(max-width:900px){.top-nav{padding:0 20px;height:70px}.nav-brand{display:none}.nav-links{gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;margin-right:10px}.nav-links::-webkit-scrollbar{display:none}.nav-item{padding:8px 12px;font-size:14px;white-space:nowrap}.search-input-large{width:200px;padding:12px 16px 12px 44px;font-size:14px}.search-input-large:focus{width:240px}.search-wrap svg{left:16px;width:16px;height:16px}.hero{height:70vh;min-height:450px}.hero-content{padding:0 20px 40px}.hero-title{font-size:42px}.hero-year{font-size:16px}.hero-desc{font-size:15px}.rows-container{padding:0 20px;gap:24px}.card{flex:0 0 200px;height:112px}.skeleton-card{flex:0 0 200px;height:112px}.server-switcher{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}}
+@media(max-width:768px){.row-nav{display:none}}
+@media(max-width:600px){.hero{height:60vh;min-height:400px}.hero-title{font-size:32px}.hero-btn{padding:12px 24px;font-size:14px}.card{flex:0 0 160px;height:90px}.skeleton-card{flex:0 0 160px;height:90px}.search-input-large{width:150px;font-size:13px}.search-input-large:focus{width:180px}}
+</style>
+</head>
+<body>
+<header class="top-nav" id="top-bar">
+<div class="nav-links">
+<span class="nav-brand">TatoCine</span>
+<button class="nav-item active" data-view="home" onclick="switchView('home')">Inicio</button>
+<button class="nav-item" data-view="movies" onclick="switchView('movies')">Películas</button>
+<button class="nav-item" data-view="series" onclick="switchView('series')">Series</button>
+<button class="nav-item" data-view="list" onclick="switchView('list')">Mi Lista</button>
+<button class="nav-item" onclick="showDisclaimer()">Aviso Legal</button>
+</div>
+<div class="search-wrap">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+<input type="search" class="search-input-large" placeholder="Buscar serie o película" id="search-input" autocomplete="off"/>
+</div>
+</header>
+<main class="main-content">
+<header class="hero" id="hero-section">
+<div class="hero-bg" id="hero-bg"></div>
+<div class="hero-gradient"></div>
+<div class="hero-content" id="hero-content">
+<h1 class="hero-title" id="hero-title">Cargando...</h1>
+<div class="hero-year" id="hero-year">2024</div>
+<p class="hero-desc" id="hero-desc">Cargando descripción...</p>
+<div class="hero-actions">
+<button class="hero-btn" id="hero-play-btn">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+Ver en TatoCine
+</button>
+</div>
+</div>
+</header>
+<div class="rows-container" id="rows-container"></div>
+</main>
+<div class="modal" id="player-modal">
+<div class="modal-backdrop" id="modal-backdrop"></div>
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="modal-title">Reproduciendo...</h2>
+<button class="modal-close" id="close-modal">✕</button>
+</div>
+<div class="modal-body">
+<div class="tv-controls" id="tv-controls">
+<select id="season-select" class="tv-select"></select>
+<select id="episode-select" class="tv-select"></select>
+</div>
+<div class="server-switcher" id="server-switcher"></div>
+<div class="player-container" id="player-view"></div>
+</div>
+</div>
+</div>
+<div class="modal" id="disclaimer-modal">
+<div class="modal-backdrop" style="cursor:default"></div>
+<div class="modal-content" style="max-width:700px">
+<div class="modal-header">
+<h2 class="modal-title">Aviso Legal y Descargo de Responsabilidad</h2>
+</div>
+<div class="modal-body" style="max-height:60vh;overflow-y:auto">
+<p style="font-size:14px;line-height:1.7;color:#d1d1d1;margin-bottom:24px;text-align:justify">
+TatoCine solo es una página de reproducción multimedia que busca en sitios de terceros y externos material audiovisual en base a un API gratuito de TMDB que cualquier persona puede obtener de manera legal y hacer una petición a servicios concretos gratuitos en internet que cualquier persona con conocimiento básico de búsqueda de reproductores de terceros puede embeder en su página. TatoCine no almacena datos de búsqueda de las personas, no almacena ni aloja ningún tipo de material audiovisual todo se consulta on-demand a través de terceros, no investiga ni analiza datos en base a preferencias y sólamente sirve como un proyecto para reproducir material audiovisual libre en internet de fácil acceso. No lucra ni busca lucrar a través de servicios de terceros por lo que siempre será gratuito. Algunos reproductores pueden tener anuncios de terceros por lo que TatoCine no se hace responsable por material indebido o con derecho de autor porque los anuncios no están en nuestro código fuente es de terceros al ejecutar el reproductor.
+</p>
+<button class="hero-btn" style="width:100%;justify-content:center;padding:16px" onclick="acceptDisclaimer()">
+Aceptar y continuar
+</button>
+</div>
+</div>
+</div>
+<script>
+//SUSTITUYE TMDB_API_KEY POR TU API KEY DE TMDB, SI NO TIENES UNA, PUEDES OBTENERLA GRATIS EN https://www.themoviedb.org/settings/api
+const TMDB_API_KEY="AQUÍ_TU_CLAVE_DE_TMDB",IMG_BG="https://image.tmdb.org/t/p/original",icons={lightning:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',server:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',disc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},SERVERS=[{name:"ESP1",icon:icons.lightning,url:(i,t,s,e)=>t==='tv'?`https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`:`https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`},{name:"ESP2",icon:icons.disc,url:(i,t,s,e)=>t==='tv'?`https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`:`https://tukiplay.com/embed/movie/${i}?autoplay=1`},{name:"ESP3",icon:icons.play,url:(i,t,s,e)=>t==='tv'?`https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`:`https://unlimplay.com/f/embed/movie/${i}`},{name:"ENG1",icon:icons.server,url:(i,t,s,e)=>t==='tv'?`https://vidsrc.sh/embed/tv/${i}/${s}/${e}`:`https://vidsrc.sh/embed/movie/${i}`}];
+let currentView='home',myList=JSON.parse(localStorage.getItem('tatoList'))||[],currentMedia=null,autoScrollInterval=null,heroInterval=null,heroMoviesList=[],currentHeroIndex=0,isSearching=!1;
+const $heroSection=document.getElementById("hero-section"),$heroBg=document.getElementById("hero-bg"),$heroTitle=document.getElementById("hero-title"),$heroYear=document.getElementById("hero-year"),$heroDesc=document.getElementById("hero-desc"),$heroContent=document.getElementById("hero-content"),$heroPlayBtn=document.getElementById("hero-play-btn"),$rowsContainer=document.getElementById("rows-container"),$searchInput=document.getElementById("search-input"),$modal=document.getElementById("player-modal"),$modalTitle=document.getElementById("modal-title"),$modalBackdrop=document.getElementById("modal-backdrop"),$closeModal=document.getElementById("close-modal"),$playerView=document.getElementById("player-view"),$serverSwitcher=document.getElementById("server-switcher"),$topBar=document.getElementById("top-bar"),$tvControls=document.getElementById("tv-controls"),$seasonSelect=document.getElementById("season-select"),$episodeSelect=document.getElementById("episode-select"),$disclaimerModal=document.getElementById("disclaimer-modal");
+function showDisclaimer(){$disclaimerModal.classList.add("open")}
+function acceptDisclaimer(){localStorage.setItem('tatoDisclaimerAccepted','true'),$disclaimerModal.classList.remove("open")}
+localStorage.getItem('tatoDisclaimerAccepted')||setTimeout(()=>{showDisclaimer()},1000);
+const fallbackData=[{id:653346,title:"El Planeta de los Simios",bg:"/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",type:"movie",rating:7.2,year:"2024",desc:"Tras la devastación mundial causada por una pandemia, un hombre vive una existencia solitaria en un hangar de aviones."},{id:693134,title:"Duna: Parte Dos",bg:"/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",type:"movie",rating:8.3,year:"2024",desc:"Paul Atreides se une a los Fremen para vengarse de los conspirativos que destruyeron a su familia."},{id:823464,title:"Godzilla y Kong",bg:"/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg",type:"movie",rating:7.4,year:"2024",desc:"Dos titanes se enfrentan en una batalla épica por la supremacía."},{id:1022789,title:"Intensamente 2",bg:"/3G1Q5xF40HkUBJXxt2DQgQzKTp5.jpg",type:"movie",rating:8.5,year:"2024",desc:"Riley entra en la adolescencia y nuevas emociones llegan a su mente."},{id:573435,title:"Bad Boys 4",bg:"/nP6RliHjxsz4irTKsxe8FRhKZYl.jpg",type:"movie",rating:7.0,year:"2024",desc:"Los detectives Mike y Marcus vuelven a la acción."},{id:519182,title:"Mi Villano Favorito 4",bg:"/wWba3TaojhK7NdycRhoQpsG0BuY.jpg",type:"movie",rating:7.2,year:"2024",desc:"Gru y su familia se enfrentan a un nuevo villano."},{id:533535,title:"Deadpool & Wolverine",bg:"/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",type:"movie",rating:7.7,year:"2024",desc:"Wade Wilson se une a Wolverine en una aventura multiversal."},{id:1011985,title:"Kung Fu Panda 4",bg:"/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",type:"movie",rating:7.1,year:"2024",desc:"Po debe encontrar a un nuevo Guerrero Dragón."},{id:94997,title:"La Casa del Dragón",bg:"/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg",type:"tv",rating:8.4,year:"2022",desc:"La historia de la Casa Targaryen."},{id:1396,title:"Breaking Bad",bg:"/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",type:"tv",rating:8.9,year:"2008",desc:"Un profesor de química se convierte en fabricante de drogas."},{id:84773,title:"Anillos de Poder",bg:"/mY78yWmbXEyIZ0o0ntiJ9pUS0LV.jpg",type:"tv",rating:7.3,year:"2022",desc:"La Segunda Edad de la Tierra Media."}];
+async function fetchTMDB(e,q=''){if(!TMDB_API_KEY||TMDB_API_KEY.includes("TU_CLAVE")||TMDB_API_KEY==="xxx"||TMDB_API_KEY==="xx")throw new Error("Sin API Key");const u=new URL(`https://api.themoviedb.org/3${e}`);u.searchParams.set("api_key",TMDB_API_KEY),u.searchParams.set("language","es-MX");const x=new URLSearchParams(q.replace(/^[?&]/,""));for(const[k,v]of x.entries())u.searchParams.set(k,v);const r=await fetch(u.toString(),{method:"GET",headers:{Accept:"application/json"}}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`TMDB HTTP ${r.status}`);return d}
+function toggleSave(e,i){e.stopPropagation();const x=myList.findIndex(m=>m.id===i.id&&m.type===i.type);x>-1?myList.splice(x,1):myList.push(i),localStorage.setItem('tatoList',JSON.stringify(myList)),currentView==='list'?switchView('list',!1):(e.currentTarget.classList.toggle('saved'),e.currentTarget.querySelector('svg').setAttribute('fill',e.currentTarget.classList.contains('saved')?'currentColor':'none'))}
+function isSaved(i){return myList.some(m=>m.id===i.id&&m.type===i.type)}
+function isUpcoming(releaseDate) {
+    if (!releaseDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const release = new Date(releaseDate);
+    release.setHours(0, 0, 0, 0);
+    return release >= today;
+}
+function renderRow(t,m){if(!m||m.length===0)return;const d=document.createElement('div');d.className='row';const h=m.map(i=>{const s=isSaved(i),st=i.title.replace(/'/g,"\\'").replace(/"/g,'&quot;'),sb=(i.bg||'').replace(/'/g,"\\'"),b=i.bg?(i.bg.startsWith('http')?i.bg:IMG_BG+i.bg):'';const upcomingClass = i.isUpcoming ? 'upcoming' : '';const upcomingBadge = i.isUpcoming ? `<div class="badge-upcoming">PRÓXIMAMENTE</div>` : '';const onclickAttr = i.isUpcoming ? '' : `onclick="openPlayer(${i.id},'${i.type}','${st}')"`;return`<div class="card ${upcomingClass}" ${onclickAttr}><img src="${b||'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'"/>${upcomingBadge}<button class="save-btn ${s?'saved':''}" onclick="toggleSave(event,{id:${i.id},type:'${i.type}',title:'${st}',bg:'${sb}',rating:${i.rating||0},year:'${i.year||''}'})"><svg width="14" height="14" viewBox="0 0 24 24" fill="${s?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><div class="card-overlay"><div class="card-title">${i.title}</div></div></div>`}).join('');d.innerHTML=`<div class="row-header"><h2 class="row-title">${t}</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">${h}</div>`,$rowsContainer.appendChild(d)}
+function scrollRow(b,d){const r=b.closest('.row'),s=r.querySelector('.row-scroll'),a=s.clientWidth*.85;s.scrollBy({left:a*d,behavior:'smooth'})}
+function setHero(m){if(!m)return;$heroContent.classList.add('fading'),setTimeout(()=>{if(m.bg){const u=m.bg.startsWith('http')?m.bg:IMG_BG+m.bg;$heroBg.style.backgroundImage=`url('${u}')`}$heroTitle.textContent=m.title,$heroYear.textContent=m.year||'2024',$heroDesc.textContent=m.desc||"Sin descripción disponible.",$heroPlayBtn.onclick=()=>openPlayer(m.id,m.type,m.title),$heroContent.classList.remove('fading')},300)}
+function startHeroCarousel(m){heroMoviesList=m.slice(0,5),currentHeroIndex=0,clearInterval(heroInterval),heroInterval=setInterval(()=>{if(isSearching)return;currentHeroIndex=(currentHeroIndex+1)%heroMoviesList.length,setHero(heroMoviesList[currentHeroIndex])},7200)}
+function startAutoScroll(){clearInterval(autoScrollInterval),autoScrollInterval=setInterval(()=>{if(isSearching)return;document.querySelectorAll('.row-scroll').forEach(s=>{if(s.closest('.row').matches(':hover'))return;const m=s.scrollWidth-s.clientWidth;s.scrollLeft>=m-10?s.scrollTo({left:0,behavior:'smooth'}):s.scrollBy({left:276,behavior:'smooth'})})},7000)}
+async function switchView(v,r=!0){
+    currentView=v,isSearching=!1,r&&($searchInput.value=''),document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')),document.querySelector(`.nav-item[data-view="${v}"]`).classList.add('active'),$rowsContainer.innerHTML=`<div class="row"><div class="row-scroll"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>`;
+    
+    if(v==='list'){
+        $heroSection.style.display='none';
+        $rowsContainer.style.paddingTop='120px'; // FIX: Espacio para que no choque con la barra superior
+        if($rowsContainer.innerHTML='',myList.length===0){$rowsContainer.innerHTML=`<div class="empty-state"><h2>Tu lista está vacía</h2><p>Haz clic en el corazón de cualquier película o serie para guardarla aquí.</p></div>`;return}
+        renderRow('Porque las elegiste como tus favoritas',myList);
+        return;
+    } else {
+        $heroSection.style.display='flex';
+        $rowsContainer.style.paddingTop='0px'; // FIX: Restaurar en otras vistas
+    }
+    try{if(v==='home'){const[t,u,p,s]=await Promise.all([fetchTMDB('/trending/movie/week'),fetchTMDB('/movie/upcoming','&region=GT'),fetchTMDB('/movie/popular'),fetchTMDB('/tv/popular')]);$rowsContainer.innerHTML='';let h=null;if(t.results?.length){const m=t.results.map(i=>{const date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});h=m[0],renderRow('Tendencias de la semana',m),startHeroCarousel(m)}if(u.results?.length){const m=u.results.map(i=>{const date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});renderRow('Próximos Estrenos',m)}if(p.results?.length){const m=p.results.map(i=>{const date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});renderRow('Películas Populares',m)}if(s.results?.length){const m=s.results.map(i=>{const date=i.first_air_date;return{id:i.id,title:i.name,bg:i.backdrop_path||i.poster_path,type:'tv',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});renderRow('Series Populares',m)}h&&setHero(h),startAutoScroll()}else if(v==='movies'){const d=await fetchTMDB('/movie/popular');$rowsContainer.innerHTML='';if(d.results?.length){const m=d.results.map(i=>{const date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});setHero(m[0]),renderRow('Películas Populares',m),startAutoScroll()}}else if(v==='series'){const d=await fetchTMDB('/tv/popular');$rowsContainer.innerHTML='';if(d.results?.length){const m=d.results.map(i=>{const date=i.first_air_date;return{id:i.id,title:i.name,bg:i.backdrop_path||i.poster_path,type:'tv',desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});setHero(m[0]),renderRow('Series Populares',m),startAutoScroll()}}}catch(e){$rowsContainer.innerHTML='',setHero(fallbackData[0]),renderRow('Catálogo (Respaldo)',fallbackData),startAutoScroll()}}
+let debounceTimer;
+$searchInput.addEventListener("keyup",e=>{clearTimeout(debounceTimer);const q=e.target.value.trim();if(q.length===0){isSearching=!1,switchView(currentView,!1);return}isSearching=!0;debounceTimer=setTimeout(async()=>{$rowsContainer.innerHTML=`<div class="row"><div class="row-scroll"><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>`;try{const d=await fetchTMDB('/search/multi',`&query=${encodeURIComponent(q)}`),m=d.results.filter(i=>i.media_type==='movie'||i.media_type==='tv').map(i=>{const date=i.release_date||i.first_air_date;return{id:i.id,title:i.title||i.name,bg:i.backdrop_path||i.poster_path,type:i.media_type,desc:i.overview,rating:i.vote_average,year:date?.split('-')[0],isUpcoming:isUpcoming(date)}});$rowsContainer.innerHTML='',m.length>0?(setHero(m[0]),renderRow(`Resultados para "${q}"`,m),startAutoScroll()):$rowsContainer.innerHTML=`<div class="empty-state"><h2>Sin resultados</h2><p>No encontramos nada para "${q}".</p></div>`}catch(e){const l=fallbackData.filter(m=>m.title.toLowerCase().includes(q.toLowerCase()));$rowsContainer.innerHTML='',l.length>0?(renderRow(`Resultados locales para "${q}"`,l),startAutoScroll()):$rowsContainer.innerHTML=`<div class="empty-state"><h2>Error de conexión</h2><p>No se pudo buscar "${q}".</p></div>`}},300)});
+function toggleSources(){const s=document.getElementById('server-switcher'),b=document.getElementById('hide-sources-btn');s.style.display==='none'?(s.style.display='grid',b.innerHTML=`Ocultar fuentes <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`):(s.style.display='none',b.innerHTML=`Mostrar fuentes <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`)}
+async function loadEpisodes(s,n){try{const d=await fetchTMDB(`/tv/${s}/season/${n}`);$episodeSelect.innerHTML=d.episodes.map(e=>`<option value="${e.episode_number}">Episodio ${e.episode_number}: ${e.name}</option>`).join('')}catch(e){$episodeSelect.innerHTML='<option value="1">Episodio 1</option>'}}
+function playEmbed(i,b){const s=SERVERS[i];$playerView.innerHTML='',$serverSwitcher.querySelectorAll('.server-btn').forEach(x=>x.classList.remove('active')),b.classList.add('active');let u='';if(currentMedia.type==='tv'){const se=$seasonSelect.value,ep=$episodeSelect.value;u=s.url(currentMedia.id,currentMedia.type,se,ep)}else u=s.url(currentMedia.id,currentMedia.type);const l=document.createElement('div');l.className='player-loading',l.textContent=`Conectando con ${s.name}...`;const f=document.createElement('iframe');f.src=u,f.setAttribute('allow','autoplay; fullscreen; picture-in-picture; encrypted-media'),f.setAttribute('referrerpolicy','origin'),f.setAttribute('allowfullscreen','true'),f.onload=()=>{l.style.display='none'},setTimeout(()=>{l.style.display='none'},3000),$playerView.appendChild(l),$playerView.appendChild(f)}
+window.openPlayer=async(i,t,ti)=>{currentMedia={id:i,type:t,title:ti},$modal.classList.add("open"),$modalTitle.textContent=ti,$playerView.innerHTML='',document.getElementById('server-switcher').style.display='grid',$serverSwitcher.innerHTML=SERVERS.map((s,x)=>`<button class="server-btn" id="server-btn-${x}" onclick="playEmbed(${x},this)">${s.icon}${s.name}</button>`).join("");if(t==='tv'){$tvControls.classList.add('active');try{const d=await fetchTMDB(`/tv/${i}`),se=d.seasons.filter(s=>s.season_number>0);$seasonSelect.innerHTML=se.map(s=>`<option value="${s.season_number}">Temporada ${s.season_number}</option>`).join(''),await loadEpisodes(i,se[0].season_number),$seasonSelect.onchange=async()=>{await loadEpisodes(i,$seasonSelect.value),playEmbed(0,document.getElementById('server-btn-0'))},$episodeSelect.onchange=()=>{playEmbed(0,document.getElementById('server-btn-0'))},playEmbed(0,document.getElementById('server-btn-0'))}catch(e){$tvControls.classList.remove('active'),playEmbed(0,document.getElementById('server-btn-0'))}}else $tvControls.classList.remove('active'),playEmbed(0,document.getElementById('server-btn-0'))};
+$closeModal.onclick=()=>{$modal.classList.remove("open"),$playerView.innerHTML=""},$modalBackdrop.onclick=()=>{$modal.classList.remove("open"),$playerView.innerHTML=""},window.addEventListener("scroll",()=>{$topBar.classList.toggle("scrolled",window.scrollY>20)}),switchView('home');
+</script>
+</body>
+</html>
