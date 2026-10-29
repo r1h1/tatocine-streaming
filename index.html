@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
 <title>TatoCine - Streaming Gratis</title>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" id="manifest-link">
+<!-- Fin PWA Meta Tags -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e50914'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23FFFFFF'/%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
@@ -13,17 +19,44 @@
 body{font-family:var(--font);background-color:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;margin:0}
 .top-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:80px;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);transition:background .3s}
 .top-nav.scrolled{background:rgba(0,0,0,.95);backdrop-filter:blur(10px)}
-.nav-links{display:flex;align-items:center;gap:8px}
+
+/* === MENÚ HAMBURGUESA Y NAVEGACIÓN RESPONSIVE === */
+.hamburger-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;margin-right:10px;z-index:1001;}
 .nav-brand{font-size:22px;font-weight:800;color:#fff;margin-right:20px;letter-spacing:-.5px}
+.nav-links{display:flex;align-items:center;gap:8px}
 .nav-item{background:0 0;border:0;color:var(--text-muted);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;padding:8px 16px;border-radius:20px;position:relative;font-family:inherit}
 .nav-item:hover{color:#fff;background:rgba(255,255,255,.1)}
 .nav-item.active{color:#fff;background:rgba(255,255,255,.2)}
+
+/* Menú móvil overlay */
+.mobile-menu {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.mobile-menu.open { opacity: 1; pointer-events: auto; }
+.mobile-menu .nav-item { font-size: 20px; padding: 15px; width: 80%; max-width: 300px; text-align: center; border-radius: 10px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+.mobile-menu .nav-item.active { background: #e50914; color: #fff; border-color: #e50914; }
+.mobile-menu .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; background: none; border: none; color: #fff; cursor: pointer; }
+
 .search-wrap{position:relative;display:flex;align-items:center}
 .search-wrap svg{position:absolute;left:20px;color:var(--text-muted);pointer-events:none;z-index:2;width:20px;height:20px;transition:color .2s}
 .search-input-large{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px;font-weight:500;padding:14px 24px 14px 52px;border-radius:30px;width:380px;outline:0;transition:all .3s;position:relative;z-index:1;font-family:inherit}
 .search-input-large::placeholder{color:var(--text-muted)}
 .search-input-large:focus{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);width:440px}
 .search-wrap:focus-within svg{color:#fff}
+
+/* CAMBIO A 1066px AQUÍ */
+@media(max-width:1066px){
+    .hamburger-btn{display:block;}
+    .nav-links{display:none !important;}
+    .top-nav{padding:0 20px;height:70px;}
+    .nav-brand{font-size:18px;margin-right:0;}
+    .search-wrap{width:auto;flex:1;margin-left:10px;}
+    .search-input-large{width:100%;padding:10px 16px 10px 40px;font-size:14px;}
+    .search-input-large:focus{width:100%;}
+    .search-wrap svg{left:14px;width:16px;height:16px;}
+}
+/* ========================================= */
+
 .main-content{padding-bottom:60px}
 .hero{position:relative;width:100%;height:80vh;min-height:550px;overflow:hidden;margin-bottom:30px;background:#111;display:flex;align-items:flex-end}
 .hero-bg{position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:center 25%;z-index:1;transition:background-image 0.8s ease-in-out}
@@ -90,48 +123,86 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 
 /* === ESTILOS LIMPIOS PARA PRÓXIMAMENTE === */
 .card.upcoming { cursor: not-allowed; }
-.card.upcoming img { filter: grayscale(100%) brightness(0.3); } /* Imagen más oscura */
+.card.upcoming img { filter: grayscale(100%) brightness(0.3); }
 .card.upcoming:hover { transform: none; border-color: transparent; box-shadow: none; z-index: 1; }
 .card.upcoming .save-btn { display: none; }
+.badge-upcoming { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 2px; z-index: 6; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); width: 100%; pointer-events: none; }
 
-.badge-upcoming { 
-    position: absolute; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    color: #fff; 
-    font-size: 16px; 
-    font-weight: 900; 
-    letter-spacing: 2px; 
-    z-index: 6; 
-    text-align: center; 
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); /* Sombra para que se lea bien */
-    width: 100%;
-    pointer-events: none;
+/* === BOTÓN PWA INSTALL === */
+#installPWA {
+    display: none; 
+    position: fixed; 
+    bottom: 20px; 
+    left: 20px; 
+    z-index: 10000; 
+    background: #e50914; 
+    color: white; 
+    border: none; 
+    padding: 12px 24px; 
+    border-radius: 30px; 
+    font-weight: 800; 
+    font-size: 14px;
+    cursor: pointer; 
+    box-shadow: 0 4px 15px rgba(229,9,20,0.5); 
+    transition: transform 0.2s;
 }
-/* ========================================= */
+#installPWA:hover { transform: scale(1.05); }
 
-@media(max-width:1024px){.search-input-large{width:260px}.search-input-large:focus{width:300px}.hero-content{padding:0 40px 50px}.rows-container{padding:0 40px}}
-@media(max-width:900px){.top-nav{padding:0 20px;height:70px}.nav-brand{display:none}.nav-links{gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;margin-right:10px}.nav-links::-webkit-scrollbar{display:none}.nav-item{padding:8px 12px;font-size:14px;white-space:nowrap}.search-input-large{width:200px;padding:12px 16px 12px 44px;font-size:14px}.search-input-large:focus{width:240px}.search-wrap svg{left:16px;width:16px;height:16px}.hero{height:70vh;min-height:450px}.hero-content{padding:0 20px 40px}.hero-title{font-size:42px}.hero-year{font-size:16px}.hero-desc{font-size:15px}.rows-container{padding:0 20px;gap:24px}.card{flex:0 0 200px;height:112px}.skeleton-card{flex:0 0 200px;height:112px}.server-switcher{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}}
-@media(max-width:768px){.row-nav{display:none}}
-@media(max-width:600px){.hero{height:60vh;min-height:400px}.hero-title{font-size:32px}.hero-btn{padding:12px 24px;font-size:14px}.card{flex:0 0 160px;height:90px}.skeleton-card{flex:0 0 160px;height:90px}.search-input-large{width:150px;font-size:13px}.search-input-large:focus{width:180px}}
+/* Ajustes adicionales para tablet */
+@media(max-width:1066px){
+    .hero-content{padding:0 30px 40px}
+    .rows-container{padding:0 30px;gap:24px}
+}
+@media(max-width:768px){
+    .hero{height:70vh;min-height:450px}
+    .hero-title{font-size:42px}
+    .hero-year{font-size:16px}
+    .hero-desc{font-size:15px}
+    .rows-container{padding:0 20px;gap:24px}
+    .card{flex:0 0 200px;height:112px}
+    .skeleton-card{flex:0 0 200px;height:112px}
+    .server-switcher{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+    .row-nav{display:none}
+}
+@media(max-width:600px){
+    .hero{height:60vh;min-height:400px}
+    .hero-title{font-size:32px}
+    .hero-btn{padding:12px 24px;font-size:14px}
+    .card{flex:0 0 160px;height:90px}
+    .skeleton-card{flex:0 0 160px;height:90px}
+}
 </style>
 </head>
 <body>
+
+<!-- Menú Móvil (Oculto por defecto) -->
+<div class="mobile-menu" id="mobile-menu">
+    <button class="close-btn" onclick="toggleMenu()">✕</button>
+    <button class="nav-item active" data-view="home" onclick="switchView('home'); toggleMenu();">Inicio</button>
+    <button class="nav-item" data-view="movies" onclick="switchView('movies'); toggleMenu();">Películas</button>
+    <button class="nav-item" data-view="series" onclick="switchView('series'); toggleMenu();">Series</button>
+    <button class="nav-item" data-view="list" onclick="switchView('list'); toggleMenu();">Mi Lista</button>
+    <button class="nav-item" onclick="showDisclaimer(); toggleMenu();">Aviso Legal</button>
+</div>
+
 <header class="top-nav" id="top-bar">
-<div class="nav-links">
-<span class="nav-brand">TatoCine</span>
-<button class="nav-item active" data-view="home" onclick="switchView('home')">Inicio</button>
-<button class="nav-item" data-view="movies" onclick="switchView('movies')">Películas</button>
-<button class="nav-item" data-view="series" onclick="switchView('series')">Series</button>
-<button class="nav-item" data-view="list" onclick="switchView('list')">Mi Lista</button>
-<button class="nav-item" onclick="showDisclaimer()">Aviso Legal</button>
-</div>
-<div class="search-wrap">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-<input type="search" class="search-input-large" placeholder="Buscar serie o película" id="search-input" autocomplete="off"/>
-</div>
+    <div style="display:flex; align-items:center;">
+        <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+        <span class="nav-brand">TatoCine</span>
+        <div class="nav-links">
+            <button class="nav-item active" data-view="home" onclick="switchView('home')">Inicio</button>
+            <button class="nav-item" data-view="movies" onclick="switchView('movies')">Películas</button>
+            <button class="nav-item" data-view="series" onclick="switchView('series')">Series</button>
+            <button class="nav-item" data-view="list" onclick="switchView('list')">Mi Lista</button>
+            <button class="nav-item" onclick="showDisclaimer()">Aviso Legal</button>
+        </div>
+    </div>
+    <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" class="search-input-large" placeholder="Buscar..." id="search-input" autocomplete="off"/>
+    </div>
 </header>
+
 <main class="main-content">
 <header class="hero" id="hero-section">
 <div class="hero-bg" id="hero-bg"></div>
@@ -150,6 +221,7 @@ Ver en TatoCine
 </header>
 <div class="rows-container" id="rows-container"></div>
 </main>
+
 <div class="modal" id="player-modal">
 <div class="modal-backdrop" id="modal-backdrop"></div>
 <div class="modal-content">
@@ -167,6 +239,7 @@ Ver en TatoCine
 </div>
 </div>
 </div>
+
 <div class="modal" id="disclaimer-modal">
 <div class="modal-backdrop" style="cursor:default"></div>
 <div class="modal-content" style="max-width:700px">
@@ -184,6 +257,9 @@ Aceptar y continuar
 </div>
 </div>
 
+<!-- BOTÓN DE INSTALACIÓN PWA -->
+<button id="installPWA">📲 Instalar App</button>
+
 <!-- ===== POLYFILLS PARA NAVEGADORES ANTIGUOS (LG WEBOS) ===== -->
 <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.3.0/dist/polyfill.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"></script>
@@ -192,17 +268,27 @@ Aceptar y continuar
 
 <script>
 //SUSTITUYE TMDB_API_KEY POR TU API KEY DE TMDB, SI NO TIENES UNA, PUEDES OBTENERLA GRATIS EN https://www.themoviedb.org/settings/api
-const TMDB_API_KEY="xxxxx",IMG_BG="https://image.tmdb.org/t/p/original",icons={lightning:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',server:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',disc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},SERVERS=[{name:"ESP1",icon:icons.lightning,url:(i,t,s,e)=>t==='tv'?`https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`:`https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`},{name:"ESP2",icon:icons.disc,url:(i,t,s,e)=>t==='tv'?`https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`:`https://tukiplay.com/embed/movie/${i}?autoplay=1`},{name:"ESP3",icon:icons.play,url:(i,t,s,e)=>t==='tv'?`https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`:`https://unlimplay.com/f/embed/movie/${i}`},{name:"ENG1",icon:icons.server,url:(i,t,s,e)=>t==='tv'?`https://vidsrc.sh/embed/tv/${i}/${s}/${e}`:`https://vidsrc.sh/embed/movie/${i}`}];
+const TMDB_API_KEY="xxx",IMG_BG="https://image.tmdb.org/t/p/original",icons={lightning:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',server:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',disc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},SERVERS=[{name:"ESP1",icon:icons.lightning,url:(i,t,s,e)=>t==='tv'?`https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`:`https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`},{name:"ESP2",icon:icons.disc,url:(i,t,s,e)=>t==='tv'?`https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`:`https://tukiplay.com/embed/movie/${i}?autoplay=1`},{name:"ESP3",icon:icons.play,url:(i,t,s,e)=>t==='tv'?`https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`:`https://unlimplay.com/f/embed/movie/${i}`},{name:"ENG1",icon:icons.server,url:(i,t,s,e)=>t==='tv'?`https://vidsrc.sh/embed/tv/${i}/${s}/${e}`:`https://vidsrc.sh/embed/movie/${i}`}];
 let currentView='home',myList=JSON.parse(localStorage.getItem('tatoList'))||[],currentMedia=null,autoScrollInterval=null,heroInterval=null,heroMoviesList=[],currentHeroIndex=0,isSearching=!1;
+
 const $heroSection=document.getElementById("hero-section"),$heroBg=document.getElementById("hero-bg"),$heroTitle=document.getElementById("hero-title"),$heroYear=document.getElementById("hero-year"),$heroDesc=document.getElementById("hero-desc"),$heroContent=document.getElementById("hero-content"),$heroPlayBtn=document.getElementById("hero-play-btn"),$rowsContainer=document.getElementById("rows-container"),$searchInput=document.getElementById("search-input"),$modal=document.getElementById("player-modal"),$modalTitle=document.getElementById("modal-title"),$modalBackdrop=document.getElementById("modal-backdrop"),$closeModal=document.getElementById("close-modal"),$playerView=document.getElementById("player-view"),$serverSwitcher=document.getElementById("server-switcher"),$topBar=document.getElementById("top-bar"),$tvControls=document.getElementById("tv-controls"),$seasonSelect=document.getElementById("season-select"),$episodeSelect=document.getElementById("episode-select"),$disclaimerModal=document.getElementById("disclaimer-modal");
+
+function toggleMenu() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+}
+
 function showDisclaimer(){$disclaimerModal.classList.add("open")}
 function acceptDisclaimer(){localStorage.setItem('tatoDisclaimerAccepted','true'),$disclaimerModal.classList.remove("open")}
 localStorage.getItem('tatoDisclaimerAccepted')||setTimeout(()=>{showDisclaimer()},1000);
+
 const fallbackData=[{id:653346,title:"El Planeta de los Simios",bg:"/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",type:"movie",rating:7.2,year:"2024",desc:"Tras la devastación mundial causada por una pandemia, un hombre vive una existencia solitaria en un hangar de aviones."},{id:693134,title:"Duna: Parte Dos",bg:"/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",type:"movie",rating:8.3,year:"2024",desc:"Paul Atreides se une a los Fremen para vengarse de los conspirativos que destruyeron a su familia."},{id:823464,title:"Godzilla y Kong",bg:"/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg",type:"movie",rating:7.4,year:"2024",desc:"Dos titanes se enfrentan en una batalla épica por la supremacía."},{id:1022789,title:"Intensamente 2",bg:"/3G1Q5xF40HkUBJXxt2DQgQzKTp5.jpg",type:"movie",rating:8.5,year:"2024",desc:"Riley entra en la adolescencia y nuevas emociones llegan a su mente."},{id:573435,title:"Bad Boys 4",bg:"/nP6RliHjxsz4irTKsxe8FRhKZYl.jpg",type:"movie",rating:7.0,year:"2024",desc:"Los detectives Mike y Marcus vuelven a la acción."},{id:519182,title:"Mi Villano Favorito 4",bg:"/wWba3TaojhK7NdycRhoQpsG0BuY.jpg",type:"movie",rating:7.2,year:"2024",desc:"Gru y su familia se enfrentan a un nuevo villano."},{id:533535,title:"Deadpool & Wolverine",bg:"/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",type:"movie",rating:7.7,year:"2024",desc:"Wade Wilson se une a Wolverine en una aventura multiversal."},{id:1011985,title:"Kung Fu Panda 4",bg:"/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",type:"movie",rating:7.1,year:"2024",desc:"Po debe encontrar a un nuevo Guerrero Dragón."},{id:94997,title:"La Casa del Dragón",bg:"/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg",type:"tv",rating:8.4,year:"2022",desc:"La historia de la Casa Targaryen."},{id:1396,title:"Breaking Bad",bg:"/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",type:"tv",rating:8.9,year:"2008",desc:"Un profesor de química se convierte en fabricante de drogas."},{id:84773,title:"Anillos de Poder",bg:"/mY78yWmbXEyIZ0o0ntiJ9pUS0LV.jpg",type:"tv",rating:7.3,year:"2022",desc:"La Segunda Edad de la Tierra Media."}];
+
 function fetchTMDB(e,q=''){return new Promise(function(resolve,reject){if(!TMDB_API_KEY||TMDB_API_KEY.includes("TU_CLAVE")||TMDB_API_KEY==="xxx"||TMDB_API_KEY==="xx"){return reject(new Error("Sin API Key"));}var u=new URL("https://api.themoviedb.org/3"+e);u.searchParams.set("api_key",TMDB_API_KEY);u.searchParams.set("language","es-MX");var x=new URLSearchParams(q.replace(/^[?&]/,""));x.forEach(function(v,k){u.searchParams.set(k,v);});fetch(u.toString(),{method:"GET",headers:{Accept:"application/json"}}).then(function(r){if(!r.ok){throw new Error("TMDB HTTP "+r.status);}return r.json();}).then(function(d){resolve(d);}).catch(function(err){reject(err);});});}
+
 function toggleSave(e,i){e.stopPropagation();const x=myList.findIndex(m=>m.id===i.id&&m.type===i.type);x>-1?myList.splice(x,1):myList.push(i),localStorage.setItem('tatoList',JSON.stringify(myList)),currentView==='list'?switchView('list',!1):(e.currentTarget.classList.toggle('saved'),e.currentTarget.querySelector('svg').setAttribute('fill',e.currentTarget.classList.contains('saved')?'currentColor':'none'))}
 function isSaved(i){return myList.some(m=>m.id===i.id&&m.type===i.type)}
 function isUpcoming(releaseDate) { if (!releaseDate) return false; const today = new Date(); today.setHours(0, 0, 0, 0); const release = new Date(releaseDate); release.setHours(0, 0, 0, 0); return release >= today; }
+
 function renderRow(t,m){if(!m||m.length===0)return;const d=document.createElement('div');d.className='row';const h=m.map(i=>{const s=isSaved(i),st=i.title.replace(/'/g,"\\'").replace(/"/g,'&quot;'),sb=(i.bg||'').replace(/'/g,"\\'"),b=i.bg?(i.bg.startsWith('http')?i.bg:IMG_BG+i.bg):'';const upcomingClass = i.isUpcoming ? 'upcoming' : '';const upcomingBadge = i.isUpcoming ? `<div class="badge-upcoming">PRÓXIMAMENTE</div>` : '';const onclickAttr = i.isUpcoming ? '' : `onclick="openPlayer(${i.id},'${i.type}','${st}')"`;return`<div class="card ${upcomingClass}" ${onclickAttr}><img src="${b||'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'"/>${upcomingBadge}<button class="save-btn ${s?'saved':''}" onclick="toggleSave(event,{id:${i.id},type:'${i.type}',title:'${st}',bg:'${sb}',rating:${i.rating||0},year:'${i.year||''}'})"><svg width="14" height="14" viewBox="0 0 24 24" fill="${s?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><div class="card-overlay"><div class="card-title">${i.title}</div></div></div>`}).join('');d.innerHTML=`<div class="row-header"><h2 class="row-title">${t}</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">${h}</div>`,$rowsContainer.appendChild(d)}
 function scrollRow(b,d){const r=b.closest('.row'),s=r.querySelector('.row-scroll'),a=s.clientWidth*.85;s.scrollBy({left:a*d,behavior:'smooth'})}
 function setHero(m){if(!m)return;$heroContent.classList.add('fading'),setTimeout(()=>{if(m.bg){const u=m.bg.startsWith('http')?m.bg:IMG_BG+m.bg;$heroBg.style.backgroundImage=`url('${u}')`}$heroTitle.textContent=m.title,$heroYear.textContent=m.year||'2024',$heroDesc.textContent=m.desc||"Sin descripción disponible.",$heroPlayBtn.onclick=()=>openPlayer(m.id,m.type,m.title),$heroContent.classList.remove('fading')},300)}
@@ -215,8 +301,8 @@ function switchView(v,r){
     if(r) $searchInput.value='';
     
     document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
-    var activeBtn = document.querySelector('.nav-item[data-view="'+v+'"]');
-    if(activeBtn) activeBtn.classList.add('active');
+    var activeBtns = document.querySelectorAll('.nav-item[data-view="'+v+'"]');
+    activeBtns.forEach(function(btn) { btn.classList.add('active'); });
     
     $rowsContainer.innerHTML='<div class="row"><div class="row-scroll"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>';
     
@@ -301,16 +387,11 @@ function switchView(v,r){
 
 var debounceTimer;
 $searchInput.addEventListener("keyup",function(e){
-    // --- FIX: SI PRESIONA ENTER, QUITAR EL FOCO Y MOVERLO AL HERO ---
     if (e.key === 'Enter' || e.keyCode === 13) {
         e.preventDefault();
-        $searchInput.blur(); // Quita el foco del input
-        if ($heroPlayBtn) {
-            $heroPlayBtn.focus(); // Enfoca el botón del hero para que el control de la TV salga
-        } else {
-            document.body.focus();
-        }
-        return; // Detiene la ejecución para no buscar de nuevo
+        $searchInput.blur();
+        if ($heroPlayBtn) { $heroPlayBtn.focus(); } else { document.body.focus(); }
+        return;
     }
 
     clearTimeout(debounceTimer);
@@ -419,6 +500,52 @@ window.openPlayer=function(i,t,ti){
 $closeModal.onclick=function(){$modal.classList.remove("open");$playerView.innerHTML="";};
 $modalBackdrop.onclick=function(){$modal.classList.remove("open");$playerView.innerHTML="";};
 window.addEventListener("scroll",function(){$topBar.classList.toggle("scrolled",window.scrollY>20);});
+
+// === LÓGICA PWA (Instalación) ===
+const manifest = {
+    name: 'TatoCine - Streaming Gratis',
+    short_name: 'TatoCine',
+    start_url: '.',
+    display: 'standalone',
+    background_color: '#000000',
+    theme_color: '#e50914',
+    icons: [{
+        src: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e50914"/%3E%3Cpath d="M14 12l14 8-14 8z" fill="%23FFFFFF"/%3E%3C/svg%3E',
+        sizes: '192x192',
+        type: 'image/svg+xml'
+    }]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+const manifestURL = URL.createObjectURL(blob);
+document.getElementById('manifest-link').href = manifestURL;
+
+let deferredPrompt;
+const installBtn = document.getElementById('installPWA');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+    });
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+            console.log('Error al registrar SW:', err);
+        });
+    });
+}
 
 // Iniciar App
 switchView('home');
