@@ -6,62 +6,108 @@
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
 <title>TatoCine - Streaming Gratis</title>
 <!-- PWA Meta Tags -->
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#e50914">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TatoCine">
+<meta name="description" content="TatoCine: películas, anime y series gratis en streaming. Proyecto sin fines de lucro.">
 <link rel="manifest" id="manifest-link">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e50914'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23FFFFFF'/%3E%3C/svg%3E">
 <!-- Fin PWA Meta Tags -->
+<!-- === PRECONNECT PARA TMDB === -->
+<link rel="preconnect" href="https://api.themoviedb.org" crossorigin>
+<link rel="preconnect" href="https://image.tmdb.org" crossorigin>
+<link rel="dns-prefetch" href="https://image.tmdb.org">
+<!-- ============================================ -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e50914'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23FFFFFF'/%3E%3C/svg%3E"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#000;--text:#fff;--text-muted:rgba(255,255,255,.7);--red:#e50914;--font:'Inter',sans-serif}
+:root{--bg:#000;--text:#fff;--text-muted:rgba(255,255,255,.7);--red:#e50914;--font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background-color:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;margin:0}
 .top-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:80px;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);transition:background .3s}
 .top-nav.scrolled{background:rgba(0,0,0,.95);backdrop-filter:blur(10px)}
 
 /* === MENÚ HAMBURGUESA Y NAVEGACIÓN RESPONSIVE === */
-.hamburger-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;margin-right:10px;z-index:1001;}
+.hamburger-btn{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px;margin-right:10px;z-index:1001;transition:transform .2s;}
+.hamburger-btn:hover{transform:scale(1.1);}
 .nav-brand{font-size:22px;font-weight:800;color:#fff;margin-right:20px;letter-spacing:-.5px}
 .nav-links{display:flex;align-items:center;gap:8px}
 .nav-item{background:0 0;border:0;color:var(--text-muted);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;padding:8px 16px;border-radius:20px;position:relative;font-family:inherit}
 .nav-item:hover{color:#fff;background:rgba(255,255,255,.1)}
 .nav-item.active{color:#fff;background:rgba(255,255,255,.2)}
 
-/* Menú móvil overlay */
+/* === MENÚ MÓVIL PREMIUM (ESTILO PÍLDORA) === */
 .mobile-menu {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100vh; 
+    background: rgba(10, 10, 10, 0.6); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 2000; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+    padding-top: 100px; gap: 15px; 
+    opacity: 0; pointer-events: none; 
+    transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
 }
 .mobile-menu.open { opacity: 1; pointer-events: auto; }
-.mobile-menu .nav-item { font-size: 20px; padding: 15px; width: 80%; max-width: 300px; text-align: center; border-radius: 10px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
-.mobile-menu .nav-item.active { background: #e50914; color: #fff; border-color: #e50914; }
-.mobile-menu .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; background: none; border: none; color: #fff; cursor: pointer; }
+.mobile-menu .nav-item { 
+    font-size: 18px; 
+    padding: 14px 24px; 
+    width: 80%; 
+    max-width: 300px; 
+    text-align: center; 
+    border-radius: 50px; /* ESTILO PÍLDORA REDONDO */
+    background: rgba(255,255,255,0.05); 
+    color: #fff; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+.mobile-menu .nav-item:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.2);
+}
+.mobile-menu .nav-item.active { 
+    background: var(--red); 
+    color: #fff; 
+    border-color: var(--red); 
+    box-shadow: 0 4px 15px rgba(229,9,20,0.4);
+}
+.mobile-menu .close-btn { 
+    position: absolute; top: 24px; right: 24px; font-size: 28px; 
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); 
+    color: #fff; cursor: pointer; width: 44px; height: 44px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.mobile-menu .close-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
 
-.search-wrap{position:relative;display:flex;align-items:center}
-.search-wrap svg{position:absolute;left:20px;color:var(--text-muted);pointer-events:none;z-index:2;width:20px;height:20px;transition:color .2s}
-.search-input-large{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px;font-weight:500;padding:14px 24px 14px 52px;border-radius:30px;width:380px;outline:0;transition:all .3s;position:relative;z-index:1;font-family:inherit}
-.search-input-large::placeholder{color:var(--text-muted)}
-.search-input-large:focus{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);width:440px}
-.search-wrap:focus-within svg{color:#fff}
-
-/* CAMBIO A 1066px AQUÍ */
-@media(max-width:1066px){
+/* === RESPONSIVE: A PARTIR DE 814px (MENÚ HAMBURGUESA) === */
+@media(max-width:814px){
     .hamburger-btn{display:block;}
     .nav-links{display:none !important;}
     .top-nav{padding:0 20px;height:70px;}
     .nav-brand{font-size:18px;margin-right:0;}
-    .search-wrap{width:auto;flex:1;margin-left:10px;}
-    .search-input-large{width:100%;padding:10px 16px 10px 40px;font-size:14px;}
-    .search-input-large:focus{width:100%;}
-    .search-wrap svg{left:14px;width:16px;height:16px;}
 }
-/* ========================================= */
+/* ============================================ */
 
 .main-content{padding-bottom:60px}
 .hero{position:relative;width:100%;height:80vh;min-height:550px;overflow:hidden;margin-bottom:30px;background:#111;display:flex;align-items:flex-end}
 .hero-bg{position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:center 25%;z-index:1;transition:background-image 0.8s ease-in-out}
 .hero-gradient{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,#000 0%,rgba(0,0,0,.6) 40%,transparent 80%),linear-gradient(to right,rgba(0,0,0,.7) 0%,transparent 60%)}
 .hero-content{position:relative;z-index:3;padding:0 50px 60px;width:100%;max-width:900px;transition:opacity 0.3s ease}
+
+/* === BARRA DE BÚSQUEDA RESTAURADA (DENTRO DEL HERO) === */
+.hero-content .search-wrap{position:relative;display:flex;align-items:center;margin-bottom:24px;width:100%;max-width:450px;}
+.hero-content .search-wrap svg{position:absolute;left:20px;color:var(--text-muted);pointer-events:none;z-index:2;width:20px;height:20px;transition:color .2s;}
+.hero-content .search-input-large{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px;font-weight:500;padding:14px 24px 14px 52px;border-radius:30px;width:100%;outline:0;transition:all .3s;position:relative;z-index:1;font-family:inherit;backdrop-filter:blur(10px);}
+.hero-content .search-input-large::placeholder{color:var(--text-muted);}
+.hero-content .search-input-large:focus{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);}
+.hero-content .search-wrap:focus-within svg{color:#fff;}
+/* ================================== */
+
 .hero-content.fading{opacity:0}
 .hero-title{font-size:clamp(40px,5.5vw,80px);font-weight:700;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px;text-shadow:0 4px 15px rgba(0,0,0,.6)}
 .hero-year{font-size:18px;font-weight:500;color:rgba(255,255,255,.8);margin-bottom:16px;text-shadow:0 1px 5px rgba(0,0,0,.5)}
@@ -69,6 +115,12 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 .hero-actions{display:flex;gap:12px}
 .hero-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;padding:16px 36px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;border:0;transition:transform .2s,background .2s;font-family:inherit}
 .hero-btn:hover{transform:scale(1.03);background:#e5e5e5}
+/* === ESTADO PRÓXIMAMENTE EN HERO === */
+.hero-btn.upcoming{background:rgba(255,255,255,.10);color:#fff;border:1.5px solid rgba(255,255,255,.4);cursor:default;letter-spacing:3px;font-weight:800;font-size:14px;padding:16px 34px;backdrop-filter:blur(8px);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.hero-btn.upcoming:hover{transform:none;background:rgba(255,255,255,.10)}
+.hero-btn.upcoming:disabled{opacity:1;color:#fff}
+/* ================================== */
+
 .rows-container{display:flex;flex-direction:column;gap:32px;padding:0 50px;transition:padding-top 0.3s ease}
 .row{position:relative}
 .row-header{display:flex;align-items:center;margin-bottom:12px}
@@ -95,6 +147,22 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 .empty-state{padding:60px 40px;text-align:center;color:var(--text-muted)}
 .empty-state h2{font-size:24px;font-weight:500;color:#fff;margin-bottom:12px}
 .empty-state p{font-size:15px;line-height:1.6}
+
+/* === GRID RESPONSIVE PARA MI LISTA === */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 0 50px;
+    margin-bottom: 40px;
+}
+.grid-container .card {
+    flex: unset;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+}
+
 .modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px}
 .modal.open{display:flex}
 #disclaimer-modal{z-index:3000}
@@ -109,9 +177,6 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 .tv-controls.active{display:flex}
 .tv-select{padding:12px 16px;border-radius:8px;background:#111;color:#fff;border:1px solid #222;font-family:inherit;font-size:14px;font-weight:500;outline:0;cursor:pointer;min-width:150px;transition:all .2s}
 .tv-select:hover{background:#1a1a1a;border-color:#444}
-.sources-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.sources-header::before{content:'';width:3px;height:16px;background:#fff;border-radius:4px}
-.sources-title{font-size:16px;font-weight:600;color:#fff}
 .server-switcher{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:20px}
 .server-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:6px;background:#111;border:1px solid #222;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;text-transform:uppercase;letter-spacing:.8px}
 .server-btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -121,14 +186,12 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 .player-container iframe{width:100%;height:100%;border:0;position:relative;z-index:2}
 .player-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;z-index:1;background:#000}
 
-/* === ESTILOS LIMPIOS PARA PRÓXIMAMENTE === */
 .card.upcoming { cursor: not-allowed; }
 .card.upcoming img { filter: grayscale(100%) brightness(0.3); }
 .card.upcoming:hover { transform: none; border-color: transparent; box-shadow: none; z-index: 1; }
 .card.upcoming .save-btn { display: none; }
 .badge-upcoming { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 2px; z-index: 6; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); width: 100%; pointer-events: none; }
 
-/* === BOTÓN PWA INSTALL === */
 #installPWA {
     display: none; 
     position: fixed; 
@@ -148,21 +211,24 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 }
 #installPWA:hover { transform: scale(1.05); }
 
-/* Ajustes adicionales para tablet */
 @media(max-width:1066px){
     .hero-content{padding:0 30px 40px}
     .rows-container{padding:0 30px;gap:24px}
+    .grid-container { padding: 0 30px; }
 }
 @media(max-width:768px){
     .hero{height:70vh;min-height:450px}
     .hero-title{font-size:42px}
     .hero-year{font-size:16px}
     .hero-desc{font-size:15px}
+    .hero-content .search-input-large{padding:12px 20px 12px 44px;font-size:14px;}
+    .hero-content .search-wrap svg{left:14px;width:16px;height:16px;}
     .rows-container{padding:0 20px;gap:24px}
     .card{flex:0 0 200px;height:112px}
     .skeleton-card{flex:0 0 200px;height:112px}
     .server-switcher{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
     .row-nav{display:none}
+    .grid-container { padding: 0 20px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 }
 @media(max-width:600px){
     .hero{height:60vh;min-height:400px}
@@ -170,17 +236,20 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
     .hero-btn{padding:12px 24px;font-size:14px}
     .card{flex:0 0 160px;height:90px}
     .skeleton-card{flex:0 0 160px;height:90px}
+    .grid-container { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 }
 </style>
 </head>
 <body>
 
-<!-- Menú Móvil (Oculto por defecto) -->
+<!-- Menú Móvil Premium -->
 <div class="mobile-menu" id="mobile-menu">
     <button class="close-btn" onclick="toggleMenu()">✕</button>
     <button class="nav-item active" data-view="home" onclick="switchView('home'); toggleMenu();">Inicio</button>
     <button class="nav-item" data-view="movies" onclick="switchView('movies'); toggleMenu();">Películas</button>
+    <button class="nav-item" data-view="anime" onclick="switchView('anime'); toggleMenu();">Anime</button>
     <button class="nav-item" data-view="series" onclick="switchView('series'); toggleMenu();">Series</button>
+    <button class="nav-item" data-view="kids" onclick="switchView('kids'); toggleMenu();">Niños</button>
     <button class="nav-item" data-view="list" onclick="switchView('list'); toggleMenu();">Mi Lista</button>
     <button class="nav-item" onclick="showDisclaimer(); toggleMenu();">Aviso Legal</button>
 </div>
@@ -192,14 +261,12 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
         <div class="nav-links">
             <button class="nav-item active" data-view="home" onclick="switchView('home')">Inicio</button>
             <button class="nav-item" data-view="movies" onclick="switchView('movies')">Películas</button>
+            <button class="nav-item" data-view="anime" onclick="switchView('anime')">Anime</button>
             <button class="nav-item" data-view="series" onclick="switchView('series')">Series</button>
+            <button class="nav-item" data-view="kids" onclick="switchView('kids')">Niños</button>
             <button class="nav-item" data-view="list" onclick="switchView('list')">Mi Lista</button>
             <button class="nav-item" onclick="showDisclaimer()">Aviso Legal</button>
         </div>
-    </div>
-    <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="search" class="search-input-large" placeholder="Buscar..." id="search-input" autocomplete="off"/>
     </div>
 </header>
 
@@ -208,17 +275,24 @@ body{font-family:var(--font);background-color:var(--bg);color:var(--text);overfl
 <div class="hero-bg" id="hero-bg"></div>
 <div class="hero-gradient"></div>
 <div class="hero-content" id="hero-content">
-<h1 class="hero-title" id="hero-title">Cargando...</h1>
-<div class="hero-year" id="hero-year">2024</div>
-<p class="hero-desc" id="hero-desc">Cargando descripción...</p>
-<div class="hero-actions">
-<button class="hero-btn" id="hero-play-btn">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-Ver en TatoCine
-</button>
-</div>
+    <!-- BARRA DE BÚSQUEDA DENTRO DEL HERO -->
+    <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" class="search-input-large" placeholder="Buscar películas, series, anime..." id="search-input" autocomplete="off"/>
+    </div>
+    
+    <h1 class="hero-title" id="hero-title">Cargando...</h1>
+    <div class="hero-year" id="hero-year">2024</div>
+    <p class="hero-desc" id="hero-desc">Cargando descripción...</p>
+    <div class="hero-actions">
+        <button class="hero-btn" id="hero-play-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            Ver en TatoCine
+        </button>
+    </div>
 </div>
 </header>
+
 <div class="rows-container" id="rows-container"></div>
 </main>
 
@@ -260,16 +334,21 @@ Aceptar y continuar
 <!-- BOTÓN DE INSTALACIÓN PWA -->
 <button id="installPWA">📲 Instalar App</button>
 
-<!-- ===== POLYFILLS PARA NAVEGADORES ANTIGUOS (LG WEBOS) ===== -->
-<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.3.0/dist/polyfill.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/url-search-params-polyfill@8.2.1/index.js"></script>
-<!-- ========================================================= -->
+<!-- ===== POLYFILLS CONDICIONALES ===== -->
+<script>
+(function(){
+    var d = document;
+    if (typeof Promise === 'undefined') d.write('<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.3.0/dist/polyfill.min.js"><\/script>');
+    if (typeof window.fetch === 'undefined') d.write('<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"><\/script>');
+    if (typeof window.URLSearchParams === 'undefined') d.write('<script src="https://cdn.jsdelivr.net/npm/url-search-params-polyfill@8.2.1/index.js"><\/script>');
+})();
+</script>
 
 <script>
-//SUSTITUYE TMDB_API_KEY POR TU API KEY DE TMDB, SI NO TIENES UNA, PUEDES OBTENERLA GRATIS EN https://www.themoviedb.org/settings/api
-const TMDB_API_KEY="xxx",IMG_BG="https://image.tmdb.org/t/p/original",icons={lightning:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',server:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',disc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},SERVERS=[{name:"ESP1",icon:icons.lightning,url:(i,t,s,e)=>t==='tv'?`https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`:`https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`},{name:"ESP2",icon:icons.disc,url:(i,t,s,e)=>t==='tv'?`https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`:`https://tukiplay.com/embed/movie/${i}?autoplay=1`},{name:"ESP3",icon:icons.play,url:(i,t,s,e)=>t==='tv'?`https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`:`https://unlimplay.com/f/embed/movie/${i}`},{name:"ENG1",icon:icons.server,url:(i,t,s,e)=>t==='tv'?`https://vidsrc.sh/embed/tv/${i}/${s}/${e}`:`https://vidsrc.sh/embed/movie/${i}`}];
+const TMDB_API_KEY="xxxxx",IMG_BG="https://image.tmdb.org/t/p/original",icons={lightning:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',play:'<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',server:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',disc:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},SERVERS=[{name:"ESP1",icon:icons.lightning,url:(i,t,s,e)=>t==='tv'?`https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`:`https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`},{name:"ESP2",icon:icons.disc,url:(i,t,s,e)=>t==='tv'?`https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`:`https://tukiplay.com/embed/movie/${i}?autoplay=1`},{name:"ESP3",icon:icons.play,url:(i,t,s,e)=>t==='tv'?`https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`:`https://unlimplay.com/f/embed/movie/${i}`},{name:"ENG1",icon:icons.server,url:(i,t,s,e)=>t==='tv'?`https://vidsrc.sh/embed/tv/${i}/${s}/${e}`:`https://vidsrc.sh/embed/movie/${i}`}];
 let currentView='home',myList=JSON.parse(localStorage.getItem('tatoList'))||[],currentMedia=null,autoScrollInterval=null,heroInterval=null,heroMoviesList=[],currentHeroIndex=0,isSearching=!1;
+
+const FALLBACK_IMG="data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 225%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22225%22/%3E%3Cpath d=%22M180 90v45l40-22.5z%22 fill=%22%23e50914%22/%3E%3C/svg%3E";
 
 const $heroSection=document.getElementById("hero-section"),$heroBg=document.getElementById("hero-bg"),$heroTitle=document.getElementById("hero-title"),$heroYear=document.getElementById("hero-year"),$heroDesc=document.getElementById("hero-desc"),$heroContent=document.getElementById("hero-content"),$heroPlayBtn=document.getElementById("hero-play-btn"),$rowsContainer=document.getElementById("rows-container"),$searchInput=document.getElementById("search-input"),$modal=document.getElementById("player-modal"),$modalTitle=document.getElementById("modal-title"),$modalBackdrop=document.getElementById("modal-backdrop"),$closeModal=document.getElementById("close-modal"),$playerView=document.getElementById("player-view"),$serverSwitcher=document.getElementById("server-switcher"),$topBar=document.getElementById("top-bar"),$tvControls=document.getElementById("tv-controls"),$seasonSelect=document.getElementById("season-select"),$episodeSelect=document.getElementById("episode-select"),$disclaimerModal=document.getElementById("disclaimer-modal");
 
@@ -289,31 +368,99 @@ function toggleSave(e,i){e.stopPropagation();const x=myList.findIndex(m=>m.id===
 function isSaved(i){return myList.some(m=>m.id===i.id&&m.type===i.type)}
 function isUpcoming(releaseDate) { if (!releaseDate) return false; const today = new Date(); today.setHours(0, 0, 0, 0); const release = new Date(releaseDate); release.setHours(0, 0, 0, 0); return release >= today; }
 
-function renderRow(t,m){if(!m||m.length===0)return;const d=document.createElement('div');d.className='row';const h=m.map(i=>{const s=isSaved(i),st=i.title.replace(/'/g,"\\'").replace(/"/g,'&quot;'),sb=(i.bg||'').replace(/'/g,"\\'"),b=i.bg?(i.bg.startsWith('http')?i.bg:IMG_BG+i.bg):'';const upcomingClass = i.isUpcoming ? 'upcoming' : '';const upcomingBadge = i.isUpcoming ? `<div class="badge-upcoming">PRÓXIMAMENTE</div>` : '';const onclickAttr = i.isUpcoming ? '' : `onclick="openPlayer(${i.id},'${i.type}','${st}')"`;return`<div class="card ${upcomingClass}" ${onclickAttr}><img src="${b||'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'"/>${upcomingBadge}<button class="save-btn ${s?'saved':''}" onclick="toggleSave(event,{id:${i.id},type:'${i.type}',title:'${st}',bg:'${sb}',rating:${i.rating||0},year:'${i.year||''}'})"><svg width="14" height="14" viewBox="0 0 24 24" fill="${s?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><div class="card-overlay"><div class="card-title">${i.title}</div></div></div>`}).join('');d.innerHTML=`<div class="row-header"><h2 class="row-title">${t}</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">${h}</div>`,$rowsContainer.appendChild(d)}
+function getCardHTML(i) {
+    const s=isSaved(i);
+    const st=i.title.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    const sb=(i.bg||'').replace(/'/g,"\\'");
+    const b=i.bg?(i.bg.startsWith('http')?i.bg:IMG_BG+i.bg):'';
+    const upcomingClass = i.isUpcoming ? 'upcoming' : '';
+    const upcomingBadge = i.isUpcoming ? `<div class="badge-upcoming">PRÓXIMAMENTE</div>` : '';
+    const onclickAttr = i.isUpcoming ? '' : `onclick="openPlayer(${i.id},'${i.type}','${st}')"`;
+    
+    return `<div class="card ${upcomingClass}" ${onclickAttr}>
+        <img src="${b||FALLBACK_IMG}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'"/>
+        ${upcomingBadge}
+        <button class="save-btn ${s?'saved':''}" onclick="toggleSave(event,{id:${i.id},type:'${i.type}',title:'${st}',bg:'${sb}',rating:${i.rating||0},year:'${i.year||''}'})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${s?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <div class="card-overlay"><div class="card-title">${i.title}</div></div>
+    </div>`;
+}
+
+function renderRow(t,m){if(!m||m.length===0)return;const d=document.createElement('div');d.className='row';const h=m.map(getCardHTML).join('');d.innerHTML=`<div class="row-header"><h2 class="row-title">${t}</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">${h}</div>`,$rowsContainer.appendChild(d)}
 function scrollRow(b,d){const r=b.closest('.row'),s=r.querySelector('.row-scroll'),a=s.clientWidth*.85;s.scrollBy({left:a*d,behavior:'smooth'})}
-function setHero(m){if(!m)return;$heroContent.classList.add('fading'),setTimeout(()=>{if(m.bg){const u=m.bg.startsWith('http')?m.bg:IMG_BG+m.bg;$heroBg.style.backgroundImage=`url('${u}')`}$heroTitle.textContent=m.title,$heroYear.textContent=m.year||'2024',$heroDesc.textContent=m.desc||"Sin descripción disponible.",$heroPlayBtn.onclick=()=>openPlayer(m.id,m.type,m.title),$heroContent.classList.remove('fading')},300)}
-function startHeroCarousel(m){heroMoviesList=m.slice(0,5),currentHeroIndex=0,clearInterval(heroInterval),heroInterval=setInterval(()=>{if(isSearching)return;currentHeroIndex=(currentHeroIndex+1)%heroMoviesList.length,setHero(heroMoviesList[currentHeroIndex])},7200)}
+
+function renderGrid(m) {
+    $rowsContainer.innerHTML = '';
+    if (!m || m.length === 0) {
+        $rowsContainer.innerHTML = '<div class="empty-state"><h2>Tu lista está vacía</h2><p>Haz clic en el corazón de cualquier película o serie para guardarla aquí.</p></div>';
+        return;
+    }
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'grid-container';
+    gridDiv.innerHTML = m.map(getCardHTML).join('');
+    $rowsContainer.appendChild(gridDiv);
+}
+
+function setHero(m){
+  if(!m) return;
+  $heroContent.classList.add('fading');
+  setTimeout(function(){
+    if(m.bg){
+      const u = m.bg.startsWith('http') ? m.bg : IMG_BG + m.bg;
+      $heroBg.style.backgroundImage = "url('" + u + "')";
+    }
+    $heroTitle.textContent = m.title;
+    $heroYear.textContent = m.year || '2024';
+    $heroDesc.textContent = m.desc || "Sin descripción disponible.";
+
+    if(m.isUpcoming){
+      $heroPlayBtn.disabled = true;
+      $heroPlayBtn.classList.add('upcoming');
+      $heroPlayBtn.innerHTML = 'PRÓXIMAMENTE';
+      $heroPlayBtn.style.cursor = 'default';
+      $heroPlayBtn.onclick = null;
+    } else {
+      $heroPlayBtn.disabled = false;
+      $heroPlayBtn.classList.remove('upcoming');
+      $heroPlayBtn.style.cursor = 'pointer';
+      $heroPlayBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Ver en TatoCine';
+      $heroPlayBtn.onclick = function(){ openPlayer(m.id, m.type, m.title); };
+    }
+
+    $heroContent.classList.remove('fading');
+  }, 300);
+}
+
+function startHeroCarousel(m){
+    heroMoviesList=m.slice(0,5);
+    currentHeroIndex=0;
+    clearInterval(heroInterval);
+    heroInterval=setInterval(()=>{
+        if(isSearching) return;
+        currentHeroIndex=(currentHeroIndex+1)%heroMoviesList.length;
+        setHero(heroMoviesList[currentHeroIndex]);
+    },7200);
+}
+
 function startAutoScroll(){clearInterval(autoScrollInterval),autoScrollInterval=setInterval(()=>{if(isSearching)return;document.querySelectorAll('.row-scroll').forEach(s=>{if(s.closest('.row').matches(':hover'))return;const m=s.scrollWidth-s.clientWidth;s.scrollLeft>=m-10?s.scrollTo({left:0,behavior:'smooth'}):s.scrollBy({left:276,behavior:'smooth'})})},7000)}
 
+/* === CONTROLADOR DE VISTAS === */
 function switchView(v,r){
     if(r===undefined) r = true;
+    clearInterval(heroInterval);
     currentView=v;isSearching=false;
     if(r) $searchInput.value='';
     
-    document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
-    var activeBtns = document.querySelectorAll('.nav-item[data-view="'+v+'"]');
-    activeBtns.forEach(function(btn) { btn.classList.add('active'); });
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.nav-item[data-view="'+v+'"]').forEach(btn=>btn.classList.add('active'));
     
     $rowsContainer.innerHTML='<div class="row"><div class="row-scroll"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>';
     
     if(v==='list'){
         $heroSection.style.display='none';
-        $rowsContainer.style.paddingTop='120px';
-        if($rowsContainer.innerHTML='',myList.length===0){
-            $rowsContainer.innerHTML='<div class="empty-state"><h2>Tu lista está vacía</h2><p>Haz clic en el corazón de cualquier película o serie para guardarla aquí.</p></div>';
-            return;
-        }
-        renderRow('Porque las elegiste como tus favoritas',myList);
+        $rowsContainer.style.paddingTop='100px';
+        renderGrid(myList);
         return;
     } else {
         $heroSection.style.display='flex';
@@ -332,7 +479,8 @@ function switchView(v,r){
             var h=null;
             if(t.results&&t.results.length){
                 var m=t.results.map(function(i){var date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
-                h=m[0];renderRow('Tendencias de la semana',m);startHeroCarousel(m);
+                h=m[0];renderRow('Tendencias de la semana',m);
+                startHeroCarousel(m);
             }
             if(u.results&&u.results.length){
                 var m=u.results.map(function(i){var date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
@@ -354,13 +502,14 @@ function switchView(v,r){
             renderRow('Catálogo (Respaldo)',fallbackData);
             startAutoScroll();
         });
-
     } else if(v==='movies'){
         fetchTMDB('/movie/popular').then(function(d){
             $rowsContainer.innerHTML='';
             if(d.results&&d.results.length){
                 var m=d.results.map(function(i){var date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
-                setHero(m[0]);renderRow('Películas Populares',m);startAutoScroll();
+                setHero(m[0]);renderRow('Películas Populares',m);
+                startHeroCarousel(m);
+                startAutoScroll();
             }
         }).catch(function(e){
             $rowsContainer.innerHTML='';
@@ -368,14 +517,67 @@ function switchView(v,r){
             renderRow('Catálogo (Respaldo)',fallbackData);
             startAutoScroll();
         });
-
+    } else if(v==='anime'){
+        fetchTMDB('/discover/tv', '&with_genres=16&with_original_language=ja&sort_by=popularity.desc').then(function(d){
+            $rowsContainer.innerHTML='';
+            if(d.results&&d.results.length){
+                var m=d.results.map(function(i){var date=i.first_air_date;return{id:i.id,title:i.name,bg:i.backdrop_path||i.poster_path,type:'tv',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
+                setHero(m[0]);renderRow('Anime Popular',m);
+                startHeroCarousel(m);
+                startAutoScroll();
+            }
+        }).catch(function(e){
+            $rowsContainer.innerHTML='';
+            setHero(fallbackData[0]);
+            renderRow('Catálogo (Respaldo)',fallbackData);
+            startAutoScroll();
+        });
     } else if(v==='series'){
         fetchTMDB('/tv/popular').then(function(d){
             $rowsContainer.innerHTML='';
             if(d.results&&d.results.length){
                 var m=d.results.map(function(i){var date=i.first_air_date;return{id:i.id,title:i.name,bg:i.backdrop_path||i.poster_path,type:'tv',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
-                setHero(m[0]);renderRow('Series Populares',m);startAutoScroll();
+                setHero(m[0]);renderRow('Series Populares',m);
+                startHeroCarousel(m);
+                startAutoScroll();
             }
+        }).catch(function(e){
+            $rowsContainer.innerHTML='';
+            setHero(fallbackData[0]);
+            renderRow('Catálogo (Respaldo)',fallbackData);
+            startAutoScroll();
+        });
+    } else if(v==='kids'){
+        // BLINDAJE INFANTIL: Solo clasificación G (General) y TV-Y7 (Niños 7+)
+        Promise.all([
+            fetchTMDB('/discover/movie', '&certification_country=US&certification=G&without_genres=27,53,80,10752&sort_by=popularity.desc'),
+            fetchTMDB('/discover/tv', '&certification_country=US&certification=TV-Y|TV-Y7|TV-G&without_genres=27,53,80,10752&sort_by=popularity.desc')
+        ]).then(function(res){
+            var mv=res[0], tv=res[1];
+            $rowsContainer.innerHTML='';
+            var h=null;
+            var combinedForHero = [];
+            
+            if(mv.results&&mv.results.length){
+                var m=mv.results.map(function(i){var date=i.release_date;return{id:i.id,title:i.title,bg:i.backdrop_path||i.poster_path,type:'movie',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
+                h=m[0];
+                combinedForHero = combinedForHero.concat(m);
+                renderRow('Películas para Niños',m);
+            }
+            if(tv.results&&tv.results.length){
+                var m=tv.results.map(function(i){var date=i.first_air_date;return{id:i.id,title:i.name,bg:i.backdrop_path||i.poster_path,type:'tv',desc:i.overview,rating:i.vote_average,year:date?date.split('-')[0]:'',isUpcoming:isUpcoming(date)};});
+                if(!h) h=m[0];
+                combinedForHero = combinedForHero.concat(m);
+                renderRow('Series para Niños',m);
+            }
+            
+            if(h) {
+                setHero(h);
+                startHeroCarousel(combinedForHero);
+            } else {
+                $rowsContainer.innerHTML = '<div class="empty-state"><h2>Sin contenido disponible</h2><p>No se encontró contenido para niños en este momento.</p></div>';
+            }
+            startAutoScroll();
         }).catch(function(e){
             $rowsContainer.innerHTML='';
             setHero(fallbackData[0]);
@@ -385,6 +587,7 @@ function switchView(v,r){
     }
 }
 
+/* === BÚSQUEDA === */
 var debounceTimer;
 $searchInput.addEventListener("keyup",function(e){
     if (e.key === 'Enter' || e.keyCode === 13) {
@@ -402,6 +605,7 @@ $searchInput.addEventListener("keyup",function(e){
         return;
     }
     isSearching=true;
+    clearInterval(heroInterval);
     debounceTimer=setTimeout(function(){
         $rowsContainer.innerHTML='<div class="row"><div class="row-scroll"><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>';
         fetchTMDB('/search/multi','&query='+encodeURIComponent(q)).then(function(d){
@@ -410,6 +614,7 @@ $searchInput.addEventListener("keyup",function(e){
             if(m.length>0){
                 setHero(m[0]);
                 renderRow('Resultados para "'+q+'"',m);
+                startHeroCarousel(m);
                 startAutoScroll();
             } else {
                 $rowsContainer.innerHTML='<div class="empty-state"><h2>Sin resultados</h2><p>No encontramos nada para "'+q+'".</p></div>';
@@ -427,8 +632,7 @@ $searchInput.addEventListener("keyup",function(e){
     },300);
 });
 
-function toggleSources(){const s=document.getElementById('server-switcher'),b=document.getElementById('hide-sources-btn');if(!s||!b)return;s.style.display==='none'?(s.style.display='grid',b.innerHTML='Ocultar fuentes <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>'):(s.style.display='none',b.innerHTML='Mostrar fuentes <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>')}
-
+/* === REPRODUCTOR === */
 function loadEpisodes(s,n){
     return fetchTMDB('/tv/'+s+'/season/'+n).then(function(d){
         $episodeSelect.innerHTML=d.episodes.map(function(e){return '<option value="'+e.episode_number+'">Episodio '+e.episode_number+': '+e.name+'</option>';}).join('');
@@ -501,26 +705,32 @@ $closeModal.onclick=function(){$modal.classList.remove("open");$playerView.inner
 $modalBackdrop.onclick=function(){$modal.classList.remove("open");$playerView.innerHTML="";};
 window.addEventListener("scroll",function(){$topBar.classList.toggle("scrolled",window.scrollY>20);});
 
-// === LÓGICA PWA (Instalación) ===
+/* === LÓGICA PWA === */
+const pwaIcon192 = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"%3E%3Ccircle cx="96" cy="96" r="96" fill="%23e50914"/%3E%3Cpath d="M70 60l70 36-70 36z" fill="%23FFFFFF"/%3E%3C/svg%3E';
+const pwaIcon512 = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Ccircle cx="256" cy="256" r="256" fill="%23e50914"/%3E%3Cpath d="M190 160l180 96-180 96z" fill="%23FFFFFF"/%3E%3C/svg%3E';
+
 const manifest = {
-    name: 'TatoCine - Streaming Gratis',
-    short_name: 'TatoCine',
-    start_url: '.',
-    display: 'standalone',
-    background_color: '#000000',
-    theme_color: '#e50914',
-    icons: [{
-        src: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%23e50914"/%3E%3Cpath d="M14 12l14 8-14 8z" fill="%23FFFFFF"/%3E%3C/svg%3E',
-        sizes: '192x192',
-        type: 'image/svg+xml'
-    }]
+    id: './', name: 'TatoCine - Streaming Gratis', short_name: 'TatoCine',
+    description: 'TatoCine: películas, anime y series gratis en streaming. Proyecto sin fines de lucro.',
+    lang: 'es', dir: 'ltr', start_url: './', scope: './', display: 'standalone',
+    display_override: ['standalone', 'minimal-ui', 'browser'], orientation: 'any',
+    background_color: '#000000', theme_color: '#e50914', categories: ['entertainment', 'video'],
+    icons: [
+        { src: pwaIcon192, sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+        { src: pwaIcon512, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
+        { src: pwaIcon512, sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' }
+    ]
 };
-const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+const blob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
 const manifestURL = URL.createObjectURL(blob);
 document.getElementById('manifest-link').href = manifestURL;
 
 let deferredPrompt;
 const installBtn = document.getElementById('installPWA');
+
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    installBtn.style.display = 'none';
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -539,11 +749,15 @@ installBtn.addEventListener('click', () => {
     });
 });
 
-if ('serviceWorker' in navigator) {
+window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    deferredPrompt = null;
+});
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-            console.log('Error al registrar SW:', err);
-        });
+        navigator.serviceWorker.register('sw.js')
+            .catch(err => console.log('SW no registrado (coloca sw.js en la raíz):', err && err.message));
     });
 }
 
