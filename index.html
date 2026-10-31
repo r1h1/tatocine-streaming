@@ -4616,7 +4616,7 @@
           switchView('list');
           toggleMenu();
         ">
-      Mi Lista
+      Favoritos
     </button>
     <button class="nav-item" onclick="showProfiles();toggleMenu();">Perfiles</button>
     <button class="nav-item" onclick="
@@ -4654,7 +4654,7 @@
           Niños
         </button>
         <button class="nav-item" data-view="list" onclick="switchView('list')">
-          Mi Lista
+          Favoritos
         </button>
         <button class="nav-settings" onclick="showSettings()" title="Ajustes">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -4723,14 +4723,14 @@
             Info
           </button>
           <button type="button" class="hero-btn secondary hero-save-btn" id="hero-save-btn"
-            onclick="toggleHeroSave(event)" title="Agregar a Mi lista" aria-label="Agregar a Mi lista"
+            onclick="toggleHeroSave(event)" title="Agregar a favoritos" aria-label="Agregar a favoritos"
             aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true">
               <path
                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            <span class="hero-save-label">Mi lista</span>
+            <span class="hero-save-label">Favoritos</span>
           </button>
           <button class="hero-btn secondary" onclick="randomPick()" title="Aleatorio">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -4915,7 +4915,7 @@
         </div>
         <div class="settings-option">
           <div>
-            <div class="label">Mi Lista</div>
+            <div class="label">Favoritos</div>
             <div class="sub-label">Eliminar todos los favoritos</div>
           </div>
           <button class="danger-btn" onclick="clearFavorites()">
@@ -5096,7 +5096,7 @@
 
   <script>
     // PON TU API KEY AQUÍ
-    const TMDB_API_KEY = "xxxxxxxxx";
+    const TMDB_API_KEY = "xxxxxxxxxxxxxxx";
     const IMG_BG = "https://image.tmdb.org/t/p/w1280";
     const IMG_CARD = "https://image.tmdb.org/t/p/w342";
     const IMG_W185 = "https://image.tmdb.org/t/p/w185";
@@ -5797,7 +5797,7 @@
           return;
         }
         setProfileBackdrop(profileBackdropNextIndex, 0);
-      }, 5000);
+      }, 6000);
     }
 
     function setProfileBackdrop(index, attempts) {
@@ -6149,7 +6149,7 @@
       var btn = $("hero-save-btn");
       if (!btn) return;
       var saved = !!(media && isSaved(media));
-      var label = saved ? "Quitar de Mi lista" : "Agregar a Mi lista";
+      var label = saved ? "Quitar" : "Agregar";
       btn.classList.toggle("saved", saved);
       btn.setAttribute("aria-pressed", saved ? "true" : "false");
       btn.setAttribute("aria-label", label);
@@ -6157,7 +6157,7 @@
       var svg = btn.querySelector("svg");
       if (svg) svg.setAttribute("fill", saved ? "currentColor" : "none");
       var text = btn.querySelector(".hero-save-label");
-      if (text) text.textContent = saved ? "En Mi lista" : "Mi lista";
+      if (text) text.textContent = saved ? "Like!" : "";
     }
     function toggleHeroSave(e) {
       if (e) {
@@ -6171,7 +6171,7 @@
       });
       if (index > -1) {
         myList.splice(index, 1);
-        showToast("Eliminado de Mi lista");
+        showToast("Eliminado de favoritos");
       } else {
         myList.push({
           id: media.id,
@@ -6181,7 +6181,7 @@
           rating: Number(media.rating) || 0,
           year: media.year || "",
         });
-        showToast("Agregado a Mi lista");
+        showToast("Agregado a favoritos");
       }
       safeStorageSet(profileStorageKey("tatoList"), JSON.stringify(myList));
       updateHeroSaveButton(media);
@@ -6657,7 +6657,7 @@
       $rowsContainer.innerHTML = "";
       if (!m || m.length === 0) {
         $rowsContainer.innerHTML =
-          '<div class="empty-state"><h2>Tu lista está vacía</h2><p>Haz clic en el corazón de cualquier película o serie para guardarla aquí.</p></div>';
+          '<div class="empty-state"><h2>Tus favoritos está vacío</h2><p>Haz clic en el corazón de cualquier película, anime o serie para guardarla aquí.</p></div>';
         return;
       }
       var gridDiv = document.createElement("div");
@@ -6956,7 +6956,7 @@
         if (isSearching || heroSectionIsEmpty()) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 7500);
+      }, 8000);
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");
@@ -6981,7 +6981,7 @@
             scroll.scrollBy({ left: 276, behavior: "smooth" });
           }
         });
-      }, 7000);
+      }, 7900);
     }
     function prefetchDetails(id, type) {
       var key = type + "_" + id;
@@ -8704,7 +8704,7 @@
       };
       setTimeout(function () {
         if (l.isConnected) l.style.display = "none";
-      }, 5000);
+      }, 4000);
       $playerView.appendChild(l);
       $playerView.appendChild(f);
       activePlayerFrame = f;
