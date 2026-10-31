@@ -389,10 +389,10 @@
     }
 
     .hero-title {
-      font-size: clamp(34px, 4.2vw, 60px);
+      font-size: clamp(37px, calc(5.5vw - 3px), 77px);
       font-weight: 700;
       line-height: 1.1;
-      letter-spacing: -1.2px;
+      letter-spacing: -1.5px;
       margin-bottom: 8px;
       text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     }
@@ -445,13 +445,13 @@
     }
 
     .hero-desc {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 1.45;
+      line-height: 1.6;
       color: rgba(255, 255, 255, 0.9);
       text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
-      margin-bottom: 22px;
-      max-width: 820px;
+      margin-bottom: 28px;
+      max-width: 750px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
@@ -497,6 +497,28 @@
 
     .hero-btn.secondary:hover {
       background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-save-btn {
+      min-width: 0;
+    }
+
+    .hero-save-btn svg {
+      transition: fill 0.2s ease, transform 0.2s ease;
+    }
+
+    .hero-save-btn.saved {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.42);
+    }
+
+    .hero-save-btn.saved svg {
+      fill: currentColor;
+    }
+
+    .hero-save-btn:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
     }
 
     .hero-btn.secondary svg {
@@ -1937,7 +1959,7 @@
     }
 
     .hero.empty-search .hero-title {
-      font-size: clamp(34px, 4.8vw, 64px);
+      font-size: clamp(31px, calc(4.8vw - 3px), 61px);
     }
 
     .hero.empty-search .hero-year {
@@ -2080,16 +2102,15 @@
       }
 
       .hero-title {
-        font-size: 36px;
-      }
-
-      .hero-desc {
-        font-size: 13px;
-        line-height: 1.4;
+        font-size: 39px;
       }
 
       .hero-year {
         font-size: 16px;
+      }
+
+      .hero-desc {
+        font-size: 15px;
       }
 
       .hero-content .search-input-large {
@@ -2223,15 +2244,15 @@
         min-height: 400px;
       }
 
-      .hero-title {
-        font-size: 29px;
-      }
-
       .hero-desc {
-        font-size: 12px;
-        line-height: 1.4;
+        font-size: 13px;
+        line-height: 1.45;
         -webkit-line-clamp: 2;
         max-width: 95%;
+      }
+
+      .hero-title {
+        font-size: 29px;
       }
 
       .hero-btn {
@@ -2329,7 +2350,7 @@
       }
 
       .hero.empty-search .hero-title {
-        font-size: 30px;
+        font-size: 27px;
       }
 
       #player-modal .modal-body {
@@ -3381,6 +3402,1171 @@
         min-height: 44px;
       }
     }
+
+    /* TatoCine PRO: perfiles locales, Top 10 y reproducción */
+    .tc-profile-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 14px;
+      padding: 6px 10px 6px 6px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 24px;
+      color: #fff;
+      background: rgba(255, 255, 255, .08);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background .2s, border-color .2s
+    }
+
+    .tc-profile-trigger:hover {
+      background: rgba(255, 255, 255, .16);
+      border-color: rgba(255, 255, 255, .32)
+    }
+
+    .tc-profile-trigger-avatar {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #292929;
+      font-size: 19px
+    }
+
+    .tc-profile-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px)
+    }
+
+    .tc-profile-overlay.open {
+      display: flex
+    }
+
+    .tc-profile-panel {
+      width: min(760px, 100%);
+      max-height: min(90vh, 900px);
+      overflow: auto;
+      padding: 26px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #171717, #090909);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .55)
+    }
+
+    .tc-profile-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px
+    }
+
+    .tc-profile-heading h2 {
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: -.5px
+    }
+
+    .tc-profile-close {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(255, 255, 255, .1);
+      cursor: pointer;
+      font-size: 22px
+    }
+
+    .tc-profile-section-title {
+      margin: 18px 0 12px;
+      color: #aaa;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase
+    }
+
+    .tc-profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+      gap: 12px
+    }
+
+    .tc-profile-card {
+      min-height: 124px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(255, 255, 255, .045);
+      cursor: pointer;
+      transition: transform .18s, border-color .18s, background .18s
+    }
+
+    .tc-profile-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, .38);
+      background: rgba(255, 255, 255, .09)
+    }
+
+    .tc-profile-card.active {
+      border-color: #fff;
+      background: rgba(255, 255, 255, .13)
+    }
+
+    .tc-profile-card-avatar {
+      display: grid;
+      place-items: center;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #303030;
+      font-size: 34px
+    }
+
+    .tc-profile-card-name {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 650
+    }
+
+    .tc-profile-active-label {
+      color: #bbb;
+      font-size: 11px
+    }
+
+    .tc-profile-avatar-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .tc-avatar-option {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 50%;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      font-size: 23px
+    }
+
+    .tc-avatar-option.selected {
+      border: 2px solid #fff;
+      background: #454545
+    }
+
+    .tc-profile-create {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .035)
+    }
+
+    .tc-profile-input {
+      width: 100%;
+      height: 44px;
+      margin: 10px 0 14px;
+      padding: 0 13px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 9px;
+      outline: none;
+      color: #fff;
+      background: #171717;
+      font: inherit
+    }
+
+    .tc-profile-input:focus {
+      border-color: #aaa
+    }
+
+    .tc-profile-create-btn {
+      margin-top: 14px;
+      padding: 11px 17px;
+      border: 0;
+      border-radius: 9px;
+      color: #000;
+      background: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .tc-profile-note {
+      margin-top: 12px;
+      color: #858585;
+      font-size: 12px;
+      line-height: 1.5
+    }
+
+    .top10-rank-badge {
+      position: absolute;
+      z-index: 5;
+      left: -5px;
+      bottom: 8px;
+      color: #080808;
+      font-size: 82px;
+      line-height: .8;
+      font-weight: 950;
+      font-style: italic;
+      letter-spacing: -7px;
+      -webkit-text-stroke: 2px rgba(255, 255, 255, .9);
+      text-shadow: 3px 4px 0 rgba(0, 0, 0, .9);
+      pointer-events: none
+    }
+
+    .auto-next-toggle {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(255, 255, 255, .07);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer
+    }
+
+    .auto-next-toggle.on {
+      border-color: rgba(93, 190, 125, .55);
+      background: rgba(44, 130, 75, .2)
+    }
+
+    @media(max-width:814px) {
+      .tc-profile-trigger {
+        margin-left: 0;
+        padding: 5px
+      }
+
+      .tc-profile-trigger-name {
+        display: none
+      }
+
+      .tc-profile-panel {
+        padding: 20px 16px
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 21px
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+      }
+
+      .top10-rank-badge {
+        font-size: 66px
+      }
+    }
+
+    @media(max-width:480px) {
+      .tc-profile-overlay {
+        padding: 10px
+      }
+
+      .tc-profile-panel {
+        max-height: 94vh;
+        padding: 17px 13px;
+        border-radius: 15px
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .tc-profile-card {
+        min-height: 108px
+      }
+
+      .tc-profile-card-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 30px
+      }
+    }
+
+    /* Selector de perfiles estilo streaming: inicial + nombre, sin avatares ilustrados */
+    .tc-profile-panel {
+      position: relative;
+      width: min(900px, 100%);
+    }
+
+    .tc-profile-heading {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .tc-profile-heading>div {
+      width: 100%;
+    }
+
+    .tc-profile-heading h2 {
+      font-size: 30px;
+    }
+
+    .tc-profile-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    .tc-profile-grid {
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      justify-items: center;
+    }
+
+    .tc-profile-card {
+      width: 100%;
+      max-width: 170px;
+      min-height: 145px;
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .tc-profile-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, .28);
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .tc-profile-card-avatar {
+      width: 82px;
+      height: 82px;
+      font-size: 35px;
+      font-weight: 650;
+      color: #fff;
+      background: #303030;
+      border: 2px solid transparent;
+    }
+
+    .tc-profile-card.active .tc-profile-card-avatar {
+      border-color: #fff;
+      background: #414141;
+    }
+
+    .tc-profile-add-card .tc-profile-add-initial {
+      font-size: 42px;
+      font-weight: 300;
+      background: #202020;
+      border: 1px solid rgba(255, 255, 255, .35);
+    }
+
+    .tc-profile-create {
+      max-width: 520px;
+      margin: 28px auto 0;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-close {
+      display: none;
+    }
+
+    .tc-profile-overlay.startup {
+      background: rgba(0, 0, 0, .96);
+    }
+
+    .tc-profile-overlay.startup .tc-profile-panel {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-heading h2 {
+      font-size: clamp(27px, 4vw, 38px);
+    }
+
+    @media(max-width:480px) {
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tc-profile-card {
+        min-height: 125px
+      }
+
+      .tc-profile-card-avatar {
+        width: 68px;
+        height: 68px;
+        font-size: 30px
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 24px
+      }
+    }
+
+    /* Selector de perfiles: comparte la identidad visual real de la pantalla Inicio */
+    .tc-profile-overlay {
+      z-index: 5000;
+      padding: clamp(18px, 4vw, 42px);
+      background: #000;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .tc-profile-overlay.startup {
+      background: #000;
+    }
+
+    .tc-profile-panel {
+      position: relative;
+      width: min(980px, 100%);
+      max-height: min(90vh, 860px);
+      overflow: auto;
+      padding: 8px 12px 20px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .tc-profile-panel::before {
+      display: none;
+    }
+
+    .tc-profile-brand {
+      margin: 0 0 34px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .tc-profile-heading {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin: 0 0 36px;
+      padding: 0 48px;
+    }
+
+    .tc-profile-heading>div {
+      width: 100%;
+    }
+
+    .tc-profile-heading h2 {
+      color: #fff;
+      font-size: clamp(27px, 3.5vw, 36px);
+      font-weight: 700;
+      letter-spacing: -.9px;
+      line-height: 1.15;
+    }
+
+    .tc-profile-heading .tc-profile-note {
+      display: block;
+      margin: 10px 0 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: rgba(255, 255, 255, .68);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0;
+      line-height: 1.45;
+    }
+
+    .tc-profile-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 22px;
+      transition: background .2s, transform .2s, border-color .2s;
+    }
+
+    .tc-profile-close:hover {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .45);
+      transform: scale(1.05);
+    }
+
+    .tc-profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 160px));
+      justify-content: center;
+      justify-items: stretch;
+      gap: 24px 22px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .tc-profile-card {
+      position: relative;
+      display: flex;
+      width: 100%;
+      max-width: 160px;
+      min-height: 150px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 8px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #fff;
+      box-shadow: none;
+      cursor: pointer;
+      transition: transform .3s cubic-bezier(.2, 0, 0, 1), border-color .3s, background .3s, box-shadow .3s;
+    }
+
+    .tc-profile-card:hover {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, .82);
+      background: transparent;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, .5);
+    }
+
+    .tc-profile-card.active {
+      border-color: rgba(255, 255, 255, .26);
+      background: rgba(255, 255, 255, .035);
+      box-shadow: none;
+    }
+
+    .tc-profile-card-avatar {
+      display: grid;
+      place-items: center;
+      width: 82px;
+      height: 82px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      background: #242424;
+      color: #fff;
+      box-shadow: none;
+      font-size: 35px;
+      font-weight: 650;
+      transition: background .2s, border-color .2s, transform .2s;
+    }
+
+    .tc-profile-card:hover .tc-profile-card-avatar {
+      border-color: rgba(255, 255, 255, .72);
+      transform: scale(1.035);
+    }
+
+    .tc-profile-card.active .tc-profile-card-avatar {
+      border-color: #fff;
+      background: #363636;
+    }
+
+    .tc-profile-card-name {
+      max-width: 100%;
+      overflow: hidden;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tc-profile-active-label {
+      color: rgba(255, 255, 255, .62);
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .tc-profile-card.active .tc-profile-active-label {
+      color: rgba(255, 255, 255, .9);
+    }
+
+    .tc-profile-add-card {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .tc-profile-add-card .tc-profile-add-initial {
+      border: 1px solid rgba(255, 255, 255, .48);
+      background: #111;
+      color: #fff;
+      font-size: 42px;
+      font-weight: 300;
+    }
+
+    .tc-profile-add-card:hover .tc-profile-add-initial {
+      border-color: #fff;
+      background: #252525;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-close {
+      display: none;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-panel {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    /* Crear perfil: modal sobrio, con los mismos botones y superficies de TatoCine */
+    .tc-profile-create-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5010;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .86);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .tc-profile-create-overlay.open {
+      display: flex;
+    }
+
+    .tc-profile-create-dialog {
+      position: relative;
+      width: min(460px, 100%);
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 18px;
+      background: #0a0a0a;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .7);
+      animation: tcProfileModalIn .2s ease-out;
+    }
+
+    @keyframes tcProfileModalIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.99)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .tc-profile-create-dialog h3 {
+      margin: 0 42px 8px 0;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -.4px;
+    }
+
+    .tc-profile-create-subtitle {
+      margin: 0 0 25px;
+      color: rgba(255, 255, 255, .68);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .tc-profile-create-label {
+      display: block;
+      margin: 0 0 9px;
+      color: rgba(255, 255, 255, .82);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tc-profile-create-dialog .tc-profile-input {
+      height: 48px;
+      margin: 0;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 9px;
+      outline: 0;
+      background: #171717;
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      box-shadow: none;
+      transition: border-color .2s, background .2s;
+    }
+
+    .tc-profile-create-dialog .tc-profile-input:focus {
+      border-color: rgba(255, 255, 255, .6);
+      background: #1d1d1d;
+      box-shadow: none;
+    }
+
+    .tc-profile-create-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn {
+      flex: 1;
+      min-height: 46px;
+      margin: 0;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 50px;
+      background: #fff;
+      color: #000;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform .2s, background .2s;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn:hover {
+      transform: scale(1.03);
+      background: #e5e5e5;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tc-profile-cancel-btn {
+      min-height: 46px;
+      padding: 0 22px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .tc-profile-cancel-btn:hover {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .35);
+    }
+
+    .tc-profile-create-dialog .tc-profile-note {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .52);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .tc-profile-create-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+
+    .tc-profile-create-close:hover {
+      background: rgba(255, 255, 255, .2);
+      transform: scale(1.05);
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-overlay {
+        padding: 14px;
+      }
+
+      .tc-profile-panel {
+        max-height: 92vh;
+        padding: 8px 0 16px;
+      }
+
+      .tc-profile-brand {
+        margin-bottom: 28px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 28px;
+        padding: 0 42px;
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 25px;
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 150px));
+        gap: 14px;
+      }
+
+      .tc-profile-card {
+        min-height: 132px;
+        padding: 10px 6px;
+      }
+
+      .tc-profile-card-avatar {
+        width: 68px;
+        height: 68px;
+        font-size: 30px;
+      }
+
+      .tc-profile-create-overlay {
+        padding: 14px;
+      }
+
+      .tc-profile-create-dialog {
+        padding: 28px 22px;
+        border-radius: 16px;
+      }
+
+      .tc-profile-create-actions {
+        flex-direction: column-reverse;
+      }
+
+      .tc-profile-cancel-btn {
+        width: 100%;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      .tc-profile-card,
+      .tc-profile-create-dialog,
+      .tc-profile-create-btn,
+      .tc-profile-close {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+
+
+    /* Selector de perfiles: fondos cinematográficos TMDB y acciones de edición. */
+    .tc-profile-overlay {
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .tc-profile-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: #050505;
+    }
+
+    .tc-profile-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0, 0, 0, .88) 0%, rgba(0, 0, 0, .66) 48%, rgba(0, 0, 0, .78) 100%), linear-gradient(180deg, rgba(0, 0, 0, .42) 0%, rgba(0, 0, 0, .28) 48%, rgba(0, 0, 0, .86) 100%);
+    }
+
+    .tc-profile-backdrop-layer {
+      position: absolute;
+      inset: 0;
+      background-position: center 35%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transform: scale(1.015);
+      transition: opacity 1.35s ease;
+      will-change: opacity;
+    }
+
+    .tc-profile-backdrop-layer.visible {
+      opacity: 1;
+    }
+
+    .tc-profile-panel {
+      z-index: 1;
+    }
+
+    .tc-profile-card-editable {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .tc-profile-select-btn {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      min-height: 146px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 12px 12px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .tc-profile-select-btn:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: -4px;
+      border-radius: 8px;
+    }
+
+    .tc-profile-card-editable .tc-profile-card-avatar {
+      margin-top: 2px;
+    }
+
+    .tc-profile-edit-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .23);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .72);
+      color: rgba(255, 255, 255, .86);
+      cursor: pointer;
+      opacity: .86;
+      transition: background .18s, border-color .18s, opacity .18s, transform .18s;
+    }
+
+    .tc-profile-edit-btn:hover,
+    .tc-profile-edit-btn:focus-visible {
+      opacity: 1;
+      background: #292929;
+      border-color: rgba(255, 255, 255, .75);
+      transform: scale(1.06);
+      outline: none;
+    }
+
+    .tc-profile-create-overlay {
+      z-index: 5020;
+    }
+
+    /* Acciones del selector: zonas clicables independientes y modal por encima del selector. */
+    #tc-profile-grid .tc-profile-select-btn,
+    #tc-profile-grid .tc-profile-edit-btn,
+    #tc-profile-grid .tc-profile-add-card {
+      position: relative;
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    #tc-profile-create-overlay {
+      pointer-events: none;
+    }
+
+    #tc-profile-create-overlay.open {
+      pointer-events: auto;
+      display: flex !important;
+    }
+
+    #tc-profile-create-overlay.open .tc-profile-create-dialog {
+      pointer-events: auto;
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-select-btn {
+        min-height: 128px;
+        padding: 16px 8px 10px
+      }
+
+      .tc-profile-edit-btn {
+        top: 6px;
+        right: 6px;
+        width: 28px;
+        height: 28px
+      }
+
+      .tc-profile-backdrop-layer {
+        background-position: center center;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .tc-profile-backdrop-layer {
+        transition: none;
+        transform: none;
+      }
+    }
+
+    /* Selector de perfiles: carrusel de fondos TMDB a pantalla completa, sin hero ni scroll interno. */
+    body.tc-profile-screen-open {
+      overflow: hidden !important;
+    }
+
+    .tc-profile-overlay {
+      overflow: hidden !important;
+      overscroll-behavior: none;
+    }
+
+    .tc-profile-panel {
+      max-height: none !important;
+      overflow: visible !important;
+      scrollbar-width: none;
+    }
+
+    .tc-profile-panel::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .tc-profile-backdrop {
+      position: absolute;
+      inset: 0;
+    }
+
+    .tc-profile-backdrop-layer {
+      transition: opacity 1.15s ease-in-out;
+    }
+
+    @media(max-height:760px) {
+      .tc-profile-brand {
+        margin-bottom: 20px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 22px;
+      }
+
+      .tc-profile-grid {
+        gap: 12px 18px;
+      }
+
+      .tc-profile-card {
+        min-height: 116px;
+      }
+
+      .tc-profile-card-avatar {
+        width: 66px;
+        height: 66px;
+        font-size: 30px;
+      }
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-panel {
+        width: 100%;
+        padding: 4px 6px 10px !important;
+      }
+
+      .tc-profile-brand {
+        margin-bottom: 20px !important;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 22px !important;
+      }
+
+      .tc-profile-grid {
+        gap: 10px 8px !important;
+      }
+
+      .tc-profile-card {
+        min-height: 112px !important;
+      }
+
+      .tc-profile-card-avatar {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 28px !important;
+      }
+    }
+
+    @media(max-height:640px) {
+      .tc-profile-brand {
+        margin-bottom: 12px !important;
+        font-size: 18px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 12px !important;
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 23px !important;
+      }
+
+      .tc-profile-heading .tc-profile-note {
+        margin-top: 6px !important;
+      }
+
+      .tc-profile-card {
+        min-height: 88px !important;
+        gap: 6px !important;
+        padding: 6px 4px !important;
+      }
+
+      .tc-profile-card-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 24px !important;
+      }
+
+      .tc-profile-grid {
+        gap: 6px !important;
+      }
+    }
+
+    /* TatoCine: posición original del lápiz de edición */
+    .tc-profile-card.tc-profile-card-editable {
+      position: relative !important;
+      overflow: hidden;
+    }
+
+    .tc-profile-card-editable .tc-profile-edit-btn {
+      position: absolute !important;
+      top: 8px !important;
+      right: 8px !important;
+      left: auto !important;
+      bottom: auto !important;
+
+      z-index: 30 !important;
+      display: grid !important;
+      place-items: center !important;
+
+      width: 30px !important;
+      height: 30px !important;
+      min-width: 30px !important;
+      margin: 0 !important;
+    }
+
+    /* Posición en móviles */
+    @media (max-width: 600px) {
+      .tc-profile-edit-btn {
+        top: 6px !important;
+        right: 6px !important;
+      }
+    }
   </style>
   <script type="application/ld+json" id="site-structured-data">
       {
@@ -3432,6 +4618,7 @@
         ">
       Mi Lista
     </button>
+    <button class="nav-item" onclick="showProfiles();toggleMenu();">Perfiles</button>
     <button class="nav-item" onclick="
           showSettings();
           toggleMenu();
@@ -3479,6 +4666,10 @@
         </button>
       </div>
     </div>
+    <button class="tc-profile-trigger" type="button" onclick="showProfiles()" title="Cambiar perfil local">
+      <span class="tc-profile-trigger-avatar" id="profile-button-avatar">U</span>
+      <span class="tc-profile-trigger-name" id="profile-button-name">Mi perfil</span>
+    </button>
   </header>
 
   <main class="main-content">
@@ -3531,6 +4722,16 @@
             </svg>
             Info
           </button>
+          <button type="button" class="hero-btn secondary hero-save-btn" id="hero-save-btn"
+            onclick="toggleHeroSave(event)" title="Agregar a Mi lista" aria-label="Agregar a Mi lista"
+            aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            <span class="hero-save-label">Mi lista</span>
+          </button>
           <button class="hero-btn secondary" onclick="randomPick()" title="Aleatorio">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round">
@@ -3576,6 +4777,8 @@
         <div class="tv-controls" id="tv-controls">
           <select id="season-select" class="tv-select"></select>
           <select id="episode-select" class="tv-select"></select>
+          <button type="button" id="auto-next-toggle" class="auto-next-toggle on" onclick="toggleAutoNextEpisode()"
+            title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Siguiente: ACTIVADO</button>
         </div>
         <div class="server-switcher" id="server-switcher"></div>
         <div class="player-container" id="player-view"></div>
@@ -3748,6 +4951,48 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Selector local de perfiles, integrado visualmente con TatoCine -->
+  <div class="tc-profile-overlay" id="tc-profile-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-profile-title" onclick="if(event.target===this)closeProfiles()">
+    <div class="tc-profile-backdrop" id="tc-profile-backdrop" aria-hidden="true">
+      <div class="tc-profile-backdrop-layer visible"></div>
+      <div class="tc-profile-backdrop-layer"></div>
+    </div>
+    <section class="tc-profile-panel">
+      <div class="tc-profile-brand" aria-label="TatoCine">TatoCine</div>
+      <div class="tc-profile-heading">
+        <div>
+          <h2 id="tc-profile-title">¿Quién está viendo?</h2>
+          <p class="tc-profile-note" id="tc-profile-count">Elige un perfil para continuar</p>
+        </div>
+        <button class="tc-profile-close" type="button" onclick="closeProfiles()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="tc-profile-grid" id="tc-profile-grid"></div>
+    </section>
+  </div>
+
+  <!-- Modal independiente para crear perfiles locales -->
+  <div class="tc-profile-create-overlay" id="tc-profile-create-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-profile-create-title" onclick="if(event.target===this)closeProfileCreateModal()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closeProfileCreateModal()"
+        aria-label="Cerrar">×</button>
+      <h3 id="tc-profile-create-title">Agregar perfil</h3>
+      <p class="tc-profile-create-subtitle" id="tc-profile-create-subtitle">Crea un espacio propio para tus películas,
+        series y recomendaciones.</p>
+      <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre del perfil</label>
+      <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
+        placeholder="Escribe un nombre" autocomplete="off" onkeydown="if(event.key==='Enter')saveProfileFromModal()">
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" onclick="closeProfileCreateModal()">Cancelar</button>
+        <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
+          onclick="saveProfileFromModal()">Crear perfil</button>
+      </div>
+      <p class="tc-profile-note">Hasta 6 perfiles. Los nombres, las listas, el historial y las recomendaciones se
+        guardan solamente en este navegador; no se crea ninguna cuenta ni se envían datos a una base de datos.</p>
+    </section>
   </div>
 
   <!-- MODAL FILTROS -->
@@ -3926,20 +5171,284 @@
         return false;
       }
     }
+    const PROFILE_STORAGE_KEY = "tatoProfilesV1";
+    const ACTIVE_PROFILE_STORAGE_KEY = "tatoActiveProfileV1";
+    const PROFILE_SESSION_STORAGE_KEY = "tatoProfileSelectedForSessionV1";
+    function initializeLocalProfiles() {
+      var stored = readLocalJSON(PROFILE_STORAGE_KEY, null);
+      if (!Array.isArray(stored) || !stored.length) {
+        stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
+        safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(stored));
+      }
+      stored = stored.filter(function (p) { return p && p.id && p.name; });
+      if (!stored.length) stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
+      // Retira los antiguos emojis guardados como avatar sin borrar perfiles ni su actividad.
+      stored.forEach(function (p) { if (Object.prototype.hasOwnProperty.call(p, "avatar")) delete p.avatar; });
+      safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(stored.slice(0, 6)));
+      var active = "";
+      try { active = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY) || ""; } catch (e) { }
+      if (!stored.some(function (p) { return p.id === active; })) active = stored[0].id;
+      safeStorageSet(ACTIVE_PROFILE_STORAGE_KEY, active);
+      var prefix = "tatoProfile_" + active + "_";
+      var legacy = [
+        ["tatoList", "[]"],
+        ["tatoContinue", "[]"],
+        ["tatoLocalAnalyticsV1", '{"items":[]}'],
+        ["tatoServer", '"ESP1"'],
+        ["tatoAutoNextEpisode", "true"]
+      ];
+      legacy.forEach(function (pair) {
+        try {
+          if (localStorage.getItem(prefix + pair[0]) === null) {
+            var oldValue = active === "main" ? localStorage.getItem(pair[0]) : null;
+            safeStorageSet(prefix + pair[0], oldValue === null ? pair[1] : oldValue);
+          }
+        } catch (e) { safeStorageSet(prefix + pair[0], pair[1]); }
+      });
+      return { profiles: stored.slice(0, 6), activeId: active };
+    }
+    var localProfileSetup = initializeLocalProfiles();
+    let localProfiles = localProfileSetup.profiles;
+    let activeProfileId = localProfileSetup.activeId;
+    var editingLocalProfileId = null;
+    var profileBackdropItems = [];
+    var profileBackdropIndex = 0;
+    var profileBackdropNextIndex = 0;
+    var profileBackdropTimer = null;
+    var profileBackdropLayerIndex = 0;
+    var profileBackdropImageRequest = 0;
+    var profileBackdropStarted = false;
+    var profileBackdropHasVisibleImage = false;
+    var profileBackdropLoading = false;
+    var profileBackdropFetchPending = false;
+    var profilePickerRequired = (function () {
+      try { return sessionStorage.getItem(PROFILE_SESSION_STORAGE_KEY) !== activeProfileId; }
+      catch (e) { return true; }
+    })();
+    function profileStorageKey(key) { return "tatoProfile_" + activeProfileId + "_" + key; }
+    function saveLocalProfiles() { return safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(localProfiles)); }
+    function getActiveProfile() { return localProfiles.find(function (p) { return p.id === activeProfileId; }) || localProfiles[0]; }
+    function getProfileInitial(profile) {
+      var name = String(profile && profile.name || "U").trim();
+      return name ? Array.from(name)[0].toLocaleUpperCase("es") : "U";
+    }
+    function updateProfileTrigger() {
+      var p = getActiveProfile();
+      var initial = document.getElementById("profile-button-avatar");
+      var name = document.getElementById("profile-button-name");
+      if (initial && p) initial.textContent = getProfileInitial(p);
+      if (name && p) name.textContent = p.name;
+      var trigger = document.querySelector(".tc-profile-trigger");
+      if (trigger && p) trigger.setAttribute("aria-label", "Perfil actual: " + p.name + ". Cambiar perfil");
+    }
+    function setProfileModalMode(mode, profile) {
+      var title = document.getElementById("tc-profile-create-title");
+      var subtitle = document.getElementById("tc-profile-create-subtitle");
+      var button = document.getElementById("tc-create-profile-btn");
+      var input = document.getElementById("tc-new-profile-name");
+      var isEdit = mode === "edit";
+      if (title) title.textContent = isEdit ? "Editar perfil" : "Agregar perfil";
+      if (subtitle) subtitle.textContent = isEdit
+        ? "Cambia el nombre de este perfil. Tu historial y tus listas se conservarán."
+        : "Crea un espacio propio para tus películas, series y recomendaciones.";
+      if (button) { button.textContent = isEdit ? "Guardar cambios" : "Crear perfil"; button.disabled = false; }
+      if (input) { input.value = isEdit && profile ? profile.name : ""; input.disabled = false; }
+    }
+    function openProfileCreateModal() {
+      if (localProfiles.length >= 6) { showToast("Puedes crear hasta 6 perfiles"); return; }
+      editingLocalProfileId = null;
+      setProfileModalMode("create", null);
+      var overlay = document.getElementById("tc-profile-create-overlay");
+      var input = document.getElementById("tc-new-profile-name");
+      if (!overlay) {
+        console.error("TatoCine: no se encontró el modal para crear perfiles (#tc-profile-create-overlay).");
+        showToast("No se pudo abrir el formulario de perfiles");
+        return;
+      }
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      window.setTimeout(function () {
+        if (input) { input.disabled = false; input.focus(); }
+      }, 90);
+    }
+    function openProfileEditModal(profileId) {
+      var profile = localProfiles.find(function (p) { return p.id === profileId; });
+      if (!profile) { showToast("No se encontró el perfil"); return; }
+      editingLocalProfileId = profile.id;
+      setProfileModalMode("edit", profile);
+      var overlay = document.getElementById("tc-profile-create-overlay");
+      var input = document.getElementById("tc-new-profile-name");
+      if (!overlay) {
+        console.error("TatoCine: no se encontró el modal de perfiles.");
+        showToast("No se pudo abrir el formulario de perfiles");
+        return;
+      }
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      window.setTimeout(function () { if (input) { input.disabled = false; input.focus(); input.select(); } }, 90);
+    }
+    function closeProfileCreateModal() {
+      var overlay = document.getElementById("tc-profile-create-overlay");
+      if (overlay) {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+      var input = document.getElementById("tc-new-profile-name");
+      if (input) input.value = "";
+      editingLocalProfileId = null;
+    }
+    function saveProfileFromModal() {
+      var input = document.getElementById("tc-new-profile-name");
+      var name = String(input && input.value || "").trim().slice(0, 24);
+      if (!name) { showToast("Escribe un nombre para el perfil"); if (input) input.focus(); return; }
+      if (!editingLocalProfileId) { createLocalProfile(); return; }
+      var profile = localProfiles.find(function (p) { return p.id === editingLocalProfileId; });
+      if (!profile) { showToast("No se encontró el perfil que quieres editar"); closeProfileCreateModal(); return; }
+      var previousName = profile.name;
+      profile.name = name;
+      if (!saveLocalProfiles()) { profile.name = previousName; showToast("No se pudo guardar el nombre en este navegador"); return; }
+      closeProfileCreateModal();
+      renderProfilesPanel();
+      updateProfileTrigger();
+      showToast("Nombre del perfil actualizado");
+    }
+    // Alias conservado para cualquier llamada previa de la interfaz.
+    function focusProfileCreation() { openProfileCreateModal(); }
+    function renderProfilesPanel() {
+      var grid = document.getElementById("tc-profile-grid");
+      if (!grid) return;
+
+      var cards = localProfiles.map(function (p) {
+        var active = p.id === activeProfileId;
+        var safeId = escapeHTML(p.id);
+        var safeName = escapeHTML(p.name);
+        return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + '">' +
+          '<button type="button" class="tc-profile-select-btn" data-profile-action="select" data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
+          '<span class="tc-profile-card-avatar" aria-hidden="true">' + escapeHTML(getProfileInitial(p)) + '</span>' +
+          '<span class="tc-profile-card-name">' + safeName + '</span>' +
+          '<span class="tc-profile-active-label">' + (active ? "Perfil actual" : "Seleccionar") + '</span>' +
+          '</button>' +
+          '<button type="button" class="tc-profile-edit-btn" data-profile-action="edit" data-profile-id="' + safeId + '" aria-label="Editar nombre de ' + safeName + '" title="Editar nombre">' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>' +
+          '</button>' +
+          '</div>';
+      });
+
+      if (localProfiles.length < 6) {
+        cards.push('<button type="button" class="tc-profile-card tc-profile-add-card" data-profile-action="create" aria-label="Agregar perfil"><span class="tc-profile-card-avatar tc-profile-add-initial" aria-hidden="true">+</span><span class="tc-profile-card-name">Agregar perfil</span><span class="tc-profile-active-label">Crear nuevo</span></button>');
+      }
+
+      grid.innerHTML = cards.join("");
+
+      // Delegación de eventos: los botones dinámicos no dependen de onclick inline.
+      // Así cada acción queda separada y nunca se confunde seleccionar con crear.
+      if (grid.dataset.profileActionsBound !== "true") {
+        grid.addEventListener("click", function (event) {
+          var target = event.target;
+          if (!target || typeof target.closest !== "function") return;
+
+          var createButton = target.closest('[data-profile-action="create"]');
+          if (createButton && grid.contains(createButton)) {
+            event.preventDefault();
+            event.stopPropagation();
+            openProfileCreateModal();
+            return;
+          }
+
+          var editButton = target.closest('[data-profile-action="edit"]');
+          if (editButton && grid.contains(editButton)) {
+            event.preventDefault();
+            event.stopPropagation();
+            openProfileEditModal(editButton.getAttribute("data-profile-id"));
+            return;
+          }
+
+          var selectButton = target.closest('[data-profile-action="select"]');
+          if (selectButton && grid.contains(selectButton)) {
+            event.preventDefault();
+            event.stopPropagation();
+            switchLocalProfile(selectButton.getAttribute("data-profile-id"));
+          }
+        });
+        grid.dataset.profileActionsBound = "true";
+      }
+
+      var count = document.getElementById("tc-profile-count");
+      if (count) count.textContent = localProfiles.length + " de 6 perfiles locales";
+      var create = document.getElementById("tc-create-profile-btn");
+      if (create) create.disabled = localProfiles.length >= 6;
+    }
+    function showProfiles(isStartup) {
+      renderProfilesPanel();
+      var panel = document.getElementById("tc-profile-overlay");
+      if (panel) {
+        document.body.classList.add("tc-profile-screen-open");
+        panel.classList.toggle("startup", !!isStartup);
+        panel.classList.add("open");
+        startProfileBackdropCarousel();
+      }
+    }
+    function closeProfiles() {
+      if (profilePickerRequired) return;
+      var panel = document.getElementById("tc-profile-overlay");
+      if (panel) panel.classList.remove("open", "startup");
+      document.body.classList.remove("tc-profile-screen-open");
+      stopProfileBackdropCarousel();
+    }
+    function confirmProfileForSession(profileId) {
+      try { sessionStorage.setItem(PROFILE_SESSION_STORAGE_KEY, profileId); } catch (e) { }
+      profilePickerRequired = false;
+    }
+    function switchLocalProfile(profileId) {
+      var selectedProfile = localProfiles.find(function (p) { return p.id === profileId; });
+      if (!selectedProfile) return;
+
+      // Si se vuelve a elegir el perfil actual, solo se cierra el selector.
+      // No se abre el formulario de creación ni el de edición.
+      if (profileId === activeProfileId) {
+        confirmProfileForSession(profileId);
+        closeProfiles();
+        return;
+      }
+
+      if (!safeStorageSet(ACTIVE_PROFILE_STORAGE_KEY, profileId)) {
+        showToast("No se pudo cambiar de perfil en este dispositivo");
+        return;
+      }
+      confirmProfileForSession(profileId);
+      location.reload();
+    }
+    function createLocalProfile() {
+      if (localProfiles.length >= 6) { showToast("Puedes crear hasta 6 perfiles"); return; }
+      var input = document.getElementById("tc-new-profile-name");
+      var name = String(input && input.value || "").trim().slice(0, 24);
+      if (!name) { showToast("Escribe un nombre para el perfil"); if (input) input.focus(); return; }
+      var id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      localProfiles.push({ id: id, name: name, createdAt: Date.now() });
+      saveLocalProfiles();
+      [
+        ["tatoList", "[]"], ["tatoContinue", "[]"],
+        ["tatoLocalAnalyticsV1", '{"items":[]}'], ["tatoServer", '"ESP1"'],
+        ["tatoAutoNextEpisode", "true"]
+      ].forEach(function (pair) { safeStorageSet("tatoProfile_" + id + "_" + pair[0], pair[1]); });
+      safeStorageSet(ACTIVE_PROFILE_STORAGE_KEY, id);
+      confirmProfileForSession(id);
+      closeProfileCreateModal();
+      location.reload();
+    }
+
     const LOCAL_ANALYTICS_KEY = "tatoLocalAnalyticsV1";
     let currentView = "home";
-    let myList = readLocalJSON("tatoList", []);
-    let continueWatching = readLocalJSON("tatoContinue", []);
-    let localAnalytics = readLocalJSON(LOCAL_ANALYTICS_KEY, { items: [] });
-    if (!localAnalytics || !Array.isArray(localAnalytics.items))
-      localAnalytics = { items: [] };
+    let myList = readLocalJSON(profileStorageKey("tatoList"), []);
+    let continueWatching = readLocalJSON(profileStorageKey("tatoContinue"), []);
+    let localAnalytics = readLocalJSON(profileStorageKey(LOCAL_ANALYTICS_KEY), { items: [] });
+    if (!localAnalytics || !Array.isArray(localAnalytics.items)) localAnalytics = { items: [] };
+    let autoNextEpisode = readLocalJSON(profileStorageKey("tatoAutoNextEpisode"), true) !== false;
     let preferredServer = (function () {
-      try {
-        return localStorage.getItem("tatoServer") || "ESP1";
-      } catch (e) {
-        return "ESP1";
-      }
+      try { return localStorage.getItem(profileStorageKey("tatoServer")) || "ESP1"; }
+      catch (e) { return "ESP1"; }
     })();
+
     let currentMedia = null,
       currentHeroMedia = null;
     let heroInterval = null,
@@ -3962,6 +5471,9 @@
       loadMoreScrollFallback = false,
       autoScrollPaused = false;
     let activePlayerFrame = null,
+      currentTvSeasons = [],
+      currentTvEpisodes = [],
+      isAdvancingEpisode = false,
       similarQueue = [],
       similarQueuePromise = Promise.resolve([]),
       playerEndedHandled = false,
@@ -3969,7 +5481,7 @@
 
     const tmdbCache = new Map();
     const tmdbPending = new Map();
-    const CACHE_TTL = 5 * 60 * 1000;
+    const CACHE_TTL = 10 * 60 * 1000;
     const CACHE_MAX_ENTRIES = 180;
     const MAX_TMDB_PAGE = 500;
     const FALLBACK_IMG =
@@ -4113,6 +5625,305 @@
       });
     }
 
+    // ==========================================================
+    // Selector de perfiles: fondos cinematográficos curados TMDB
+    // Orden solicitado; las búsquedas conservan ese orden.
+    // ==========================================================
+    var PROFILE_BACKDROP_FEATURED = [
+      { label: "Stranger Things", type: "tv", queries: ["Stranger Things"] },
+      { label: "Ratatouille", type: "movie", queries: ["Ratatouille"] },
+      { label: "Batman: El caballero de la noche", type: "movie", queries: ["The Dark Knight", "Batman: El caballero de la noche"] },
+      { label: "Yo, él y Raquel", type: "movie", queries: ["Me and Earl and the Dying Girl", "Yo, él y Raquel"] },
+      { label: "Loki", type: "tv", queries: ["Loki"] },
+      { label: "Game of Thrones", type: "tv", queries: ["Game of Thrones"] },
+      { label: "Pulp Fiction", type: "movie", queries: ["Pulp Fiction"] },
+      { label: "Star Wars: Episodio III", type: "movie", queries: ["Star Wars: Episode III - Revenge of the Sith", "Revenge of the Sith"] },
+      { label: "Naruto Shippuden", type: "tv", queries: ["Naruto Shippuden", "Naruto: Shippuden"] },
+      { label: "Avengers: Doomsday", type: "movie", year: 2026, queries: ["Avengers: Doomsday", "Avengers Doomsday"] },
+      { label: "Spider-Man: Brand New Day", type: "movie", year: 2026, queries: ["Spider-Man: Brand New Day", "Spider-Man Brand New Day", "Spider-Man: No Way Home"] },
+      { label: "1917", type: "movie", queries: ["1917"] },
+      { label: "El Padrino", type: "movie", queries: ["The Godfather", "El Padrino"] },
+      { label: "Volver al futuro", type: "movie", queries: ["Back to the Future", "Volver al futuro"] },
+      { label: "American Psycho", type: "movie", queries: ["American Psycho", "American Psyco"] },
+      { label: "Spider-Man: A través del Spider-Verso", type: "movie", queries: ["Spider-Man: Across the Spider-Verse", "Spider-Man Across the Spider Verse"] },
+      { label: "Dune: Parte uno", type: "movie", year: 2021, queries: ["Dune: Part One", "Dune"] },
+      { label: "Gravity Falls", type: "tv", queries: ["Gravity Falls"] },
+      { label: "Coco", type: "movie", queries: ["Coco"] },
+      { label: "Toy Story", type: "movie", queries: ["Toy Story"] }
+    ];
+
+    function profileBackdropEndpoint(entry) {
+      return entry.type === "tv" ? "/search/tv" : "/search/movie";
+    }
+
+    function chooseProfileBackdropResult(entry, results) {
+      var valid = (Array.isArray(results) ? results : []).filter(function (item) {
+        return item && typeof item.backdrop_path === "string" && item.backdrop_path.charAt(0) === "/";
+      });
+      if (!valid.length) return null;
+
+      // Si se indicó año, prioriza el título de ese año sin descartar un resultado válido.
+      if (entry.year) {
+        var dateField = entry.type === "tv" ? "first_air_date" : "release_date";
+        var exactYear = valid.find(function (item) {
+          return String(item[dateField] || "").slice(0, 4) === String(entry.year);
+        });
+        if (exactYear) return exactYear;
+      }
+      return valid[0];
+    }
+
+    function fetchProfileBackdropEntry(entry, queryIndex) {
+      var index = queryIndex || 0;
+      if (index >= entry.queries.length) return Promise.resolve(null);
+
+      var params = "query=" + encodeURIComponent(entry.queries[index]) + "&include_adult=false&page=1";
+      if (entry.year) params += "&year=" + encodeURIComponent(entry.year);
+
+      return fetchTMDB(profileBackdropEndpoint(entry), params)
+        .then(function (data) {
+          var selected = chooseProfileBackdropResult(entry, data && data.results);
+          if (selected) {
+            selected._tcProfileLabel = entry.label;
+            selected._tcProfileType = entry.type;
+            return selected;
+          }
+          return fetchProfileBackdropEntry(entry, index + 1);
+        })
+        .catch(function (error) {
+          console.warn("TatoCine: búsqueda de fondo fallida para " + entry.label + ".", error);
+          return fetchProfileBackdropEntry(entry, index + 1);
+        });
+    }
+
+    function loadProfileBackdropCollection() {
+      var results = new Array(PROFILE_BACKDROP_FEATURED.length);
+      var cursor = 0;
+      var workerCount = Math.min(4, PROFILE_BACKDROP_FEATURED.length);
+
+      function worker() {
+        var current = cursor++;
+        if (current >= PROFILE_BACKDROP_FEATURED.length) return Promise.resolve();
+        return fetchProfileBackdropEntry(PROFILE_BACKDROP_FEATURED[current], 0)
+          .then(function (item) {
+            results[current] = item;
+            return worker();
+          });
+      }
+
+      var workers = [];
+      for (var w = 0; w < workerCount; w++) workers.push(worker());
+
+      return Promise.all(workers).then(function () {
+        var curated = results.filter(Boolean);
+        var missing = PROFILE_BACKDROP_FEATURED.filter(function (entry, index) {
+          return !results[index];
+        }).map(function (entry) { return entry.label; });
+
+        if (missing.length) {
+          console.warn("TatoCine: TMDB no devolvió fondos para:", missing.join(" · "));
+        }
+
+        // Conserva los 20 títulos en el orden solicitado. Solo añade tendencias
+        // al final como respaldo cuando TMDB no encuentre suficientes fondos.
+        if (curated.length >= 2) return curated;
+        return fetchTMDB("/trending/all/week")
+          .then(function (data) {
+            var seen = Object.create(null);
+            curated.forEach(function (item) { seen[item.backdrop_path] = true; });
+            (data && Array.isArray(data.results) ? data.results : []).forEach(function (item) {
+              if (curated.length >= 6) return;
+              if (!item || !item.backdrop_path || seen[item.backdrop_path]) return;
+              seen[item.backdrop_path] = true;
+              item._tcProfileLabel = item.title || item.name || "Tendencia";
+              curated.push(item);
+            });
+            return curated;
+          })
+          .catch(function () { return curated; });
+      });
+    }
+
+    function preloadProfileBackdropImage(item) {
+      if (!item || !item.backdrop_path) return Promise.resolve(null);
+      if (item._tcBackdropImage && item._tcBackdropImage.complete && item._tcBackdropImage.naturalWidth > 0) {
+        return Promise.resolve(item._tcBackdropImage);
+      }
+      if (item._tcBackdropPromise) return item._tcBackdropPromise;
+
+      item._tcBackdropPromise = new Promise(function (resolve) {
+        var image = new Image();
+        var settled = false;
+        var timeout = window.setTimeout(function () { finish(null); }, 12000);
+
+        function finish(result) {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          image.onload = null;
+          image.onerror = null;
+          if (result) item._tcBackdropImage = image;
+          else item._tcBackdropPromise = null;
+          resolve(result);
+        }
+
+        image.decoding = "async";
+        image.onload = function () { finish(image.naturalWidth > 0 ? image : null); };
+        image.onerror = function () { finish(null); };
+        item._tcBackdropUrl = IMG_BG + item.backdrop_path;
+        image.src = item._tcBackdropUrl;
+        if (image.complete && image.naturalWidth > 0) finish(image);
+      });
+
+      return item._tcBackdropPromise;
+    }
+
+    function scheduleNextProfileBackdrop() {
+      if (profileBackdropTimer) {
+        window.clearTimeout(profileBackdropTimer);
+        profileBackdropTimer = null;
+      }
+
+      var overlay = document.getElementById("tc-profile-overlay");
+      if (!overlay || !overlay.classList.contains("open") || profileBackdropItems.length < 2) return;
+
+      // El cambio de imagen NO depende de prefers-reduced-motion. Esa preferencia
+      // solo afecta al fundido CSS, no al funcionamiento del carrusel.
+      profileBackdropTimer = window.setTimeout(function () {
+        profileBackdropTimer = null;
+        if (!overlay.classList.contains("open")) return;
+        if (document.hidden || profileBackdropLoading) {
+          scheduleNextProfileBackdrop();
+          return;
+        }
+        setProfileBackdrop(profileBackdropNextIndex, 0);
+      }, 5000);
+    }
+
+    function setProfileBackdrop(index, attempts) {
+      var overlay = document.getElementById("tc-profile-overlay");
+      var layers = overlay ? overlay.querySelectorAll(".tc-profile-backdrop-layer") : [];
+      var total = profileBackdropItems.length;
+      if (!overlay || !overlay.classList.contains("open") || !layers || layers.length < 2 || !total || profileBackdropLoading) return;
+
+      var currentAttempt = attempts || 0;
+      if (currentAttempt >= total) {
+        profileBackdropLoading = false;
+        console.warn("TatoCine: no quedan fondos de perfil disponibles para mostrar.");
+        return;
+      }
+
+      var normalizedIndex = ((index % total) + total) % total;
+      var item = profileBackdropItems[normalizedIndex];
+      if (!item || !item.backdrop_path) {
+        profileBackdropNextIndex = (normalizedIndex + 1) % total;
+        setProfileBackdrop(profileBackdropNextIndex, currentAttempt + 1);
+        return;
+      }
+
+      profileBackdropLoading = true;
+      var requestId = ++profileBackdropImageRequest;
+
+      preloadProfileBackdropImage(item).then(function (image) {
+        if (requestId !== profileBackdropImageRequest) return;
+        if (!overlay.classList.contains("open")) {
+          profileBackdropLoading = false;
+          return;
+        }
+
+        if (!image) {
+          item._tcBackdropFailed = true;
+          profileBackdropLoading = false;
+          profileBackdropNextIndex = (normalizedIndex + 1) % total;
+          setProfileBackdrop(profileBackdropNextIndex, currentAttempt + 1);
+          return;
+        }
+
+        var currentLayers = overlay.querySelectorAll(".tc-profile-backdrop-layer");
+        if (!currentLayers || currentLayers.length < 2) {
+          profileBackdropLoading = false;
+          return;
+        }
+
+        var targetLayerIndex = profileBackdropLayerIndex === 0 ? 1 : 0;
+        currentLayers[targetLayerIndex].style.backgroundImage = "url(\"" + (item._tcBackdropUrl || IMG_BG + item.backdrop_path) + "\")";
+        currentLayers[targetLayerIndex].style.backgroundPosition = "center 35%";
+        currentLayers[targetLayerIndex].classList.add("visible");
+        currentLayers[profileBackdropLayerIndex].classList.remove("visible");
+
+        profileBackdropLayerIndex = targetLayerIndex;
+        profileBackdropIndex = normalizedIndex;
+        profileBackdropNextIndex = (normalizedIndex + 1) % total;
+        profileBackdropHasVisibleImage = true;
+        profileBackdropLoading = false;
+
+        // Prepara el próximo fondo antes de que llegue el siguiente intervalo.
+        preloadProfileBackdropImage(profileBackdropItems[profileBackdropNextIndex]);
+        scheduleNextProfileBackdrop();
+      }).catch(function (error) {
+        if (requestId !== profileBackdropImageRequest) return;
+        profileBackdropLoading = false;
+        console.warn("TatoCine: no se pudo aplicar el fondo de " + (item._tcProfileLabel || "TMDB") + ".", error);
+        profileBackdropNextIndex = (normalizedIndex + 1) % total;
+        setProfileBackdrop(profileBackdropNextIndex, currentAttempt + 1);
+      });
+    }
+
+    function stopProfileBackdropCarousel() {
+      if (profileBackdropTimer) {
+        window.clearTimeout(profileBackdropTimer);
+        profileBackdropTimer = null;
+      }
+      // Invalida cualquier descarga de imagen pendiente al cerrar el selector.
+      profileBackdropImageRequest++;
+      profileBackdropLoading = false;
+    }
+
+    function startProfileBackdropCarousel() {
+      var overlay = document.getElementById("tc-profile-overlay");
+      if (!overlay || !overlay.classList.contains("open")) return;
+
+      if (profileBackdropItems.length) {
+        if (!profileBackdropStarted || !profileBackdropHasVisibleImage) {
+          profileBackdropStarted = true;
+          if (!profileBackdropLoading) setProfileBackdrop(profileBackdropNextIndex, 0);
+        } else if (!profileBackdropTimer && !profileBackdropLoading) {
+          scheduleNextProfileBackdrop();
+        }
+        return;
+      }
+
+      if (profileBackdropFetchPending) return;
+      profileBackdropFetchPending = true;
+      loadProfileBackdropCollection()
+        .then(function (items) {
+          profileBackdropItems = items;
+          profileBackdropNextIndex = 0;
+          profileBackdropFetchPending = false;
+          if (profileBackdropItems.length) {
+            console.info("TatoCine: fondos del selector listos en el orden solicitado (" + profileBackdropItems.length + "/" + PROFILE_BACKDROP_FEATURED.length + ").");
+            if (overlay.classList.contains("open")) startProfileBackdropCarousel();
+          } else {
+            console.warn("TatoCine: TMDB no devolvió fondos utilizables para el selector.");
+          }
+        })
+        .catch(function (error) {
+          profileBackdropFetchPending = false;
+          console.warn("TatoCine: no se pudieron obtener los fondos del selector desde TMDB.", error);
+        });
+    }
+
+    if (!window.__tcProfileBackdropVisibilityListener) {
+      window.__tcProfileBackdropVisibilityListener = true;
+      document.addEventListener("visibilitychange", function () {
+        var overlay = document.getElementById("tc-profile-overlay");
+        if (!overlay || !overlay.classList.contains("open")) return;
+        if (!document.hidden && !profileBackdropTimer && !profileBackdropLoading && profileBackdropItems.length >= 2) {
+          scheduleNextProfileBackdrop();
+        }
+      });
+    }
+
     function getDistinctPlayedCount() {
       var seen = {};
       (localAnalytics.items || []).forEach(function (x) {
@@ -4121,7 +5932,7 @@
       return Object.keys(seen).length;
     }
     function saveLocalAnalytics() {
-      safeStorageSet(LOCAL_ANALYTICS_KEY, JSON.stringify(localAnalytics));
+      safeStorageSet(profileStorageKey(LOCAL_ANALYTICS_KEY), JSON.stringify(localAnalytics));
       updateLocalAnalyticsUI();
     }
     function updateLocalAnalyticsUI() {
@@ -4243,7 +6054,7 @@
       )
         return;
       localAnalytics = { items: [] };
-      safeStorageRemove(LOCAL_ANALYTICS_KEY);
+      safeStorageRemove(profileStorageKey(LOCAL_ANALYTICS_KEY));
       document.querySelectorAll(".personalized-row").forEach(function (row) {
         if (row.parentNode) row.parentNode.removeChild(row);
       });
@@ -4318,7 +6129,10 @@
       });
       if (x > -1) myList.splice(x, 1);
       else myList.push(i);
-      localStorage.setItem("tatoList", JSON.stringify(myList));
+      safeStorageSet(profileStorageKey("tatoList"), JSON.stringify(myList));
+      if (currentHeroMedia && currentHeroMedia.id === i.id && currentHeroMedia.type === i.type) {
+        updateHeroSaveButton(currentHeroMedia);
+      }
       if (currentView === "list") switchView("list", false);
       else {
         var btn = e.currentTarget;
@@ -4330,6 +6144,48 @@
             btn.classList.contains("saved") ? "currentColor" : "none",
           );
       }
+    }
+    function updateHeroSaveButton(media) {
+      var btn = $("hero-save-btn");
+      if (!btn) return;
+      var saved = !!(media && isSaved(media));
+      var label = saved ? "Quitar de Mi lista" : "Agregar a Mi lista";
+      btn.classList.toggle("saved", saved);
+      btn.setAttribute("aria-pressed", saved ? "true" : "false");
+      btn.setAttribute("aria-label", label);
+      btn.title = label;
+      var svg = btn.querySelector("svg");
+      if (svg) svg.setAttribute("fill", saved ? "currentColor" : "none");
+      var text = btn.querySelector(".hero-save-label");
+      if (text) text.textContent = saved ? "En Mi lista" : "Mi lista";
+    }
+    function toggleHeroSave(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      var media = currentHeroMedia;
+      if (!media || !media.id || !media.type) return;
+      var index = myList.findIndex(function (item) {
+        return item.id === media.id && item.type === media.type;
+      });
+      if (index > -1) {
+        myList.splice(index, 1);
+        showToast("Eliminado de Mi lista");
+      } else {
+        myList.push({
+          id: media.id,
+          type: media.type,
+          title: media.title || "Sin título",
+          bg: media.bg || "",
+          rating: Number(media.rating) || 0,
+          year: media.year || "",
+        });
+        showToast("Agregado a Mi lista");
+      }
+      safeStorageSet(profileStorageKey("tatoList"), JSON.stringify(myList));
+      updateHeroSaveButton(media);
+      if (currentView === "list") switchView("list", false);
     }
     function getStatusText(s) {
       if (!s) return "";
@@ -4356,6 +6212,7 @@
         rating: media.rating,
         season: season || null,
         episode: episode || null,
+        episodeName: (currentTvEpisodes || []).find(function (item) { return Number(item.episode_number) === Number(episode); })?.name || "",
         timestamp: Date.now(),
       };
       continueWatching = continueWatching.filter(function (m) {
@@ -4363,10 +6220,10 @@
       });
       continueWatching.unshift(entry);
       continueWatching = continueWatching.slice(0, 20);
-      localStorage.setItem("tatoContinue", JSON.stringify(continueWatching));
+      safeStorageSet(profileStorageKey("tatoContinue"), JSON.stringify(continueWatching));
     }
     function clearContinueWatching() {
-      localStorage.removeItem("tatoContinue");
+      safeStorageRemove(profileStorageKey("tatoContinue"));
       continueWatching = [];
       closeSettings();
       switchView(currentView, false);
@@ -4380,7 +6237,7 @@
       if (updated.length === continueWatching.length) return;
 
       try {
-        localStorage.setItem("tatoContinue", JSON.stringify(updated));
+        safeStorageSet(profileStorageKey("tatoContinue"), JSON.stringify(updated));
       } catch (error) {
         showToast("No se pudo guardar el cambio");
         return;
@@ -4423,7 +6280,9 @@
         var card = document.createElement("div");
         card.className = "card continue-card";
 
-        var progressInfo = m.season ? "T" + m.season + " E" + m.episode : "";
+        var progressInfo = m.season
+          ? "T" + m.season + " · E" + m.episode + (m.episodeName ? " · " + m.episodeName : "")
+          : (m.type === "movie" ? "Película · Reanudar" : "Serie · Reanudar");
 
         var imageUrl = m.bg
           ? String(m.bg).startsWith("http")
@@ -4455,7 +6314,7 @@
 
         var progress = document.createElement("div");
         progress.style.cssText = "font-size:11px;color:#aaa;margin-top:4px;";
-        progress.textContent = progressInfo;
+        progress.textContent = progressInfo + (m.timestamp ? " · " + (new Date(m.timestamp).toLocaleDateString("es-GT", { day: "numeric", month: "short" })) : "");
 
         overlay.appendChild(title);
         overlay.appendChild(progress);
@@ -4498,7 +6357,7 @@
     }
     function setPreferredServer(name) {
       preferredServer = name;
-      localStorage.setItem("tatoServer", name);
+      safeStorageSet(profileStorageKey("tatoServer"), name);
       updateSettingsUI();
     }
     function updateSettingsUI() {
@@ -4507,7 +6366,7 @@
     }
     function resetPreferredServer() {
       preferredServer = "ESP1";
-      localStorage.setItem("tatoServer", "ESP1");
+      safeStorageSet(profileStorageKey("tatoServer"), "ESP1");
       updateSettingsUI();
       showToast("Servidor reseteado");
     }
@@ -4697,6 +6556,9 @@
       var upcomingBadge = i.isUpcoming
         ? '<div class="badge-upcoming">PRÓXIMAMENTE</div>'
         : "";
+      var topRankBadge = i.topRank
+        ? '<div class="top10-rank-badge" aria-label="Puesto ' + Number(i.topRank) + '">' + Number(i.topRank) + '</div>'
+        : "";
       var ratingBadge =
         !i.isUpcoming && i.rating
           ? '<div class="rating-badge">' +
@@ -4732,6 +6594,7 @@
         ratingBadge +
         statusBadge +
         upcomingBadge +
+        topRankBadge +
         '<button class="share-card-btn" onclick="shareCard(event,{id:' +
         i.id +
         ",type:'" +
@@ -5004,6 +6867,7 @@
       var request = ++heroRequestId;
 
       currentHeroMedia = m;
+      updateHeroSaveButton(m);
 
       $heroSection.classList.remove("empty-search");
       $heroActions.style.display = "flex";
@@ -5092,7 +6956,7 @@
         if (isSearching || heroSectionIsEmpty()) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 7200);
+      }, 7500);
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");
@@ -5117,7 +6981,7 @@
             scroll.scrollBy({ left: 276, behavior: "smooth" });
           }
         });
-      }, 5500);
+      }, 7000);
     }
     function prefetchDetails(id, type) {
       var key = type + "_" + id;
@@ -6240,13 +8104,41 @@
           var row = document.createElement("div");
           row.className = "row catalog-row personalized-row";
           row.innerHTML =
-            '<div class="row-header"><h2 class="row-title">Recomendado para ti</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">' +
+            '<div class="row-header"><h2 class="row-title">Hecho para ti</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">' +
             picks.map(getCardHTML).join("") +
             "</div>";
           $rowsContainer.insertBefore(row, firstCatalog || null);
         })
         .catch(function () { });
     }
+    function loadTop10AndCollections(snapshot) {
+      var collections = [
+        { title: "Colección · Acción y aventura", query: "&with_genres=28|12&sort_by=popularity.desc&vote_count.gte=80&page=1" },
+        { title: "Colección · Ciencia ficción y fantasía", query: "&with_genres=878|14&sort_by=popularity.desc&vote_count.gte=60&page=1" },
+        { title: "Colección · Misterio, suspenso y terror", query: "&with_genres=9648|53|27&sort_by=popularity.desc&vote_count.gte=50&page=1" }
+      ];
+      var requests = [fetchTMDB("/trending/all/week")].concat(collections.map(function (item) {
+        return fetchTMDB("/discover/movie", item.query);
+      }));
+      Promise.all(requests).then(function (results) {
+        if (snapshot !== catalogRequestId || currentView !== "home") return;
+        var ranked = (results[0].results || []).filter(function (item) {
+          return item && item.id && (item.media_type === "movie" || item.media_type === "tv" || item.title || item.name);
+        }).slice(0, 10).map(function (item, index) {
+          var media = item.media_type === "tv" ? mapTvResult(item) : mapMovieResult(item);
+          media.topRank = index + 1;
+          return media;
+        });
+        if (ranked.length) renderRow("Top 10 de la semana", ranked);
+        collections.forEach(function (collection, index) {
+          var data = results[index + 1];
+          if (!data || !data.results || !data.results.length) return;
+          renderRow(collection.title, data.results.map(mapMovieResult));
+        });
+        startAutoScroll();
+      }).catch(function () { });
+    }
+
     function loadHomeView() {
       var snapshot = catalogRequestId;
       Promise.all([
@@ -6279,44 +8171,32 @@
           if (h) setHero(h);
           renderLoadMore(t.total_pages || 1);
           startAutoScroll();
-          loadPersonalizedHomeRow();
-          // Las colecciones mejor calificadas se cargan después del primer contenido para acelerar el inicio.
-          fetchTMDB(
-            "/discover/movie",
-            "&sort_by=vote_average.desc&vote_count.gte=300&page=1",
-          )
-            .then(function (d) {
-              if (
-                snapshot !== catalogRequestId ||
-                currentView !== "home" ||
-                !d.results ||
-                !d.results.length
-              )
-                return;
-              var top = d.results.map(mapMovieResult).sort(function (a, b) {
-                return (b.rating || 0) - (a.rating || 0);
-              });
-              renderRow("Películas mejor calificadas", top);
-            })
-            .catch(function () { });
-          fetchTMDB(
-            "/discover/tv",
-            "&sort_by=vote_average.desc&vote_count.gte=150&page=1",
-          )
-            .then(function (d) {
-              if (
-                snapshot !== catalogRequestId ||
-                currentView !== "home" ||
-                !d.results ||
-                !d.results.length
-              )
-                return;
-              var top = d.results.map(mapTvResult).sort(function (a, b) {
-                return (b.rating || 0) - (a.rating || 0);
-              });
-              renderRow("Series mejor calificadas", top);
-            })
-            .catch(function () { });
+          // Las filas no esenciales se escalonan para mostrar primero el catálogo principal.
+          // Cada tarea comprueba el identificador de vista para no insertar resultados obsoletos.
+          window.setTimeout(function () {
+            if (snapshot === catalogRequestId && currentView === "home") loadPersonalizedHomeRow();
+          }, 250);
+          window.setTimeout(function () {
+            if (snapshot === catalogRequestId && currentView === "home") loadTop10AndCollections(snapshot);
+          }, 650);
+          window.setTimeout(function () {
+            if (snapshot !== catalogRequestId || currentView !== "home") return;
+            fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1")
+              .then(function (d) {
+                if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
+                var top = d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
+                renderRow("Películas mejor calificadas", top);
+              }).catch(function () { });
+          }, 1250);
+          window.setTimeout(function () {
+            if (snapshot !== catalogRequestId || currentView !== "home") return;
+            fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1")
+              .then(function (d) {
+                if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
+                var top = d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
+                renderRow("Series mejor calificadas", top);
+              }).catch(function () { });
+          }, 1750);
         })
         .catch(function () {
           if (snapshot !== catalogRequestId || currentView !== "home") return;
@@ -6501,18 +8381,34 @@
     }
     function clearFavorites() {
       if (confirm("¿Borrar toda tu lista de favoritos?")) {
-        localStorage.removeItem("tatoList");
+        safeStorageRemove(profileStorageKey("tatoList"));
         myList = [];
+        updateHeroSaveButton(currentHeroMedia);
         closeSettings();
         switchView(currentView, false);
         showToast("Lista borrada");
       }
     }
 
+    function updateAutoNextButton() {
+      var button = document.getElementById("auto-next-toggle");
+      if (!button) return;
+      button.textContent = autoNextEpisode ? "Siguiente: ACTIVADO" : "Siguiente: DESACTIVADO";
+      button.classList.toggle("on", !!autoNextEpisode);
+      button.setAttribute("aria-pressed", autoNextEpisode ? "true" : "false");
+    }
+    function toggleAutoNextEpisode() {
+      autoNextEpisode = !autoNextEpisode;
+      safeStorageSet(profileStorageKey("tatoAutoNextEpisode"), JSON.stringify(autoNextEpisode));
+      updateAutoNextButton();
+      showToast(autoNextEpisode ? "Siguiente episodio automático activado" : "Reproducción automática desactivada");
+    }
+
     function loadEpisodes(s, n) {
       return fetchTMDB("/tv/" + s + "/season/" + n)
         .then(function (d) {
           var eps = d.episodes || [];
+          currentTvEpisodes = eps.slice();
           $episodeSelect.innerHTML = eps
             .map(function (e) {
               return (
@@ -6529,9 +8425,12 @@
           if (!eps.length)
             $episodeSelect.innerHTML =
               '<option value="1">Episodio 1</option>';
+          return eps;
         })
         .catch(function () {
+          currentTvEpisodes = [];
           $episodeSelect.innerHTML = '<option value="1">Episodio 1</option>';
+          return [];
         });
     }
     function prepareSimilarQueue(media) {
@@ -6611,6 +8510,56 @@
         openPlayer(next.id, next.type, next.title, null, null, next.bg);
       });
     }
+    function playNextEpisode() {
+      if (!autoNextEpisode || !currentMedia || currentMedia.type !== "tv" || isAdvancingEpisode) return;
+      var seasonNumber = Number($seasonSelect.value || 0);
+      var episodeNumber = Number($episodeSelect.value || 0);
+      var nextEpisode = currentTvEpisodes.slice().sort(function (a, b) {
+        return Number(a.episode_number) - Number(b.episode_number);
+      }).find(function (episode) { return Number(episode.episode_number) > episodeNumber; });
+      var serverIndex = SERVERS.findIndex(function (server) { return server.name === preferredServer; });
+      if (serverIndex < 0) serverIndex = 0;
+      var serverButton = function () { return document.getElementById("server-btn-" + serverIndex); };
+      if (nextEpisode) {
+        isAdvancingEpisode = true;
+        $episodeSelect.value = String(nextEpisode.episode_number);
+        showToast("Siguiente episodio: " + (nextEpisode.name || ("Episodio " + nextEpisode.episode_number)));
+        var button = serverButton();
+        if (button) playEmbed(serverIndex, button);
+        isAdvancingEpisode = false;
+        return;
+      }
+      var nextSeason = currentTvSeasons.slice().sort(function (a, b) {
+        return Number(a.season_number) - Number(b.season_number);
+      }).find(function (season) {
+        return Number(season.season_number) > seasonNumber && Number(season.episode_count || 0) > 0;
+      });
+      if (!nextSeason) {
+        showToast("Has llegado al último episodio disponible");
+        return;
+      }
+      isAdvancingEpisode = true;
+      $seasonSelect.value = String(nextSeason.season_number);
+      loadEpisodes(currentMedia.id, nextSeason.season_number).then(function (episodes) {
+        if (!episodes || !episodes.length) {
+          isAdvancingEpisode = false;
+          showToast("No se pudo cargar la siguiente temporada");
+          return;
+        }
+        var first = episodes.slice().sort(function (a, b) {
+          return Number(a.episode_number) - Number(b.episode_number);
+        })[0];
+        $episodeSelect.value = String(first.episode_number);
+        showToast("Siguiente temporada: T" + nextSeason.season_number + " · " + (first.name || ("Episodio " + first.episode_number)));
+        var button = serverButton();
+        if (button) playEmbed(serverIndex, button);
+        isAdvancingEpisode = false;
+      }).catch(function () {
+        isAdvancingEpisode = false;
+        showToast("No se pudo cargar la siguiente temporada");
+      });
+    }
+
     function isEndedPlayerMessage(raw) {
       var data = raw;
       if (typeof data === "string") {
@@ -6669,7 +8618,10 @@
         event.source !== activePlayerFrame.contentWindow
       )
         return;
-      if (isEndedPlayerMessage(event.data)) playNextSimilar();
+      if (isEndedPlayerMessage(event.data)) {
+        if (currentMedia && currentMedia.type === "tv") playNextEpisode();
+        else playNextSimilar();
+      }
     });
     function updateFullscreenButton() {
       var btn = $("player-fullscreen-btn");
@@ -6766,6 +8718,10 @@
         bg: bg || null,
         genre_ids: [],
       };
+      currentTvSeasons = [];
+      currentTvEpisodes = [];
+      isAdvancingEpisode = false;
+      updateAutoNextButton();
       recordMediaStart(currentMedia, []);
       $modal.classList.add("open");
       document.body.style.overflow = "hidden";
@@ -6799,6 +8755,7 @@
             var se = (d.seasons || []).filter(function (s) {
               return s.season_number > 0;
             });
+            currentTvSeasons = se.slice();
             if (!se.length) throw new Error("No hay temporadas");
             $seasonSelect.innerHTML = se
               .map(function (s) {
@@ -6877,6 +8834,14 @@
       if (e.key === "Escape") {
         if ($actorModal.classList.contains("open")) {
           closeActor();
+          return;
+        }
+        if (document.getElementById("tc-profile-create-overlay").classList.contains("open")) {
+          closeProfileCreateModal();
+          return;
+        }
+        if (document.getElementById("tc-profile-overlay").classList.contains("open")) {
+          closeProfiles();
           return;
         }
         if ($filtersModal.classList.contains("open")) {
@@ -6994,6 +8959,8 @@
       } catch (e) { }
     }
     if (!navigator.onLine) $offlineBanner.style.transform = "translateY(0)";
+    updateProfileTrigger();
+    if (profilePickerRequired) showProfiles(true);
     switchView("home");
     setTimeout(checkDeepLink, 300);
   </script>
