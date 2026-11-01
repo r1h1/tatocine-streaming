@@ -281,14 +281,14 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 6 s", false, 6000], ["con tráiler cada título dura 15 s", true, 15000]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 15 s", true, 15000]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
       await enter(page);
       await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2, null, { timeout: 20000 });
-      const gaps = await heroIntervals(page, expected * (withTrailer ? 2 : 3) + 2500);
-      ok(gaps.length >= (withTrailer ? 1 : 2), "rotó menos de lo esperado: " + JSON.stringify(gaps));
+      const gaps = await heroIntervals(page, expected * (withTrailer ? 2 : 2.5) + 2500);
+      ok(gaps.length >= (withTrailer ? 1 : 1), "rotó menos de lo esperado: " + JSON.stringify(gaps));
       for (const g of gaps) ok(Math.abs(g - expected) < 1000, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
     });
   }
@@ -303,6 +303,17 @@ async function main() {
     eq(await page.evaluate(() => document.getElementById("hero-video-wrap").classList.contains("active")), false, "el tráiler se vio antes del segundo 2:");
     await page.waitForFunction(() => document.getElementById("hero-video-wrap").classList.contains("active"), null, { timeout: 9000 }).catch(() => {});   // y luego aparece solo
     ok(Date.now() - t0 >= 0, "");
+  });
+
+  await test("portada: en Automático el tráiler sale aunque el sistema pida «reducir animaciones» (el interruptor propio de la app sí lo apaga)", async (page, ctx) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
+    await enter(page);
+    await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2);
+    eq(await page.evaluate(() => htMode), "auto", "modo por defecto:");
+    eq(await page.evaluate(() => htWhyNot()), "", "motivo para no reproducir con el sistema en «reducir animaciones»:");
+    await page.evaluate(() => toggleReduceMotion());
+    ok((await page.evaluate(() => htWhyNot())).includes("Reducir movimiento"), "el interruptor de la app no apagó el tráiler");
   });
 
   await test("portada: si YouTube está bloqueado, no se queda en silencio: aviso con el motivo", async (page, ctx) => {

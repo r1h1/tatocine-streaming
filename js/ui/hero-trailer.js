@@ -1,36 +1,40 @@
 /**
  * TatoCine · js/ui/hero-trailer.js
- * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 6 s en pantalla; si TIENE tráiler dura 15 s
+ * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 8 s en pantalla; si TIENE tráiler dura 15 s
  * y el vídeo se ve en el segundo 2 (se precarga y arranca oculto antes, sin pasar el ratón), en Inicio, Películas, Series, Anime y Niños.
  * Es youtube-nocookie y sin sonido. Se detiene al cambiar de título, salir de la portada, abrir una ficha o el reproductor,
  * u ocultar la pestaña.
- * Ajustes → «Tráiler en la portada»: Automático (equipos con ratón y buena conexión; respeta «reducir animaciones» del sistema) /
- * Activado (manda sobre el sistema) / Desactivado. El vídeo solo se muestra cuando YouTube confirma que reproduce; Ajustes indica el motivo si no sale.
+ * Ajustes → «Tráiler en la portada»: Automático (por defecto: se reproduce salvo con ahorro de datos o conexión lenta, modo ligero o «Reducir movimiento» de la app) /
+ * Activado (ignora el ahorro de datos y el modo ligero) / Desactivado. El vídeo solo se muestra cuando YouTube confirma que reproduce; Ajustes indica el motivo si no sale.
  * Nunca en perfiles infantiles, con «reducir movimiento», modo ligero o ahorro de datos.
  */
 var HT_KEY = "tatoHeroTrailer", HT_MAX_MS = 45000, htToken = 0, htTimer = null, htCache = {}, htWatch = null, htPlayingKey = "";
 var htMode = (function () { try { var v = localStorage.getItem(HT_KEY); return v === "on" || v === "off" ? v : "auto"; } catch (e) { return "auto"; } })();
 var htStatus = "";
-/** Motivo por el que NO se reproduce el tráiler ahora ("" = se puede). «Activado» ignora los ajustes del sistema (elección explícita). */
+/** Motivo por el que NO se reproduce el tráiler ahora ("" = se puede). `htWhyNotify` indica si conviene avisar al usuario (una vez por sesión). */
+var htWhyNotify = false;
 function htWhyNot() {
-  var forced = htMode === "on", mm = function (q) { return !!(window.matchMedia && window.matchMedia(q).matches); };
+  var forced = htMode === "on";
+  htWhyNotify = false;
   if (htMode === "off") return L("Desactivado en Ajustes.", "Off in Settings.");
   var picker = document.getElementById("tc-profile-overlay");
   if (picker && picker.classList.contains("open")) return L("Hay que elegir perfil primero.", "Choose a profile first.");
-  if (location.protocol === "file:") return L("YouTube no permite reproducir desde un archivo local (file://). Abre TatoCine desde http://localhost o desde el sitio publicado.", "YouTube won't play from a local file (file://). Open TatoCine from http://localhost or the published site.");
-  if (document.body.classList.contains("rm")) return L("«Reducir movimiento» está activado en Ajustes.", "“Reduce motion” is on in Settings.");
-  if (document.body.classList.contains("lite") && !forced) return L("Modo ligero activado.", "Lite mode is on.");
+  if (location.protocol === "file:") { htWhyNotify = true; return L("YouTube no permite reproducir desde un archivo local (file://). Abre TatoCine desde http://localhost o desde el sitio publicado.", "YouTube won't play from a local file (file://). Open TatoCine from http://localhost or the published site."); }
+  if (document.body.classList.contains("rm")) { htWhyNotify = true; return L("«Reducir movimiento» está activado en Ajustes → Accesibilidad.", "“Reduce motion” is on in Settings → Accessibility."); }
+  if (document.body.classList.contains("lite") && !forced) { htWhyNotify = true; return L("El modo ligero está activado (Ajustes → Modo ligero).", "Lite mode is on (Settings → Lite mode)."); }
   if (!(currentView === "home" || currentView === "movies" || currentView === "series" || currentView === "anime" || currentView === "kids") || isSearching) return L("Solo en la portada de Inicio, Películas, Series, Anime y Niños.", "Only on the Home, Movies, Series, Anime and Kids hero.");
   if (!forced) {
     var c = navigator.connection || {};
-    if (c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || "")) return L("Ahorro de datos o conexión lenta.", "Data saver or slow connection.");
-    if (mm("(prefers-reduced-motion: reduce)")) return L("Tu sistema tiene «reducir animaciones» activado. Pon «Activado» aquí para verlo igualmente.", "Your system has “reduce animations” on. Choose “On” here to see it anyway.");
-    if (htMode === "auto" && !mm("(hover: hover) and (pointer: fine)")) return L("Automático solo en equipos con ratón. Pon «Activado» para verlo en este dispositivo.", "Automatic only on devices with a mouse. Choose “On” to see it on this device.");
+    if (c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || "")) { htWhyNotify = true; return L("Tu navegador tiene el ahorro de datos activado o la conexión es lenta. Pon «Activado» en Ajustes para verlo igualmente.", "Your browser has data saver on or the connection is slow. Choose “On” in Settings to see it anyway."); }
   }
   return "";
 }
 function htAllowed() { return !document.hidden && htWhyNot() === ""; }
 var htFailToasted = false;
+function htNotifyOnce(msg) {
+  try { if (sessionStorage.getItem("tatoHtFail")) return; sessionStorage.setItem("tatoHtFail", "1"); } catch (e) { }
+  showToast(L("Tráiler de la portada: ", "Hero trailer: ") + msg);
+}
 function htFail(msg) {
   htSetStatus(msg);
   if (htFailToasted) return;
@@ -135,11 +139,14 @@ function htSchedule(m) {
   htStop();
   if (!m || m.isUpcoming) return;
   var why = htWhyNot();
-  if (why || document.hidden) { if (why) htSetStatus(why); return; }
+  if (why || document.hidden) {
+    if (why) { htSetStatus(why); if (htWhyNotify) htNotifyOnce(why); }
+    return;
+  }
   var token = htToken;
   htTrailerKeys(m).then(function (keys) {
     if (token !== htToken || currentHeroMedia !== m || !htAllowed()) return;
-    if (!keys.length) { htSetStatus(L("Este título no tiene tráiler en TMDB.", "This title has no trailer on TMDB.")); return; }       // sin tráiler: 6 s
+    if (!keys.length) { htSetStatus(L("Este título no tiene tráiler en TMDB.", "This title has no trailer on TMDB.")); return; }       // sin tráiler: 8 s
     heroPlan(HERO_DWELL_TRAILER);                                                                                                        // con tráiler: 15 s
     htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
   });
@@ -150,7 +157,7 @@ decorate("openDetails", function (original) { return function () { htStop(); ret
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("switchView", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 document.addEventListener("visibilitychange", function () { if (document.hidden) htStop(); });
-function htLabel() { return { auto: L("Automático (equipos con ratón)", "Automatic (devices with a mouse)"), on: L("Activado", "On"), off: L("Desactivado", "Off") }[htMode]; }
+function htLabel() { return { auto: L("Automático", "Automatic"), on: L("Activado", "On"), off: L("Desactivado", "Off") }[htMode]; }
 function cycleHeroTrailer() {
   htMode = { auto: "on", on: "off", off: "auto" }[htMode];
   try { localStorage.setItem(HT_KEY, htMode); } catch (e) { }
