@@ -145,3 +145,56 @@
 .tc-qr-label { display: block; margin: 12px 0 6px; font-size: 13px; text-align: left; color: rgba(255, 255, 255, .8); }
 .tc-qr-select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 12px; background: #151515; color: #fff; font: inherit; font-size: 15px; }
 .tc-qr-hint { margin: 8px 0 4px; font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, .6); text-align: left; }
+
+/* ---------- Asistente «¿Qué ver hoy?» en móvil: todo cabe en una pantalla y el botón siempre se ve ---------- */
+@media (max-width: 600px) {
+  .tc-wizard { padding: 16px 14px 0; max-height: calc(100dvh - 16px); }
+  .tc-wizard h3 { font-size: 18px; margin: 0 28px 0 0; }
+  .tc-wizard .wiz-q { margin: 10px 0 6px; font-size: 12px; }
+  .tc-wizard .wiz-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .tc-wizard .wiz-chip { min-height: 34px; padding: 0 6px; font-size: 12px; line-height: 1.15; }
+  .tc-wizard .wiz-actions { position: sticky; bottom: 0; margin: 12px -14px 0; padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to bottom, rgba(10, 10, 10, 0), #0a0a0a 32%); }
+  .tc-wizard .wiz-actions .tc-profile-create-btn { min-height: 44px; }
+}
+@media (max-width: 600px) and (max-height: 640px) {
+  .tc-wizard .wiz-q { margin: 7px 0 4px; }
+  .tc-wizard .wiz-chip { min-height: 30px; }
+}
+
+/* ---------- Filtros avanzados: columnas en pantallas grandes (como Ajustes), una columna en tableta y móvil ---------- */
+@media (min-width: 1024px) {
+  #filters-modal .modal-body { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-content: start; padding: 24px 28px 32px !important; }
+  #filters-modal .filter-group { margin: 0; padding: 18px; border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; background: rgba(255, 255, 255, .04); }
+  #filters-modal .filter-option { padding: 8px 14px; }
+}
+@media (max-width: 1023px) {
+  #filters-modal .modal-body { display: block; }
+  #filters-modal .filter-group { padding: 14px 18px; }
+  #filters-modal .filter-option { padding: 9px 16px; }
+}
+@media (max-width: 600px) {
+  #filters-modal .filter-options { gap: 8px; }
+}
+
+/* ---------- Esqueletos de arranque: menú y selector de perfiles ---------- */
+.nav-skel { display: none; align-items: center; gap: 8px; }
+.nav-skel span, .tc-profile-skel span, .tc-profile-skel i { display: block; background: rgba(255, 255, 255, .1); animation: skelPulse 1.4s ease-in-out infinite; }
+.nav-skel-links span { width: 72px; height: 30px; border-radius: 20px; }
+.nav-skel-links span:nth-child(2n) { width: 88px; }
+.nav-skel-right span { width: 40px; height: 40px; border-radius: 50%; }
+.nav-skel-right span.wide { width: 86px; border-radius: 24px; }
+body:not(.app-ready) .nav-skel { display: flex; }
+body:not(.app-ready) .nav-links,
+body:not(.app-ready) .nav-right > :not(.nav-skel) { display: none !important; }
+@media (max-width: 814px) {
+  .nav-skel-links { display: none !important; }
+  .nav-skel-right span { width: 34px; height: 34px; }
+  .nav-skel-right span.wide { width: 34px; border-radius: 50%; }
+}
+.tc-profile-skel { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 10px; }
+.tc-profile-skel span { width: 84px; height: 84px; border-radius: 50%; }
+.tc-profile-skel i { width: 60px; height: 12px; border-radius: 8px; }
+body.lite .nav-skel span, body.lite .tc-profile-skel span, body.lite .tc-profile-skel i { animation: none; }
+@media (max-width: 600px) {
+  .tc-wizard .wiz-chips:has(> .wiz-chip:nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

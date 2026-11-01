@@ -28,7 +28,18 @@
       { label: "Dune: Parte uno", type: "movie", year: 2021, queries: ["Dune: Part One", "Dune"] },
       { label: "Gravity Falls", type: "tv", queries: ["Gravity Falls"] },
       { label: "Coco", type: "movie", queries: ["Coco"] },
-      { label: "Toy Story", type: "movie", queries: ["Toy Story"] }
+      { label: "Toy Story", type: "movie", queries: ["Toy Story"] },
+      { label: "Lupin", type: "tv", year: 2021, queries: ["Lupin"] },
+      { label: "Cars", type: "movie", year: 2006, queries: ["Cars"] },
+      { label: "El extraño mundo de Jack", type: "movie", queries: ["The Nightmare Before Christmas", "El extraño mundo de Jack"] },
+      { label: "Monster House", type: "movie", queries: ["Monster House", "La casa de los sustos"] },
+      { label: "Los Simpson", type: "tv", queries: ["The Simpsons", "Los Simpson"] },
+      { label: "Rick y Morty", type: "tv", queries: ["Rick and Morty", "Rick y Morty"] },
+      { label: "WandaVision", type: "tv", queries: ["WandaVision"] },
+      { label: "Coraline", type: "movie", queries: ["Coraline"] },
+      { label: "Avengers: Endgame", type: "movie", queries: ["Avengers: Endgame"] },
+      { label: "Avengers: Infinity War", type: "movie", queries: ["Avengers: Infinity War"] },
+      { label: "Iron Man", type: "movie", year: 2008, queries: ["Iron Man"] }
     ];
 
     function profileBackdropEndpoint(entry) {
@@ -103,7 +114,7 @@
           console.warn("TatoCine: TMDB no devolvió fondos para:", missing.join(" · "));
         }
 
-        // Conserva los 20 títulos en el orden solicitado. Solo añade tendencias
+        // Conserva los títulos de la lista (se mezclan en cada carga). Solo añade tendencias
         // al final como respaldo cuando TMDB no encuentre suficientes fondos.
         if (curated.length >= 2) return shuffleInPlace(curated);   // orden aleatorio en cada carga
         return fetchTMDB("/trending/all/week")

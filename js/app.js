@@ -4,6 +4,7 @@
  * Script clásico (sin módulos): comparte el ámbito global con el resto de js/ para que los
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
+    setTimeout(function () { document.body.classList.add("app-ready"); }, 6000);   // por si algo falla: nunca se queda en esqueleto
     function checkDeepLink() {
       var params = new URLSearchParams(location.search);
       var id = params.get("id");
@@ -71,5 +72,7 @@
     $searchInput.value = "";
     updateProfileTrigger();
     if (profilePickerRequired) showProfiles(true);
+    else document.documentElement.classList.remove("tc-picker-boot");
     switchView("home");
+    document.body.classList.add("app-ready");               // el menú deja de ser un esqueleto
     setTimeout(checkDeepLink, 300);

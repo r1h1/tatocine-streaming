@@ -73,30 +73,39 @@ function importProfileData(file) {
   reader.onload = function () {
     var payload;
     try { payload = JSON.parse(String(reader.result)); } catch (e) { payload = null; }
-    if (!payload || payload.app !== BACKUP_APP || !payload.data || typeof payload.data !== "object") {
+    if (!payload || typeof payload !== "object" || payload.app !== BACKUP_APP || !payload.data || typeof payload.data !== "object" || Array.isArray(payload.data)) {
       showToast(L("Archivo no válido: no es una copia de TatoCine", "Invalid file: not a TatoCine backup"));
       return;
     }
-    var from = payload.profile && typeof payload.profile.name === "string" ? payload.profile.name.slice(0, 24) : "";
+    // Se reconstruye la copia solo con campos conocidos y válidos (ver backup-sanitize.js).
+    var sanitized = sanitizeBackupData(payload.data, SERVERS.map(function (s) { return s.name; }));
+    var kind = payload.profile && payload.profile.kind === "kid" ? "kid" : "adult";
+    var from = payload.profile && typeof payload.profile.name === "string" ? bkText(payload.profile.name, 24) : "";
+    if (!Object.keys(sanitized.clean).length) { showToast(L("La copia no contiene datos válidos", "The backup has no valid data")); return; }
     pickImportTarget({
       title: L("Importar copia de seguridad", "Import backup"),
       summary: from ? L("Copia del perfil «" + escapeHTML(from) + "».", "Backup of profile “" + escapeHTML(from) + "”.") : L("Copia de seguridad de TatoCine.", "TatoCine backup."),
-      onConfirm: function (targetId) {
+      sourceKind: kind,
+      onConfirm: async function (targetId, targetKind) {
+        var clean = sanitized.clean, skipped = 0;
+        if (targetKind === "kid") {
+          qrStatus(L("Comprobando que todo sea apto para niños…", "Checking everything is suitable for kids…"));
+          var unsafe = await kidUnsafeKeys(backupMediaKeys(clean));
+          skipped = Object.keys(unsafe).length;
+          backupDropKeys(clean, unsafe);
+        }
         var prefix = "tatoProfile_" + targetId + "_", applied = 0;
-        Object.keys(payload.data).forEach(function (key) {
-          var raw = payload.data[key];
-          if (typeof raw !== "string" || raw.length > BACKUP_MAX_BYTES) return;
+        Object.keys(clean).forEach(function (key) {
           try {
             if (PROFILE_MERGERS[key]) {
-              var incoming = JSON.parse(raw);
-              var current = readLocalJSON(prefix + key, null);
-              if (safeStorageSet(prefix + key, JSON.stringify(PROFILE_MERGERS[key](current, incoming)))) applied++;
+              if (safeStorageSet(prefix + key, JSON.stringify(PROFILE_MERGERS[key](readLocalJSON(prefix + key, null), clean[key])))) applied++;
             } else if (PROFILE_REPLACE_KEYS.indexOf(key) > -1) {
-              if (safeStorageSet(prefix + key, raw)) applied++;
+              if (safeStorageSet(prefix + key, JSON.stringify(clean[key]))) applied++;
             }
           } catch (e) { }
         });
-        if (applied) finishImport(targetId, L("Copia importada.", "Backup imported."));
+        var note = skipped ? L("Se omitieron " + skipped + " títulos que no son aptos para niños.", skipped + " titles that are not suitable for kids were skipped.") : "";
+        if (applied) finishImport(targetId, L("Copia importada.", "Backup imported."), note);
         else qrBody().innerHTML = '<p class="tc-qr-warn">' + L("No había datos que importar.", "There was no data to import.") + "</p>";
       }
     });
@@ -108,7 +117,6 @@ function importProfileData(file) {
   var input = $("backup-file");
   if (input) input.addEventListener("change", function () { importProfileData(input.files && input.files[0]); input.value = ""; });
   if (typeof i18nAdd === "function") i18nAdd({
-    "Copia de seguridad": "Backup", "Exportar": "Export", "Importar": "Import",
-    "Guarda o recupera favoritos, listas, vistas e historial de este perfil (sin el PIN).": "Save or restore this profile's favorites, lists, watched titles and history (without the PIN)."
+    "Copia de seguridad": "Backup", "Copia de seguridad completa": "Full backup", "Exportar": "Export", "Importar": "Import"
   });
 })();

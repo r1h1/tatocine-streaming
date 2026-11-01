@@ -70,10 +70,13 @@
     var profileBackdropHasVisibleImage = false;
     var profileBackdropLoading = false;
     var profileBackdropFetchPending = false;
-    var profilePickerRequired = (function () {
-      try { return sessionStorage.getItem(PROFILE_SESSION_STORAGE_KEY) !== activeProfileId; }
-      catch (e) { return true; }
-    })();
+    // El selector de perfiles se muestra SIEMPRE al cargar la página (antes de ver nada). La única excepción son
+    // las recargas que hace la propia app (cambiar de perfil, importar, etc.): `reloadApp` deja una marca de un solo uso.
+    var profilePickerRequired = window.__tcSkipPicker !== true;
+    function reloadApp(delay) {
+      try { sessionStorage.setItem("tatoSkipPickerOnce", "1"); } catch (e) { }
+      if (delay) setTimeout(function () { location.reload(); }, delay); else location.reload();
+    }
     function profileStorageKey(key) { return "tatoProfile_" + activeProfileId + "_" + key; }
     function saveLocalProfiles() { return safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(localProfiles)); }
     function getActiveProfile() { return localProfiles.find(function (p) { return p.id === activeProfileId; }) || localProfiles[0]; }

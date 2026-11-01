@@ -20,7 +20,7 @@ js/
   features/                Funciones de producto (una por archivo): favorites, favorites-lists, continue-watching,
                            analytics, watch-tracking, recommendations, stats, brands, share, search,
                            recent-searches, search-suggest, details-extras, details-favorite, watched,
-                           discover-wizard, new-episodes, infinite-feed (scroll infinito), streak, kids, pwa-install, backup, import-target (elegir perfil destino), qr-payload (formato + validación del QR, probado en Node), qr-transfer (interfaz del QR)
+                           discover-wizard, new-episodes, infinite-feed (scroll infinito), streak, kids, pwa-install, backup, backup-sanitize (saneado del JSON importado, probado en Node), import-target (perfil destino + reglas adulto/niño + filtro infantil), qr-payload (formato + validación del QR, probado en Node), qr-transfer (interfaz del QR)
   app.js                   Arranque (enlaces directos, primera vista)
 sw.js · manifest.webmanifest · icons/    PWA
 ```
@@ -101,3 +101,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## QR de transferencia y seguridad
 `qr-payload.js` es lógica pura: genera `<sitio>#tcimport=TC1.<deflate+base64url>` y valida todo lo que se lee (mismo sitio, tamaños, esquema, listas blancas, rechazo de XSS/SQL/CSP/claves/enlaces). `qr-transfer.js` dibuja/lee el QR (librerías de `js/vendor/`, cargadas solo al usarlas, ver [THIRD_PARTY](THIRD_PARTY.md)) y `import-target.js` elige el perfil destino (PIN si es otro perfil protegido). `tests/qr-payload.test.js` cubre los casos hostiles. La CSP está en `index.html`; si añades un servidor de reproducción, vale `frame-src https:`.
+
+## Roles al importar
+`import-target.js` aplica el control de acceso: mismo tipo de perfil (adulto→adulto, niño→niño), Invitado excluido, PIN del destino, y filtro de aptitud título a título en destinos infantiles. El tipo de origen viaja en el QR (`k`) y en `profile.kind` del JSON.

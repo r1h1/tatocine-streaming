@@ -26,7 +26,7 @@
       LITE_PREF = next;
       updateLiteRow();
       showToast("Modo ligero: " + { auto: "automático", on: "activado", off: "desactivado" }[next]);
-      setTimeout(function () { location.reload(); }, 700);
+      reloadApp(700);
     }
     decorate("showSettings", function (original) { return function () { original(); updateLiteRow(); }; });
     // Precarga al pasar el cursor: solo en equipos con puntero, con espera y una sola petición

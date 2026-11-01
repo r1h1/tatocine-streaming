@@ -34,22 +34,20 @@ function qrErrorText(code) {
   };
   return m[code] || m.malformed;
 }
-function qrSummary(f, l, w) {
+function qrSummary(f, l, w, c, h) {
   function pl(n, one, many) { return n + " " + (n === 1 ? one : many); }
-  return L(pl(f, "favorito", "favoritos") + " · " + pl(l, "lista", "listas") + " · " + pl(w, "visto", "vistos"),
-    pl(f, "favorite", "favorites") + " · " + pl(l, "list", "lists") + " · " + pl(w, "watched title", "watched titles"));
+  var es = [pl(f, "favorito", "favoritos"), pl(l, "lista", "listas"), pl(w, "visto", "vistos")], en = [pl(f, "favorite", "favorites"), pl(l, "list", "lists"), pl(w, "watched title", "watched titles")];
+  if (c) { es.push(pl(c, "en curso", "en curso")); en.push(pl(c, "in progress", "in progress")); }
+  if (h) { es.push(pl(h, "en el historial", "en el historial")); en.push(pl(h, "in history", "in history")); }
+  return L(es.join(" · "), en.join(" · "));
 }
 function qrBody() { return $("tc-qr-body"); }
 function qrCanTransfer() {
   if (isGuestProfile()) { showToast(L("El perfil Invitado no guarda datos", "The Guest profile does not save data")); return false; }
   return true;
 }
-/** Escanear/importar exige poder gestionar perfiles (no Invitado ni infantil). */
-function qrCanImport() {
-  if (!qrCanTransfer()) return false;
-  if (!canManageProfiles()) { showToast(L("Importar no está disponible en un perfil infantil", "Import is not available on a kid profile")); return false; }
-  return true;
-}
+/** Importar: no en el Invitado. Los perfiles infantiles sí pueden, pero solo datos infantiles (ver import-target.js). */
+function qrCanImport() { return qrCanTransfer(); }
 function closeQr() { qrStopCamera(); qrBusy = false; closeOverlay("tc-qr-overlay"); }
 function qrOpen(title) { $("tc-qr-title").textContent = title; openOverlay("tc-qr-overlay"); }
 
@@ -59,14 +57,23 @@ function qrSeenList() {
     .map(function (r) { return [r.type === "tv" ? 1 : 0, Number(r.id), r.w ? 1 : 0, r.ur > 0 ? 1 : r.ur < 0 ? -1 : 0]; })
     .filter(function (a) { return a[1] > 0; });
 }
+function qrContList() {
+  return (continueWatching || []).filter(function (m) { return m && (m.type === "movie" || m.type === "tv") && Number(m.id) > 0; })
+    .map(function (m) { return [m.type === "tv" ? 1 : 0, Number(m.id), Number(m.season) || 0, Number(m.episode) || 0]; }).slice(0, QR_MAX_CONT);
+}
+function qrHistList() {
+  return ((localAnalytics && localAnalytics.items) || []).filter(function (x) { return x && (x.type === "movie" || x.type === "tv") && Number(x.id) > 0; })
+    .sort(function (a, b) { return (b.lastPlayedAt || 0) - (a.lastPlayedAt || 0); }).slice(0, QR_MAX_HIST)
+    .map(function (x) { return [x.type === "tv" ? 1 : 0, Number(x.id), Math.min(600000, Math.round((x.secs || 0) / 60)), Math.min(999, x.done || 0)]; });
+}
 async function openQrShow() {
   if (!qrCanTransfer()) return;
   qrOpen(L("Pasar a otro dispositivo", "Move to another device"));
   qrBody().innerHTML = '<p class="tc-qr-note">' + L("Generando QR…", "Generating QR…") + "</p>";
   try {
-    var built = await qrBuildLink(location.origin + location.pathname, myList, favLists, qrSeenList());
-    if (!built.counts || (!built.counts.favs && !built.counts.seen && !built.counts.lists)) {
-      qrBody().innerHTML = '<p class="tc-qr-note">' + L("Aún no tienes favoritos, listas ni títulos vistos para pasar.", "You have no favorites, lists or watched titles to move yet.") + "</p>";
+    var built = await qrBuildLink(location.origin + location.pathname, { kind: isKidProfile() ? "kid" : "adult", favs: myList, lists: favLists, seen: qrSeenList(), cont: qrContList(), hist: qrHistList() });
+    if (!built.counts || (!built.counts.favs && !built.counts.seen && !built.counts.lists && !built.counts.cont && !built.counts.hist)) {
+      qrBody().innerHTML = '<p class="tc-qr-note">' + L("Aún no tienes favoritos, listas, historial ni títulos para pasar.", "You have no favorites, lists, history or titles to move yet.") + "</p>";
       return;
     }
     if (!built.fits) throw new Error("size");
@@ -74,7 +81,7 @@ async function openQrShow() {
     var qr = qrcode(0, "L");
     qr.addData(built.link, "Byte");
     qr.make();
-    var n = qr.getModuleCount(), quiet = 4, side = Math.min(380, Math.max(220, window.innerWidth - 80));
+    var n = qr.getModuleCount(), quiet = 4, side = Math.min(560, Math.max(240, window.innerWidth - 56));
     var cell = Math.max(2, Math.floor(side / (n + quiet * 2))), size = (n + quiet * 2) * cell;
     var canvas = document.createElement("canvas");
     canvas.width = canvas.height = size;
@@ -86,14 +93,13 @@ async function openQrShow() {
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = "#000";
     for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (qr.isDark(r, c)) ctx.fillRect((c + quiet) * cell, (r + quiet) * cell, cell, cell);
-    var k = built.counts, cut = k.favs < k.totalFavs || k.seen < k.totalSeen;
+    var k = built.counts, cut = k.favs < k.totalFavs || k.seen < k.totalSeen || k.hist < k.totalHist;
     qrBody().innerHTML = "";
     qrBody().appendChild(canvas);
     var info = document.createElement("div");
     info.innerHTML = '<p class="tc-qr-note">' + L("Escanéalo con la cámara del otro dispositivo (o en TatoCine › Ajustes › Escanear).", "Scan it with the other device's camera (or in TatoCine › Settings › Scan).") + "</p>" +
-      '<p class="tc-qr-meta">' + qrSummary(k.favs, k.lists, k.seen) + "</p>" +
+      '<p class="tc-qr-meta">' + qrSummary(k.favs, k.lists, k.seen, k.cont, k.hist) + "</p>" +
       (cut ? '<p class="tc-qr-warn">' + L("No cupo todo en un solo QR; usa la copia de seguridad en archivo para el resto.", "Not everything fit in one QR; use the backup file for the rest.") + "</p>" : "") +
-      '<p class="tc-qr-warn">' + L("Contiene tus datos: no lo publiques. No incluye PIN ni claves.", "It contains your data: do not post it. No PIN or keys included.") + "</p>" +
       '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-qr="png">' + L("Guardar imagen", "Save image") + '</button><button type="button" class="tc-profile-create-btn" data-qr="copy">' + L("Copiar enlace", "Copy link") + "</button></div>";
     qrBody().appendChild(info);
     info.querySelector('[data-qr="png"]').onclick = function () {
@@ -184,16 +190,16 @@ async function qrHandleText(text) {
 function qrConfirm(data) {
   pickImportTarget({
     title: L("Importar con QR", "Import with QR"),
-    summary: L("QR verificado: ", "QR verified: ") + qrSummary(data.favs.length, data.lists.length, data.seen.length) + ".",
-    onConfirm: function (targetId) { return qrApply(data, targetId); }
+    summary: L("QR verificado: ", "QR verified: ") + qrSummary(data.favs.length, data.lists.length, data.seen.length, data.cont.length, data.hist.length) + ".",
+    sourceKind: data.kind,
+    onConfirm: function (targetId, targetKind) { return qrApply(data, targetId, targetKind); }
   });
 }
-async function qrApply(data, targetId) {
+async function qrApply(data, targetId, targetKind) {
   var box = qrBody(), bar = box.querySelector(".tc-qr-bar"), fill = bar.firstElementChild;
   bar.hidden = false;
   var keys = {}, todo = [];
-  data.favs.forEach(function (x) { keys[x.type + ":" + x.id] = 1; });
-  data.seen.forEach(function (x) { keys[x.type + ":" + x.id] = 1; });
+  [data.favs, data.seen, data.cont, data.hist].forEach(function (list) { list.forEach(function (x) { keys[x.type + ":" + x.id] = 1; }); });
   Object.keys(keys).forEach(function (k) { var p = k.split(":"); todo.push({ type: p[0], id: Number(p[1]) }); });
   var info = {}, done = 0, next = 0;
   async function worker() {
@@ -201,15 +207,28 @@ async function qrApply(data, targetId) {
       var t = todo[next++];
       try {
         var d = await fetchTMDB("/" + t.type + "/" + t.id);
-        if (d && d.id === t.id) info[t.type + ":" + t.id] = { title: String(d.title || d.name || "").slice(0, 120), bg: d.backdrop_path || d.poster_path || "", rating: Number(d.vote_average) || 0, year: String(d.release_date || d.first_air_date || "").slice(0, 4) };
+        if (d && d.id === t.id) info[t.type + ":" + t.id] = {
+          title: bkText(String(d.title || d.name || ""), 120), bg: bkBg(d.backdrop_path || d.poster_path || ""), rating: Number(d.vote_average) || 0,
+          year: String(d.release_date || d.first_air_date || "").slice(0, 4), lang: /^[a-z]{2,3}$/.test(d.original_language || "") ? d.original_language : "",
+          genreIds: (d.genres || []).map(function (g) { return g.id; }).filter(function (g) { return bkInt(g, 1, 100000); }).slice(0, 8),
+          runtime: t.type === "tv" ? ((d.episode_run_time && d.episode_run_time[0]) || 40) : (d.runtime || 100)
+        };
       } catch (e) { }
       done++;
-      fill.style.width = Math.round(done / todo.length * 100) + "%";
+      fill.style.width = Math.round(done / todo.length * 50) + "%";
       qrStatus(L("Importando " + done + " de " + todo.length + "…", "Importing " + done + " of " + todo.length + "…"));
     }
   }
   await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
-  var prefix = "tatoProfile_" + targetId + "_";
+  // Perfil infantil: se comprueba que cada título sea apto, venga de donde venga.
+  var unsafe = {}, skipped = 0;
+  if (targetKind === "kid") {
+    qrStatus(L("Comprobando que todo sea apto para niños…", "Checking everything is suitable for kids…"));
+    unsafe = await kidUnsafeKeys(Object.keys(info), function (n, total) { fill.style.width = 50 + Math.round(n / total * 50) + "%"; });
+    Object.keys(unsafe).forEach(function (k) { delete info[k]; });
+    skipped = Object.keys(unsafe).length;
+  }
+  var now = Date.now(), prefix = "tatoProfile_" + targetId + "_";
   var curLists = readLocalJSON(prefix + "tatoFavLists", []);
   if (!Array.isArray(curLists)) curLists = [];
   var idByName = {};
@@ -219,7 +238,7 @@ async function qrApply(data, targetId) {
     var key = name.toLowerCase();
     if (!(key in idByName) && curLists.length + newLists.length < 12) { var id = "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); idByName[key] = id; newLists.push({ id: id, name: name }); }
   });
-  var favs = [], seen = {};
+  var favs = [], seen = {}, cont = [], hist = [];
   data.favs.forEach(function (x) {
     var i = info[x.type + ":" + x.id]; if (!i) return;
     var rec = { id: x.id, type: x.type, title: i.title || "Sin título", bg: i.bg, rating: i.rating, year: i.year };
@@ -228,18 +247,31 @@ async function qrApply(data, targetId) {
   });
   data.seen.forEach(function (x) {
     var i = info[x.type + ":" + x.id]; if (!i) return;
-    var rec = { id: x.id, type: x.type, title: i.title, bg: i.bg, ts: 1 };
+    var rec = { id: x.id, type: x.type, title: i.title, bg: i.bg, ts: 1, g: i.genreIds.slice(0, 6) };
     if (x.w) rec.w = true;
     if (x.ur) rec.ur = x.ur;
     seen[x.type + ":" + x.id] = rec;
+  });
+  data.cont.forEach(function (x, n) {
+    var i = info[x.type + ":" + x.id]; if (!i) return;
+    cont.push({ id: x.id, type: x.type, title: i.title || "Sin título", bg: i.bg, year: i.year, rating: i.rating, season: x.season, episode: x.episode, episodeName: "", timestamp: now - n * 1000 });
+  });
+  data.hist.forEach(function (x, n) {
+    var i = info[x.type + ":" + x.id]; if (!i) return;
+    var it = { id: x.id, type: x.type, title: i.title || "Contenido", bg: i.bg, genreIds: i.genreIds, lang: i.lang, runtime: i.runtime, plays: Math.max(1, x.done || 1), firstPlayedAt: now - (n + 1) * 60000, lastPlayedAt: now - (n + 1) * 60000, secs: x.mins * 60, done: x.done };
+    it.cat = typeof categoryOf === "function" ? categoryOf(it) : x.type;
+    hist.push(it);
   });
   var ok = true;
   if (newLists.length) ok = safeStorageSet(prefix + "tatoFavLists", JSON.stringify(PROFILE_MERGERS.tatoFavLists(curLists, newLists))) && ok;
   if (favs.length) ok = safeStorageSet(prefix + "tatoList", JSON.stringify(PROFILE_MERGERS.tatoList(readLocalJSON(prefix + "tatoList", []), favs))) && ok;
   if (Object.keys(seen).length) ok = safeStorageSet(prefix + "tatoWatched", JSON.stringify(PROFILE_MERGERS.tatoWatched(readLocalJSON(prefix + "tatoWatched", {}), seen))) && ok;
-  var added = favs.length + Object.keys(seen).length + newLists.length;
-  if (ok && added) finishImport(targetId, L("Listo. Importado: ", "Done. Imported: ") + qrSummary(favs.length, newLists.length, Object.keys(seen).length) + ".");
-  else box.innerHTML = '<p class="tc-qr-warn">' + L("No se pudo importar (sin espacio o títulos no encontrados).", "Could not import (no space or titles not found).") + "</p>";
+  if (cont.length) ok = safeStorageSet(prefix + "tatoContinue", JSON.stringify(PROFILE_MERGERS.tatoContinue(readLocalJSON(prefix + "tatoContinue", []), cont))) && ok;
+  if (hist.length) ok = safeStorageSet(prefix + "tatoLocalAnalyticsV1", JSON.stringify(PROFILE_MERGERS.tatoLocalAnalyticsV1(readLocalJSON(prefix + "tatoLocalAnalyticsV1", { items: [] }), { items: hist }))) && ok;
+  var added = favs.length + Object.keys(seen).length + newLists.length + cont.length + hist.length;
+  var note = skipped ? L("Se omitieron " + skipped + " títulos que no son aptos para niños.", skipped + " titles that are not suitable for kids were skipped.") : "";
+  if (ok && added) finishImport(targetId, L("Listo. Importado: ", "Done. Imported: ") + qrSummary(favs.length, newLists.length, Object.keys(seen).length, cont.length, hist.length) + ".", note);
+  else box.innerHTML = '<p class="tc-qr-warn">' + L("No se pudo importar (sin espacio, títulos no encontrados o no aptos).", "Could not import (no space, titles not found or not suitable).") + "</p>" + (note ? '<p class="tc-qr-warn">' + escapeHTML(note) + "</p>" : "");
 }
 
 /* ---------- Enlace abierto desde la cámara del teléfono ---------- */

@@ -11,13 +11,24 @@ const ok = async (name, fn) => { await fn(); n++; console.log("✓", name); };
 (async () => {
   await ok("ida y vuelta válida", async () => {
     const favs = [{ type: "movie", id: 603, list: "l1" }, { type: "tv", id: 1399 }];
-    const r = await P.qrBuildLink(ORIGIN + "/", favs, [{ id: "l1", name: "Terror" }], [[1, 1399, 1, 0]]);
-    assert(r.fits && r.link.length < 400);
+    const r = await P.qrBuildLink(ORIGIN + "/", { kind: "kid", favs, lists: [{ id: "l1", name: "Terror" }], seen: [[1, 1399, 1, 0]], cont: [[1, 1399, 2, 5]], hist: [[0, 603, 95, 1]] });
+    assert(r.fits && r.link.length < 600);
     const v = await P.qrValidate(r.link, ORIGIN);
     assert.strictEqual(v.ok, true);
     assert.deepStrictEqual(v.data.favs, [{ type: "movie", id: 603, list: "Terror" }, { type: "tv", id: 1399, list: null }]);
     assert.deepStrictEqual(v.data.lists, ["Terror"]);
     assert.strictEqual(v.data.seen.length, 1);
+    assert.strictEqual(v.data.kind, "kid");
+    assert.deepStrictEqual(v.data.cont, [{ type: "tv", id: 1399, season: 2, episode: 5 }]);
+    assert.deepStrictEqual(v.data.hist, [{ type: "movie", id: 603, mins: 95, done: 1 }]);
+  });
+
+  await ok("el tipo de perfil viaja en el QR (adulto por defecto) y las versiones antiguas siguen valiendo", async () => {
+    const a = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs: [{ type: "movie", id: 5 }], lists: [], seen: [], cont: [], hist: [] });
+    assert.strictEqual((await P.qrValidate(a.link, ORIGIN)).data.kind, "adult");
+    assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 603, -1]], l: [], w: [] }), ORIGIN)).data.kind, "adult");
+    for (const o of [{ v: 2, k: 2, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [[0, 1, 999, 0]], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [], h: [[0, 1, -5, 0]] }])
+      assert.strictEqual((await P.qrValidate(await enc(o), ORIGIN)).ok, false, JSON.stringify(o));
   });
 
   await ok("acepta el código TC1 suelto", async () => {
@@ -77,14 +88,19 @@ const ok = async (name, fn) => { await fn(); n++; console.log("✓", name); };
   });
 
   await ok("el enlace generado jamás contiene claves", async () => {
-    const r = await P.qrBuildLink(ORIGIN + "/", [{ type: "movie", id: 1 }], [], []);
+    const r = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs: [{ type: "movie", id: 1 }], lists: [], seen: [], cont: [], hist: [] });
     assert(!/api[_-]?key|[a-f0-9]{32}/i.test(r.link));
   });
 
   await ok("recorta cuando no cabe en un QR", async () => {
     const favs = Array.from({ length: 300 }, (_, i) => ({ type: "movie", id: 100000 + i * 7919 }));
-    const r = await P.qrBuildLink(ORIGIN + "/", favs, [], []);
-    assert(r.fits && r.link.length <= 1700 && r.counts.favs > 0);
+    const seen = Array.from({ length: 400 }, (_, i) => [i % 2, 200000 + i * 6007, 1, i % 3 - 1]);
+    const hist = Array.from({ length: 120 }, (_, i) => [i % 2, 300000 + i * 4999, 30 + i, i % 4]);
+    const cont = Array.from({ length: 20 }, (_, i) => [1, 400000 + i * 3001, 1 + i % 5, 1 + i]);
+    const r = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs, lists: [], seen, cont, hist });
+    assert(r.fits && r.link.length <= 2600 && r.counts.favs > 0 && r.counts.cont === 20, JSON.stringify(r.counts));
+    const small = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs: favs.slice(0, 60), lists: [], seen: seen.slice(0, 40), cont, hist: hist.slice(0, 60) });
+    assert(small.counts.favs === 60 && small.counts.hist === 60 && small.counts.cont === 20, "un perfil normal cabe entero con historial y continuar viendo: " + JSON.stringify(small.counts));
   });
 
   console.log(`\n${n} grupos de pruebas correctos`);

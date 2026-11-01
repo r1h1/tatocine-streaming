@@ -32,7 +32,7 @@ function renderStreak() {
   var n = isKidProfile() ? 0 : currentStreak();
   pill.hidden = n < 1;
   if (n < 1) return;
-  $("streak-count").textContent = String(n);
+  $("streak-count").textContent = L("Racha: ", "Streak: ") + n;
   var label = n === 1 ? L("Racha: 1 día seguido viendo algo", "Streak: 1 day in a row watching something") : L("Racha: " + n + " días seguidos viendo algo", "Streak: " + n + " days in a row watching something");
   pill.title = label;
   pill.setAttribute("aria-label", label);

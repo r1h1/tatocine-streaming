@@ -138,6 +138,7 @@
       return { ok: true, value: raw };
     }
     function deleteProfileFromModal() {
+      if (!canManageProfiles()) { showToast("Solo un perfil de adulto puede administrar perfiles"); return; }
       var id = editingLocalProfileId;
       var profile = localProfiles.find(function (p) { return p.id === id; });
       if (!profile || profile.guest) return;
@@ -164,6 +165,7 @@
       showToast("Perfil eliminado");
     }
     function saveProfileFromModal() {
+      if (!canManageProfiles()) { showToast("Solo un perfil de adulto puede administrar perfiles"); return; }
       var input = document.getElementById("tc-new-profile-name");
       var name = String(input && input.value || "").trim().slice(0, 24);
       if (!name) { showToast("Escribe un nombre para el perfil"); if (input) input.focus(); return; }
@@ -193,7 +195,7 @@
       if (previous.lang !== profile.lang) safeStorageSet("tatoProfile_" + profile.id + "_tatoServer", defaultServerFor(profile.lang));
       var editedId = profile.id;
       closeProfileCreateModal();
-      if (kindChanged && editedId === activeProfileId) { location.reload(); return; }
+      if (kindChanged && editedId === activeProfileId) { reloadApp(); return; }
       renderProfilesPanel();
       updateProfileTrigger();
       showToast("Perfil actualizado");
@@ -269,6 +271,7 @@
         document.body.classList.add("tc-profile-screen-open");
         panel.classList.toggle("startup", !!isStartup);
         panel.classList.add("open");
+        document.documentElement.classList.remove("tc-picker-boot");
         startProfileBackdropCarousel();
       }
     }
@@ -310,7 +313,7 @@
         return;
       }
       confirmProfileForSession(profileId);
-      location.reload();
+      reloadApp();
     }
     function createLocalProfile() {
       if (localProfiles.length >= 6) { showToast("Puedes crear hasta 6 perfiles"); return; }
@@ -334,5 +337,5 @@
       safeStorageSet(ACTIVE_PROFILE_STORAGE_KEY, id);
       confirmProfileForSession(id);
       closeProfileCreateModal();
-      location.reload();
+      reloadApp();
     }

@@ -5,7 +5,7 @@
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
     function showSettings() {
-      if (isKidProfile()) return;
+      // En perfiles infantiles Ajustes solo muestra la copia de seguridad y el QR (el resto es data-adult-only).
       $settingsModal.classList.add("open");
       updateSettingsUI();
       updateLocalAnalyticsUI();

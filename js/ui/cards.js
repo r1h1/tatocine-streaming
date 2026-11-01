@@ -13,8 +13,9 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
-      var sb = (i.bg || "").replace(/'/g, "\\'");
-      var b = i.bg ? (i.bg.startsWith("http") ? i.bg : IMG_CARD + i.bg) : "";
+      var sb = String(i.bg || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      var cid = Number(i.id) || 0, ctype = i.type === "tv" ? "tv" : "movie";      // nunca se interpolan valores sin validar en los atributos
+      var b = i.bg ? escapeHTML(String(i.bg).startsWith("http") ? i.bg : IMG_CARD + i.bg) : "";
       var upcomingClass = (i.isUpcoming ? "upcoming" : "") + (i.topRank ? " top-ranked" + (Number(i.topRank) >= 10 ? " rank-wide" : "") : "");
       var upcomingBadge = i.isUpcoming
         ? '<div class="badge-upcoming">PRÓXIMAMENTE</div>'
@@ -42,13 +43,13 @@
         '<div class="card ' +
         upcomingClass +
         '" tabindex="0" role="group" aria-label="' + escapeHTML(i.title) + '" onclick="openDetails(' +
-        i.id +
+        cid +
         ",'" +
-        i.type +
+        ctype +
         '\')" onmouseenter="prefetchDetails(' +
-        i.id +
+        cid +
         ",'" +
-        i.type +
+        ctype +
         '\')"><img alt="' + escapeHTML(i.title) + '" src="' +
         (b || FALLBACK_IMG) +
         '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')" onerror="this.onerror=null;this.src=\'' +
@@ -59,17 +60,17 @@
         upcomingBadge +
         topRankBadge +
         '<button class="share-card-btn" onclick="shareCard(event,{id:' +
-        i.id +
+        cid +
         ",type:'" +
-        i.type +
+        ctype +
         "',title:'" +
         st +
         '\'})" title="Compartir" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button><button class="save-btn ' +
         (s ? "saved" : "") +
         '" title="Favoritos" aria-label="Favoritos" onclick="toggleSave(event,{id:' +
-        i.id +
+        cid +
         ",type:'" +
-        i.type +
+        ctype +
         "',title:'" +
         st +
         "',bg:'" +

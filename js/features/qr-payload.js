@@ -10,15 +10,16 @@
  * Seguridad (se rechaza ante la duda, nunca se «arregla» lo sospechoso):
  *   - Solo enlaces del MISMO sitio (o el código TC1.… suelto); cualquier otro QR se ignora y jamás se abre.
  *   - Límites de tamaño de texto, de datos descomprimidos (anti «zip bomb») y de cantidad de elementos.
- *   - Esquema estricto: claves permitidas, enteros en rango; sin __proto__/constructor/prototype.
+ *   - Esquema estricto: claves permitidas, enteros en rango; sin __proto__/constructor/prototype. Lleva el TIPO de
+ *     perfil de origen (adulto/niño): solo se importa entre perfiles del mismo tipo (ver import-target.js).
  *   - Los nombres de lista pasan una lista blanca de caracteres (sin < > " ` \ / ; = $ { } &) y se rechazan
  *     patrones de XSS, inyección SQL y CSP (<script, javascript:, on…=, union select, --, script-src…).
  *   - Se rechaza todo lo que parezca una clave (32 hex, api_key, tmdb, bearer, JWT) o un enlace (http, //).
  *   - El QR que genera la app NUNCA incluye la clave de TMDB ni el PIN.
  */
 var QR_PREFIX = "TC1.", QR_HASH_KEY = "tcimport";
-var QR_MAX_TEXT = 4000, QR_MAX_URL = 1700, QR_MAX_JSON = 60 * 1024;
-var QR_MAX_FAVS = 300, QR_MAX_SEEN = 400, QR_MAX_LISTS = 12, QR_NAME_MAX = 24;
+var QR_MAX_TEXT = 4000, QR_MAX_URL = 2600, QR_MAX_JSON = 60 * 1024;
+var QR_MAX_FAVS = 300, QR_MAX_SEEN = 400, QR_MAX_CONT = 20, QR_MAX_HIST = 120, QR_MAX_LISTS = 12, QR_NAME_MAX = 24;
 
 function qrB64urlEncode(bytes) {
   var s = "";
@@ -67,25 +68,32 @@ function qrCleanListName(name) {
 }
 function qrInt(v, min, max) { return typeof v === "number" && Number.isInteger(v) && v >= min && v <= max; }
 
-/** Construye el texto del QR (enlace) con lo que quepa; devuelve también cuántos elementos entraron. */
-async function qrBuildLink(origin, favs, lists, seen) {
+/**
+ * Construye el enlace del QR con lo que quepa. parts = { kind:"adult"|"kid", favs, lists, seen, cont, hist }:
+ *   favs [{type,id,list}] · lists [{id,name}] · seen [[t,id,visto,valoración]] · cont [[t,id,temporada,episodio]] · hist [[t,id,minutos,finalizados]].
+ * Si no cabe, se recortan primero vistos, luego historial y favoritos; «continuar viendo» (máx. 20) se conserva.
+ */
+async function qrBuildLink(origin, parts) {
   var names = [], idx = {};
-  (lists || []).slice(0, QR_MAX_LISTS).forEach(function (l) {
+  (parts.lists || []).slice(0, QR_MAX_LISTS).forEach(function (l) {
     var n = qrCleanListName(l.name);
     if (n && !(l.id in idx)) { idx[l.id] = names.length; names.push(n); }
   });
-  var f = (favs || []).filter(function (m) { return m && (m.type === "movie" || m.type === "tv") && qrInt(Number(m.id), 1, 2147483647); })
+  var f = (parts.favs || []).filter(function (m) { return m && (m.type === "movie" || m.type === "tv") && qrInt(Number(m.id), 1, 2147483647); })
     .map(function (m) { return [m.type === "tv" ? 1 : 0, Number(m.id), m.list && m.list in idx ? idx[m.list] : -1]; }).slice(0, QR_MAX_FAVS);
-  var w = (seen || []).slice(0, QR_MAX_SEEN);
-  var nf = f.length, nw = w.length, link = "", counts;
-  for (var guard = 0; guard < 40; guard++) {
-    var obj = { v: 1, f: f.slice(0, nf), l: names, w: w.slice(0, nw) };
+  var w = (parts.seen || []).slice(0, QR_MAX_SEEN), c = (parts.cont || []).slice(0, QR_MAX_CONT), h = (parts.hist || []).slice(0, QR_MAX_HIST);
+  var n = { f: f.length, w: w.length, c: c.length, h: h.length }, link = "", counts;
+  for (var guard = 0; guard < 60; guard++) {
+    var obj = { v: 2, k: parts.kind === "kid" ? 1 : 0, f: f.slice(0, n.f), l: names, w: w.slice(0, n.w), c: c.slice(0, n.c), h: h.slice(0, n.h) };
     var packed = QR_PREFIX + qrB64urlEncode(await qrDeflate(JSON.stringify(obj)));
     link = origin + "#" + QR_HASH_KEY + "=" + packed;
-    counts = { favs: nf, seen: nw, lists: names.length, totalFavs: f.length, totalSeen: w.length };
+    counts = { favs: n.f, seen: n.w, cont: n.c, hist: n.h, lists: names.length, totalFavs: f.length, totalSeen: w.length, totalHist: h.length, totalCont: c.length };
     if (link.length <= QR_MAX_URL) break;
-    if (nw > 0) nw = Math.floor(nw * 0.8); else nf = Math.floor(nf * 0.85);
-    if (nf === 0 && nw === 0) break;
+    if (n.w > 0) n.w = Math.floor(n.w * 0.8);
+    else if (n.h > 0) n.h = Math.floor(n.h * 0.85);
+    else if (n.f > 0) n.f = Math.floor(n.f * 0.85);
+    else if (n.c > 0) n.c = 0;
+    else break;
   }
   return { link: link, counts: counts, fits: link.length <= QR_MAX_URL };
 }
@@ -117,18 +125,20 @@ async function qrValidate(text, origin) {
   if (/[a-f0-9]{32}|api[_-]?key|tmdb|bearer|eyJ|https?:|\/\/|<|>|javascript:/i.test(json)) return { ok: false, error: "unsafe" };
   var o;
   try { o = JSON.parse(json); } catch (e) { return { ok: false, error: "malformed" }; }
-  if (!o || typeof o !== "object" || Array.isArray(o) || o.v !== 1) return { ok: false, error: "malformed" };
-  var keys = Object.keys(o);
-  if (keys.some(function (k) { return ["v", "f", "l", "w"].indexOf(k) < 0; })) return { ok: false, error: "malformed" };
-  if (!Array.isArray(o.f) || !Array.isArray(o.l) || !Array.isArray(o.w)) return { ok: false, error: "malformed" };
-  if (o.f.length > QR_MAX_FAVS || o.w.length > QR_MAX_SEEN || o.l.length > QR_MAX_LISTS) return { ok: false, error: "too_big" };
+  if (!o || typeof o !== "object" || Array.isArray(o) || (o.v !== 1 && o.v !== 2)) return { ok: false, error: "malformed" };
+  var allowed = o.v === 1 ? ["v", "f", "l", "w"] : ["v", "k", "f", "l", "w", "c", "h"];
+  if (Object.keys(o).some(function (k) { return allowed.indexOf(k) < 0; })) return { ok: false, error: "malformed" };
+  if (o.v === 2 && !qrInt(o.k, 0, 1)) return { ok: false, error: "malformed" };
+  var c0 = o.v === 2 ? o.c : [], h0 = o.v === 2 ? o.h : [];
+  if (!Array.isArray(o.f) || !Array.isArray(o.l) || !Array.isArray(o.w) || !Array.isArray(c0) || !Array.isArray(h0)) return { ok: false, error: "malformed" };
+  if (o.f.length > QR_MAX_FAVS || o.w.length > QR_MAX_SEEN || o.l.length > QR_MAX_LISTS || c0.length > QR_MAX_CONT || h0.length > QR_MAX_HIST) return { ok: false, error: "too_big" };
   var lists = [];
   for (var i = 0; i < o.l.length; i++) {
     var n = qrCleanListName(o.l[i]);
     if (!n) return { ok: false, error: "unsafe" };
     lists.push(n);
   }
-  var favs = [], seen = [];
+  var favs = [], seen = [], cont = [], hist = [];
   for (var j = 0; j < o.f.length; j++) {
     var e = o.f[j];
     if (!Array.isArray(e) || e.length !== 3 || !qrInt(e[0], 0, 1) || !qrInt(e[1], 1, 2147483647) || !qrInt(e[2], -1, lists.length - 1)) return { ok: false, error: "malformed" };
@@ -139,8 +149,18 @@ async function qrValidate(text, origin) {
     if (!Array.isArray(s) || s.length !== 4 || !qrInt(s[0], 0, 1) || !qrInt(s[1], 1, 2147483647) || !qrInt(s[2], 0, 1) || !qrInt(s[3], -1, 1)) return { ok: false, error: "malformed" };
     seen.push({ type: s[0] ? "tv" : "movie", id: s[1], w: !!s[2], ur: s[3] });
   }
-  if (!favs.length && !seen.length && !lists.length) return { ok: false, error: "empty" };
-  return { ok: true, data: { favs: favs, lists: lists, seen: seen } };
+  for (var m = 0; m < c0.length; m++) {
+    var q = c0[m];
+    if (!Array.isArray(q) || q.length !== 4 || !qrInt(q[0], 0, 1) || !qrInt(q[1], 1, 2147483647) || !qrInt(q[2], 0, 200) || !qrInt(q[3], 0, 5000)) return { ok: false, error: "malformed" };
+    cont.push({ type: q[0] ? "tv" : "movie", id: q[1], season: q[2] || null, episode: q[3] || null });
+  }
+  for (var z = 0; z < h0.length; z++) {
+    var t = h0[z];
+    if (!Array.isArray(t) || t.length !== 4 || !qrInt(t[0], 0, 1) || !qrInt(t[1], 1, 2147483647) || !qrInt(t[2], 0, 600000) || !qrInt(t[3], 0, 999)) return { ok: false, error: "malformed" };
+    hist.push({ type: t[0] ? "tv" : "movie", id: t[1], mins: t[2], done: t[3] });
+  }
+  if (!favs.length && !seen.length && !lists.length && !cont.length && !hist.length) return { ok: false, error: "empty" };
+  return { ok: true, data: { kind: o.v === 2 && o.k ? "kid" : "adult", favs: favs, lists: lists, seen: seen, cont: cont, hist: hist } };
 }
 
 if (typeof module !== "undefined" && module.exports) module.exports = { qrBuildLink: qrBuildLink, qrValidate: qrValidate, qrExtractPayload: qrExtractPayload, qrCleanListName: qrCleanListName, qrDeflate: qrDeflate, qrB64urlEncode: qrB64urlEncode };
