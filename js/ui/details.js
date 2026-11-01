@@ -115,7 +115,7 @@
               return (
                 '<div class="cast-item" tabindex="0" role="button" onclick="openActor(' +
                 c.id +
-                ')"><img class="cast-photo" loading="lazy" decoding="async" src="' +
+                ')"><img class="cast-photo" alt="" loading="lazy" decoding="async" src="' +
                 (c.profile_path
                   ? IMG_W185 + c.profile_path
                   : "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%2240%22 fill=%22%23333%22/%3E%3C/svg%3E") +
@@ -142,7 +142,7 @@
                 s.id +
                 ",'" +
                 type +
-                '\')"><img class="similar-poster" src="' +
+                '\')"><img class="similar-poster" alt="" src="' +
                 sBg +
                 '" loading="lazy" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22%3E%3Crect fill=%22%23222%22 width=%22200%22 height=%22300%22/%3E%3C/svg%3E\'"/><div class="similar-title">' +
                 sTitle +

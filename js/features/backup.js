@@ -77,23 +77,29 @@ function importProfileData(file) {
       showToast(L("Archivo no válido: no es una copia de TatoCine", "Invalid file: not a TatoCine backup"));
       return;
     }
-    if (!confirm(L("¿Importar esta copia en el perfil «" + getActiveProfile().name + "»? Se combinará con tus datos actuales.", "Import this backup into profile “" + getActiveProfile().name + "”? It will be merged with your current data."))) return;
-    var prefix = "tatoProfile_" + activeProfileId + "_", applied = 0;
-    Object.keys(payload.data).forEach(function (key) {
-      var raw = payload.data[key];
-      if (typeof raw !== "string" || raw.length > BACKUP_MAX_BYTES) return;
-      try {
-        if (PROFILE_MERGERS[key]) {
-          var incoming = JSON.parse(raw);
-          var current = readLocalJSON(prefix + key, null);
-          if (safeStorageSet(prefix + key, JSON.stringify(PROFILE_MERGERS[key](current, incoming)))) applied++;
-        } else if (PROFILE_REPLACE_KEYS.indexOf(key) > -1) {
-          if (safeStorageSet(prefix + key, raw)) applied++;
-        }
-      } catch (e) { }
+    var from = payload.profile && typeof payload.profile.name === "string" ? payload.profile.name.slice(0, 24) : "";
+    pickImportTarget({
+      title: L("Importar copia de seguridad", "Import backup"),
+      summary: from ? L("Copia del perfil «" + escapeHTML(from) + "».", "Backup of profile “" + escapeHTML(from) + "”.") : L("Copia de seguridad de TatoCine.", "TatoCine backup."),
+      onConfirm: function (targetId) {
+        var prefix = "tatoProfile_" + targetId + "_", applied = 0;
+        Object.keys(payload.data).forEach(function (key) {
+          var raw = payload.data[key];
+          if (typeof raw !== "string" || raw.length > BACKUP_MAX_BYTES) return;
+          try {
+            if (PROFILE_MERGERS[key]) {
+              var incoming = JSON.parse(raw);
+              var current = readLocalJSON(prefix + key, null);
+              if (safeStorageSet(prefix + key, JSON.stringify(PROFILE_MERGERS[key](current, incoming)))) applied++;
+            } else if (PROFILE_REPLACE_KEYS.indexOf(key) > -1) {
+              if (safeStorageSet(prefix + key, raw)) applied++;
+            }
+          } catch (e) { }
+        });
+        if (applied) finishImport(targetId, L("Copia importada.", "Backup imported."));
+        else qrBody().innerHTML = '<p class="tc-qr-warn">' + L("No había datos que importar.", "There was no data to import.") + "</p>";
+      }
     });
-    showToast(applied ? L("Copia importada. Recargando…", "Backup imported. Reloading…") : L("No había datos que importar", "There was no data to import"));
-    if (applied) setTimeout(function () { location.reload(); }, 900);
   };
   reader.readAsText(file);
 }

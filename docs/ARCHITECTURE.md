@@ -16,11 +16,11 @@ js/
   i18n/                    Idioma por perfil: diccionario, reglas, traducción en vivo del DOM, helpers L()/i18nAdd()
   ui/                      Pantallas y componentes: cards, hero, details, filters, views, settings, keyboard,
                            tv-navigation, a11y, skeletons (marcadores de carga), gestures (táctil/ratón/mando)
-  player/                  Reproductor: servidores, player, autoplay-next
+  player/                  Reproductor: servidores, player, autoplay-next, player-robust (cambio automático de servidor y memoria por título)
   features/                Funciones de producto (una por archivo): favorites, favorites-lists, continue-watching,
                            analytics, watch-tracking, recommendations, stats, brands, share, search,
                            recent-searches, search-suggest, details-extras, details-favorite, watched,
-                           discover-wizard, new-episodes, infinite-feed (scroll infinito), streak, kids, pwa-install, backup
+                           discover-wizard, new-episodes, infinite-feed (scroll infinito), streak, kids, pwa-install, backup, import-target (elegir perfil destino), qr-payload (formato + validación del QR, probado en Node), qr-transfer (interfaz del QR)
   app.js                   Arranque (enlaces directos, primera vista)
 sw.js · manifest.webmanifest · icons/    PWA
 ```
@@ -98,3 +98,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Capa responsive (`css/19-responsive.css`)
 Última de la cascada. Define `--gutter` y `--card-w` con `clamp()` (móvil → TV 4K), alinea carruseles con los títulos, compacta la portada y el reproductor en móvil horizontal, difiere el pintado de filas fuera de pantalla (`content-visibility`) y quita desenfoques costosos en táctil.
+
+## QR de transferencia y seguridad
+`qr-payload.js` es lógica pura: genera `<sitio>#tcimport=TC1.<deflate+base64url>` y valida todo lo que se lee (mismo sitio, tamaños, esquema, listas blancas, rechazo de XSS/SQL/CSP/claves/enlaces). `qr-transfer.js` dibuja/lee el QR (librerías de `js/vendor/`, cargadas solo al usarlas, ver [THIRD_PARTY](THIRD_PARTY.md)) y `import-target.js` elige el perfil destino (PIN si es otro perfil protegido). `tests/qr-payload.test.js` cubre los casos hostiles. La CSP está en `index.html`; si añades un servidor de reproducción, vale `frame-src https:`.

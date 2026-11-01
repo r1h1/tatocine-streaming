@@ -130,3 +130,18 @@
   #player-modal .fullscreen-label { display: none; }
   #player-modal .player-container { max-height: calc(100dvh - 120px); min-height: 0; }
 }
+
+/* ---------- Pasar a otro dispositivo (QR) ---------- */
+.tc-qr { text-align: center; }
+.tc-qr-canvas { display: block; margin: 8px auto 12px; max-width: 100%; height: auto; border-radius: 12px; background: #fff; image-rendering: pixelated; }
+.tc-qr-video { display: block; width: 100%; max-height: 46vh; margin: 0 auto 12px; border-radius: 12px; background: #000; object-fit: cover; }
+.tc-qr-note { margin: 6px 0 10px; font-size: 14px; line-height: 1.5; color: rgba(255, 255, 255, .82); }
+.tc-qr-meta { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
+.tc-qr-warn { margin: 6px 0 10px; font-size: 13px; line-height: 1.45; color: #ffcf6b; }
+.tc-qr-status { min-height: 20px; margin: 8px 0 0; font-size: 13px; color: rgba(255, 255, 255, .75); }
+.tc-qr-status.bad { color: #ff8a8a; }
+.tc-qr-bar { height: 6px; margin: 8px 0; border-radius: 6px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.tc-qr-bar span { display: block; height: 100%; width: 0; background: #fff; transition: width .15s linear; }
+.tc-qr-label { display: block; margin: 12px 0 6px; font-size: 13px; text-align: left; color: rgba(255, 255, 255, .8); }
+.tc-qr-select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 12px; background: #151515; color: #fff; font: inherit; font-size: 15px; }
+.tc-qr-hint { margin: 8px 0 4px; font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, .6); text-align: left; }

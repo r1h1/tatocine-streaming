@@ -27,7 +27,9 @@ function a11yFocusables(scope) {
   var links = document.querySelector(".nav-links");
   if (links) { links.setAttribute("role", "navigation"); links.setAttribute("aria-label", "Principal"); }
   var menu = $("mobile-menu");
-  if (menu) menu.setAttribute("aria-label", "Menú");
+  if (menu) { menu.setAttribute("role", "navigation"); menu.setAttribute("aria-label", "Menú"); }
+  var offline = $("offline-banner");
+  if (offline) offline.setAttribute("role", "status");
   var toasts = $("toast-container");
   if (toasts) { toasts.setAttribute("role", "status"); toasts.setAttribute("aria-live", "polite"); }
   var main = document.querySelector("main");

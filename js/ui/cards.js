@@ -41,7 +41,7 @@
       return (
         '<div class="card ' +
         upcomingClass +
-        '" tabindex="0" role="button" onclick="openDetails(' +
+        '" tabindex="0" role="group" aria-label="' + escapeHTML(i.title) + '" onclick="openDetails(' +
         i.id +
         ",'" +
         i.type +

@@ -195,7 +195,7 @@
     }
     function listCardHTML(l) {
       var count = favCount(l.id), active = favFilter === l.id;
-      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="button" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(favFilter === \'' + escapeHTML(l.id) + '\' ? \'all\' : \'' + escapeHTML(l.id) + '\')" aria-pressed="' + active + '" aria-label="' + escapeHTML(l.name) + '">' +
+      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="group" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(favFilter === \'' + escapeHTML(l.id) + '\' ? \'all\' : \'' + escapeHTML(l.id) + '\')" aria-current="' + (active ? "true" : "false") + '" aria-label="' + escapeHTML(l.name) + '">' +
         '<div class="list-cover"></div><div class="list-shade"></div>' +
         '<button type="button" class="fav-edit-btn list-edit" title="Editar lista" aria-label="Editar lista" onclick="event.stopPropagation();openListModal(\'' + escapeHTML(l.id) + '\')">' + PENCIL_SVG + '</button>' +
         '<div class="list-info"><div class="list-name" data-i18n="skip">' + escapeHTML(l.name) + ' <span class="list-qty">(' + count + ")</span></div></div></div>";

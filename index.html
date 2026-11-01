@@ -3,6 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
+  <!-- Política de seguridad: solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
   <title>TatoCine | Películas, series y anime</title>
   <meta name="theme-color" content="#000000" />
@@ -505,6 +507,16 @@
         </div>
         <div class="settings-option">
           <div>
+            <div class="label">Pasar a otro dispositivo (QR)</div>
+            <div class="sub-label">Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" onclick="openQrShow()">Mostrar QR</button>
+            <button class="danger-btn" onclick="openQrScan()">Escanear</button>
+          </div>
+        </div>
+        <div class="settings-option">
+          <div>
             <div class="label">Atajos de Teclado</div>
             <div class="sub-label">/ buscar · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
           </div>
@@ -586,6 +598,17 @@
       </div>
     </section>
   </div>
+
+  <!-- Pasar datos a otro dispositivo con un código QR -->
+  <div class="tc-profile-create-overlay" id="tc-qr-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-qr-title" aria-hidden="true" onclick="if(event.target===this)closeQr()">
+    <section class="tc-profile-create-dialog tc-qr">
+      <button class="tc-profile-create-close" type="button" onclick="closeQr()" aria-label="Cerrar">×</button>
+      <h3 id="tc-qr-title">Pasar a otro dispositivo</h3>
+      <div id="tc-qr-body"></div>
+    </section>
+  </div>
+  <input type="file" id="tc-qr-file" accept="image/*" hidden aria-label="Subir captura del QR" />
 
   <!-- Asistente «¿Qué ver hoy?» -->
   <div class="tc-profile-create-overlay" id="tc-wizard-overlay" role="dialog" aria-modal="true"
@@ -826,8 +849,12 @@
   <script src="js/features/discover-wizard.js"></script>
   <script src="js/features/streak.js"></script>
   <script src="js/features/new-episodes.js"></script>
+  <script src="js/features/import-target.js"></script>
   <script src="js/features/backup.js"></script>
+  <script src="js/features/qr-payload.js"></script>
+  <script src="js/features/qr-transfer.js"></script>
   <script src="js/player/autoplay-next.js"></script>
+  <script src="js/player/player-robust.js"></script>
   <script src="js/ui/gestures.js"></script>
   <script src="js/ui/a11y.js"></script>
   <script src="js/core/performance.js"></script>

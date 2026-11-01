@@ -97,7 +97,8 @@
       continueVisible.forEach(function (m) {
         var card = document.createElement("div");
         card.setAttribute("tabindex", "0");
-        card.setAttribute("role", "button");
+        card.setAttribute("role", "group");
+        card.setAttribute("aria-label", m.title || "");
         card.className = "card continue-card";
 
         var progressInfo = m.season

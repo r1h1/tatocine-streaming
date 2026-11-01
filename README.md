@@ -18,9 +18,11 @@
 - **Favoritos con listas** («Todos» y «+ Nueva lista» como botones primarios; abrir y cerrar una lista tocando su tarjeta de nuevo o con «Cerrar lista»; crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
 - **Carga sin saltos:** *skeletons* en toda la app y **scroll infinito** en todas las pestañas (Inicio, Películas, Series, Anime, Niños, búsqueda, plataformas y Favoritos).
 - **Hecho para ti:** se activa con **2 títulos finalizados** y mejora con cada uno; todo se calcula localmente.
-- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (solo al terminar de verdad: aviso «Siguiente episodio en 10 s» con Cancelar; si el vídeo está en pantalla completa se sale de ella para mostrarlo).
+- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (solo al terminar de verdad: aviso «Siguiente episodio en 10 s» con Cancelar; si el vídeo está en pantalla completa se sale de ella para mostrarlo). **Cambio automático de servidor** si el elegido no responde en 12 s (sin tocar tu servidor predeterminado) y **memoria por título** del servidor que funcionó.
 - **Avisos de nuevo episodio** para tus series (se comprueban al abrir el Inicio; sin servidor no hay notificaciones push).
-- **Copia de seguridad** del perfil (Ajustes → Exportar/Importar archivo; sin PIN, se fusiona con los datos existentes).
+- **Copia de seguridad** del perfil (Ajustes → Exportar/Importar archivo; sin PIN, se fusiona con los datos existentes) e **importación al perfil que elijas** (los protegidos con PIN piden su PIN; no se importa al Invitado ni a perfiles infantiles).
+- **Pasar a otro dispositivo con un QR** (Ajustes → Mostrar QR / Escanear): enlace al propio sitio con favoritos, listas y vistos comprimidos; se escanea con la cámara del teléfono, con la cámara dentro de la app o subiendo una captura. Todo QR se **valida** antes de usarse (solo el mismo sitio, esquema estricto, listas blancas de caracteres, rechazo de XSS, SQL, CSP, claves y enlaces; nunca incluye PIN ni la clave de TMDB). Pruebas: `node tests/qr-payload.test.js`.
+- **Seguridad y accesibilidad:** política CSP en `index.html`, cabeceras (`nosniff`, `Referrer-Policy`, `Permissions-Policy`) y auditoría con axe-core sin infracciones en las pantallas principales.
 - **Portada automática:** el **Top 10 de la semana** rota solo cada 7 s con fundido e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).
 - **Estadísticas y Ajustes** se reorganizan en cuadrículas en pantallas grandes (móvil y tableta sin cambios). Una lista de favoritos vacía muestra una portada automática acorde a su nombre.
 - **Racha:** días seguidos reproduciendo algo, con icono de fuego junto al perfil (contador local y discreto; no existe en perfiles Niño).
@@ -59,7 +61,7 @@ index.html            Interfaz y orden de carga
 config.js             Tu clave de TMDB (único archivo de configuración)
 css/                  Hojas numeradas (01-base … 19-responsive); la cascada va por orden
 js/core · profiles · i18n · ui · player · features · app.js     Código por responsabilidad
-sw.js · manifest.webmanifest · icons/ · LICENSE · docs/ · index.backup.html (monolito anterior, estable)
+sw.js · manifest.webmanifest · icons/ · LICENSE · docs/
 ```
 
 Principios: responsabilidad única por archivo, extensión sin editar el núcleo (`decorate()`), utilidades compartidas (DRY) y rendimiento por dispositivo. Detalle, guía para añadir funciones y lista de verificación en **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
@@ -85,7 +87,7 @@ index.html   config.js   sw.js   manifest.webmanifest   _headers
 css/   js/   icons/
 ```
 
-(`docs/`, `LICENSE`, `README.md` e `index.backup.html` son opcionales; puedes comprimir la carpeta entera.) `_headers` (Netlify) y `vercel.json` solo ajustan la caché para que `index.html`, `config.js` y `sw.js` siempre estén frescos.
+(`docs/`, `LICENSE` y `README.md` son opcionales; puedes comprimir la carpeta entera.) `_headers` (Netlify) y `vercel.json` solo ajustan la caché para que `index.html`, `config.js` y `sw.js` siempre estén frescos.
 
 Navegadores modernos; en Smart TV, Tizen 5.5+, webOS 5+ o Android TV/Fire TV actuales.
 
@@ -109,7 +111,7 @@ Gratuito y de código abierto bajo **licencia MIT** ([`LICENSE`](LICENSE)); no c
 
 - Fluid responsive layer (`css/19-responsive.css`: card width and gutters scale from 320 px phones to 4K TVs) with deferred rendering of off-screen rows. Responsive dark UI for phones, tablets, desktops and Smart TVs; installable **PWA** (install button, offline shell, D-pad/remote navigation, lite mode, accessibility support).
 - **Local profiles** (adult/kids, optional PIN, per-profile language ESP/ENG, delete). Kids profiles see only the Kids section with strict age-rating filtering and an 8 h use limit plus a 1 h break.
-- **"What should I watch?"** wizard (mood, time, company, avoid → 3 picks with reasons), series pages with **seasons and episodes**, director links, **watched + 👍/👎**, **search suggestions and actor/director search**, favorites with lists, statistics, a **local recommendation engine** (unlocks after 2 finished titles), new-episode alerts, profile **backup/restore**, and platform/studio rows.
+- **"What should I watch?"** wizard (mood, time, company, avoid → 3 picks with reasons), series pages with **seasons and episodes**, director links, **watched + 👍/👎**, **search suggestions and actor/director search**, favorites with lists, statistics, a **local recommendation engine** (unlocks after 2 finished titles), new-episode alerts, profile **backup/restore** (import into any adult profile) and **QR transfer** between devices (validated against XSS/SQL/CSP/key leaks), and platform/studio rows.
 - Modular code (`css/`, `js/core|profiles|i18n|ui|player|features`), no build step. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```bash
