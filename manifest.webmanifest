@@ -110,8 +110,8 @@
       ]
     },
     {
-      "name": "Favoritos",
-      "short_name": "Favoritos",
+      "name": "Mi cine",
+      "short_name": "Mi cine",
       "url": "./?tab=list",
       "icons": [
         {

@@ -94,7 +94,7 @@
       Niños
     </button>
     <button class="nav-item" data-view="list" data-adult-only data-h="h7">
-      Favoritos
+      Mi cine
     </button>
     <button class="nav-item" data-h="h8">
       Aviso Legal
@@ -123,7 +123,7 @@
           Niños
         </button>
         <button class="nav-item" data-view="list" data-adult-only data-h="h14">
-          Favoritos
+          Mi cine
         </button>
       </div>
     </div>
@@ -462,7 +462,7 @@
                 <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Tráiler en la portada</div>
-            <div class="sub-label" id="hero-trailer-sub">Automático</div>
+            <div class="sub-label" id="hero-trailer-sub">Siempre</div>
           </div>
           <div class="settings-actions">
             <button class="danger-btn" type="button" data-act="hero-trailer-cycle">Cambiar</button>
@@ -613,6 +613,13 @@
           <label class="tc-bedtime-on"><input type="checkbox" id="tc-bed-on" /> Activar</label>
         </div>
       </div>
+          <div id="tc-screen-box" class="pf-field" hidden>
+            <label class="tc-profile-create-label">Tiempo de pantalla (solo niños)</label>
+            <div class="pf-two">
+              <label class="pf-mini"><span>Horas de pantalla al día</span><input class="tc-profile-input" id="tc-screen-hours" type="number" inputmode="decimal" min="0.5" max="12" step="0.5" value="6.5"></label>
+              <label class="pf-mini"><span>Horas de descanso</span><input class="tc-profile-input" id="tc-break-hours" type="number" inputmode="decimal" min="0.25" max="8" step="0.25" value="1"></label>
+            </div>
+          </div>
           <div class="pf-field">
       <label class="tc-profile-create-label" for="tc-new-profile-pin">PIN de acceso (opcional)</label>
       <input class="tc-profile-input" id="tc-new-profile-pin" type="password" inputmode="numeric" pattern="[0-9]*"

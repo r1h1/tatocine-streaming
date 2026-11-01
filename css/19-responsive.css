@@ -387,3 +387,10 @@ body.cp-details #details-modal { z-index: 6000; }
 @media (max-width: 1023px) { .pf-grid { max-width: 640px; } .pf-dialog > h3 { max-width: 640px !important; } }   /* col-md-12: una columna */
 /* Tarjetas de perfil «tempranas» (se pintan antes que los scripts): solo lectura hasta que la app las sustituye */
 .tc-profile-early { pointer-events: none; }
+
+/* Tiempo de pantalla del niño (horas de pantalla / horas de descanso) */
+.pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pf-mini { display: flex; flex-direction: column; gap: 8px; font-size: calc(13px * var(--ts, 1)); color: rgba(255, 255, 255, .78); }
+.pf-mini .tc-profile-input { width: 100%; }
+.pf-field[hidden] { display: none; }
+@media (max-width: 420px) { .pf-two { grid-template-columns: 1fr; } }

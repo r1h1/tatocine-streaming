@@ -77,12 +77,15 @@ bedtimeCheck();
 
 /* ---------- Campos de «Hora de dormir» en el formulario del perfil (solo para perfiles infantiles) ---------- */
 decorate("setProfileFormKind", function (original) {
-  return function (kind) { var r = original(kind); var box = $("tc-bedtime-box"); if (box) box.hidden = profileFormKind !== "kid"; return r; };
+  return function (kind) { var r = original(kind); ["tc-bedtime-box", "tc-screen-box"].forEach(function (id) { var box = $(id); if (box) box.hidden = profileFormKind !== "kid"; }); return r; };
 });
 decorate("setProfileModalMode", function (original) {
   return function (mode, profile) {
     var r = original(mode, profile), b = (mode === "edit" && profile && profile.bedtime) || { on: false, from: "21:00", to: "07:00" };
     $("tc-bed-on").checked = !!b.on; $("tc-bed-from").value = b.from || "21:00"; $("tc-bed-to").value = b.to || "07:00";
+    var ed = mode === "edit" && profile;
+    $("tc-screen-hours").value = ed && Number(profile.screenHours) >= 0.5 ? profile.screenHours : 6.5;
+    $("tc-break-hours").value = ed && Number(profile.breakHours) >= 0.25 ? profile.breakHours : 1;
     return r;
   };
 });
@@ -90,11 +93,14 @@ decorate("saveProfileFromModal", function (original) {
   return function () {
     var editingId = editingLocalProfileId, before = localProfiles.length;
     var vals = { on: $("tc-bed-on").checked, from: $("tc-bed-from").value, to: $("tc-bed-to").value };
+    function hrs(id, min, max, def) { var n = Number($(id).value.replace(",", ".")); return isFinite(n) && n >= min && n <= max ? Math.round(n * 4) / 4 : def; }
+    var screenH = hrs("tc-screen-hours", 0.5, 12, 6.5), breakH = hrs("tc-break-hours", 0.25, 8, 1);
     return Promise.resolve(original.apply(this, arguments)).then(function (r) {
       var p = editingId ? localProfiles.find(function (x) { return x.id === editingId; }) : (localProfiles.length > before ? localProfiles[localProfiles.length - 1] : null);
       if (p) {
         if (p.kind === "kid" && vals.on && bedMinutes(vals.from) != null && bedMinutes(vals.to) != null) p.bedtime = { on: true, from: vals.from, to: vals.to };
         else delete p.bedtime;
+        if (p.kind === "kid") { p.screenHours = screenH; p.breakHours = breakH; } else { delete p.screenHours; delete p.breakHours; }       // tiempo de pantalla y descanso del niño
         saveLocalProfiles();
       }
       return r;

@@ -338,6 +338,34 @@
       }).catch(function () { });
     }
 
+    // Hero: siempre el Top 10 de la semana de cada sección (Inicio, Películas, Series, Anime, Niños).
+    function heroTop10(view, snapshot) {
+      var jobs;
+      if (view === "movies") jobs = [["/trending/movie/week", "", "movie"]];
+      else if (view === "series") jobs = [["/trending/tv/week", "", "tv"]];
+      else if (view === "anime") jobs = [["/discover/tv", "&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=1", "tv"]];
+      else if (view === "kids") jobs = [
+        ["/discover/movie", "&certification_country=US&certification=G&without_genres=27,53,80,10752&sort_by=popularity.desc&page=1", "movie"],
+        ["/discover/tv", "&certification_country=US&certification=TV-Y|TV-Y7|TV-G&without_genres=27,53,80,10752&sort_by=popularity.desc&page=1", "tv"]
+      ];
+      else jobs = [["/trending/all/week", "", "all"]];
+      Promise.all(jobs.map(function (j) { return fetchTMDB(j[0], j[1]).catch(function () { return null; }); })).then(function (res) {
+        if (snapshot !== catalogRequestId || currentView !== view) return;
+        var lists = res.map(function (r, i) {
+          return ((r && r.results) || []).filter(function (x) { return x && x.id && (x.backdrop_path || x.poster_path); }).map(function (x) {
+            var t = jobs[i][2] === "all" ? x.media_type : jobs[i][2];
+            if (t !== "movie" && t !== "tv") return null;
+            return t === "tv" ? mapTvResult(x, view === "anime" ? "Anime" : view === "kids" ? "Serie infantil" : undefined) : mapMovieResult(x);
+          }).filter(Boolean);
+        });
+        var top = [];
+        for (var k = 0; top.length < 10 && k < 10; k++) lists.forEach(function (l) { if (l[k] && top.length < 10) top.push(l[k]); });
+        if (top.length < 3 || currentHeroIndex > 0) return;
+        startHeroCarousel(top);
+        setHero(top[0]);
+      });
+    }
+
     function loadHomeView() {
       var snapshot = catalogRequestId;
       Promise.all([
@@ -369,6 +397,7 @@
             renderRow("Series Populares", s.results.map(mapTvResult));
             renderBrandRow();
           if (h) setHero(h);
+          heroTop10("home", snapshot);
           renderLoadMore(t.total_pages || 1);
           // Las filas no esenciales se escalonan para mostrar primero el catálogo principal.
           // Cada tarea comprueba el identificador de vista para no insertar resultados obsoletos.
@@ -419,6 +448,7 @@
             setHero(m[0]);
             renderRow("Películas", m);
             startHeroCarousel(m);
+            heroTop10("movies", snapshot);
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
@@ -446,6 +476,7 @@
             setHero(m[0]);
             renderRow("Series", m);
             startHeroCarousel(m);
+            heroTop10("series", snapshot);
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
@@ -485,6 +516,7 @@
             setHero(m[0]);
             renderRow("Anime", m);
             startHeroCarousel(m);
+            heroTop10("anime", snapshot);
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
@@ -541,6 +573,7 @@
           if (h) {
             setHero(h);
             startHeroCarousel(combined);
+            heroTop10("kids", snapshot);
             renderLoadMore(
               Math.max(mv.total_pages || 1, tv.total_pages || 1),
             );

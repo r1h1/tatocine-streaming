@@ -11,7 +11,7 @@
     // ==========================================================
     var I18N_EXACT = {
       // --- navegación, secciones y pantallas ---
-      "Inicio": "Home", "Películas": "Movies", "Anime": "Anime", "Series": "Series", "Niños": "Kids", "Favoritos": "Favorites",
+      "Inicio": "Home", "Películas": "Movies", "Anime": "Anime", "Series": "Series", "Niños": "Kids", "Favoritos": "Favorites", "Mi cine": "My Cinema", "Siempre": "Always", "Solo con ratón": "Mouse only", "Tráiler en la portada": "Hero trailer",
       "Perfiles": "Profiles", "Ajustes": "Settings", "Aviso Legal": "Legal notice", "Info": "Info", "Ver": "Watch", "Ver Tráiler": "Watch Trailer",
       "Ocultar Tráiler": "Hide Trailer", "Compartir": "Share", "Reparto": "Cast", "Recomendados para ti": "Recommended for you",
       "Regresar a inicio": "Back to home", "Pantalla completa": "Full screen", "Salir de pantalla completa": "Exit full screen",
@@ -173,6 +173,7 @@
       // fragmentos dentro de oraciones más largas
       [/(\d+) títulos reproducidos · (\d+) finalizados\./g, "$1 titles played · $2 finished."],
       [/Termina 2 títulos para activar «Hecho para ti»\./g, "Finish 2 titles to unlock “Made for you”."],
+      [/Mira 2 títulos \(aunque no los termines\) para activar «Hecho para ti»\./g, "Watch 2 titles (even if you don't finish them) to unlock “Made for you”."],
       [/Géneros principales: /g, "Top genres: "],
       [/Los datos permanecen en este dispositivo\./g, "Data stays on this device."],
       [/Datos locales: /g, "Local data: "],

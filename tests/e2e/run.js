@@ -275,19 +275,19 @@ async function main() {
     await page.evaluate(() => closePlayer());
   });
 
-  async function heroIntervals(page, ms) {
-    await page.evaluate(() => { window.__chg = []; let last = currentHeroMedia && currentHeroMedia.id; setInterval(() => { const id = currentHeroMedia && currentHeroMedia.id; if (id !== last) { window.__chg.push(Date.now()); last = id; } }, 50); });
+  async function heroIntervals(page, ms, kick) {
+    await page.evaluate((k) => { window.__chg = []; if (k) setTimeout(() => setHero(heroMoviesList[1]), 300); let last = currentHeroMedia && currentHeroMedia.id; setInterval(() => { const id = currentHeroMedia && currentHeroMedia.id; if (id !== last) { window.__chg.push(Date.now()); last = id; } }, 50); }, kick);
     await page.waitForTimeout(ms);
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 15 s", true, 15000]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 30 s", true, 30000]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
       await enter(page);
       await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2, null, { timeout: 20000 });
-      const gaps = await heroIntervals(page, expected * (withTrailer ? 2 : 2.5) + 2500);
+      const gaps = await heroIntervals(page, expected * (withTrailer ? 1 : 2.5) + 3500, withTrailer);   // con tráiler: se fuerza un título nuevo para medir un solo ciclo
       ok(gaps.length >= (withTrailer ? 1 : 1), "rotó menos de lo esperado: " + JSON.stringify(gaps));
       for (const g of gaps) ok(Math.abs(g - expected) < 1000, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
     });
@@ -310,7 +310,7 @@ async function main() {
     await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
     await enter(page);
     await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2);
-    eq(await page.evaluate(() => htMode), "auto", "modo por defecto:");
+    eq(await page.evaluate(() => htMode), "on", "modo por defecto (Siempre):");
     eq(await page.evaluate(() => htWhyNot()), "", "motivo para no reproducir con el sistema en «reducir animaciones»:");
     await page.evaluate(() => toggleReduceMotion());
     ok((await page.evaluate(() => htWhyNot())).includes("Reducir movimiento"), "el interruptor de la app no apagó el tráiler");

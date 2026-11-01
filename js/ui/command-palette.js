@@ -57,7 +57,7 @@ function cmdRun(i) {
   });
   var go = function (v) { return function () { switchView(v); }; };
   [["home", "Ir a Inicio", "Go to Home", "inicio home principal"], ["movies", "Ir a Películas", "Go to Movies", "peliculas cine"], ["series", "Ir a Series", "Go to Series", "series capitulos"],
-    ["anime", "Ir a Anime", "Go to Anime", "anime japon"], ["list", "Ir a Favoritos", "Go to Favorites", "favoritos listas guardados"]].forEach(function (x) {
+    ["anime", "Ir a Anime", "Go to Anime", "anime japon"], ["list", "Ir a Mi cine", "Go to My Cinema", "mi cine favoritos listas guardados"]].forEach(function (x) {
     registerCommand({ id: "go-" + x[0], es: x[1], en: x[2], keys: x[3], adult: true, run: go(x[0]) });
   });
   registerCommand({ id: "go-kids", es: "Ir a Niños", en: "Go to Kids", keys: "ninos infantil", run: go("kids") });

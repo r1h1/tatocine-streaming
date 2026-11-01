@@ -20,6 +20,9 @@
       return it.type === "tv" ? "tv" : "movie";
     }
     function completedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0; }); }
+    /** Títulos «vistos» para las recomendaciones: terminados O empezados de verdad (≥ 2 min de reproducción). Cuantos más, mejor se afina. */
+    var ENGAGED_SECS = 120;
+    function engagedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0 || (x.secs || 0) >= ENGAGED_SECS; }); }
     function tasteWeight(it) {
       var d = it.done || 0;
       if (d > 0) return 1.4 + 0.5 * Math.min(3, d) + Math.min(1, (it.secs || 0) / 7200);
@@ -169,9 +172,9 @@
     function updateLocalAnalyticsUI() {
       var el = $("local-analytics-summary");
       if (!el) return;
-      var done = completedTitles().length;
+      var done = engagedTitles().length;
       var names = getTasteProfile().slice(0, 3).map(function (x) { return x.name; });
       el.textContent = getDistinctPlayedCount() + " títulos reproducidos · " + done + " finalizados. " +
-        (done < 2 ? "Termina 2 títulos para activar «Hecho para ti». " : (names.length ? "Géneros principales: " + names.join(", ") + ". " : "")) +
+        (done < 2 ? "Mira 2 títulos (aunque no los termines) para activar «Hecho para ti». " : (names.length ? "Géneros principales: " + names.join(", ") + ". " : "")) +
         "Los datos permanecen en este dispositivo.";
     };

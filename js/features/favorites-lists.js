@@ -219,7 +219,7 @@
       else if (favFilter === "later") body = laterSection();
       else if (favFilter === "general") body = favSection("General", null, false);
       else body = favSection(favListById(favFilter).name, favFilter, false);
-      $rowsContainer.innerHTML = '<h1 class="sr-only">' + L("Favoritos", "Favorites") + "</h1>" + toolbar + cards + body;
+      $rowsContainer.innerHTML = '<h1 class="sr-only">' + L("Mi cine", "My Cinema") + "</h1>" + toolbar + cards + body;
       $rowsContainer.querySelectorAll(".list-card").forEach(function (el) {
         var l = favListById(el.getAttribute("data-list"));
         if (!l) return;

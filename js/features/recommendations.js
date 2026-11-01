@@ -18,9 +18,9 @@
     function loadPersonalizedHomeRow() {
       if (isKidProfile()) return;
       var items = localAnalytics.items || [];
-      var done = completedTitles();
+      var done = engagedTitles();
       var n = done.length;
-      if (n < 2) return;                                   // mínimo 2 títulos finalizados
+      if (n < 2) return;                                   // mínimo 2 títulos vistos (terminados o con ≥ 2 min de reproducción)
       var profile = getTasteProfile();
       if (!profile.length) return;
       var snapshot = catalogRequestId;

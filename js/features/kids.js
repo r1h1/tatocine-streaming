@@ -83,7 +83,11 @@
     // ==========================================================
 
     // ---- Límite de uso infantil: 6,5 h de uso (dos películas largas) y 1 h de descanso (local, compartido por los perfiles Niño del dispositivo) ----
-    var KID_LIMIT_SECS = 6.5 * 3600, KID_BREAK_MS = 3600 * 1000, KID_USAGE_KEY = "tatoKidUsageV1";
+    var KID_LIMIT_SECS = 6.5 * 3600, KID_BREAK_MS = 3600 * 1000, KID_USAGE_KEY = "tatoKidUsageV1";     // valores por defecto
+    /** Tiempo de pantalla y de descanso de ESTE perfil infantil (se configuran al crear/editar el perfil); si no hay, los de por defecto. */
+    function kidLimitSecs() { var p = getActiveProfile(), h = p ? Number(p.screenHours) : 0; return (h >= 0.5 && h <= 12 ? h : KID_LIMIT_SECS / 3600) * 3600; }
+    function kidBreakMs() { var p = getActiveProfile(), h = p ? Number(p.breakHours) : 0; return (h >= 0.25 && h <= 8 ? h : KID_BREAK_MS / 3600000) * 3600000; }
+    function kidFmtHours(h) { var m = Math.round(h * 60), hh = Math.floor(m / 60), mm = m % 60; return (hh ? hh + " h" : "") + (hh && mm ? " " : "") + (mm ? mm + " min" : ""); }
     var kidUsage = readLocalJSON(KID_USAGE_KEY, null);
     if (!kidUsage || typeof kidUsage !== "object") kidUsage = { day: "", secs: 0, lockedUntil: 0 };
     var kidLastTick = Date.now(), kidWarned = false, kidSavedAt = 0, kidLockTimer = null;
@@ -97,6 +101,8 @@
     }
     function showKidLock() {
       var el = $("tc-kid-lock");
+      var sub = el.querySelector(".tc-profile-create-subtitle");
+      if (sub) sub.textContent = L("Se alcanzó el límite de " + kidFmtHours(kidLimitSecs() / 3600) + " de uso. Podrás volver a ver contenido cuando termine el descanso de " + kidFmtHours(kidBreakMs() / 3600000) + ".", "The " + kidFmtHours(kidLimitSecs() / 3600) + " usage limit was reached. You can watch again when the " + kidFmtHours(kidBreakMs() / 3600000) + " break ends.");
       if (!el.classList.contains("open")) {
         el.classList.add("open");
         try { if ($modal.classList.contains("open")) closePlayer(); } catch (e) { }
@@ -130,13 +136,13 @@
       if (kidUsage.day !== dayKey()) { kidUsage.day = dayKey(); kidUsage.secs = 0; kidWarned = false; }
       if (document.hidden) return;
       kidUsage.secs += elapsed;
-      if (kidUsage.secs >= KID_LIMIT_SECS) {
-        kidUsage.lockedUntil = now + KID_BREAK_MS;
+      if (kidUsage.secs >= kidLimitSecs()) {
+        kidUsage.lockedUntil = now + kidBreakMs();
         saveKidUsage();
         showKidLock();
         return;
       }
-      if (!kidWarned && KID_LIMIT_SECS - kidUsage.secs <= 900) { kidWarned = true; showToast("Quedan 15 minutos de uso antes del descanso"); }
+      if (!kidWarned && kidLimitSecs() - kidUsage.secs <= 900 && kidLimitSecs() > 1800) { kidWarned = true; showToast("Quedan 15 minutos de uso antes del descanso"); }
       if (now - kidSavedAt > 30000) saveKidUsage();
     }
     setInterval(kidUsageTick, 5000);

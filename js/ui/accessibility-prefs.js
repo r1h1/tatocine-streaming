@@ -49,7 +49,7 @@ function announce(msg) {
   setTimeout(function () { announceEl.textContent = msg; }, 60);
   showToast(msg);
 }
-var VIEW_NAMES = { home: ["Inicio", "Home"], movies: ["Películas", "Movies"], series: ["Series", "Series"], anime: ["Anime", "Anime"], kids: ["Niños", "Kids"], list: ["Favoritos", "Favorites"] };
+var VIEW_NAMES = { home: ["Inicio", "Home"], movies: ["Películas", "Movies"], series: ["Series", "Series"], anime: ["Anime", "Anime"], kids: ["Niños", "Kids"], list: ["Mi cine", "My Cinema"] };
 decorate("switchView", function (original) {
   return function (v, r) {
     var out = original(v, r), n = VIEW_NAMES[currentView];
