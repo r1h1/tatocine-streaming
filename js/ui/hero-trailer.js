@@ -1,8 +1,9 @@
 /**
  * TatoCine · js/ui/hero-trailer.js
- * Tráiler en silencio en la portada (como las plataformas grandes): tras ~3 s sin cambiar de título, el fondo pasa del
- * póster a su tráiler de YouTube (youtube-nocookie, sin sonido). Mientras suena no rota el carrusel; se detiene al
- * salir de la portada, abrir una ficha o el reproductor, ocultar la pestaña, o pasados 45 s.
+ * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 6 s en pantalla; si TIENE tráiler dura 8 s
+ * y el vídeo se ve en el segundo 3 (se precarga y arranca oculto antes, sin pasar el ratón), en Inicio, Películas, Series, Anime y Niños.
+ * Es youtube-nocookie y sin sonido. Se detiene al cambiar de título, salir de la portada, abrir una ficha o el reproductor,
+ * u ocultar la pestaña.
  * Ajustes → «Tráiler en la portada»: Automático (equipos con ratón y buena conexión; respeta «reducir animaciones» del sistema) /
  * Activado (manda sobre el sistema) / Desactivado. El vídeo solo se muestra cuando YouTube confirma que reproduce; Ajustes indica el motivo si no sale.
  * Nunca en perfiles infantiles, con «reducir movimiento», modo ligero o ahorro de datos.
@@ -14,11 +15,12 @@ var htStatus = "";
 function htWhyNot() {
   var forced = htMode === "on", mm = function (q) { return !!(window.matchMedia && window.matchMedia(q).matches); };
   if (htMode === "off") return L("Desactivado en Ajustes.", "Off in Settings.");
-  if (isKidProfile()) return L("No se usa en perfiles infantiles.", "Not used on kid profiles.");
+  var picker = document.getElementById("tc-profile-overlay");
+  if (picker && picker.classList.contains("open")) return L("Hay que elegir perfil primero.", "Choose a profile first.");
   if (location.protocol === "file:") return L("YouTube no permite reproducir desde un archivo local (file://). Abre TatoCine desde http://localhost o desde el sitio publicado.", "YouTube won't play from a local file (file://). Open TatoCine from http://localhost or the published site.");
   if (document.body.classList.contains("rm")) return L("«Reducir movimiento» está activado en Ajustes.", "“Reduce motion” is on in Settings.");
   if (document.body.classList.contains("lite") && !forced) return L("Modo ligero activado.", "Lite mode is on.");
-  if (!(currentView === "home" || currentView === "movies" || currentView === "series" || currentView === "anime") || isSearching) return L("Solo en la portada de Inicio, Películas, Series y Anime.", "Only on the Home, Movies, Series and Anime hero.");
+  if (!(currentView === "home" || currentView === "movies" || currentView === "series" || currentView === "anime" || currentView === "kids") || isSearching) return L("Solo en la portada de Inicio, Películas, Series, Anime y Niños.", "Only on the Home, Movies, Series, Anime and Kids hero.");
   if (!forced) {
     var c = navigator.connection || {};
     if (c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || "")) return L("Ahorro de datos o conexión lenta.", "Data saver or slow connection.");
@@ -52,29 +54,41 @@ async function htTrailerKeys(m) {
   htCache[k] = keys;
   return keys;
 }
-/** Reproduce keys[i]; el vídeo solo se muestra cuando YouTube confirma que está reproduciendo. Si falla, prueba el siguiente. */
+var HT_PRELOAD_MS = 800, HT_PLAY_MS = 1500, HT_START_MS = 3000;   // se precarga a los 0,8 s, arranca (oculto) a los 1,5 s y SE VE a los 3 s del título: así los controles que YouTube muestra al empezar ya pasaron
+/** Prepara keys[i] en pausa y lo arranca en el segundo 3. Solo se muestra cuando YouTube confirma que reproduce; si falla, prueba el siguiente. */
 function htPlay(keys, i, token) {
   if (token !== htToken) return;
   if (i >= keys.length) { htSetStatus(L("YouTube no pudo reproducir los tráilers de este título.", "YouTube couldn't play this title's trailers.")); return; }
-  var key = keys[i], f = document.createElement("iframe"), shown = false, giveUp = null;
+  var key = keys[i], f = document.createElement("iframe"), shown = false, giveUp = null, kick = null;
   f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true"); f.setAttribute("title", "");
   f.setAttribute("allow", "autoplay; encrypted-media");
   f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=" + key + "&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
+  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=" + key + "&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
+  function post(func) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: [] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
   function next(reason) { cleanup(); if (token === htToken) { htSetStatus(reason); $heroVideoWrap.innerHTML = ""; htPlay(keys, i + 1, token); } }
-  function cleanup() { clearTimeout(giveUp); window.removeEventListener("message", onMsg); }
+  function cleanup() { clearTimeout(giveUp); clearInterval(kick); window.removeEventListener("message", onMsg); }
   function onMsg(e) {
     if (e.source !== f.contentWindow || token !== htToken) return;
     var d = e.data; if (typeof d === "string") { try { d = JSON.parse(d); } catch (x) { return; } }
     if (!d) return;
     var state = d.event === "onStateChange" ? d.info : (d.event === "infoDelivery" && d.info && d.info.playerState !== undefined ? d.info.playerState : null);
     if (d.event === "onError") { next(L("YouTube rechazó el tráiler (error " + d.info + ")", "YouTube rejected the trailer (error " + d.info + ")")); return; }
-    if (state === 1 && !shown) { shown = true; clearTimeout(giveUp); htReveal(f, key, token); }
+    if (state === 1 && !shown) {
+      shown = true; clearTimeout(giveUp); clearInterval(kick);
+      setTimeout(function () { htReveal(f, key, token); }, Math.max(0, heroShownAt + HT_START_MS - Date.now()));       // nunca se ve antes del segundo 3
+    }
   }
   window.addEventListener("message", onMsg);
   f.onload = function () {
     try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "https://www.youtube-nocookie.com"); } catch (e) { }
-    giveUp = setTimeout(function () { if (!shown) next(L("El tráiler no arrancó (el navegador pudo bloquear la reproducción automática).", "The trailer didn't start (the browser may have blocked autoplay).")); }, 9000);
+    // A los 1,5 s se da la orden de reproducir, oculto (se repite cada 0,7 s hasta que YouTube confirme que reproduce).
+    var startIn = Math.max(0, heroShownAt + HT_PLAY_MS - Date.now());
+    setTimeout(function () {
+      if (token !== htToken || shown) return;
+      post("playVideo");
+      kick = setInterval(function () { if (!shown) post("playVideo"); }, 700);
+      giveUp = setTimeout(function () { if (!shown) next(L("El tráiler no arrancó (el navegador pudo bloquear la reproducción automática).", "The trailer didn't start (the browser may have blocked autoplay).")); }, 4000);
+    }, startIn);
   };
   $heroVideoWrap.innerHTML = "";
   $heroVideoWrap.dataset.key = key;
@@ -101,7 +115,7 @@ function htReveal(f, key, token) {
   var t0 = Date.now();
   htWatch = setInterval(function () {                                          // condiciones para seguir sonando
     var out = window.scrollY > $heroSection.offsetHeight * 0.6;
-    if (document.hidden || out || document.body.style.overflow === "hidden" || Date.now() - t0 > HT_MAX_MS || !htAllowed()) htStop();
+    if (document.hidden || out || document.body.style.overflow === "hidden" || !htAllowed()) htStop();
   }, 1500);
 }
 function htSchedule(m) {
@@ -110,13 +124,14 @@ function htSchedule(m) {
   var why = htWhyNot();
   if (why || document.hidden) { if (why) htSetStatus(why); return; }
   var token = htToken;
-  htTimer = setTimeout(async function () {
-    if (token !== htToken || !htAllowed()) return;
-    var keys = await htTrailerKeys(m);
-    if (!keys.length) { htSetStatus(L("Este título no tiene tráiler en TMDB.", "This title has no trailer on TMDB.")); return; }
-    if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token);
-  }, 3000);
+  htTrailerKeys(m).then(function (keys) {
+    if (token !== htToken || currentHeroMedia !== m || !htAllowed()) return;
+    if (!keys.length) { htSetStatus(L("Este título no tiene tráiler en TMDB.", "This title has no trailer on TMDB.")); return; }       // sin tráiler: 6 s
+    heroPlan(HERO_DWELL_TRAILER);                                                                                                        // con tráiler: 8 s
+    htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
+  });
 }
+var HERO_DWELL_TRAILER = 8000;
 decorate("setHero", function (original) { return function (m) { var r = original(m); htSchedule(m); return r; }; });
 decorate("openDetails", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
@@ -135,3 +150,14 @@ function cycleHeroTrailer() {
 registerAction("hero-trailer-cycle", cycleHeroTrailer);
 decorate("showSettings", function (original) { return function () { var r = original.apply(this, arguments); if (!htStatus) { var why = htWhyNot(); if (why && currentView !== "list") htStatus = why; } htSetStatus(htStatus); return r; }; });
 if (typeof i18nAdd === "function") i18nAdd({ "Tráiler en la portada": "Hero trailer", "Cambiar": "Change" });
+
+(function restartAfterPicker() {
+  var ov = document.getElementById("tc-profile-overlay");
+  if (!ov || !window.MutationObserver) return;
+  new MutationObserver(function () {
+    if (ov.classList.contains("open") || !currentHeroMedia) return;
+    heroShownAt = Date.now();                       // el título que estaba detrás del selector empieza a contar ahora
+    heroPlan(HERO_DWELL);
+    htSchedule(currentHeroMedia);
+  }).observe(ov, { attributes: true, attributeFilter: ["class"] });
+})();

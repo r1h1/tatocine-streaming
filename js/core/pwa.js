@@ -41,13 +41,28 @@
         return;
       }
       if (location.protocol === "https:" || devHost) {
-        var hadController = !!navigator.serviceWorker.controller;
+        var refreshing = false, wantReload = false;
+        // La versión nueva espera: se instala en segundo plano y se activa cuando el usuario pulsa «Actualizar» (no a mitad de una película).
+        function offerUpdate(reg) {
+          if (!reg.waiting || !navigator.serviceWorker.controller) return;
+          showToastAction(L("Hay una versión nueva de TatoCine", "A new version of TatoCine is available"), L("Actualizar", "Update"), function () { wantReload = true; reg.waiting.postMessage({ type: "SKIP_WAITING" }); }, 30000);
+        }
         window.addEventListener("load", function () {
-          navigator.serviceWorker.register("sw.js").then(function (reg) { reg.update(); }).catch(function () { });
+          navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
+            offerUpdate(reg);
+            reg.addEventListener("updatefound", function () {
+              var w = reg.installing;
+              if (w) w.addEventListener("statechange", function () { if (w.state === "installed") offerUpdate(reg); });
+            });
+            reg.update();
+            setInterval(function () { reg.update().catch(function () { }); }, 60 * 60 * 1000);                          // busca versiones nuevas cada hora
+            document.addEventListener("visibilitychange", function () { if (!document.hidden) reg.update().catch(function () { }); });
+          }).catch(function () { });
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-          if (hadController) showToast("TatoCine se actualizó. Recarga para ver la última versión.");
-          hadController = true;
+          if (refreshing || !wantReload) return;                                                                      // la primera instalación toma el control sin recargar
+          refreshing = true;
+          location.reload();                                                                                           // tras «Actualizar»: se recarga con la versión nueva
         });
       }
     })();

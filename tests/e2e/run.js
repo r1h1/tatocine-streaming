@@ -275,6 +275,57 @@ async function main() {
     await page.evaluate(() => closePlayer());
   });
 
+  async function heroIntervals(page, ms) {
+    await page.evaluate(() => { window.__chg = []; let last = currentHeroMedia && currentHeroMedia.id; setInterval(() => { const id = currentHeroMedia && currentHeroMedia.id; if (id !== last) { window.__chg.push(Date.now()); last = id; } }, 50); });
+    await page.waitForTimeout(ms);
+    const t = await page.evaluate(() => window.__chg);
+    return t.slice(1).map((x, i) => x - t[i]);
+  }
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 6 s", false, 6000], ["con tráiler cada título dura 8 s", true, 8000]]) {
+    await test("portada: " + name, async (page, ctx) => {
+      await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
+      await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
+      await enter(page);
+      await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2, null, { timeout: 20000 });
+      const gaps = await heroIntervals(page, expected * 3 + 2500);
+      ok(gaps.length >= 2, "rotó menos de 3 veces: " + JSON.stringify(gaps));
+      for (const g of gaps) ok(Math.abs(g - expected) < 900, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
+    });
+  }
+  await test("portada: el tráiler se precarga pero no se ve antes del segundo 3, y aparece solo (sin pasar el ratón)", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
+    await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
+    await enter(page);
+    await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2);
+    await page.evaluate(() => setHero(heroMoviesList[1]));                       // título nuevo: el reloj de 3 s empieza ahora
+    await page.waitForTimeout(1700);
+    ok(await page.locator("#hero-video-wrap iframe").count() === 1, "el iframe no se precargó");
+    eq(await page.evaluate(() => document.getElementById("hero-video-wrap").classList.contains("active")), false, "el tráiler se vio antes del segundo 3:");
+  });
+
+  await test("buscador: el micrófono queda centrado dentro de su botón y de la barra", async (page) => {
+    await enter(page);
+    const g = await page.evaluate(() => { const b = document.querySelector(".voice-btn"); if (!b) return null; const r = b.getBoundingClientRect(), s = b.querySelector("svg").getBoundingClientRect(), w = document.querySelector(".hero-content .search-wrap").getBoundingClientRect(); return { dx: Math.abs((r.left + r.width / 2) - (s.left + s.width / 2)), dy: Math.abs((r.top + r.height / 2) - (s.top + s.height / 2)), inside: r.right <= w.right + 1 && r.left >= w.left }; });
+    ok(g && g.dx < 1.5 && g.dy < 1.5 && g.inside, "micrófono desfasado: " + JSON.stringify(g));
+  });
+
+  await test("PWA: el service worker guarda todo y la app abre SIN conexión", async (page, ctx) => {
+    await page.goto(url + "?sw=1", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("#tc-profile-overlay.open");
+    await page.waitForFunction(async () => { const r = await navigator.serviceWorker.getRegistration(); return !!(r && r.active); }, null, { timeout: 20000 });
+    await page.waitForFunction(async () => { const n = await caches.keys(); const k = n.find((x) => x.startsWith("tatocine-shell")); if (!k) return false; return (await (await caches.open(k)).keys()).length > 90; }, null, { timeout: 20000 });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });      // la página ya la controla el service worker
+    const m = await page.evaluate(async () => { const m = await (await fetch("manifest.webmanifest")).json(); return { icons: m.icons.length, maskable: m.icons.some((i) => i.purpose === "maskable"), standalone: m.display === "standalone", id: !!m.id, shortcuts: m.shortcuts.length }; });
+    ok(m.icons >= 8 && m.maskable && m.standalone && m.id && m.shortcuts >= 3, "manifiesto: " + JSON.stringify(m));
+    await ctx.setOffline(true);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    ok(await page.locator(".tc-profile-card").count() > 0, "sin conexión no se pintaron los perfiles (faltan archivos en la caché)");
+    const off = await (await ctx.newPage()).goto(url + "offline.html").then((r) => r.status());
+    eq(off, 200, "offline.html:");
+    await ctx.setOffline(false);
+  });
+
   await test("rendimiento: arranque y primera tarjeta dentro de presupuesto (se imprimen las cifras)", async (page) => {
     await page.addInitScript(() => {
       window.__lt = []; window.__lcp = 0;

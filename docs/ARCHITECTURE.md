@@ -126,3 +126,7 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Estado de los diálogos
 `couple-picker.js` guarda la ronda en `sessionStorage` (`tatoPairV1`, 3 h, validada al leer) tras cada respuesta. «Info» (`cpOpenInfo`) no cierra el diálogo: lo deja debajo (inerte, `body.cp-details`) y la ficha se abre encima (z-index 6000); un `MutationObserver` lo reactiva al cerrarse la ficha por cualquier vía.
+
+## PWA y portada
+- `sw.js`: en `install` lee `index.html`, extrae `css/…` y `js/…` y los guarda junto a `offline.html`, iconos y librerías del QR; CSS/JS van «red con límite de 4 s y respaldo en caché»; las navegaciones caen a `index.html` y, si no existe, a `offline.html`. Una versión nueva espera (`SKIP_WAITING` solo tras pulsar «Actualizar» en `core/pwa.js`). Sube `VERSION` en cada publicación.
+- Portada: `ui/hero.js` usa UN temporizador por título (`heroPlan`: 6 s; `ui/hero-trailer.js` lo amplía a 8 s si hay tráiler), pausado mientras el selector de perfiles está abierto y reiniciado al cerrarse. El tráiler se precarga a 0,8 s, arranca oculto a 1,5 s y se muestra a los 3 s (`HT_*`).

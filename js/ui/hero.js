@@ -209,6 +209,8 @@
       if (!m) return;
 
       var request = ++heroRequestId;
+      heroShownAt = Date.now();
+      heroPlan(HERO_DWELL);          // cada título dura 6 s; si tiene tráiler, hero-trailer.js lo amplía a 8 s
       setHeroLoading(false);
 
       currentHeroMedia = m;
@@ -355,19 +357,33 @@
       var n = heroMoviesList[(currentHeroIndex + 1) % heroMoviesList.length];
       if (n && n.bg) { var i = new Image(); i.src = n.bg.startsWith("http") ? n.bg : IMG_BG + n.bg; }   // la imagen ya está lista al llegar su turno
     }
+    // Rotación de la portada: UN temporizador por título (no un intervalo global), así cada título dura lo mismo aunque
+    // se salte con los puntos, se vuelva de otra pestaña o se espere al selector de perfiles: 6 s (sin tráiler) u 8 s (con tráiler).
+    var HERO_DWELL = 6000, heroShownAt = 0, heroCarouselOn = false;
+    function heroBlocked() {
+      var picker = document.getElementById("tc-profile-overlay");
+      return document.hidden || isSearching || heroSectionIsEmpty() || (picker && picker.classList.contains("open")) || document.body.style.overflow === "hidden" ||
+        document.body.classList.contains("rm") || window.scrollY > $heroSection.offsetHeight;
+    }
+    function heroPlan(total) {
+      clearTimeout(heroInterval);
+      if (!heroCarouselOn) return;
+      heroInterval = setTimeout(heroTick, Math.max(400, total - (Date.now() - heroShownAt)));
+    }
+    function heroTick() {
+      if (heroBlocked()) { heroInterval = setTimeout(heroTick, 1000); return; }       // sin rotar (ni descargar) si no se está viendo
+      currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
+      setHero(heroMoviesList[currentHeroIndex]);
+      setTimeout(heroPreloadNext, 1500);
+    }
     function startHeroCarousel(m) {
       heroMoviesList = (m || []).slice(0, 10);          // Top 10 de la semana
       currentHeroIndex = 0;
-      clearInterval(heroInterval);
+      clearTimeout(heroInterval);
       renderHeroDots();
-      if (heroMoviesList.length < 2) return;
-      heroInterval = setInterval(function () {
-        // Sin rotar (ni descargar imágenes) si la pestaña está oculta, la portada fuera de vista o hay un modal/reproductor abierto.
-        if (document.hidden || isSearching || heroSectionIsEmpty() || document.body.style.overflow === "hidden" || document.body.classList.contains("rm") || document.body.classList.contains("hero-trailer-on") || window.scrollY > $heroSection.offsetHeight) return;
-        currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
-        setHero(heroMoviesList[currentHeroIndex]);
-        setTimeout(heroPreloadNext, 1500);
-      }, 7000);
+      heroCarouselOn = heroMoviesList.length >= 2;
+      heroShownAt = Date.now();
+      heroPlan(HERO_DWELL);
       heroPreloadNext();
     }
     function heroSectionIsEmpty() {

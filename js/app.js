@@ -17,6 +17,7 @@
         -1
       )
         switchView(tab, false);
+      if (params.get("focus") === "search") setTimeout(function () { window.scrollTo(0, 0); $searchInput.focus(); }, 500);       // atajo «Buscar» del icono instalado
       if (id && type && (type === "movie" || type === "tv"))
         setTimeout(function () {
           openDetails(parseInt(id, 10), type);

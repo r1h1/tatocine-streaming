@@ -1,19 +1,29 @@
 /* TatoCine - Service Worker
+   - Instalación: guarda TODO el shell (HTML, CSS, JS, iconos y página sin conexión) leyendo index.html: funciona sin internet desde la primera vez.
+   - Actualización: una versión nueva espera a que pulses «Actualizar» (no cambia el código a mitad de una película).
    - Shell (HTML, manifest, iconos): red primero con respaldo offline.
    - Imágenes de TMDB: NO se interceptan (TMDB ya las sirve con caché HTTP de ~1 año y el navegador las guarda).
    - API de TMDB: red primero; caché solo como respaldo sin conexión (con límite y caducidad).
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v20";
+const VERSION = "v21";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
+const SHELL = ["./", "index.html", "offline.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
 const MAX_API = 90;
 const API_MAX_AGE = 6 * 60 * 60 * 1000;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) => Promise.all(SHELL.map((u) => cache.add(u).catch(() => null)))).then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(SHELL_CACHE);
+    // Los CSS y JS se descubren leyendo index.html: no hay lista que mantener a mano.
+    let assets = [];
+    try {
+      const html = await (await fetch("index.html", { cache: "reload" })).text();
+      assets = [...html.matchAll(/(?:href|src)="((?:css|js)\/[^"]+)"/g)].map((m) => m[1]);
+    } catch (e) { }
+    await Promise.all(SHELL.concat(assets).map((u) => fetch(u, { cache: "reload" }).then((r) => (r.ok ? cache.put(u, r) : null)).catch(() => null)));
+    // La primera instalación se activa sola; una actualización espera el aviso «Actualizar» (mensaje SKIP_WAITING).
+  })());
 });
 
 self.addEventListener("activate", (event) => {
@@ -53,7 +63,7 @@ self.addEventListener("fetch", (event) => {
         if (res && res.ok) { const c = await caches.open(SHELL_CACHE); c.put("index.html", res.clone()); }
         return res;
       } catch (e) {
-        const cached = (await caches.match("index.html")) || (await caches.match("./"));
+        const cached = (await caches.match("index.html")) || (await caches.match("./")) || (await caches.match("offline.html"));
         return cached || new Response("Sin conexión", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
       }
     })());
@@ -63,10 +73,10 @@ self.addEventListener("fetch", (event) => {
   if (url.origin === self.location.origin) {
     // Código sin hash (despliegue desde la raíz): red primero para ver siempre la última versión, con la caché como respaldo sin conexión.
     if (/\/(css|js)\//.test(url.pathname)) {
-      event.respondWith(fetch(req).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(SHELL_CACHE).then((c) => c.put(req, copy)); } return res; }).catch(() => caches.match(req)));
+      event.respondWith(timeoutFetch(req, 4000).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(SHELL_CACHE).then((c) => c.put(req, copy)); } return res; }).catch(() => caches.match(req)));
       return;
     }
-    if (/\/(icons\/|assets\/|manifest\.webmanifest)/.test(url.pathname)) {   // recursos estáticos (assets/ lleva hash en el nombre)
+    if (/\/(icons\/|assets\/|manifest\.webmanifest|offline\.html|config\.js)/.test(url.pathname)) {   // recursos estáticos (assets/ lleva hash en el nombre)
       event.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(SHELL_CACHE).then((c) => c.put(req, copy)); } return res; })));
     }
     return;
