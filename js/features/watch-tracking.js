@@ -136,7 +136,7 @@
       if (!watch.counted && total && watch.epSecs >= total * 0.8) markCompleted();
       // Solo si se conoce la duración real y ya se cumplió completa (nunca con una duración supuesta).
       var known = watchKnownRuntimeSec();
-      if (watch.type === "tv" && autoNextEpisode && known && watch.epSecs >= known && !watch.nextPrompted) {
+      if (watch.type === "tv" && autoNextEpisode && known && watch.epSecs >= known - (watch.exact ? 4 : 0) && !watch.nextPrompted) {
         watch.nextPrompted = true;
         showNextEpisodePrompt();
       }
