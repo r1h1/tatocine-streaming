@@ -302,6 +302,7 @@ async function main() {
   await test("portada: sin botón de volumen, 1,8 s para verse, 31 s por título y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
+    await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
     eq(r.dwell, 31000, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 

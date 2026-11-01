@@ -208,7 +208,7 @@
     function setHero(m) {
       if (!m) return;
 
-      var request = ++heroRequestId;
+      var request = ++heroRequestId, heroPainted = false, heroDetails = null;   // si los detalles llegan ANTES del cambio de texto (caché), se guardan y se pintan con él
       heroShownAt = Date.now();
       heroPlan(HERO_DWELL);          // cada título dura 8 s; si tiene tráiler, hero-trailer.js lo amplía a 15 s
       setHeroLoading(false);
@@ -243,7 +243,8 @@
 
         $heroDesc.textContent = truncateHeroDesc(m.desc);
 
-        renderHeroMeta(m, null);
+        renderHeroMeta(m, heroDetails);
+        heroPainted = true;
 
         if (m.isUpcoming) {
           $heroPlayBtn.disabled = true;
@@ -289,7 +290,8 @@
           )
             return;
 
-          renderHeroMeta(m, data);
+          heroDetails = data;
+          if (heroPainted) renderHeroMeta(m, data);
         })
         .catch(function () {
           if (request === heroRequestId) renderHeroMeta(m, null);
