@@ -280,3 +280,23 @@ body.hc .hero-desc, body.hc .sub-label, body.hc .card-overlay span, body.hc .her
 .cp-win { box-shadow: 0 0 0 3px #3ddc84; cursor: default; }
 .wiz-couple { display: block; margin: 10px auto 2px; }
 @media (max-width: 600px) { .tc-wizard .wiz-couple { margin: 6px auto 12px; } }
+
+/* ---------- Efecto «wow»: tráiler en la portada, color dinámico y esqueletos con brillo ---------- */
+.hero-sound-btn { position: absolute; right: var(--gutter, 24px); bottom: 118px; z-index: 6; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(0, 0, 0, .45); color: #fff; cursor: pointer; transition: background .2s; }
+.hero-sound-btn:hover, .hero-sound-btn:focus-visible { background: rgba(255, 255, 255, .25); }
+.hero-sound-btn .snd-on { display: none; } .hero-sound-btn[aria-pressed="true"] .snd-on { display: inline; } .hero-sound-btn[aria-pressed="true"] .snd-off { display: none; }
+body.hero-trailer-on .hero-bg { opacity: 0 !important; transition: opacity .8s ease; }
+#details-modal.has-accent .details-content { background: radial-gradient(120% 55% at 18% 0%, rgba(var(--accent-rgb), .32), transparent 64%), rgba(12, 12, 14, .94) !important; transition: background .6s ease; }
+#details-modal.has-accent .details-actions .hero-btn:not(.secondary) { box-shadow: 0 0 30px rgba(var(--accent-rgb), .5); }
+#player-modal .player-container { transition: box-shadow .9s ease; }
+#player-modal.has-accent .player-container { box-shadow: 0 0 150px 26px rgba(var(--accent-rgb), .4), 0 0 44px rgba(var(--accent-rgb), .28); }
+.card img:not(.loaded) { transform: scale(1.06); }
+
+/* Esqueletos: un brillo que cruza (solo transform → barato para la GPU) en lugar del parpadeo */
+.skeleton-card, .skel, .sk-title, .sk-badge, .sk-chip, .sk-line, .sk-btn, .sk-cast-item, .nav-skel span, .tc-profile-skel span, .tc-profile-skel i { position: relative; overflow: hidden; animation: none !important; }
+.skeleton-card::after, .skel::after, .sk-title::after, .sk-badge::after, .sk-chip::after, .sk-line::after, .sk-btn::after, .sk-cast-item::after, .nav-skel span::after, .tc-profile-skel span::after, .tc-profile-skel i::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .09), transparent); animation: tcShimmer 1.5s ease-in-out infinite;
+}
+@keyframes tcShimmer { to { transform: translateX(100%); } }
+body.lite .skeleton-card::after, body.lite .skel::after, body.lite .sk-line::after, body.rm *::after { animation: none; }
+.fav-lists .list-card:not(.has-cover) .list-cover { animation: none; }

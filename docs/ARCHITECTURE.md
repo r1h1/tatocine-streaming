@@ -116,3 +116,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Fase 4 · funciones
 `features/watch-later.js`, `calendar.js` (`calendarCollect`, cache `tatoCalCacheV1`), `release-alerts.js` (+ `notificationclick` en `sw.js`), `wrapped.js` (canvas) y `couple-picker.js`. Todos usan `registerAction` (data-act) y `registerCommand` (Ctrl+K). Ojo con el orden de `<script>`: `command-palette.js` va justo después de `ui-utils.js` para que el resto pueda registrar comandos al cargar.
+
+## Fase 5 · efecto wow
+`ui/hero-trailer.js` (`htAllowed` decide cuándo; una sola iframe; se detiene al salir de la portada), `ui/dynamic-color.js` (`dominantColor` con miniatura w92 y canvas 16×16, variable `--accent-rgb`), `ui/open-motion.js` (FLIP con Web Animations) y esqueletos con `::after` + `tcShimmer` en `css/19-responsive.css`.
