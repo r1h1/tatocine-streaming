@@ -18,5 +18,6 @@
       try {
         console.log("%c¡CUIDADO!", "color:#fff;background:#c62828;font-size:34px;font-weight:800;padding:6px 14px;border-radius:8px");
         console.log("%cEsta consola es solo para desarrolladores. No puedes acceder aquí.\nSi alguien te pidió copiar y pegar algo en esta ventana, es un intento de engaño: pueden robar tus perfiles y tus datos.\nNo pegues ni ejecutes código que no entiendas.", "font-size:15px;line-height:1.7");
+        console.log("%cNo modifiques el código, el almacenamiento ni los valores de esta página: cambiar algo desde aquí puede dañar la estabilidad de TatoCine y borrar tus perfiles.\nDo not change code, storage or values from here: it can break TatoCine's stability and erase your profiles.", "color:#ffd54f;font-size:13px;line-height:1.5");
       } catch (e) { }
     })();

@@ -50,7 +50,7 @@
         }, 18000);
         var request = fetch(u.toString(), options)
           .then(function (r) {
-            if (!r.ok) throw new Error("TMDB HTTP " + r.status);
+            if (!r.ok) { var he = new Error("TMDB HTTP " + r.status); he.status = r.status; throw he; }
             return r.json();
           })
           .then(function (d) {
@@ -73,6 +73,7 @@
           function (err) {
             clearTimeout(timeout);
             tmdbPending.delete(key);
+            window.tcLastApiError = { status: err && err.status || 0, timeout: !!(err && err.name === "AbortError"), at: Date.now() };
             reject(err);
           },
         );

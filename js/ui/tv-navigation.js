@@ -87,7 +87,7 @@
         if (isTypingTarget(ae) || (document.body.classList.contains("cp-active") && !document.body.classList.contains("cp-details"))) return;     // «Decidir en pareja» usa ← → para responder
         var kb = false;
         try { kb = !!ae && ae !== document.body && ae.matches(":focus-visible"); } catch (err) { }
-        var tvIdle = IS_TV && (!ae || ae === document.body) && (e.key === "ArrowDown" || e.key === "ArrowUp");
+        var tvIdle = (!ae || ae === document.body) && (IS_TV ? (e.key === "ArrowDown" || e.key === "ArrowUp") : (e.key === "ArrowLeft" || e.key === "ArrowRight"));   // en escritorio, ← → sin foco empiezan a recorrer las filas
         if (kb || tvIdle) {
           if (spatialMove(e.key)) { e.preventDefault(); e.stopImmediatePropagation(); }
         }

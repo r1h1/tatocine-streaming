@@ -2,7 +2,10 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(self), microphone=(self), geolocation=()
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), usb=()
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
 /index.html
   Cache-Control: no-cache
 /config.js
@@ -14,3 +17,9 @@
   Cache-Control: no-cache
 /icons/*
   Cache-Control: public, max-age=604800
+/404.html
+  X-Robots-Tag: noindex
+  Cache-Control: no-cache
+/500.html
+  X-Robots-Tag: noindex
+  Cache-Control: no-cache

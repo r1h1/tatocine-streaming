@@ -5,10 +5,10 @@
    - Imágenes de TMDB: NO se interceptan (TMDB ya las sirve con caché HTTP de ~1 año y el navegador las guarda).
    - API de TMDB: red primero; caché solo como respaldo sin conexión (con límite y caducidad).
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v27";
+const VERSION = "v28";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
-const SHELL = ["./", "index.html", "offline.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
+const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
 const MAX_API = 90;
 const API_MAX_AGE = 6 * 60 * 60 * 1000;
 
@@ -61,6 +61,7 @@ self.addEventListener("fetch", (event) => {
       try {
         const res = await timeoutFetch(req, 6000, event.preloadResponse);
         if (res && res.ok) { const c = await caches.open(SHELL_CACHE); c.put("index.html", res.clone()); }
+        if (res && res.status >= 500) { const e500 = await caches.match("500.html"); if (e500) return e500; }      // error del servidor: pantalla propia en vez de la del hosting
         return res;
       } catch (e) {
         const cached = (await caches.match("index.html")) || (await caches.match("./")) || (await caches.match("offline.html"));

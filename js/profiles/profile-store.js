@@ -29,7 +29,7 @@
       guest.name = "Invitado";
       guest.kind = "adult";
       guest.guest = true;
-      guest.lang = /^en/i.test(navigator.language || "") ? "en" : "es";
+      guest.lang = "es";                                  // Invitado siempre en español
       delete guest.pin;
       var others = stored.filter(function (p) { return p.id !== "guest"; }).slice(0, 5);   // 6 en total contando al Invitado
       stored = others.slice(0, 1).concat([guest], others.slice(1));
@@ -89,7 +89,7 @@
     function isGuestProfile() { var p = getActiveProfile(); return !!p && !!p.guest; }
     /** Solo un perfil adulto (no Niño ni Invitado) administra perfiles. */
     function canManageProfiles() { var p = getActiveProfile(); return !!p && p.kind !== "kid" && !p.guest; }
-    function profileDisplayName(p) { return p && p.guest ? L("Invitado", "Guest") : (p ? p.name : ""); }
+    function profileDisplayName(p) { return p ? p.name : ""; }
     function isKidProfile() { var p = getActiveProfile(); return !!p && p.kind === "kid"; }
     function adultProfileCount(excludeId) {
       return localProfiles.filter(function (p) { return p.id !== excludeId && p.kind !== "kid" && !p.guest; }).length;

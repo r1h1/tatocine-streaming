@@ -135,3 +135,5 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 `index.html` marca todos los `<script src>` (salvo `boot.js` y `picker-open.js`) con `defer`: el navegador los descarga a la vez (HTTP/2) y los ejecuta en el orden del documento, por lo que el orden de las etiquetas sigue siendo el orden de dependencias. `picker-open.js` abre el selector y pinta tarjetas ligeras desde `localStorage` antes que nada.
 
 - Hero: `heroTop10(view, snapshot)` en `ui/views.js` sustituye la lista de la sección por su Top 10 semanal (trending; Anime/Niños por popularidad con filtros). Tráiler: modo por defecto `on` (Siempre), idioma del perfil. Niños: `kidLimitSecs()/kidBreakMs()` leen `screenHours/breakHours` del perfil.
+
+- Errores: `core/errors.js` (manejadores globales, registro, pantalla de error grave), `ui/skeletons.js` (`apiProblem`, `emptyOffline`, `renderRowError`), `ui/views.js` (`rowOrRetry`), `404.html`/`500.html` (precacheadas por `sw.js`). Tráiler: `HERO_DWELL_TRAILER` 31 s, `HT_START_MS` 1,8 s, sin botón de volumen.

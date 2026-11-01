@@ -335,7 +335,10 @@
           if (!data || !data.results || !data.results.length) return;
           renderRow(collection.title, data.results.map(mapMovieResult));
         });
-      }).catch(function () { });
+      }).catch(function () {
+        if (snapshot !== catalogRequestId || currentView !== "home") return;
+        renderRowError("Top 10 de la semana", function () { loadTop10AndCollections(catalogRequestId); return true; });
+      });
     }
 
     // Hero: siempre el Top 10 de la semana de cada sección (Inicio, Películas, Series, Anime, Niños).
@@ -366,17 +369,28 @@
       });
     }
 
+    /** Fila del catálogo: si la petición falló (data === null) muestra el título con «Reintentar» solo para esa fila. */
+    function rowOrRetry(title, path, query, mapFn, data) {
+      function paint(d) { renderRow(title, d.results.map(mapFn)); }
+      if (data && data.results && data.results.length) return paint(data);
+      if (data) return;                                                   // respondió pero sin resultados: no hay nada que mostrar
+      renderRowError(title, function () {
+        return fetchTMDB(path, query).then(function (d) { if (!d || !d.results || !d.results.length) return false; paint(d); return true; }).catch(function () { return false; });
+      });
+    }
     function loadHomeView() {
       var snapshot = catalogRequestId;
+      var upQ = "&region=" + (UI_EN ? "US" : "GT");
       Promise.all([
         fetchTMDB("/trending/movie/week"),
-        fetchTMDB("/movie/upcoming", "&region=" + (UI_EN ? "US" : "GT")),
+        fetchTMDB("/movie/upcoming", upQ),
         fetchTMDB("/movie/popular"),
         fetchTMDB("/tv/popular"),
-      ])
+      ].map(function (pr) { return pr.catch(function () { return null; }); }))      // una fila que falla no tumba la portada
         .then(function (res) {
           if (snapshot !== catalogRequestId || currentView !== "home") return;
-          var t = res[0],
+          if (!res[0] && !res[1] && !res[2] && !res[3]) throw new Error("catalog");
+          var t = res[0] || {},
             u = res[1],
             p = res[2],
             s = res[3];
@@ -389,12 +403,10 @@
             renderRow("Tendencias de la semana", m);
             startHeroCarousel(m);
           }
-          if (u.results && u.results.length)
-            renderRow("Próximos Estrenos", u.results.map(mapMovieResult));
-          if (p.results && p.results.length)
-            renderRow("Películas Populares", p.results.map(mapMovieResult));
-          if (s.results && s.results.length)
-            renderRow("Series Populares", s.results.map(mapTvResult));
+          if (!res[0]) rowOrRetry("Tendencias de la semana", "/trending/movie/week", "", mapMovieResult, null);
+          rowOrRetry("Próximos Estrenos", "/movie/upcoming", upQ, mapMovieResult, u);
+          rowOrRetry("Películas Populares", "/movie/popular", "", mapMovieResult, p);
+          rowOrRetry("Series Populares", "/tv/popular", "", mapTvResult, s);
             renderBrandRow();
           if (h) setHero(h);
           heroTop10("home", snapshot);
@@ -414,7 +426,12 @@
                 if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
                 var top = d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
                 renderRow("Películas mejor calificadas", top);
-              }).catch(function () { });
+              }).catch(function () {
+                if (snapshot !== catalogRequestId || currentView !== "home") return;
+                renderRowError("Películas mejor calificadas", function () {
+                  return fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Películas mejor calificadas", d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; }).catch(function () { return false; });
+                });
+              });
           }, 1250);
           window.setTimeout(function () {
             if (snapshot !== catalogRequestId || currentView !== "home") return;
@@ -423,7 +440,12 @@
                 if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
                 var top = d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
                 renderRow("Series mejor calificadas", top);
-              }).catch(function () { });
+              }).catch(function () {
+                if (snapshot !== catalogRequestId || currentView !== "home") return;
+                renderRowError("Series mejor calificadas", function () {
+                  return fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Series mejor calificadas", d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; }).catch(function () { return false; });
+                });
+              });
           }, 1750);
         })
         .catch(function () {

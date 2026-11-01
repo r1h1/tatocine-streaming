@@ -101,7 +101,10 @@
         card.setAttribute("aria-label", m.title || "");
         card.className = "card continue-card";
 
-        var progressInfo = m.season
+        var epDone = m.type === "tv" && m.season && m.pct >= 92;          // episodio terminado: la tarjeta ofrece el siguiente
+        var progressInfo = epDone
+          ? L("Siguiente tras T", "Up next after S") + m.season + " · E" + m.episode
+          : m.season
           ? "T" + m.season + " · E" + m.episode + (m.episodeName ? " · " + m.episodeName : "")
           : (m.type === "movie" ? "Película · Reanudar" : "Serie · Reanudar");
 
@@ -166,8 +169,26 @@
         card.appendChild(img);
         card.appendChild(overlay);
         card.appendChild(removeBtn);
+        if (m.pct > 1 && m.pct < 100) {
+          var bar = document.createElement("div");
+          bar.className = "continue-progress";
+          bar.setAttribute("aria-hidden", "true");
+          bar.innerHTML = '<span style="width:' + Math.min(100, Math.round(m.pct)) + '%"></span>';
+          card.appendChild(bar);
+        }
         card.addEventListener("click", function () {
-          openPlayer(m.id, m.type, m.title, m.season, m.episode, m.bg);
+          if (!epDone) { openPlayer(m.id, m.type, m.title, m.season, m.episode, m.bg); return; }
+          // Terminó ese episodio: se abre el siguiente (o el primero de la siguiente temporada).
+          var s0 = Number(m.season), e0 = Number(m.episode);
+          fetchTMDB("/tv/" + m.id + "/season/" + s0).then(function (d) {
+            var nxt = ((d && d.episodes) || []).filter(function (x) { return Number(x.episode_number) > e0; }).sort(function (a, b) { return a.episode_number - b.episode_number; })[0];
+            if (nxt) return openPlayer(m.id, m.type, m.title, s0, nxt.episode_number, m.bg);
+            return fetchTMDB("/tv/" + m.id + "/season/" + (s0 + 1)).then(function (d2) {
+              var first = ((d2 && d2.episodes) || [])[0];
+              if (first) openPlayer(m.id, m.type, m.title, s0 + 1, first.episode_number, m.bg);
+              else openPlayer(m.id, m.type, m.title, m.season, m.episode, m.bg);
+            });
+          }).catch(function () { openPlayer(m.id, m.type, m.title, m.season, m.episode, m.bg); });
         });
 
         scroll.appendChild(card);

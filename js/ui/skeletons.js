@@ -33,5 +33,29 @@ function emptyStateHTML(kind, title, text, actLabel, act) {
   return '<div class="empty-state empty-' + kind + '"><div class="empty-art" aria-hidden="true"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + (EMPTY_ICONS[kind] || EMPTY_ICONS.none) + "</svg></div><h2>" + title + "</h2>" + (text ? "<p>" + text + "</p>" : "") +
     (actLabel ? '<button type="button" class="genre-chip chip-primary" data-act="' + act + '">' + actLabel + "</button>" : "") + "</div>";
 }
-function emptyOffline() { return emptyStateHTML("offline", L("Sin conexión con el catálogo", "Can't reach the catalog"), L("Revisa tu internet e inténtalo de nuevo.", "Check your connection and try again."), L("Reintentar", "Retry"), "retry"); }
+function apiProblem() {
+  var e = window.tcLastApiError || {}, st = e.status;
+  if (navigator.onLine === false) return [L("Sin conexión a internet", "No internet connection"), L("Revisa tu conexión y vuelve a intentarlo.", "Check your connection and try again.")];
+  if (st === 401 || st === 403) return [L("Clave del catálogo no válida", "Invalid catalog key"), L("La clave de TMDB no es válida o no tiene permiso (error " + st + "). Si eres el dueño, revisa config.js.", "The TMDB key is invalid or not allowed (error " + st + "). If you own the site, check config.js.")];
+  if (st === 404) return [L("No se encontró lo que buscabas", "Not found"), L("El catálogo no tiene ese contenido (error 404).", "The catalog doesn't have that content (error 404).")];
+  if (st === 429) return [L("Demasiadas solicitudes", "Too many requests"), L("El catálogo pide esperar un momento (error 429). Inténtalo en un minuto.", "The catalog asks you to wait a moment (error 429). Try again in a minute.")];
+  if (st >= 500) return [L("El catálogo tiene problemas", "The catalog is having problems"), L("TMDB no responde bien ahora (error " + st + "). No es tu dispositivo; reintenta en unos minutos.", "TMDB isn't responding well right now (error " + st + "). It isn't your device; retry in a few minutes.")];
+  if (e.timeout) return [L("El catálogo tarda demasiado", "The catalog is taking too long"), L("La conexión es lenta o inestable. Inténtalo de nuevo.", "The connection is slow or unstable. Try again.")];
+  return [L("Sin conexión con el catálogo", "Can't reach the catalog"), L("Revisa tu internet e inténtalo de nuevo.", "Check your connection and try again.")];
+}
+function emptyOffline() { var pr = apiProblem(); return emptyStateHTML("offline", pr[0], pr[1], L("Reintentar", "Retry"), "retry"); }
+/** Una fila que no pudo cargar muestra su título y «Reintentar» solo para ella (el resto de la página sigue igual). */
+function renderRowError(title, retry) {
+  var row = document.createElement("div");
+  row.className = "row catalog-row row-error";
+  var pr = apiProblem();
+  row.innerHTML = '<div class="row-header"><h2 class="row-title">' + escapeHTML(title) + '</h2></div><div class="row-error-box" role="status"><span>' + escapeHTML(pr[0]) + '</span><button type="button" class="genre-chip">' + escapeHTML(L("Reintentar", "Retry")) + '</button></div>';
+  var btn = row.querySelector("button");
+  btn.addEventListener("click", function () {
+    btn.disabled = true; btn.textContent = L("Cargando…", "Loading…");
+    Promise.resolve().then(retry).then(function (ok) { if (ok !== false && row.parentNode) row.parentNode.removeChild(row); else { btn.disabled = false; btn.textContent = L("Reintentar", "Retry"); } }).catch(function () { btn.disabled = false; btn.textContent = L("Reintentar", "Retry"); });
+  });
+  if ($rowsContainer) $rowsContainer.appendChild(row);
+  return row;
+}
 function emptyNone() { return emptyStateHTML("none", L("Sin resultados", "No results"), L("Prueba con otros filtros o palabras.", "Try other filters or words."), L("Volver al inicio", "Back to home"), "go-home"); }

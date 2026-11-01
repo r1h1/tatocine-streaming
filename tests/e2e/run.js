@@ -281,7 +281,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 30 s", true, 30000]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 31 s", true, 31000]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -292,6 +292,27 @@ async function main() {
       for (const g of gaps) ok(Math.abs(g - expected) < 1000, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
     });
   }
+  await test("Invitado siempre en español (aunque el navegador esté en inglés) y la portada muestra el Top 10 de la semana", async (page) => {
+    await enter(page, "guest");
+    eq(await page.evaluate(() => UI_LANG), "es", "idioma del Invitado:");
+    ok(/Inicio/.test(await page.evaluate(() => document.querySelector(".top-nav, nav, body").innerText)), "la interfaz no está en español");
+    await page.waitForFunction(() => heroMoviesList.length === 10, null, { timeout: 20000 });
+  });
+
+  await test("portada: sin botón de volumen, 1,8 s para verse, 31 s por título y menú «Mi cine»", async (page) => {
+    await enter(page);
+    const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
+    eq(r.dwell, 31000, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+  });
+
+  await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
+    await page.route("**/api.themoviedb.org/3/movie/popular**", (r) => r.abort());
+    await enter(page);
+    await page.waitForSelector(".row-error", { timeout: 20000 });
+    ok(/Películas Populares/.test(await page.locator(".row-error").first().innerText()), "la fila con error no nombra su título");
+    ok(await page.locator("#rows-container .card").count() > 5, "el resto de la portada no cargó");
+  });
+
   await test("portada: el tráiler se precarga pero no se ve antes del segundo 2, y aparece solo (sin pasar el ratón)", async (page, ctx) => {
     await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
     await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
