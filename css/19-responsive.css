@@ -347,3 +347,6 @@ body.rm .hero-bg { transition: none; }
 .tc-qr .tour-title { text-align: center; }
 .cp-res-btn { justify-content: center; }
 #details-modal.has-accent .details-body { background: radial-gradient(60% 40% at 25% 60%, rgba(var(--accent-rgb), .20), transparent 70%); }
+
+/* Decidir en pareja: la ficha se abre encima del diálogo (que sigue abierto debajo, con su ronda) */
+body.cp-details #details-modal { z-index: 6000; }

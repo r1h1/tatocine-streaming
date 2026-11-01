@@ -84,7 +84,7 @@
         return;
       }
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) > -1 && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
-        if (isTypingTarget(ae) || document.body.classList.contains("cp-active")) return;     // «Decidir en pareja» usa ← → para responder
+        if (isTypingTarget(ae) || (document.body.classList.contains("cp-active") && !document.body.classList.contains("cp-details"))) return;     // «Decidir en pareja» usa ← → para responder
         var kb = false;
         try { kb = !!ae && ae !== document.body && ae.matches(":focus-visible"); } catch (err) { }
         var tvIdle = IS_TV && (!ae || ae === document.body) && (e.key === "ArrowDown" || e.key === "ArrowUp");

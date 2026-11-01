@@ -250,8 +250,22 @@ async function main() {
     await page.click('[data-cp="info"]');
     await page.waitForSelector("#details-real-content", { state: "visible", timeout: 20000 });
     eq(await page.evaluate(() => document.getElementById("tc-profile-overlay").classList.contains("open")), false, "Info abrió el selector de perfiles:");
+    ok(await page.evaluate(() => document.getElementById("tc-qr-overlay").classList.contains("open") && !!document.getElementById("cp-card")), "el diálogo de la pareja se cerró al abrir Info");
+    await page.keyboard.press("ArrowRight");                      // con la ficha encima, las flechas NO responden la carta de abajo
+    eq((await page.locator(".tc-qr-meta").first().innerText()).includes("2/"), true, "las flechas respondieron la carta con la ficha abierta:");
     await page.evaluate(() => closeDetails());
-    await page.waitForSelector("#cp-card", { timeout: 5000 });
+    await page.waitForFunction(() => !document.getElementById("tc-qr-overlay").inert && !document.body.classList.contains("cp-details"), null, { timeout: 5000 });
+    eq((await page.locator(".tc-qr-meta").first().innerText()).includes("2/"), true, "la ronda perdió su posición:");
+    // la ronda sobrevive a cerrar el diálogo y a recargar
+    await page.evaluate(() => closeQr());
+    await page.evaluate(() => openCouplePicker());
+    await page.waitForSelector('[data-cp="resume"]');
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => document.body.classList.contains("app-ready"));
+    await page.waitForSelector(".toast-action", { timeout: 10000 });
+    await page.click(".toast-action");
+    await page.waitForSelector("#cp-card");
+    eq((await page.locator(".tc-qr-meta").first().innerText()).includes("2/"), true, "al retomar tras recargar:");
     await page.evaluate(() => closeQr());
     await page.evaluate(() => openPlayer(603, "movie", "Matrix", null, null, null));
     await page.waitForSelector("#player-view iframe", { timeout: 10000 });

@@ -123,3 +123,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 ## Fase 6 · CSP estricta y pruebas
 - **Sin JavaScript en línea.** `js/boot.js` (cabecera) y `js/core/picker-open.js` sustituyen los scripts del HTML; `js/core/handlers.js` (generado al migrar) contiene los antiguos `onclick`/`onkeydown` del HTML estático como `TC_H.hN`, y `js/core/actions.js` los despacha (`data-h`, `data-hk`) junto con `data-act` (acciones registradas con `registerAction`), `data-hover`, `data-lc` y `data-fb` (clase al cargar e imagen de respaldo). Las plantillas de JS ya no escriben atributos `on*`: pasan los datos en `data-*`.
 - **Pruebas.** `tests/*.test.js` (Node, sin dependencias) y `tests/e2e/run.js` (Playwright; solo desarrollo, el sitio sigue sin build). Las pruebas de navegador necesitan internet y la clave de TMDB en `config.js`.
+
+## Estado de los diálogos
+`couple-picker.js` guarda la ronda en `sessionStorage` (`tatoPairV1`, 3 h, validada al leer) tras cada respuesta. «Info» (`cpOpenInfo`) no cierra el diálogo: lo deja debajo (inerte, `body.cp-details`) y la ficha se abre encima (z-index 6000); un `MutationObserver` lo reactiva al cerrarse la ficha por cualquier vía.
