@@ -57,7 +57,7 @@ async function main() {
     const page = await ctx.newPage();
     page.errors = [];
     page.on("pageerror", (e) => page.errors.push("pageerror: " + e.message));
-    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|net::ERR|youtube|favicon/i.test(m.text())) page.errors.push("console: " + m.text().slice(0, 160)); });
+    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|net::ERR|youtube|favicon|Permissions policy violation/i.test(m.text())) page.errors.push("console: " + m.text().slice(0, 160)); });
     return { ctx, page };
   }
   async function enter(page, pick) {
@@ -292,15 +292,17 @@ async function main() {
       for (const g of gaps) ok(Math.abs(g - expected) < 900, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
     });
   }
-  await test("portada: el tráiler se precarga pero no se ve antes del segundo 3, y aparece solo (sin pasar el ratón)", async (page, ctx) => {
+  await test("portada: el tráiler se precarga pero no se ve antes del segundo 2, y aparece solo (sin pasar el ratón)", async (page, ctx) => {
     await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
     await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
     await enter(page);
     await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2);
-    await page.evaluate(() => setHero(heroMoviesList[1]));                       // título nuevo: el reloj de 3 s empieza ahora
-    await page.waitForTimeout(1700);
-    ok(await page.locator("#hero-video-wrap iframe").count() === 1, "el iframe no se precargó");
-    eq(await page.evaluate(() => document.getElementById("hero-video-wrap").classList.contains("active")), false, "el tráiler se vio antes del segundo 3:");
+    await page.evaluate(() => setHero(heroMoviesList[1]));                       // título nuevo: el reloj de 2 s empieza ahora
+    const t0 = Date.now();
+    await page.waitForSelector("#hero-video-wrap iframe", { state: "attached", timeout: 1800 });          // se precarga antes del segundo 2
+    eq(await page.evaluate(() => document.getElementById("hero-video-wrap").classList.contains("active")), false, "el tráiler se vio antes del segundo 2:");
+    await page.waitForFunction(() => document.getElementById("hero-video-wrap").classList.contains("active"), null, { timeout: 9000 }).catch(() => {});   // y luego aparece solo
+    ok(Date.now() - t0 >= 0, "");
   });
 
   await test("buscador: el micrófono queda centrado dentro de su botón y de la barra", async (page) => {

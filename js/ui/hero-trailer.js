@@ -1,7 +1,7 @@
 /**
  * TatoCine · js/ui/hero-trailer.js
  * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 6 s en pantalla; si TIENE tráiler dura 8 s
- * y el vídeo se ve en el segundo 3 (se precarga y arranca oculto antes, sin pasar el ratón), en Inicio, Películas, Series, Anime y Niños.
+ * y el vídeo se ve en el segundo 2 (se precarga y arranca oculto antes, sin pasar el ratón), en Inicio, Películas, Series, Anime y Niños.
  * Es youtube-nocookie y sin sonido. Se detiene al cambiar de título, salir de la portada, abrir una ficha o el reproductor,
  * u ocultar la pestaña.
  * Ajustes → «Tráiler en la portada»: Automático (equipos con ratón y buena conexión; respeta «reducir animaciones» del sistema) /
@@ -31,6 +31,7 @@ function htWhyNot() {
 }
 function htAllowed() { return !document.hidden && htWhyNot() === ""; }
 function htSetStatus(msg) { htStatus = msg; var el = $("hero-trailer-sub"); if (el) el.textContent = htLabel() + (htStatus ? " — " + htStatus : ""); }
+var htWrapGen = 0;
 function htStop() {
   htToken++;
   clearTimeout(htTimer); clearInterval(htWatch);
@@ -38,7 +39,8 @@ function htStop() {
   $heroVideoWrap.classList.remove("active");
   document.body.classList.remove("hero-trailer-on");
   var b = $("hero-sound-btn"); if (b) b.remove();
-  setTimeout(function () { if (!htPlayingKey) { $heroVideoWrap.innerHTML = ""; $heroVideoWrap.dataset.key = ""; } }, 520);
+  var gen = ++htWrapGen;                                                              // la limpieza diferida no debe borrar un tráiler que empezó a cargarse después
+  setTimeout(function () { if (gen === htWrapGen && !htPlayingKey) { $heroVideoWrap.innerHTML = ""; $heroVideoWrap.dataset.key = ""; } }, 520);
 }
 async function htTrailerKeys(m) {
   var k = m.type + ":" + m.id;
@@ -54,8 +56,8 @@ async function htTrailerKeys(m) {
   htCache[k] = keys;
   return keys;
 }
-var HT_PRELOAD_MS = 800, HT_PLAY_MS = 1500, HT_START_MS = 3000;   // se precarga a los 0,8 s, arranca (oculto) a los 1,5 s y SE VE a los 3 s del título: así los controles que YouTube muestra al empezar ya pasaron
-/** Prepara keys[i] en pausa y lo arranca en el segundo 3. Solo se muestra cuando YouTube confirma que reproduce; si falla, prueba el siguiente. */
+var HT_PRELOAD_MS = 500, HT_PLAY_MS = 1000, HT_START_MS = 2000;   // se precarga a los 0,5 s, arranca (oculto) a 1 s y SE VE a los 2 s del título: los controles que YouTube muestra al empezar ya pasaron
+/** Prepara keys[i] en pausa y lo arranca oculto y lo muestra en el segundo 2. Solo se muestra cuando YouTube confirma que reproduce; si falla, prueba el siguiente. */
 function htPlay(keys, i, token) {
   if (token !== htToken) return;
   if (i >= keys.length) { htSetStatus(L("YouTube no pudo reproducir los tráilers de este título.", "YouTube couldn't play this title's trailers.")); return; }
@@ -75,13 +77,13 @@ function htPlay(keys, i, token) {
     if (d.event === "onError") { next(L("YouTube rechazó el tráiler (error " + d.info + ")", "YouTube rejected the trailer (error " + d.info + ")")); return; }
     if (state === 1 && !shown) {
       shown = true; clearTimeout(giveUp); clearInterval(kick);
-      setTimeout(function () { htReveal(f, key, token); }, Math.max(0, heroShownAt + HT_START_MS - Date.now()));       // nunca se ve antes del segundo 3
+      setTimeout(function () { htReveal(f, key, token); }, Math.max(0, heroShownAt + HT_START_MS - Date.now()));       // nunca se ve antes del segundo 2
     }
   }
   window.addEventListener("message", onMsg);
   f.onload = function () {
     try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "https://www.youtube-nocookie.com"); } catch (e) { }
-    // A los 1,5 s se da la orden de reproducir, oculto (se repite cada 0,7 s hasta que YouTube confirme que reproduce).
+    // A 1 s se da la orden de reproducir, oculto (se repite cada 0,7 s hasta que YouTube confirme que reproduce).
     var startIn = Math.max(0, heroShownAt + HT_PLAY_MS - Date.now());
     setTimeout(function () {
       if (token !== htToken || shown) return;
@@ -90,6 +92,7 @@ function htPlay(keys, i, token) {
       giveUp = setTimeout(function () { if (!shown) next(L("El tráiler no arrancó (el navegador pudo bloquear la reproducción automática).", "The trailer didn't start (the browser may have blocked autoplay).")); }, 4000);
     }, startIn);
   };
+  htWrapGen++;
   $heroVideoWrap.innerHTML = "";
   $heroVideoWrap.dataset.key = key;
   $heroVideoWrap.appendChild(f);
