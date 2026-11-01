@@ -526,9 +526,10 @@ function decorate(name, factory) {
         var active = p.id === activeProfileId;
         var safeId = escapeHTML(p.id);
         var safeName = escapeHTML(profileDisplayName(p));
+        var blockedForKid = p.guest && isKidProfile();
         var editButton = p.guest ? "" : '<button type="button" class="tc-profile-edit-btn" data-profile-action="edit" data-profile-id="' + safeId + '" aria-label="Editar nombre de ' + safeName + '" title="Editar nombre"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>';
-        return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + '">' +
-          '<button type="button" class="tc-profile-select-btn" data-profile-action="select" data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
+        return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + (blockedForKid ? " is-blocked" : "") + '">' +
+          '<button type="button" class="tc-profile-select-btn" data-profile-action="select"' + (blockedForKid ? ' aria-disabled="true"' : "") + ' data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
           '<span class="tc-profile-card-avatar" aria-hidden="true">' + escapeHTML(getProfileInitial(p)) + '</span>' +
           '<span class="tc-profile-card-name">' + safeName + '</span>' +
           '<span class="tc-profile-active-label">' + (active ? "Actual" : "Seleccionar") + (p.guest ? " · Sin historial" : "") + (p.kind === "kid" ? " · Niño" : "") + (p.lang === "en" && !p.guest ? " · ENG" : "") + (profileHasPin(p) ? " · PIN" : "") + '</span>' +
@@ -605,6 +606,8 @@ function decorate(name, factory) {
     function switchLocalProfile(profileId) {
       var selectedProfile = localProfiles.find(function (p) { return p.id === profileId; });
       if (!selectedProfile) return;
+      // Un perfil Niño nunca puede cambiar al Invitado (sin PIN y de adultos): primero debe entrar un perfil de adulto.
+      if (selectedProfile.guest && isKidProfile()) { showToast("Desde un perfil Niño no se puede entrar como Invitado"); return; }
 
       // Si se vuelve a elegir el perfil actual, solo se cierra el selector.
       // No se abre el formulario de creación ni el de edición.
@@ -2294,7 +2297,7 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
         if (document.hidden || isSearching || heroSectionIsEmpty()) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 6000);
+      }, 7000);
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");
@@ -4359,10 +4362,10 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
         return ok;
       }).catch(function () { return false; });
     }
-    function kidsFilterSearch(list) {
+    function kidsFilterSearch(list, limit) {
       var candidates = list.filter(function (x) {
         return !x.adult && !hasBlockedTerms(x.title, x.desc) && !(x.genre_ids || []).some(function (g) { return KID_BLOCKED_GENRES.indexOf(g) > -1; });
-      }).slice(0, 16);
+      }).slice(0, limit || 16);
       return Promise.all(candidates.map(function (x) {
         return isKidSafe(x.id, x.type).then(function (ok) { return ok ? x : null; });
       })).then(function (r) { return r.filter(Boolean); });
@@ -4599,7 +4602,7 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
       "Explora películas, series y anime. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.": "Explore movies, series and anime. Discover new releases, popular titles and recommendations based on your local preferences.",
       "Explora películas, series y anime. Descubre títulos populares y recomendaciones personalizadas.": "Explore movies, series and anime. Discover popular titles and personalized recommendations.",
       "TatoCine - Streaming Gratis": "TatoCine - Free Streaming", "TatoCine: películas, anime y series gratis en streaming.": "TatoCine: free streaming movies, anime and series.",
-      "Guardar": "Save", "Invitado": "Guest", "El perfil Invitado no se puede editar": "The Guest profile cannot be edited",
+      "Guardar": "Save", "Cerrar lista": "Close list", "Desde un perfil Niño no se puede entrar como Invitado": "Kids profiles cannot switch to the Guest profile", "Invitado": "Guest", "El perfil Invitado no se puede editar": "The Guest profile cannot be edited",
       "Todo público": "All ages"
     };
     // Reglas para textos con datos variables (aplican a fragmentos; se evalúan en orden)
@@ -5244,6 +5247,7 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
     function favSection(title, listId, editable) {
       var items = myList.filter(function (m) { return (m.list || null) === (listId || null); });
       var head = '<div class="row-header"><h2 class="row-title"' + (listId ? ' data-i18n="skip"' : "") + '>' + escapeHTML(title) + ' <span class="fav-count">(' + items.length + ')</span></h2>' +
+        (listId && favFilter === listId ? '<button type="button" class="fav-close-btn" onclick="setFavFilter(\'all\')" aria-label="Cerrar lista" title="Cerrar lista"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cerrar lista</span></button>' : "") +
         (editable ? '<button type="button" class="fav-edit-btn" title="Editar lista" aria-label="Editar lista" onclick="openListModal(\'' + escapeHTML(listId) + '\')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' : "") + "</div>";
       if (!items.length) return '<section class="fav-section">' + head + '<p class="fav-empty">Esta lista aún no tiene títulos. Usa el corazón en cualquier título y elige esta lista.</p></section>';
       return '<section class="fav-section">' + head + '<div class="grid-container">' + items.slice(0, favLimit).map(getCardHTML).join("") + "</div></section>" + (items.length > favLimit ? markFavTruncated() : "");
@@ -5305,7 +5309,7 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
     }
     function listCardHTML(l) {
       var count = favCount(l.id), active = favFilter === l.id;
-      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="button" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(\'' + escapeHTML(l.id) + '\')" aria-label="' + escapeHTML(l.name) + '">' +
+      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="button" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(favFilter === \'' + escapeHTML(l.id) + '\' ? \'all\' : \'' + escapeHTML(l.id) + '\')" aria-pressed="' + active + '" aria-label="' + escapeHTML(l.name) + '">' +
         '<div class="list-cover"></div><div class="list-shade"></div>' +
         '<button type="button" class="fav-edit-btn list-edit" title="Editar lista" aria-label="Editar lista" onclick="event.stopPropagation();openListModal(\'' + escapeHTML(l.id) + '\')">' + PENCIL_SVG + '</button>' +
         '<div class="list-info"><div class="list-name" data-i18n="skip">' + escapeHTML(l.name) + ' <span class="list-qty">(' + count + ")</span></div></div></div>";
@@ -5313,10 +5317,10 @@ function setHeroLoading(on) { if ($heroSection) $heroSection.classList.toggle("h
     function renderFavoritesView() {
       favTruncated = false;
       if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && !favListById(favFilter)) favFilter = "all";
-      var chip = function (id, label) { return '<button class="genre-chip ' + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
-      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos") + chip("general", "General") + chip("watched", "Vistas") +
+      var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
+      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") +
         '<span class="fav-toolbar-gap"></span>' +
-        (favLists.length < 12 ? '<button class="genre-chip" onclick="openListModal()">+ Nueva lista</button>' : "") +
+        (favLists.length < 12 ? '<button class="genre-chip chip-primary" onclick="openListModal()">+ Nueva lista</button>' : "") +
         '<button class="genre-chip" onclick="openStats()">Estadísticas</button></div>';
       var cards = favLists.length ? '<section class="fav-lists"><div class="row-header"><h2 class="row-title">Mis listas</h2></div><div class="list-cards">' + favLists.map(listCardHTML).join("") + "</div></section>" : "";
       var body = "";
@@ -6152,6 +6156,15 @@ function loadSeasonEpisodes(id, season) {
   });
   if (typeof i18nAdd === "function") i18nAdd({ "Temporadas y episodios": "Seasons and episodes" });
 })();
+
+// La ✕ de la ficha cierra primero el tráiler (si está abierto) y solo después la ficha: un único botón de salir.
+decorate("closeDetails", function (original) {
+  return function (fromPlay) {
+    var trailer = $("details-trailer");
+    if (!fromPlay && trailer && trailer.classList.contains("active")) { closeDetailsTrailer(); return; }
+    return original.apply(this, arguments);
+  };
+});
 ;
 /* ==== js/features/search-suggest.js ==== */
 /**
@@ -6472,7 +6485,7 @@ var WIZARD_OPTIONS = {
     { k: "drama", es: "Drama", en: "Drama", movie: "18", tv: "18" }
   ],
   kidMoods: ["fun", "adrenaline", "fantasy"],      // ánimos permitidos en perfiles Niño
-  times: [30, 60, 90, 120],
+  times: [30, 60, 90, 120, "120+"],
   who: [
     { k: "solo", es: "Solo", en: "Alone" },
     { k: "couple", es: "Pareja", en: "As a couple" },
@@ -6498,26 +6511,30 @@ var WIZ_ICONS = (function () {
   };
 })();
 var wizardState = { mood: null, time: null, who: null, avoid: [] };
-var wizardPool = [], wizardShown = {}, wizardRun = 0, wizardCurrent = [];
+var wizardPool = [], wizardShown = {}, wizardRun = 0, wizardCurrent = [], wizardRelaxed = false;
 
 function wizardOptionLabel(o) { return L(o.es, o.en); }
 function wizardFindMood() { return WIZARD_OPTIONS.moods.find(function (m) { return m.k === wizardState.mood; }) || null; }
 
-/** Construye la consulta de `discover` para películas ("movie") o series ("tv"). */
-function wizardQuery(kind, page) {
-  var mood = wizardFindMood(), kids = kidsContext();
+/** Construye la consulta de `discover` ("movie" o "tv"). `relax` quita condiciones para garantizar siempre 3 resultados. */
+function wizardQuery(kind, page, relax) {
+  relax = relax || {};
+  var mood = relax.noMood ? null : wizardFindMood(), kids = kidsContext();
+  var time = relax.noTime ? null : wizardState.time;
+  if (time === "120+" && kind === "tv") return null;          // «Más de 120 min» solo aplica a películas
   var q = "&sort_by=popularity.desc&include_adult=false&vote_count.gte=" + (kind === "movie" ? 200 : 100) + "&page=" + page;
   // Niños: mismas reglas que la pestaña Niños (clasificación US apta, sin terror/suspenso/crimen/bélico)
   if (kids) q += kind === "movie" ? "&certification_country=US&certification=G" : "&certification_country=US&certification=TV-Y|TV-Y7|TV-G";
   if (mood && mood[kind]) q += "&with_genres=" + encodeURIComponent(mood[kind]);
   var without = [];
-  WIZARD_OPTIONS.avoid.forEach(function (a) { if (wizardState.avoid.indexOf(a.k) > -1 && a[kind]) without.push(a[kind]); });
+  if (!relax.noAvoid) WIZARD_OPTIONS.avoid.forEach(function (a) { if (wizardState.avoid.indexOf(a.k) > -1 && a[kind]) without.push(a[kind]); });
   if (kids) without.push(27, 53, 80, 10752, 9648, 10768);
-  else if (wizardState.who === "family") { without.push(27, 80); if (kind === "movie") q += "&certification_country=US&certification.lte=PG"; }
+  else if (wizardState.who === "family" && !relax.noAvoid) { without.push(27, 80); if (kind === "movie") q += "&certification_country=US&certification.lte=PG"; }
   if (without.length) q += "&without_genres=" + encodeURIComponent(without.join(","));
-  if (wizardState.time) {
-    q += "&with_runtime.lte=" + wizardState.time;
-    if (kind === "movie") q += "&with_runtime.gte=" + Math.max(60, wizardState.time - 40);
+  if (time === "120+") q += "&with_runtime.gte=121";
+  else if (time) {
+    q += "&with_runtime.lte=" + time;
+    if (kind === "movie") q += "&with_runtime.gte=" + Math.max(60, time - 40);
   }
   return q;
 }
@@ -6535,7 +6552,8 @@ function wizardScore(item, weights, maxWeight) {
 function wizardReason(item, topTaste) {
   var parts = [], mood = wizardFindMood();
   if (mood) parts.push(L("Va con tu ánimo: ", "Fits your mood: ") + wizardOptionLabel(mood));
-  if (wizardState.time) parts.push(item.type === "movie"
+  if (wizardState.time === "120+") parts.push(L("dura más de 120 min", "runs over 120 min"));
+  else if (wizardState.time) parts.push(item.type === "movie"
     ? L("dura menos de " + wizardState.time + " min", "runs under " + wizardState.time + " min")
     : L("episodios de menos de " + wizardState.time + " min", "episodes under " + wizardState.time + " min"));
   if (item.rating >= 7.5) parts.push(L("muy bien valorada (", "highly rated (") + Number(item.rating).toFixed(1) + " ★)");
@@ -6549,53 +6567,67 @@ function wizardPickThree() {
   profile.forEach(function (p) { weights[p.id] = p.score; });
   var maxWeight = (profile[0] && profile[0].score) || 1;
   var topTaste = profile.slice(0, 3).map(function (p) { return p.id; });
-  var scored = wizardPool.filter(function (m) { return !wizardShown[m.type + ":" + m.id]; })
-    .map(function (m) { return { m: m, s: wizardScore(m, weights, maxWeight) }; })
-    .sort(function (a, b) { return b.s - a.s; });
-  var picks = [], counts = { movie: 0, tv: 0 };
-  scored.forEach(function (x) {
-    if (picks.length >= 3) return;
-    if (counts[x.m.type] >= 2 && scored.length > 5) return;     // mezcla de películas y series
-    counts[x.m.type]++;
-    picks.push(x.m);
+  var fresh = function () { return wizardPool.filter(function (m) { return !wizardShown[m.type + ":" + m.id]; }); };
+  if (fresh().length < 3) wizardShown = {};                          // se agotaron: se vuelve a empezar para no quedarse con menos de 3
+  var scored = fresh().map(function (m) { return { m: m, s: wizardScore(m, weights, maxWeight) }; }).sort(function (a, b) { return b.s - a.s; });
+  var picks = [], counts = { movie: 0, tv: 0 }, used = {};
+  scored.forEach(function (x) {                                     // primero, mezcla de películas y series
+    if (picks.length >= 3 || (counts[x.m.type] >= 2 && scored.length > 5)) return;
+    counts[x.m.type]++; used[x.m.type + ":" + x.m.id] = true; picks.push(x.m);
+  });
+  scored.forEach(function (x) {                                     // si faltan, se completa con los mejores restantes
+    if (picks.length >= 3 || used[x.m.type + ":" + x.m.id]) return;
+    used[x.m.type + ":" + x.m.id] = true; picks.push(x.m);
   });
   picks.forEach(function (m) { wizardShown[m.type + ":" + m.id] = true; m._reason = wizardReason(m, topTaste); });
   return picks;
 }
 
-function runWizard() {
-  var run = ++wizardRun;
-  var body = $("tc-wizard-body");
-  body.innerHTML = '<p class="wiz-loading" role="status">' + L("Buscando lo mejor para ti…", "Finding the best picks for you…") + "</p>" + skeletonResults(3);
-  var requests = [
-    fetchTMDB("/discover/movie", wizardQuery("movie", 1)), fetchTMDB("/discover/movie", wizardQuery("movie", 2)),
-    fetchTMDB("/discover/tv", wizardQuery("tv", 1)), fetchTMDB("/discover/tv", wizardQuery("tv", 2))
-  ].map(function (p) { return p.catch(function () { return null; }); });
-  Promise.all(requests).then(function (r) {
-    if (run !== wizardRun) return;
-    var ok = r.some(Boolean);
-    var avoidIds = {};
+/** Reúne candidatos; si con tus respuestas salen menos de 3 se relajan (tiempo → ánimo → lo que evitas) hasta tener 3 como mínimo. */
+var WIZARD_RELAX = [{}, { noTime: true }, { noTime: true, noMood: true }, { noTime: true, noMood: true, noAvoid: true }];
+function wizardCollect(relax, run) {
+  var jobs = [];
+  [1, 2, 3].forEach(function (page) {
+    ["movie", "tv"].forEach(function (kind) {
+      var q = wizardQuery(kind, page, relax);
+      if (q) jobs.push(fetchTMDB("/discover/" + kind, q).then(function (d) { return { kind: kind, data: d }; }).catch(function () { return null; }));
+    });
+  });
+  return Promise.all(jobs).then(function (r) {
+    var avoidIds = {}, pool = [], seen = {}, ok = r.some(Boolean);
     (typeof watchedList === "function" ? watchedList() : []).forEach(function (x) { avoidIds[x.type + ":" + x.id] = true; });
     completedTitles().forEach(function (x) { avoidIds[x.type + ":" + x.id] = true; });
-    var pool = [];
-    [[r[0], "movie"], [r[1], "movie"], [r[2], "tv"], [r[3], "tv"]].forEach(function (pair) {
-      ((pair[0] && pair[0].results) || []).forEach(function (raw) {
-        var m = pair[1] === "tv" ? mapTvResult(raw) : mapMovieResult(raw);
+    r.forEach(function (res) {
+      if (!res) return;
+      ((res.data && res.data.results) || []).forEach(function (raw) {
+        var m = res.kind === "tv" ? mapTvResult(raw) : mapMovieResult(raw), key = m.type + ":" + m.id;
         m._pop = raw.popularity;
-        if (m.isUpcoming || !m.bg || avoidIds[m.type + ":" + m.id]) return;
-        if (wizardState.who === "family" && pair[1] === "tv" && !(m.genre_ids.indexOf(10751) > -1 || m.genre_ids.indexOf(16) > -1 || m.genre_ids.indexOf(10762) > -1)) return;
+        if (m.isUpcoming || !m.bg || avoidIds[key] || seen[key]) return;
+        if (wizardState.who === "family" && res.kind === "tv" && !(m.genre_ids.indexOf(10751) > -1 || m.genre_ids.indexOf(16) > -1 || m.genre_ids.indexOf(10762) > -1)) return;
+        seen[key] = true;
         pool.push(m);
       });
     });
     // En Niños cada candidato se verifica con su clasificación real antes de mostrarse (falla cerrado).
-    var ready = kidsContext() ? kidsFilterSearch(pool.slice(0, 24)) : Promise.resolve(pool);
-    ready.then(function (safe) {
-      if (run !== wizardRun) return;
-      wizardPool = safe;
-      wizardShown = {};
-      renderWizardResults(ok);
-    });
+    return (kidsContext() ? kidsFilterSearch(pool, 48) : Promise.resolve(pool)).then(function (safe) { return { pool: safe, ok: ok }; });
   });
+}
+function runWizard() {
+  var run = ++wizardRun;
+  var body = $("tc-wizard-body");
+  body.innerHTML = '<p class="wiz-loading" role="status">' + L("Buscando lo mejor para ti…", "Finding the best picks for you…") + "</p>" + skeletonResults(3);
+  var level = 0, anyOk = false;
+  (function attempt() {
+    wizardCollect(WIZARD_RELAX[level], run).then(function (res) {
+      if (run !== wizardRun) return;
+      anyOk = anyOk || res.ok;
+      if (res.pool.length < 3 && level < WIZARD_RELAX.length - 1) { level++; attempt(); return; }
+      wizardPool = res.pool;
+      wizardShown = {};
+      wizardRelaxed = level > 0;
+      renderWizardResults(anyOk);
+    });
+  })();
 }
 
 function renderWizardResults(requestOk, reuse) {
@@ -6610,7 +6642,7 @@ function renderWizardResults(requestOk, reuse) {
       '</p><div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="back">' + L("Cambiar respuestas", "Change answers") + "</button></div>";
     return;
   }
-  body.innerHTML = '<div class="wiz-results">' + picks.map(function (m, i) {
+  body.innerHTML = (wizardRelaxed ? '<p class="wiz-note">' + L("Con tus respuestas había pocas opciones: ampliamos un poco la búsqueda para mostrarte 3.", "There were few matches for your answers, so we widened the search to show you 3.") + "</p>" : "") + '<div class="wiz-results">' + picks.map(function (m, i) {
     var saved = isSaved(m);
     return '<article class="wiz-result" data-i="' + i + '"><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_CARD + m.bg) + '" onerror="this.onerror=null;this.src=FALLBACK_IMG">' +
       '<div class="wiz-info"><h4 class="wiz-title" data-i18n="skip">' + escapeHTML(m.title) + '</h4>' +
@@ -6635,7 +6667,7 @@ function renderWizardForm() {
   }
   $("tc-wizard-body").innerHTML =
     '<p class="wiz-q">' + L("¿Qué ambiente tienes?", "What mood are you in?") + "</p>" + chips("mood", moods, wizardOptionLabel, function (o) { return o.k; }) +
-    '<p class="wiz-q">' + L("¿Cuánto tiempo tienes?", "How much time do you have?") + "</p>" + chips("time", WIZARD_OPTIONS.times, function (t) { return t + " min"; }, function (t) { return t; }) +
+    '<p class="wiz-q">' + L("¿Cuánto tiempo tienes?", "How much time do you have?") + "</p>" + chips("time", WIZARD_OPTIONS.times, function (t) { return t === "120+" ? L("Más de 120 min", "Over 120 min") : t + " min"; }, function (t) { return t; }) +
     '<p class="wiz-q">' + L("¿Con quién vas a ver?", "Who are you watching with?") + "</p>" + chips("who", WIZARD_OPTIONS.who, wizardOptionLabel, function (o) { return o.k; }) +
     (kids ? "" : '<p class="wiz-q">' + L("¿Qué prefieres evitar?", "What would you rather avoid?") + "</p>" + chips("avoid", WIZARD_OPTIONS.avoid, wizardOptionLabel, function (o) { return o.k; }, true)) +
     '<div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="go"' + (wizardState.mood ? "" : " disabled") + ">" + L("Mostrar 3 recomendaciones", "Show 3 recommendations") + "</button></div>";
@@ -6661,7 +6693,7 @@ function closeWizard() { wizardRun++; closeOverlay("tc-wizard-overlay"); }
     else if (act === "chip") {
       var g = el.getAttribute("data-group"), v = el.getAttribute("data-value");
       if (g === "avoid") { var i = wizardState.avoid.indexOf(v); if (i > -1) wizardState.avoid.splice(i, 1); else wizardState.avoid.push(v); }
-      else wizardState[g] = (g === "time" ? Number(v) : v) === wizardState[g] ? null : (g === "time" ? Number(v) : v);
+      else { var val = g === "time" && v !== "120+" ? Number(v) : v; wizardState[g] = val === wizardState[g] ? null : val; }
       renderWizardForm();
       var again = overlay.querySelector('[data-group="' + g + '"][data-value="' + v + '"]'); if (again) again.focus();
     }

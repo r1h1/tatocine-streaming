@@ -133,6 +133,7 @@
     function favSection(title, listId, editable) {
       var items = myList.filter(function (m) { return (m.list || null) === (listId || null); });
       var head = '<div class="row-header"><h2 class="row-title"' + (listId ? ' data-i18n="skip"' : "") + '>' + escapeHTML(title) + ' <span class="fav-count">(' + items.length + ')</span></h2>' +
+        (listId && favFilter === listId ? '<button type="button" class="fav-close-btn" onclick="setFavFilter(\'all\')" aria-label="Cerrar lista" title="Cerrar lista"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cerrar lista</span></button>' : "") +
         (editable ? '<button type="button" class="fav-edit-btn" title="Editar lista" aria-label="Editar lista" onclick="openListModal(\'' + escapeHTML(listId) + '\')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' : "") + "</div>";
       if (!items.length) return '<section class="fav-section">' + head + '<p class="fav-empty">Esta lista aún no tiene títulos. Usa el corazón en cualquier título y elige esta lista.</p></section>';
       return '<section class="fav-section">' + head + '<div class="grid-container">' + items.slice(0, favLimit).map(getCardHTML).join("") + "</div></section>" + (items.length > favLimit ? markFavTruncated() : "");
@@ -194,7 +195,7 @@
     }
     function listCardHTML(l) {
       var count = favCount(l.id), active = favFilter === l.id;
-      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="button" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(\'' + escapeHTML(l.id) + '\')" aria-label="' + escapeHTML(l.name) + '">' +
+      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="button" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(favFilter === \'' + escapeHTML(l.id) + '\' ? \'all\' : \'' + escapeHTML(l.id) + '\')" aria-pressed="' + active + '" aria-label="' + escapeHTML(l.name) + '">' +
         '<div class="list-cover"></div><div class="list-shade"></div>' +
         '<button type="button" class="fav-edit-btn list-edit" title="Editar lista" aria-label="Editar lista" onclick="event.stopPropagation();openListModal(\'' + escapeHTML(l.id) + '\')">' + PENCIL_SVG + '</button>' +
         '<div class="list-info"><div class="list-name" data-i18n="skip">' + escapeHTML(l.name) + ' <span class="list-qty">(' + count + ")</span></div></div></div>";
@@ -202,10 +203,10 @@
     function renderFavoritesView() {
       favTruncated = false;
       if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && !favListById(favFilter)) favFilter = "all";
-      var chip = function (id, label) { return '<button class="genre-chip ' + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
-      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos") + chip("general", "General") + chip("watched", "Vistas") +
+      var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
+      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") +
         '<span class="fav-toolbar-gap"></span>' +
-        (favLists.length < 12 ? '<button class="genre-chip" onclick="openListModal()">+ Nueva lista</button>' : "") +
+        (favLists.length < 12 ? '<button class="genre-chip chip-primary" onclick="openListModal()">+ Nueva lista</button>' : "") +
         '<button class="genre-chip" onclick="openStats()">Estadísticas</button></div>';
       var cards = favLists.length ? '<section class="fav-lists"><div class="row-header"><h2 class="row-title">Mis listas</h2></div><div class="list-cards">' + favLists.map(listCardHTML).join("") + "</div></section>" : "";
       var body = "";

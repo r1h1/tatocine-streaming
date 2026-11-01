@@ -140,7 +140,7 @@
       "Explora películas, series y anime. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.": "Explore movies, series and anime. Discover new releases, popular titles and recommendations based on your local preferences.",
       "Explora películas, series y anime. Descubre títulos populares y recomendaciones personalizadas.": "Explore movies, series and anime. Discover popular titles and personalized recommendations.",
       "TatoCine - Streaming Gratis": "TatoCine - Free Streaming", "TatoCine: películas, anime y series gratis en streaming.": "TatoCine: free streaming movies, anime and series.",
-      "Guardar": "Save", "Invitado": "Guest", "El perfil Invitado no se puede editar": "The Guest profile cannot be edited",
+      "Guardar": "Save", "Cerrar lista": "Close list", "Desde un perfil Niño no se puede entrar como Invitado": "Kids profiles cannot switch to the Guest profile", "Invitado": "Guest", "El perfil Invitado no se puede editar": "The Guest profile cannot be edited",
       "Todo público": "All ages"
     };
     // Reglas para textos con datos variables (aplican a fragmentos; se evalúan en orden)

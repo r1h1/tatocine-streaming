@@ -338,7 +338,7 @@
         if (document.hidden || isSearching || heroSectionIsEmpty()) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 6000);
+      }, 7000);
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");

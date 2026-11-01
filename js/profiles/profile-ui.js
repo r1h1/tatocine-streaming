@@ -206,9 +206,10 @@
         var active = p.id === activeProfileId;
         var safeId = escapeHTML(p.id);
         var safeName = escapeHTML(profileDisplayName(p));
+        var blockedForKid = p.guest && isKidProfile();
         var editButton = p.guest ? "" : '<button type="button" class="tc-profile-edit-btn" data-profile-action="edit" data-profile-id="' + safeId + '" aria-label="Editar nombre de ' + safeName + '" title="Editar nombre"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>';
-        return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + '">' +
-          '<button type="button" class="tc-profile-select-btn" data-profile-action="select" data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
+        return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + (blockedForKid ? " is-blocked" : "") + '">' +
+          '<button type="button" class="tc-profile-select-btn" data-profile-action="select"' + (blockedForKid ? ' aria-disabled="true"' : "") + ' data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
           '<span class="tc-profile-card-avatar" aria-hidden="true">' + escapeHTML(getProfileInitial(p)) + '</span>' +
           '<span class="tc-profile-card-name">' + safeName + '</span>' +
           '<span class="tc-profile-active-label">' + (active ? "Actual" : "Seleccionar") + (p.guest ? " · Sin historial" : "") + (p.kind === "kid" ? " · Niño" : "") + (p.lang === "en" && !p.guest ? " · ENG" : "") + (profileHasPin(p) ? " · PIN" : "") + '</span>' +
@@ -285,6 +286,8 @@
     function switchLocalProfile(profileId) {
       var selectedProfile = localProfiles.find(function (p) { return p.id === profileId; });
       if (!selectedProfile) return;
+      // Un perfil Niño nunca puede cambiar al Invitado (sin PIN y de adultos): primero debe entrar un perfil de adulto.
+      if (selectedProfile.guest && isKidProfile()) { showToast("Desde un perfil Niño no se puede entrar como Invitado"); return; }
 
       // Si se vuelve a elegir el perfil actual, solo se cierra el selector.
       // No se abre el formulario de creación ni el de edición.

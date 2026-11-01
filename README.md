@@ -1,6 +1,6 @@
 # TatoCine — Películas, series y anime
 
-![Versión](https://img.shields.io/badge/Versión-5.2.0-blue)
+![Versión](https://img.shields.io/badge/Versión-5.3.0-blue)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
 ![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20CSS%20%7C%20JS-orange)
 ![PWA](https://img.shields.io/badge/PWA-Instalable-purple)
@@ -12,16 +12,16 @@
 ## Características
 
 - **Inicio estilo streaming:** portada con carrusel, Continuar viendo (con progreso), **Nuevos episodios**, Hecho para ti, Porque viste…, Tendencias, Top 10, colecciones y **Plataformas y estudios** (Netflix, Disney+, HBO Max, Prime Video, Marvel, Pixar, Ghibli…).
-- **«¿Qué ver hoy?»:** 4 preguntas (ambiente, tiempo, compañía, qué evitar) → 3 recomendaciones con el motivo de cada una; puedes pedir otras 3, ver, abrir la ficha o guardar.
-- **Ficha del título:** director (o creadores), reparto, tráiler, recomendados, compartir, favoritos y, en series, **temporadas y episodios** con imagen, duración y sinopsis (tocas un episodio y se reproduce). **Marcar como vista** y valorar con 👍/👎 (afinan tus recomendaciones).
+- **«¿Qué ver hoy?»:** 4 preguntas (ambiente, tiempo —incluye «Más de 120 min»—, compañía, qué evitar) → **siempre 3** recomendaciones con el motivo de cada una (si tus respuestas dejan pocas opciones, se amplía la búsqueda y se avisa); puedes pedir otras 3, ver, abrir la ficha o guardar.
+- **Ficha del título:** director (o creadores), reparto, tráiler, recomendados, compartir, favoritos y, en series, **temporadas y episodios** con imagen, duración y sinopsis en 1 columna (móvil/tableta), 2 (pantallas medianas) o 3 (grandes); tocas un episodio y se reproduce. El tráiler tiene un único botón de salir. **Marcar como vista** y valorar con 👍/👎 (afinan tus recomendaciones).
 - **Búsqueda inteligente:** sugerencias mientras escribes (títulos y personas), obras de un actor o director (también desde la ficha) y búsquedas recientes por perfil.
-- **Favoritos con listas** (crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
+- **Favoritos con listas** («Todos» y «+ Nueva lista» como botones primarios; abrir y cerrar una lista tocando su tarjeta de nuevo o con «Cerrar lista»; crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
 - **Carga sin saltos:** *skeletons* en toda la app y **scroll infinito** en todas las pestañas (Inicio, Películas, Series, Anime, Niños, búsqueda, plataformas y Favoritos).
 - **Hecho para ti:** se activa con **2 títulos finalizados** y mejora con cada uno; todo se calcula localmente.
 - **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (si el servidor no avisa el final, aparece «Siguiente episodio en 10 s» con Cancelar).
 - **Avisos de nuevo episodio** para tus series (se comprueban al abrir el Inicio; sin servidor no hay notificaciones push).
 - **Copia de seguridad** del perfil (Ajustes → Exportar/Importar archivo; sin PIN, se fusiona con los datos existentes).
-- **Portada automática:** el **Top 10 de la semana** rota solo cada 6 s con fundido e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).
+- **Portada automática:** el **Top 10 de la semana** rota solo cada 7 s con fundido e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).
 - **Estadísticas y Ajustes** se reorganizan en cuadrículas en pantallas grandes (móvil y tableta sin cambios). Una lista de favoritos vacía muestra una portada automática acorde a su nombre.
 - **Racha:** días seguidos reproduciendo algo, con icono de fuego junto al perfil (contador local y discreto; no existe en perfiles Niño).
 - Fondos del selector de perfil en orden aleatorio; listas de favoritos como tarjetas verticales con el póster de su primer título y su cantidad (p. ej. «Terror (4)»), sin repetirse; cada cambio de pestaña empieza arriba.
@@ -30,7 +30,7 @@
 
 **6 perfiles en total** (en filas de 3): «Yo» y **«Invitado»** vienen por defecto y se pueden crear 4 más; crear, editar y **eliminar** (icono de basurero). Al abrir la app hay que **elegir un perfil** (el selector no se puede cerrar); ya dentro de uno, sí se puede cerrar. Cada uno elige **Adulto** o **Niño**, un **idioma (ESP / ENG)** y un **PIN** opcional de 4 dígitos (5 fallos = bloqueo de 30 s). Siempre queda un perfil adulto.
 
-**Invitado:** no guarda nada en el dispositivo (ni historial, favoritos, búsquedas, racha ni caché de la API): todo vive en memoria y desaparece al cerrar o recargar. No se edita, no tiene PIN, no administra perfiles y no exporta copias.
+**Invitado:** (un perfil Niño **no puede** cambiar al Invitado) no guarda nada en el dispositivo (ni historial, favoritos, búsquedas, racha ni caché de la API): todo vive en memoria y desaparece al cerrar o recargar. No se edita, no tiene PIN, no administra perfiles y no exporta copias.
 
 **Idioma por perfil:** ESP → interfaz y catálogo en español, servidor por defecto **ESP1**; ENG → todo en inglés, servidor por defecto **ENG1**. El siguiente episodio automático viene activado.
 

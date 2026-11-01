@@ -99,3 +99,12 @@ function loadSeasonEpisodes(id, season) {
   });
   if (typeof i18nAdd === "function") i18nAdd({ "Temporadas y episodios": "Seasons and episodes" });
 })();
+
+// La ✕ de la ficha cierra primero el tráiler (si está abierto) y solo después la ficha: un único botón de salir.
+decorate("closeDetails", function (original) {
+  return function (fromPlay) {
+    var trailer = $("details-trailer");
+    if (!fromPlay && trailer && trailer.classList.contains("active")) { closeDetailsTrailer(); return; }
+    return original.apply(this, arguments);
+  };
+});

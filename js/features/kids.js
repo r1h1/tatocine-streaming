@@ -47,10 +47,10 @@
         return ok;
       }).catch(function () { return false; });
     }
-    function kidsFilterSearch(list) {
+    function kidsFilterSearch(list, limit) {
       var candidates = list.filter(function (x) {
         return !x.adult && !hasBlockedTerms(x.title, x.desc) && !(x.genre_ids || []).some(function (g) { return KID_BLOCKED_GENRES.indexOf(g) > -1; });
-      }).slice(0, 16);
+      }).slice(0, limit || 16);
       return Promise.all(candidates.map(function (x) {
         return isKidSafe(x.id, x.type).then(function (ok) { return ok ? x : null; });
       })).then(function (r) { return r.filter(Boolean); });

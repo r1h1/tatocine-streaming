@@ -405,3 +405,87 @@ body.lite *::after {
     grid-column: span 8;
   }
 }
+
+/* ---------- Temporadas y episodios: 1 columna en móvil/tableta, 2 en pantallas medianas, 3 en grandes ---------- */
+.ep-list {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.ep-skeletons {
+  display: contents;
+}
+
+@media (min-width: 1024px) {
+  .ep-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1500px) {
+  .ep-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Tráiler: un solo botón de salir (la ✕ de la ficha) ---------- */
+.details-trailer-close {
+  display: none !important;
+}
+
+/* ---------- Favoritos: botones primarios y cierre de lista ---------- */
+.fav-toolbar .genre-chip.chip-primary {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+  font-weight: 700;
+}
+
+.fav-toolbar .genre-chip.chip-primary:hover,
+.fav-toolbar .genre-chip.chip-primary:focus-visible {
+  background: #e5e5e5;
+}
+
+.fav-toolbar .genre-chip:not(.chip-primary).active {
+  background: rgba(255, 255, 255, .2);
+  border-color: rgba(255, 255, 255, .6);
+  color: #fff;
+}
+
+.fav-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fav-close-btn:hover,
+.fav-close-btn:focus-visible {
+  background: rgba(255, 255, 255, .2);
+}
+
+/* ---------- Selector de perfiles: Invitado bloqueado para perfiles Niño ---------- */
+.tc-profile-card.is-blocked {
+  opacity: .4;
+}
+
+.tc-profile-card.is-blocked .tc-profile-select-btn {
+  cursor: not-allowed;
+}
+
+.wiz-note {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
