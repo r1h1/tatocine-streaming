@@ -99,6 +99,7 @@ function htPlay(keys, i, token) {
     var state = d.event === "onStateChange" ? d.info : (d.event === "infoDelivery" && d.info && d.info.playerState !== undefined ? d.info.playerState : null);
     if (state !== null) lastState = state;
     f.__htState = function () { return lastState; };
+    if (d.event === "infoDelivery" && d.info && d.info.muted !== undefined) f.__htMuted = !!d.info.muted;
     if (d.event === "onError") { next(L("YouTube rechazó el tráiler (error " + d.info + ")", "YouTube rejected the trailer (error " + d.info + ")")); return; }
     if (state === 1 && !shown) {
       shown = true; clearTimeout(giveUp); clearInterval(kick);
@@ -132,15 +133,25 @@ function htReveal(f, key, token, post) {
   htSetStatus("");
   function setVol(v) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [v] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
   function soundOn() { post("unMute"); setVol(70); }
-  // Siempre con sonido. Si el navegador bloquea el audio sin interacción previa (el vídeo se detiene), sigue en silencio y se activa solo con el primer toque o tecla.
-  soundOn();
-  setTimeout(function () {
+  // Siempre con sonido. En una PWA instalada (o sin interacción previa) el navegador puede bloquear el audio: entonces sigue en silencio,
+  // avisa una vez y el PRIMER toque, clic o tecla (cuenta al soltar, no al pulsar) lo activa; si aun así no suena, vuelve a esperar el siguiente.
+  var GEST = ["pointerup", "click", "touchend", "keydown"], armed = false;
+  function disarm() { GEST.forEach(function (n) { removeEventListener(n, onGesture, true); }); armed = false; }
+  function onGesture() { disarm(); if (token !== htToken) return; soundOn(); setTimeout(check, 900); }
+  function arm() {
+    if (armed) return; armed = true;
+    GEST.forEach(function (n) { addEventListener(n, onGesture, true); });
+    try { if (!sessionStorage.getItem("tatoHtSoundHint")) { sessionStorage.setItem("tatoHtSoundHint", "1"); showToast(L("Toca la pantalla para activar el sonido del tráiler", "Tap the screen to turn on the trailer sound")); } } catch (e) { }
+  }
+  function check() {
+    if (token !== htToken) return;
     var st = f.__htState && f.__htState();
-    if (token !== htToken || st === null || st === 1) return;
-    post("mute"); post("playVideo");
-    var once = function () { removeEventListener("pointerdown", once, true); removeEventListener("keydown", once, true); if (token === htToken) soundOn(); };
-    addEventListener("pointerdown", once, true); addEventListener("keydown", once, true);
-  }, 1000);
+    if (st !== null && st !== 1) { post("mute"); post("playVideo"); arm(); }          // el navegador detuvo el vídeo al quitar el silencio
+    else if (f.__htMuted === true) arm();                                             // sigue sin sonido
+  }
+  soundOn();
+  setTimeout(check, 1200);
+  setTimeout(check, 3500);
   // Último segundo: el sonido baja y el vídeo se PAUSA; justo después la portada pasa al siguiente título.
   var untilPause = Math.max(0, heroShownAt + HERO_DWELL_TRAILER - 1000 - Date.now());
   htPauseTimer = setTimeout(function () {
