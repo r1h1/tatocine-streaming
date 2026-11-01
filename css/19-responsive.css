@@ -251,3 +251,32 @@ body.hc .hero-desc, body.hc .sub-label, body.hc .card-overlay span, body.hc .her
 .tour-dots span.on { width: 22px; border-radius: 6px; background: #fff; }
 .empty-state .empty-art { width: 92px; height: 92px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: rgba(255, 255, 255, .85); background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .16), rgba(255, 255, 255, .04)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
 .empty-state .genre-chip { margin-top: 4px; }
+
+/* ---------- Calendario y Ver más tarde ---------- */
+.cal-day { margin: 14px 0 6px; font-size: calc(13px * var(--ts, 1)); font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: rgba(255, 255, 255, .7); text-align: left; }
+.cal-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px; margin: 0 0 6px; border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; background: rgba(255, 255, 255, .04); color: #fff; font: inherit; text-align: left; cursor: pointer; }
+.cal-item:hover, .cal-item:focus-visible { background: rgba(255, 255, 255, .1); }
+.cal-thumb { flex: none; width: 96px; height: 54px; border-radius: 8px; object-fit: cover; background: #1a1a1a; }
+.cal-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.cal-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-sub { font-size: calc(12.5px * var(--ts, 1)); color: rgba(255, 255, 255, .65); }
+.cal-skel .cal-item { cursor: default; }
+.ua-btn[data-act="later-toggle"].active { background: #fff; color: #000; }
+.wrapped-canvas { display: block; width: min(300px, 80%); height: auto; margin: 6px auto 12px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, .6); }
+.wrapped-cta { margin: 0 0 14px; }
+
+/* ---------- Decidir en pareja ---------- */
+.cp-card { position: relative; margin: 8px auto; width: min(100%, 420px); aspect-ratio: 16 / 10; border-radius: 16px; overflow: hidden; background: #111; touch-action: pan-y; user-select: none; transition: transform .2s ease, box-shadow .2s; cursor: grab; }
+.cp-card.drag { transition: none; cursor: grabbing; }
+.cp-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.cp-info { position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 14px 12px; display: flex; flex-direction: column; gap: 2px; text-align: left; background: linear-gradient(to top, rgba(0, 0, 0, .92), transparent); }
+.cp-info strong { font-size: calc(18px * var(--ts, 1)); } .cp-info span { font-size: calc(12.5px * var(--ts, 1)); color: rgba(255, 255, 255, .75); }
+.cp-btns { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 12px 0 4px; }
+.cp-btns button { width: 58px; height: 58px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .08); color: #fff; font-size: 26px; cursor: pointer; }
+.cp-btns .cp-yes:hover, .cp-btns .cp-yes:focus-visible { background: #3ddc84; color: #000; }
+.cp-btns .cp-no:hover, .cp-btns .cp-no:focus-visible { background: #ff5c5c; color: #000; }
+.cp-btns .cp-info-btn { width: 44px; height: 44px; font-size: 20px; }
+.cp-kid { margin: 10px 0 2px; }
+.cp-win { box-shadow: 0 0 0 3px #3ddc84; cursor: default; }
+.wiz-couple { display: block; margin: 10px auto 2px; }
+@media (max-width: 600px) { .tc-wizard .wiz-couple { margin: 6px auto 12px; } }

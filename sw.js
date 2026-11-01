@@ -3,7 +3,7 @@
    - Imágenes de TMDB: NO se interceptan (TMDB ya las sirve con caché HTTP de ~1 año y el navegador las guarda).
    - API de TMDB: red primero; caché solo como respaldo sin conexión (con límite y caducidad).
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v15";
+const VERSION = "v16";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
@@ -104,4 +104,14 @@ self.addEventListener("message", (event) => {
       if (event.ports && event.ports[0]) event.ports[0].postMessage({ ok: true });
     }));
   }
+});
+
+// Al tocar un aviso de estreno se abre (o se enfoca) TatoCine en esa ficha.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || "./", self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+    for (const c of list) { if ("focus" in c) { c.navigate(url).catch(() => {}); return c.focus(); } }
+    return self.clients.openWindow(url);
+  }));
 });

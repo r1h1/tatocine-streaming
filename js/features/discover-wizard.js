@@ -203,7 +203,7 @@ function renderWizardForm() {
     '<p class="wiz-q">' + L("¿Cuánto tiempo tienes?", "How much time do you have?") + "</p>" + chips("time", WIZARD_OPTIONS.times, function (t) { return t === "120+" ? L("Más de 120 min", "Over 120 min") : t + " min"; }, function (t) { return t; }) +
     '<p class="wiz-q">' + L("¿Con quién vas a ver?", "Who are you watching with?") + "</p>" + chips("who", WIZARD_OPTIONS.who, wizardOptionLabel, function (o) { return o.k; }) +
     (kids ? "" : '<p class="wiz-q">' + L("¿Qué prefieres evitar?", "What would you rather avoid?") + "</p>" + chips("avoid", WIZARD_OPTIONS.avoid, wizardOptionLabel, function (o) { return o.k; }, true)) +
-    '<div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="go"' + (wizardState.mood ? "" : " disabled") + ">" + L("Mostrar 3 recomendaciones", "Show 3 recommendations") + "</button></div>";
+    '<div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="go"' + (wizardState.mood ? "" : " disabled") + ">" + L("Mostrar 3 recomendaciones", "Show 3 recommendations") + '</button></div><button type="button" class="tc-link-btn wiz-couple" data-act="wizard-couple">👫 ' + L("¿Dos personas? Decidir en pareja", "Two people? Decide as a couple") + "</button>";
 }
 
 function openWizard() {

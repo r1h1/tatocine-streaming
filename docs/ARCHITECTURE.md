@@ -113,3 +113,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Fase 3 · uso y accesibilidad
 `ui/undo.js` (avisos con acción), `ui/accessibility-prefs.js` (`--ts` multiplica cada `font-size`: `calc(Npx * var(--ts, 1))`), `ui/command-palette.js` (`registerCommand`), `features/voice-search.js`, `ui/onboarding.js`, `core/actions.js` (`data-act` + `registerAction`, base para quitar `unsafe-inline` de la CSP) y pantallas vacías en `ui/skeletons.js`.
+
+## Fase 4 · funciones
+`features/watch-later.js`, `calendar.js` (`calendarCollect`, cache `tatoCalCacheV1`), `release-alerts.js` (+ `notificationclick` en `sw.js`), `wrapped.js` (canvas) y `couple-picker.js`. Todos usan `registerAction` (data-act) y `registerCommand` (Ctrl+K). Ojo con el orden de `<script>`: `command-palette.js` va justo después de `ui-utils.js` para que el resto pueda registrar comandos al cargar.

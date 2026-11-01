@@ -68,10 +68,10 @@ function cmdRun(i) {
   registerCommand({ id: "week", es: "Resumen semanal", en: "Weekly summary", keys: "resumen semanal padres uso", adult: true, run: function () { openWeeklySummary(); } });
   registerCommand({ id: "profiles", es: "Cambiar de perfil", en: "Switch profile", keys: "perfil usuario cambiar", run: function () { showProfiles(); } });
   registerCommand({ id: "fullscreen", es: "Pantalla completa", en: "Full screen", keys: "pantalla completa fullscreen", run: function () { toggleAppFullscreen(); } });
-  registerCommand({ id: "hc", es: "Alternar alto contraste", en: "Toggle high contrast", keys: "contraste accesibilidad", run: toggleHighContrast });
+  registerCommand({ id: "hc", es: "Alternar alto contraste", en: "Toggle high contrast", keys: "contraste accesibilidad", run: function () { toggleHighContrast(); } });
   registerCommand({ id: "bigger", es: "Texto más grande", en: "Larger text", keys: "texto grande accesibilidad zoom", run: function () { changeTextScale(1); } });
   registerCommand({ id: "smaller", es: "Texto más pequeño", en: "Smaller text", keys: "texto pequeno accesibilidad zoom", run: function () { changeTextScale(-1); } });
-  registerCommand({ id: "rm", es: "Alternar reducir movimiento", en: "Toggle reduce motion", keys: "movimiento animaciones accesibilidad", run: toggleReduceMotion });
+  registerCommand({ id: "rm", es: "Alternar reducir movimiento", en: "Toggle reduce motion", keys: "movimiento animaciones accesibilidad", run: function () { toggleReduceMotion(); } });
   registerCommand({ id: "backup", es: "Copia de seguridad (exportar)", en: "Backup (export)", keys: "copia seguridad exportar backup", run: function () { exportProfileData(); } });
   registerCommand({ id: "qr-show", es: "Mostrar QR para otro dispositivo", en: "Show QR for another device", keys: "qr pasar dispositivo", run: function () { openQrShow(); } });
   registerCommand({ id: "qr-scan", es: "Escanear un QR", en: "Scan a QR", keys: "qr escanear importar", run: function () { openQrScan(); } });

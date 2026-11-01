@@ -92,4 +92,13 @@ ok("filtrado infantil: se quitan las claves no aptas de todas las secciones", ()
   assert.deepStrictEqual(Object.keys(r.clean.tatoSeriesSeen), []);
 });
 
+ok("Ver más tarde se sanea y entra en el filtro infantil", () => {
+  const r = clean({ tatoLater: j([{ id: 9, type: "movie", title: "<b>X</b>", bg: "/ok12345.jpg", addedAt: 5 }, { id: "x", type: "movie" }]) });
+  assert.strictEqual(r.clean.tatoLater.length, 1);
+  assert(!/[<>]/.test(r.clean.tatoLater[0].title));
+  assert.deepStrictEqual(B.backupMediaKeys(r.clean), ["movie:9"]);
+  B.backupDropKeys(r.clean, { "movie:9": 1 });
+  assert.strictEqual(r.clean.tatoLater.length, 0);
+});
+
 console.log(`\n${n} grupos de pruebas correctos`);

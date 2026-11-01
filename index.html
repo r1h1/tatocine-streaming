@@ -542,7 +542,16 @@
             <button class="danger-btn" onclick="openQrScan()">Escanear</button>
           </div>
         </div>
-        <div class="settings-option" data-adult-only>
+                <div class="settings-option" data-adult-only>
+          <div>
+            <div class="label">Avisos de estreno</div>
+            <div class="sub-label" id="alerts-sub">Te avisa de estrenos de hoy y mañana al abrir la app.</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" id="alerts-btn" type="button" data-act="alerts-toggle" aria-pressed="false">Activar</button>
+          </div>
+        </div>
+<div class="settings-option" data-adult-only>
           <div>
             <div class="label">Resumen semanal</div>
             <div class="sub-label">Revisa cuánto y qué vieron en la última semana.</div>
@@ -879,6 +888,7 @@
   <script src="js/profiles/pin-strong.js"></script>
   <script src="js/core/state.js"></script>
   <script src="js/core/ui-utils.js"></script>
+  <script src="js/ui/command-palette.js"></script>
   <script src="js/core/tmdb.js"></script>
   <script src="js/profiles/profile-backdrop.js"></script>
   <script src="js/features/analytics.js"></script>
@@ -927,13 +937,17 @@
   <script src="js/features/backup.js"></script>
   <script src="js/features/qr-transfer.js"></script>
   <script src="js/features/parental.js"></script>
+  <script src="js/features/watch-later.js"></script>
+  <script src="js/features/calendar.js"></script>
+  <script src="js/features/release-alerts.js"></script>
+  <script src="js/features/wrapped.js"></script>
+  <script src="js/features/couple-picker.js"></script>
   <script src="js/ui/undo.js"></script>
   <script src="js/player/autoplay-next.js"></script>
   <script src="js/player/player-robust.js"></script>
   <script src="js/ui/gestures.js"></script>
   <script src="js/ui/a11y.js"></script>
   <script src="js/ui/accessibility-prefs.js"></script>
-  <script src="js/ui/command-palette.js"></script>
   <script src="js/features/voice-search.js"></script>
   <script src="js/ui/onboarding.js"></script>
   <script src="js/core/performance.js"></script>

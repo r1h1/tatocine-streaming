@@ -42,6 +42,13 @@ var BK_SANITIZERS = {
       return m;
     }).filter(Boolean);
   },
+  tatoLater: function (raw) {
+    return bkArr(raw).slice(0, 200).map(function (x) {
+      var m = bkMedia(x); if (!m) return null;
+      m.rating = bkNum(x.rating, 0, 10, 0); m.year = bkYear(x.year); m.addedAt = bkNum(x.addedAt, 0, 4102444800000, 0);
+      return m;
+    }).filter(Boolean);
+  },
   tatoFavLists: function (raw, ctx) { return ctx.lists; },
   tatoContinue: function (raw) {
     return bkArr(raw).slice(0, 20).map(function (x) {
@@ -127,7 +134,7 @@ function sanitizeBackupData(data, servers) {
 function backupMediaKeys(clean) {
   var keys = {};
   function add(x) { if (x && x.id && x.type) keys[x.type + ":" + x.id] = 1; }
-  (clean.tatoList || []).forEach(add); (clean.tatoContinue || []).forEach(add);
+  (clean.tatoList || []).forEach(add); (clean.tatoLater || []).forEach(add); (clean.tatoContinue || []).forEach(add);
   ((clean.tatoLocalAnalyticsV1 || {}).items || []).forEach(add);
   Object.keys(clean.tatoWatched || {}).forEach(function (k) { add(clean.tatoWatched[k]); });
   Object.keys(clean.tatoSeriesSeen || {}).forEach(function (id) { keys["tv:" + id] = 1; });
@@ -137,6 +144,7 @@ function backupMediaKeys(clean) {
 function backupDropKeys(clean, unsafe) {
   function ok(x) { return !unsafe[x.type + ":" + x.id]; }
   if (clean.tatoList) clean.tatoList = clean.tatoList.filter(ok);
+  if (clean.tatoLater) clean.tatoLater = clean.tatoLater.filter(ok);
   if (clean.tatoContinue) clean.tatoContinue = clean.tatoContinue.filter(ok);
   if (clean.tatoLocalAnalyticsV1) clean.tatoLocalAnalyticsV1.items = clean.tatoLocalAnalyticsV1.items.filter(ok);
   if (clean.tatoWatched) Object.keys(clean.tatoWatched).forEach(function (k) { if (unsafe[k]) delete clean.tatoWatched[k]; });

@@ -202,20 +202,21 @@
     }
     function renderFavoritesView() {
       favTruncated = false;
-      if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && !favListById(favFilter)) favFilter = "all";
+      if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && favFilter !== "later" && !favListById(favFilter)) favFilter = "all";
       var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
-      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") +
+      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") + chip("later", L("Ver más tarde", "Watch later") + (laterList.length ? " (" + laterList.length + ")" : "")) +
         '<span class="fav-toolbar-gap"></span>' +
         (favLists.length < 12 ? '<button class="genre-chip chip-primary" onclick="openListModal()">+ Nueva lista</button>' : "") +
-        '<button class="genre-chip" onclick="openStats()">Estadísticas</button></div>';
+        '<button class="genre-chip" data-act="open-calendar">' + L("Calendario", "Calendar") + '</button><button class="genre-chip" onclick="openStats()">Estadísticas</button></div>';
       var cards = favLists.length ? '<section class="fav-lists"><div class="row-header"><h2 class="row-title">Mis listas</h2></div><div class="list-cards">' + favLists.map(listCardHTML).join("") + "</div></section>" : "";
       var body = "";
-      if (!myList.length && !favLists.length) {
+      if (!myList.length && !favLists.length && favFilter !== "later") {
         body = emptyStateHTML("favorites", L("Aún no tienes favoritos", "No favorites yet"), L("Toca el corazón de cualquier película, anime o serie para guardarla aquí. También puedes crear listas para organizarlas.", "Tap the heart on any movie, anime or series to save it here. You can also create lists to organize them."), L("Explorar películas", "Explore movies"), "go-movies");
       } else if (favFilter === "all") {
         if (favCount(null) || !favLists.length) body += favSection("General", null, false);
         // Las listas se ven una sola vez, como tarjetas; al tocar una se abre su contenido.
       } else if (favFilter === "watched") body = watchedSection();
+      else if (favFilter === "later") body = laterSection();
       else if (favFilter === "general") body = favSection("General", null, false);
       else body = favSection(favListById(favFilter).name, favFilter, false);
       $rowsContainer.innerHTML = toolbar + cards + body;

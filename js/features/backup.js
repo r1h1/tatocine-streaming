@@ -31,6 +31,7 @@ function mergeObjectNewest(current, incoming) {
 var PROFILE_MERGERS = {
   tatoList: mergeArrayBy(function (x) { return x.type + ":" + x.id; }),
   tatoFavLists: mergeArrayBy(function (x) { return x.id; }),
+  tatoLater: mergeArrayBy(function (x) { return x.type + ":" + x.id; }, 200),
   tatoContinue: mergeArrayBy(function (x) { return x.type + ":" + x.id; }, 20, function (a, b) { return (a.timestamp || 0) - (b.timestamp || 0); }),
   tatoLocalAnalyticsV1: function (current, incoming) {
     var merge = mergeArrayBy(function (x) { return x.type + ":" + x.id; }, 150, function (a, b) { return ((a.secs || 0) + (a.done || 0) * 1e5) - ((b.secs || 0) + (b.done || 0) * 1e5); });
