@@ -30,6 +30,14 @@ function htWhyNot() {
   return "";
 }
 function htAllowed() { return !document.hidden && htWhyNot() === ""; }
+var htFailToasted = false;
+function htFail(msg) {
+  htSetStatus(msg);
+  if (htFailToasted) return;
+  htFailToasted = true;
+  try { if (sessionStorage.getItem("tatoHtFail")) return; sessionStorage.setItem("tatoHtFail", "1"); } catch (e) { }
+  showToast(L("Tráiler de la portada: ", "Hero trailer: ") + msg);
+}
 function htSetStatus(msg) { htStatus = msg; var el = $("hero-trailer-sub"); if (el) el.textContent = htLabel() + (htStatus ? " — " + htStatus : ""); }
 var htWrapGen = 0;
 function htStop() {
@@ -60,14 +68,14 @@ var HT_PRELOAD_MS = 500, HT_PLAY_MS = 1000, HT_START_MS = 2000;   // se precarga
 /** Prepara keys[i] en pausa y lo arranca oculto y lo muestra en el segundo 2. Solo se muestra cuando YouTube confirma que reproduce; si falla, prueba el siguiente. */
 function htPlay(keys, i, token) {
   if (token !== htToken) return;
-  if (i >= keys.length) { htSetStatus(L("YouTube no pudo reproducir los tráilers de este título.", "YouTube couldn't play this title's trailers.")); return; }
+  if (i >= keys.length) { htFail(L("YouTube no pudo reproducir los tráilers de este título.", "YouTube couldn't play this title's trailers.")); return; }
   var key = keys[i], f = document.createElement("iframe"), shown = false, giveUp = null, kick = null;
   f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true"); f.setAttribute("title", "");
   f.setAttribute("allow", "autoplay; encrypted-media");
   f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
   f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=" + key + "&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
   function post(func) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: [] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
-  function next(reason) { cleanup(); if (token === htToken) { htSetStatus(reason); $heroVideoWrap.innerHTML = ""; htPlay(keys, i + 1, token); } }
+  function next(reason) { cleanup(); if (token === htToken) { if (i + 1 >= keys.length) htFail(reason); else htSetStatus(reason); $heroVideoWrap.innerHTML = ""; htPlay(keys, i + 1, token); } }
   function cleanup() { clearTimeout(giveUp); clearInterval(kick); window.removeEventListener("message", onMsg); }
   function onMsg(e) {
     if (e.source !== f.contentWindow || token !== htToken) return;
@@ -81,6 +89,7 @@ function htPlay(keys, i, token) {
     }
   }
   window.addEventListener("message", onMsg);
+  giveUp = setTimeout(function () { if (!shown) next(L("YouTube no respondió: el navegador o una extensión (p. ej. Brave Shields) pudo bloquear el vídeo incrustado.", "YouTube didn't respond: the browser or an extension (e.g. Brave Shields) may have blocked the embedded video.")); }, HT_START_MS + 7000);
   f.onload = function () {
     try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "https://www.youtube-nocookie.com"); } catch (e) { }
     // A 1 s se da la orden de reproducir, oculto (se repite cada 0,7 s hasta que YouTube confirme que reproduce).
@@ -89,6 +98,7 @@ function htPlay(keys, i, token) {
       if (token !== htToken || shown) return;
       post("playVideo");
       kick = setInterval(function () { if (!shown) post("playVideo"); }, 700);
+      clearTimeout(giveUp);
       giveUp = setTimeout(function () { if (!shown) next(L("El tráiler no arrancó (el navegador pudo bloquear la reproducción automática).", "The trailer didn't start (the browser may have blocked autoplay).")); }, 4000);
     }, startIn);
   };

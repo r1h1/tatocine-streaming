@@ -305,6 +305,18 @@ async function main() {
     ok(Date.now() - t0 >= 0, "");
   });
 
+  await test("portada: si YouTube está bloqueado, no se queda en silencio: aviso con el motivo", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
+    await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] }) }));
+    await page.route("**/*youtube-nocookie.com/**", (r) => r.abort());
+    await enter(page);
+    await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2);
+    await page.evaluate(() => setHero(heroMoviesList[1]));
+    await page.waitForFunction(() => /YouTube/.test(htStatus), null, { timeout: 14000 });
+    ok(await page.locator(".toast").filter({ hasText: "Tráiler de la portada" }).count() > 0, "no hubo aviso con el motivo");
+    eq(await page.evaluate(() => document.body.classList.contains("hero-trailer-on")), false, "se mostró un vídeo roto:");
+  });
+
   await test("buscador: el micrófono queda centrado dentro de su botón y de la barra", async (page) => {
     await enter(page);
     const g = await page.evaluate(() => { const b = document.querySelector(".voice-btn"); if (!b) return null; const r = b.getBoundingClientRect(), s = b.querySelector("svg").getBoundingClientRect(), w = document.querySelector(".hero-content .search-wrap").getBoundingClientRect(); return { dx: Math.abs((r.left + r.width / 2) - (s.left + s.width / 2)), dy: Math.abs((r.top + r.height / 2) - (s.top + s.height / 2)), inside: r.right <= w.right + 1 && r.left >= w.left }; });
