@@ -51,7 +51,7 @@
         i.type +
         '\')"><img alt="' + escapeHTML(i.title) + '" src="' +
         (b || FALLBACK_IMG) +
-        '" loading="lazy" decoding="async" fetchpriority="low" onload="this.classList.add(\'loaded\')" onerror="this.onerror=null;this.src=\'' +
+        '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')" onerror="this.onerror=null;this.src=\'' +
         FALLBACK_IMG +
         "'\"/>" +
         ratingBadge +

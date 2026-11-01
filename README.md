@@ -57,7 +57,7 @@ Todo en `localStorage` (`tatoProfile_<id>_…` por perfil; lista completa en [do
 ```text
 index.html            Interfaz y orden de carga
 config.js             Tu clave de TMDB (único archivo de configuración)
-css/                  Hojas numeradas (01-base … 18-lists-skeletons); la cascada va por orden
+css/                  Hojas numeradas (01-base … 19-responsive); la cascada va por orden
 js/core · profiles · i18n · ui · player · features · app.js     Código por responsabilidad
 sw.js · manifest.webmanifest · icons/ · LICENSE · docs/ · index.backup.html (monolito anterior, estable)
 ```
@@ -107,7 +107,7 @@ Gratuito y de código abierto bajo **licencia MIT** ([`LICENSE`](LICENSE)); no c
 
 **TatoCine** is a free, open-source (MIT) static web app to browse movies, series and anime with the TMDB API. No backend, no accounts: everything personal stays in your browser.
 
-- Responsive dark UI for phones, tablets, desktops and Smart TVs; installable **PWA** (install button, offline shell, D-pad/remote navigation, lite mode, accessibility support).
+- Fluid responsive layer (`css/19-responsive.css`: card width and gutters scale from 320 px phones to 4K TVs) with deferred rendering of off-screen rows. Responsive dark UI for phones, tablets, desktops and Smart TVs; installable **PWA** (install button, offline shell, D-pad/remote navigation, lite mode, accessibility support).
 - **Local profiles** (adult/kids, optional PIN, per-profile language ESP/ENG, delete). Kids profiles see only the Kids section with strict age-rating filtering and an 8 h use limit plus a 1 h break.
 - **"What should I watch?"** wizard (mood, time, company, avoid → 3 picks with reasons), series pages with **seasons and episodes**, director links, **watched + 👍/👎**, **search suggestions and actor/director search**, favorites with lists, statistics, a **local recommendation engine** (unlocks after 2 finished titles), new-episode alerts, profile **backup/restore**, and platform/studio rows.
 - Modular code (`css/`, `js/core|profiles|i18n|ui|player|features`), no build step. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

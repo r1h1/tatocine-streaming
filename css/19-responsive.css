@@ -1,0 +1,132 @@
+/**
+ * TatoCine · css/19-responsive.css
+ * Capa responsive unificada y de rendimiento (última de la cascada).
+ *   - Sistema fluido: márgenes (--gutter) y ancho de tarjeta (--card-w) escalan con la pantalla,
+ *     sin saltos entre breakpoints, de 320 px (móvil) a 4K (TV).
+ *   - Carruseles alineados con los títulos; flechas dentro del carrusel.
+ *   - Rendimiento: renderizado diferido de filas fuera de pantalla, sin desenfoques costosos en
+ *     tarjetas, desplazamiento táctil con imán suave.
+ */
+:root {
+  --gutter: clamp(16px, 3.6vw, 56px);
+  --card-w: clamp(200px, 56vw, 260px);
+}
+
+@media (min-width: 601px) {
+  :root { --card-w: clamp(240px, 31vw, 310px); }
+}
+
+@media (min-width: 1025px) {
+  :root { --card-w: clamp(290px, 21.5vw, 420px); }
+}
+
+/* ---------- Márgenes fluidos ---------- */
+.rows-container,
+.grid-container {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+.hero-content {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* ---------- Tarjetas: ancho fluido, siempre 16:9 (las del esqueleto miden igual) ---------- */
+.row-scroll .card,
+.skeleton-card {
+  flex: 0 0 var(--card-w);
+  width: var(--card-w);
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.card.top-ranked {
+  --rk: calc(var(--card-w) * .35);
+}
+
+/* ---------- Carruseles alineados con los títulos; flechas dentro ---------- */
+.row-scroll {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.row-nav.prev { left: 6px; transform: translate(0, -50%); }
+.row-nav.next { right: 6px; transform: translate(0, -50%); }
+.row-nav.prev:hover,
+.row-nav.next:hover { transform: translate(0, -50%) scale(1.06); }
+
+/* ---------- Móvil estrecho: el perfil queda solo con el avatar (no se corta) ---------- */
+@media (max-width: 430px) {
+  .tc-profile-trigger-name { display: none; }
+  .tc-profile-trigger { padding: 4px; }
+}
+
+/* ---------- Pantallas grandes / TV: más aire y textos mayores ---------- */
+@media (min-width: 1600px) {
+  .row-title { font-size: 24px; }
+  .hero-desc { font-size: 19px; max-width: 760px; }
+}
+
+@media (min-width: 2200px) {
+  .row-title { font-size: 30px; }
+  .hero-desc { font-size: 24px; max-width: 980px; }
+  .hero-year { font-size: 22px; }
+}
+
+/* ---------- Táctil: desplazamiento con imán suave y sin efectos de hover ---------- */
+@media (hover: none) {
+  .row-scroll {
+    scroll-snap-type: x proximity;
+    scroll-behavior: auto;
+  }
+  .row-scroll .card,
+  .row-scroll .skeleton-card { scroll-snap-align: start; }
+}
+
+/* ---------- Móvil horizontal: portada compacta ---------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero { min-height: 0; height: auto; padding-top: calc(76px + env(safe-area-inset-top)); }
+  .hero-title { font-size: clamp(24px, 5vw, 36px); }
+  .hero-desc { -webkit-line-clamp: 2; }
+  .hero-content .search-wrap { margin-bottom: 12px; }
+}
+
+/* ---------- Rendimiento ---------- */
+/* Las filas que aún no se ven no se pintan ni se miden hasta acercarse. */
+.rows-container > .row:not(:first-child) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(var(--card-w) * .5625 + 90px);
+}
+
+/* Sin desenfoque de fondo en insignias y botones sobre imágenes (barato en GPU, casi igual de bonito). */
+@media (max-width: 814px), (hover: none) {
+  .card *,
+  .hero-actions *,
+  .hero-meta *,
+  .genre-chip,
+  .hero-dots * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* Flechas discretas: aparecen al pasar el cursor por el carrusel (en táctil no hay flechas). */
+@media (hover: hover) {
+  .row-nav { opacity: 0; transition: opacity .18s ease, background .18s ease; }
+  .row:hover .row-nav,
+  .row-nav:focus-visible { opacity: 1; }
+}
+
+/* ---------- Reproductor en móvil horizontal: cabecera y controles compactos para dar altura al vídeo ---------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  #player-modal .modal-header { padding-top: 6px; padding-bottom: 6px; }
+  #player-modal .modal-title { font-size: 16px; }
+  #player-modal .modal-body { padding-top: 6px; }
+  #player-modal .tv-select,
+  #player-modal .auto-next-toggle,
+  #player-modal .server-btn { min-height: 32px; padding-top: 4px; padding-bottom: 4px; font-size: 12px; }
+  #player-modal .player-fullscreen-btn { min-height: 34px; }
+  #player-modal .fullscreen-label { display: none; }
+  #player-modal .player-container { max-height: calc(100dvh - 120px); min-height: 0; }
+}

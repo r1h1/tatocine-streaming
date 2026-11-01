@@ -8,7 +8,7 @@ personal vive en `localStorage`; la única red es la API de TMDB y los reproduct
 ```text
 index.html                 Estructura de la interfaz + orden de carga (única fuente de verdad)
 config.js                  Configuración editable (clave de TMDB)
-css/                       Cascada numerada: 01-base … 18-lists-skeletons (los posteriores refinan a los anteriores)
+css/                       Cascada numerada: 01-base … 19-responsive (los posteriores refinan a los anteriores)
 js/
   core/                    Servicios sin interfaz: config, storage, extend (decorate), env, state, tmdb, utils,
                            ui-utils, seo, events, storage-maintenance, performance, pwa
@@ -95,3 +95,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 - Sin servidor no hay sincronización entre dispositivos (solo copia de seguridad manual), ni Watch Party, ni notificaciones
   push: los avisos de nuevos episodios se calculan al abrir la app.
 - No hay pruebas automatizadas; la verificación es manual y con un navegador real.
+
+## Capa responsive (`css/19-responsive.css`)
+Última de la cascada. Define `--gutter` y `--card-w` con `clamp()` (móvil → TV 4K), alinea carruseles con los títulos, compacta la portada y el reproductor en móvil horizontal, difiere el pintado de filas fuera de pantalla (`content-visibility`) y quita desenfoques costosos en táctil.
