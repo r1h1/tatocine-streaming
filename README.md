@@ -1,6 +1,6 @@
 # TatoCine — Películas, series y anime
 
-![Versión](https://img.shields.io/badge/Versión-5.3.0-blue)
+![Versión](https://img.shields.io/badge/Versión-5.5.0-blue)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
 ![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20CSS%20%7C%20JS-orange)
 ![PWA](https://img.shields.io/badge/PWA-Instalable-purple)
@@ -56,9 +56,9 @@ Todo en `localStorage` (`tatoProfile_<id>_…` por perfil; lista completa en [do
 
 ```text
 index.html            Interfaz y orden de carga
+config.js             Tu clave de TMDB (único archivo de configuración)
 css/                  Hojas numeradas (01-base … 16-accessibility); la cascada va por orden
 js/core · profiles · i18n · ui · player · features · app.js     Código por responsabilidad
-tools/build.py        Empaquetado de producción → dist/
 sw.js · manifest.webmanifest · icons/ · LICENSE · docs/ · index.backup.html (monolito anterior, estable)
 ```
 
@@ -66,16 +66,28 @@ Principios: responsabilidad única por archivo, extensión sin editar el núcleo
 
 ## Instalación y despliegue
 
-```bash
-git clone https://github.com/r1h1/tatocine-streaming.git
-cd tatocine-streaming
-python3 -m http.server 5500      # desarrollo: http://localhost:5500
-python3 tools/build.py           # producción: genera dist/ (1 CSS + 1 JS con hash)
+**Es una web tradicional (HTML + CSS + JavaScript): sin Python, sin Node, sin compilar ni instalar nada.** Se sube la carpeta tal cual.
+
+**1. Tu clave de TMDB** — la única configuración está en **`config.js`**:
+
+```js
+window.TATOCINE_CONFIG = { TMDB_API_KEY: "TU_API_KEY_V3" };
 ```
 
-1. Consigue **tu propia** clave v3 de [TMDB](https://developer.themoviedb.org/docs) y cámbiala en `js/core/config.js`: `const TMDB_API_KEY = "TU_API_KEY_V3";` (es visible para quien abra la app).
-2. Despliega la carpeta **`dist/`** (o la raíz del proyecto, que también funciona) por **HTTPS** (Netlify, Vercel, GitHub Pages…), con todos sus archivos juntos. Tras cambiar el código, vuelve a ejecutar `build.py` y sube `dist/`.
-3. Navegadores modernos; en Smart TV, Tizen 5.5+, webOS 5+ o Android TV/Fire TV actuales.
+Consigue **tu propia** clave v3 en [TMDB](https://developer.themoviedb.org/docs) (es visible para quien abra la app; es de solo lectura del catálogo). Cambiarla es editar ese archivo y volver a subir.
+
+**2. Probar en tu equipo:** abre `index.html` en el navegador (o con la extensión *Live Server* de VS Code; el proyecto trae su configuración). Para probar la instalación PWA hace falta HTTPS o `localhost` (Live Server sirve).
+
+**3. Subir a producción (HTTPS):** arrastra la carpeta (o un ZIP) a **Netlify Drop**, o conéctala por Git a **Netlify / Vercel / Render** (en Render: *Static Site*, sin *build command* y *Publish directory* `.`). Sube estos archivos juntos:
+
+```text
+index.html   config.js   sw.js   manifest.webmanifest   _headers
+css/   js/   icons/
+```
+
+(`docs/`, `LICENSE`, `README.md` e `index.backup.html` son opcionales; puedes comprimir la carpeta entera.) `_headers` (Netlify) y `vercel.json` solo ajustan la caché para que `index.html`, `config.js` y `sw.js` siempre estén frescos.
+
+Navegadores modernos; en Smart TV, Tizen 5.5+, webOS 5+ o Android TV/Fire TV actuales.
 
 **FAQ:** *«Hecho para ti» no aparece* → faltan 2 títulos finalizados o es perfil Niño. *Sin pantalla completa* → iPhone y apps instaladas no lo permiten.
 
@@ -98,15 +110,15 @@ Gratuito y de código abierto bajo **licencia MIT** ([`LICENSE`](LICENSE)); no c
 - Responsive dark UI for phones, tablets, desktops and Smart TVs; installable **PWA** (install button, offline shell, D-pad/remote navigation, lite mode, accessibility support).
 - **Local profiles** (adult/kids, optional PIN, per-profile language ESP/ENG, delete). Kids profiles see only the Kids section with strict age-rating filtering and an 8 h use limit plus a 1 h break.
 - **"What should I watch?"** wizard (mood, time, company, avoid → 3 picks with reasons), series pages with **seasons and episodes**, director links, **watched + 👍/👎**, **search suggestions and actor/director search**, favorites with lists, statistics, a **local recommendation engine** (unlocks after 2 finished titles), new-episode alerts, profile **backup/restore**, and platform/studio rows.
-- Modular code (`css/`, `js/core|profiles|i18n|ui|player|features`) with a production build (`python3 tools/build.py` → `dist/`). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- Modular code (`css/`, `js/core|profiles|i18n|ui|player|features`), no build step. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```bash
 git clone https://github.com/r1h1/tatocine-streaming.git && cd tatocine-streaming
-# put YOUR OWN TMDB v3 key in js/core/config.js (TMDB_API_KEY), then:
-python3 -m http.server 5500      # or: python3 tools/build.py and deploy dist/
+# put YOUR OWN TMDB v3 key in config.js (TMDB_API_KEY), then:
+# open index.html (or use VS Code Live Server) · to deploy, drag the folder to Netlify Drop
 ```
 
-Deploy over HTTPS. TatoCine hosts no video; playback uses third-party embeds. Not endorsed or certified by TMDB.
+No Python, Node or build tools needed. Deploy over HTTPS. TatoCine hosts no video; playback uses third-party embeds. Not endorsed or certified by TMDB.
 
 ---
 

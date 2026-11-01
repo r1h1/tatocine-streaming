@@ -7,6 +7,7 @@ personal vive en `localStorage`; la única red es la API de TMDB y los reproduct
 
 ```text
 index.html                 Estructura de la interfaz + orden de carga (única fuente de verdad)
+config.js                  Configuración editable (clave de TMDB)
 css/                       Cascada numerada: 01-base … 16-accessibility (los posteriores refinan a los anteriores)
 js/
   core/                    Servicios sin interfaz: config, storage, extend (decorate), env, state, tmdb, utils,
@@ -21,7 +22,6 @@ js/
                            recent-searches, search-suggest, details-extras, details-favorite, watched,
                            discover-wizard, new-episodes, infinite-feed (scroll infinito), streak, kids, pwa-install, backup
   app.js                   Arranque (enlaces directos, primera vista)
-tools/build.py             Empaquetado de producción → dist/ (1 CSS + 1 JS con hash)
 sw.js · manifest.webmanifest · icons/    PWA
 ```
 
@@ -74,9 +74,7 @@ sw.js · manifest.webmanifest · icons/    PWA
   deduplicación, reintento de imágenes.
 - **Smart TV / equipos modestos:** modo ligero automático (sin desenfoques, imágenes más livianas con conexión lenta),
   navegación espacial con mando, foco visible, precarga solo con puntero.
-- **Producción:** `python3 tools/build.py` genera `dist/` con un único CSS y JS (menos peticiones en TV con HTTP/1.1) y nombres
-  con hash para caché inmutable en el Service Worker.
-- **Almacenamiento:** guardado compacto, limpieza automática, manejo de cuota y botón «Liberar espacio».
+- **Sin compilación:** se publica la carpeta tal cual (sin Python, Node ni empaquetadores). El Service Worker guarda `css/` y `js/` tras la primera visita (red primero, caché sin conexión).
 
 ## Datos locales (`localStorage`)
 
@@ -89,7 +87,7 @@ Globales: `tatoProfilesV1`, `tatoActiveProfileV1`, `tatoKidUsageV1`, `tatoBrandB
 Perfil adulto en ESP y ENG · perfil Niño (solo Niños, búsqueda filtrada, límite de uso) · Inicio y Favoritos/listas ·
 «¿Qué ver hoy?» · ficha de serie (episodios) y de película (director) · búsqueda con sugerencias · reproductor y
 siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrecho (320 px), tableta, escritorio y modo TV
-(`?tv=1`) · `python3 tools/build.py` y repetir lo básico sobre `dist/`.
+(`?tv=1`).
 
 ## Limitaciones conocidas
 
