@@ -165,7 +165,7 @@
         card.appendChild(img);
         card.appendChild(overlay);
         card.appendChild(removeBtn);
-        if (m.pct > 1 && m.pct < 100) {
+        if (m.pct >= 1 && m.pct < 100) {
           var bar = document.createElement("div");
           bar.className = "continue-progress";
           var fill = document.createElement("span");

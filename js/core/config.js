@@ -26,8 +26,8 @@
         icon: icons.lightning,
         url: (i, t, s, e) =>
           t === "tv"
-            ? `https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`
-            : `https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`,
+            ? `https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?color=000000&autoplay=1`
+            : `https://api.moviemaster.lat/e/movie/${i}?color=000000&autoplay=1`,
       },
       {
         name: "ESP2",

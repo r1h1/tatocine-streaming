@@ -22,6 +22,8 @@
     function showNextEpisodePrompt() {
       if (document.querySelector(".next-ep-prompt") || !hasNextEpisode()) return;
       var left = 10;
+      // Con el vídeo en pantalla completa el aviso quedaría oculto: se sale de ella para poder cancelar.
+      if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () { });
       var p = document.createElement("div");
       p.className = "next-ep-prompt";
       p.setAttribute("role", "alert");

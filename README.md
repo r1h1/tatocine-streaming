@@ -18,7 +18,7 @@
 - **Favoritos con listas** («Todos» y «+ Nueva lista» como botones primarios; abrir y cerrar una lista tocando su tarjeta de nuevo o con «Cerrar lista»; crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
 - **Carga sin saltos:** *skeletons* en toda la app y **scroll infinito** en todas las pestañas (Inicio, Películas, Series, Anime, Niños, búsqueda, plataformas y Favoritos).
 - **Hecho para ti:** se activa con **2 títulos finalizados** y mejora con cada uno; todo se calcula localmente.
-- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (si el servidor no avisa el final, aparece «Siguiente episodio en 10 s» con Cancelar).
+- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (solo al terminar de verdad: aviso «Siguiente episodio en 10 s» con Cancelar; si el vídeo está en pantalla completa se sale de ella para mostrarlo). El progreso de Continuar viendo se retoma donde quedó.
 - **Avisos de nuevo episodio** para tus series (se comprueban al abrir el Inicio; sin servidor no hay notificaciones push).
 - **Copia de seguridad** del perfil (Ajustes → Exportar/Importar archivo; sin PIN, se fusiona con los datos existentes).
 - **Portada automática:** el **Top 10 de la semana** rota solo cada 7 s con fundido e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).

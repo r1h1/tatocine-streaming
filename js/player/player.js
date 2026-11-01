@@ -233,8 +233,12 @@
       )
         return;
       if (isEndedPlayerMessage(event.data)) {
-        if (currentMedia && currentMedia.type === "tv") playNextEpisode();
-        else playNextSimilar();
+        if (currentMedia && currentMedia.type === "tv") {
+          // Falsos «ended»: si según la duración conocida faltaba mucho, se ignora (nunca salta a mitad del episodio).
+          var known = typeof watchKnownRuntimeSec === "function" ? watchKnownRuntimeSec() : 0;
+          if (known && watch && watch.epSecs < known * 0.6) return;
+          if (autoNextEpisode) showNextEpisodePrompt();
+        } else playNextSimilar();
       }
     });
     function updateFullscreenButton() {

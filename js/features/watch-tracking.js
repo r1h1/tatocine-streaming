@@ -52,8 +52,21 @@
         if (watch) watch.dirty = true;
       }).catch(function () { });
     }
+    /** Duración real del episodio/película según TMDB (0 si no se conoce: no se inventa una duración). */
+    function watchKnownRuntimeSec() {
+      if (!watch) return 0;
+      if (watch.duration) return watch.duration;
+      var it = analyticsItem(watch.type, watch.id);
+      if (watch.type === "tv") {
+        var ep = Number($episodeSelect.value || 0);
+        var e = (currentTvEpisodes || []).find(function (x) { return Number(x.episode_number) === ep; });
+        return e && e.runtime ? e.runtime * 60 : 0;
+      }
+      return it && it.runtime ? it.runtime * 60 : 0;
+    }
     function watchRuntimeSec() {
       if (!watch) return 0;
+      if (watch.duration) return watch.duration;
       var it = analyticsItem(watch.type, watch.id);
       if (watch.type === "tv") {
         var ep = Number($episodeSelect.value || 0);
@@ -61,6 +74,23 @@
         return ((e && e.runtime) || (it && it.runtime) || 40) * 60;
       }
       return ((it && it.runtime) || 100) * 60;
+    }
+    function continueEntry() {
+      for (var i = 0; i < continueWatching.length; i++) {
+        var m = continueWatching[i];
+        if (watch && m.type === watch.type && String(m.id) === String(watch.id)) return m;
+      }
+      return null;
+    }
+    /** Si el reproductor avisa del tiempo (currentTime/duration), se usa el dato real; si no, se estima por reloj. */
+    function playerTimeFromMessage(raw) {
+      var d = raw;
+      if (typeof d === "string") { try { d = JSON.parse(d); } catch (e) { return null; } }
+      if (!d || typeof d !== "object") return null;
+      var n = d.data && typeof d.data === "object" ? d.data : d;
+      var t = Number(n.currentTime != null ? n.currentTime : n.time), du = Number(n.duration != null ? n.duration : n.total);
+      if (!isFinite(t) || !isFinite(du) || du < 60 || t < 0 || t > du + 5) return null;
+      return { t: t, d: du };
     }
     function setContinuePct(pct) {
       for (var i = 0; i < continueWatching.length; i++) {
@@ -90,24 +120,37 @@
       if (!it) return;
       if (watch.type === "tv") {
         var k = $seasonSelect.value + ":" + $episodeSelect.value;
-        if (k !== watch.epKey) { watch.epKey = k; watch.epSecs = 0; watch.counted = false; watch.nextPrompted = false; }
+        if (k !== watch.epKey) { watch.epKey = k; watch.epSecs = 0; watch.counted = false; watch.nextPrompted = false; watch.inited = false; watch.duration = 0; watch.exact = false; }
+      }
+      var total = watchRuntimeSec();
+      if (!watch.inited && total) {
+        // Al volver a un título ya empezado, el progreso continúa desde lo guardado (no vuelve a 0).
+        watch.inited = true;
+        var saved = continueEntry();
+        if (saved && saved.pct > 1 && saved.pct < 100) watch.epSecs = Math.round(saved.pct / 100 * total);
       }
       it.secs = (it.secs || 0) + 5;
       it.lastPlayedAt = Date.now();
-      watch.epSecs += 5;
-      var total = watchRuntimeSec();
-      if (total) setContinuePct(Math.min(99, Math.round(watch.epSecs / total * 100)));
+      if (!watch.exact) watch.epSecs += 5;
+      if (total) setContinuePct(Math.max(1, Math.min(99, Math.round(watch.epSecs / total * 100))));
       if (!watch.counted && total && watch.epSecs >= total * 0.8) markCompleted();
-      if (watch.type === "tv" && autoNextEpisode && total && watch.epSecs >= total * 0.985 && !watch.nextPrompted) {
-        watch.nextPrompted = true;               // una vez por episodio; si el reproductor avisa "ended", se adelanta solo
+      // Solo si se conoce la duración real y ya se cumplió completa (nunca con una duración supuesta).
+      var known = watchKnownRuntimeSec();
+      if (watch.type === "tv" && autoNextEpisode && known && watch.epSecs >= known && !watch.nextPrompted) {
+        watch.nextPrompted = true;
         showNextEpisodePrompt();
       }
       watch.sinceFlush += 5;
-      if (watch.sinceFlush >= 30) flushWatch();
+      if (watch.sinceFlush >= 15) flushWatch();
     }
     watchTimer = setInterval(watchTick, 5000);
     window.addEventListener("message", function (event) {
       if (!watch || !activePlayerFrame || event.source !== activePlayerFrame.contentWindow) return;
+      var pt = playerTimeFromMessage(event.data);
+      if (pt) {
+        watch.exact = true; watch.duration = pt.d; watch.epSecs = pt.t;
+        setContinuePct(Math.max(1, Math.min(99, Math.round(pt.t / pt.d * 100))));
+      }
       if (isEndedPlayerMessage(event.data)) markCompleted();
     });
     document.addEventListener("visibilitychange", function () { if (document.hidden) flushWatch(); });

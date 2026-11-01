@@ -227,3 +227,16 @@
     display: none;
   }
 }
+
+/* ---------- Escritorio: el contenido del hero nunca queda bajo el menú (a 100 % de zoom con títulos largos) ---------- */
+@media (min-width: 815px) {
+  .hero {
+    height: auto;
+    min-height: max(550px, 80vh);
+    padding-top: calc(110px + env(safe-area-inset-top));
+  }
+
+  body.brand-view .hero {
+    padding-top: calc(110px + env(safe-area-inset-top));
+  }
+}
