@@ -361,3 +361,29 @@ body.cp-details #details-modal { z-index: 6000; }
 /* El vídeo mide al menos un 30 % más que la portada en alto: se recortan arriba y abajo los bordes donde YouTube pinta su título y «más vídeos». */
 .hero-video-wrap iframe { width: auto; height: max(130cqh, calc(100cqw * 9 / 16 * 1.3)); aspect-ratio: 16 / 9; min-width: 0; min-height: 0; border: 0; }
 @media (max-width: 814px) { .hero-sound-btn { bottom: 64px; right: 16px; width: 38px; height: 38px; } }
+
+.cp-choice { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* ---------- Editar / agregar perfil: pantalla completa, 2 columnas en escritorio (col-lg-6) y 1 en tableta y móvil (col-md-12) ---------- */
+#tc-profile-create-overlay { padding: 0; align-items: stretch; justify-content: stretch; background: #050505; -webkit-backdrop-filter: none; backdrop-filter: none; }
+#tc-profile-create-overlay.open { align-items: stretch !important; }
+#tc-profile-create-overlay .pf-dialog { width: 100%; max-width: none; min-height: 100%; height: 100dvh; overflow-y: auto; border: 0; border-radius: 0; box-shadow: none; background: transparent; padding: clamp(24px, 5vh, 56px) clamp(16px, 6vw, 96px) calc(32px + env(safe-area-inset-bottom)); animation: none; }
+#tc-profile-create-overlay .pf-dialog > h3 { max-width: 1120px; margin: 0 auto 28px; font-size: calc(26px * var(--ts, 1)); padding-right: 56px; }
+#tc-profile-create-overlay .tc-profile-create-close { position: fixed; top: calc(16px + env(safe-area-inset-top)); right: calc(16px + env(safe-area-inset-right)); width: 44px; height: 44px; font-size: 26px; z-index: 3; }
+.pf-grid { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 0 56px; }
+.pf-col { min-width: 0; }
+.pf-field { margin: 0 0 30px; }
+.pf-field > .tc-profile-create-label { display: block; margin: 0 0 10px; }
+.pf-field .tc-profile-input { width: 100%; }
+.pf-choice .tc-profile-kind { margin: 0; }
+.pf-field.tc-bedtime-box { margin-top: 0; padding-bottom: 30px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.pf-field.tc-bedtime-box[hidden] { display: none; }
+.pf-footer { max-width: 560px; margin: 8px auto 0; }
+.pf-footer .tc-profile-create-actions { margin-top: 0; }
+@media (min-width: 1024px) {
+  .pf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }                       /* col-lg-6 + col-lg-6 */
+  .pf-footer { margin-top: 16px; }
+}
+@media (max-width: 1023px) { .pf-grid { max-width: 640px; } .pf-dialog > h3 { max-width: 640px !important; } }   /* col-md-12: una columna */
+/* Tarjetas de perfil «tempranas» (se pintan antes que los scripts): solo lectura hasta que la app las sustituye */
+.tc-profile-early { pointer-events: none; }

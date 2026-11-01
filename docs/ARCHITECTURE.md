@@ -129,4 +129,7 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## PWA y portada
 - `sw.js`: en `install` lee `index.html`, extrae `css/…` y `js/…` y los guarda junto a `offline.html`, iconos y librerías del QR; CSS/JS van «red con límite de 4 s y respaldo en caché»; las navegaciones caen a `index.html` y, si no existe, a `offline.html`. Una versión nueva espera (`SKIP_WAITING` solo tras pulsar «Actualizar» en `core/pwa.js`). Sube `VERSION` en cada publicación.
-- Portada: `ui/hero.js` usa UN temporizador por título (`heroPlan`: 6 s; `ui/hero-trailer.js` lo amplía a 8 s si hay tráiler), pausado mientras el selector de perfiles está abierto y reiniciado al cerrarse. El tráiler se precarga a 0,5 s, arranca oculto a 1 s y se muestra a los 2 s (`HT_*`).
+- Portada: `ui/hero.js` usa UN temporizador por título (`heroPlan`: 6 s; `ui/hero-trailer.js` lo amplía a 15 s si hay tráiler), pausado mientras el selector de perfiles está abierto y reiniciado al cerrarse. El tráiler se precarga a 0,5 s, arranca oculto a 1 s y se muestra a los 2 s (`HT_*`).
+
+## Carga
+`index.html` marca todos los `<script src>` (salvo `boot.js` y `picker-open.js`) con `defer`: el navegador los descarga a la vez (HTTP/2) y los ejecuta en el orden del documento, por lo que el orden de las etiquetas sigue siendo el orden de dependencias. `picker-open.js` abre el selector y pinta tarjetas ligeras desde `localStorage` antes que nada.

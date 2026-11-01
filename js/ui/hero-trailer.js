@@ -1,6 +1,6 @@
 /**
  * TatoCine · js/ui/hero-trailer.js
- * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 6 s en pantalla; si TIENE tráiler dura 8 s
+ * Tráiler en silencio en la portada (como las plataformas grandes). Cada título dura 6 s en pantalla; si TIENE tráiler dura 15 s
  * y el vídeo se ve en el segundo 2 (se precarga y arranca oculto antes, sin pasar el ratón), en Inicio, Películas, Series, Anime y Niños.
  * Es youtube-nocookie y sin sonido. Se detiene al cambiar de título, salir de la portada, abrir una ficha o el reproductor,
  * u ocultar la pestaña.
@@ -130,11 +130,11 @@ function htSchedule(m) {
   htTrailerKeys(m).then(function (keys) {
     if (token !== htToken || currentHeroMedia !== m || !htAllowed()) return;
     if (!keys.length) { htSetStatus(L("Este título no tiene tráiler en TMDB.", "This title has no trailer on TMDB.")); return; }       // sin tráiler: 6 s
-    heroPlan(HERO_DWELL_TRAILER);                                                                                                        // con tráiler: 8 s
+    heroPlan(HERO_DWELL_TRAILER);                                                                                                        // con tráiler: 15 s
     htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
   });
 }
-var HERO_DWELL_TRAILER = 8000;
+var HERO_DWELL_TRAILER = 15000;
 decorate("setHero", function (original) { return function (m) { var r = original(m); htSchedule(m); return r; }; });
 decorate("openDetails", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });

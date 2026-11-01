@@ -6,6 +6,7 @@
  * Se abre desde «¿Qué ver hoy?» o con Ctrl+K. Teclado: ← no · → sí.
  */
 var cpState = null, CP_COUNT = 12;
+var EYE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>', DICE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/></svg>', PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 function cpName(i) { return cpState.names[i]; }
 async function cpBuildPool(kid) {
   var calls, page = 1 + Math.floor(Math.random() * 3), movies = [], shows = [];
@@ -57,7 +58,7 @@ function openCouplePicker() {
   var done = saved.turn === 1 && saved.i >= saved.pool.length;
   qrOpen(L("Decidir en pareja", "Decide as a couple"));
   qrBody().innerHTML = '<p class="tc-qr-note">' + (done ? L("Tienes un resultado de la última ronda.", "You have a result from the last round.") : L("Tienes una ronda sin terminar: turno de ", "You have an unfinished round: turn of ") + "<strong>" + escapeHTML(saved.names[saved.turn]) + "</strong> · " + Math.min(saved.i + 1, saved.pool.length) + "/" + saved.pool.length + ".") + '</p>' +
-    '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-cp="resume">' + (done ? L("Ver resultado", "See result") : L("Continuar", "Continue")) + '</button><button type="button" class="tc-profile-cancel-btn" data-cp="fresh">' + L("Nueva ronda", "New round") + "</button></div>";
+    '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn cp-choice" data-cp="resume">' + (done ? EYE : PLAY) + "<span>" + (done ? L("Ver resultado", "See result") : L("Continuar", "Continue")) + '</span></button><button type="button" class="tc-profile-cancel-btn cp-choice" data-cp="fresh">' + DICE + "<span>" + L("Nueva ronda", "New round") + "</span></button></div>";
   qrBody().querySelector('[data-cp="resume"]').onclick = function () { cpState = saved; cpShowCard(); };
   qrBody().querySelector('[data-cp="fresh"]').onclick = function () { cpClear(); cpState = null; cpSetupScreen(); };
 }

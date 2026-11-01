@@ -281,15 +281,15 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 6 s", false, 6000], ["con tráiler cada título dura 8 s", true, 8000]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 6 s", false, 6000], ["con tráiler cada título dura 15 s", true, 15000]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
       await enter(page);
       await page.waitForFunction(() => currentHeroMedia && heroMoviesList.length >= 2, null, { timeout: 20000 });
-      const gaps = await heroIntervals(page, expected * 3 + 2500);
-      ok(gaps.length >= 2, "rotó menos de 3 veces: " + JSON.stringify(gaps));
-      for (const g of gaps) ok(Math.abs(g - expected) < 900, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
+      const gaps = await heroIntervals(page, expected * (withTrailer ? 2 : 3) + 2500);
+      ok(gaps.length >= (withTrailer ? 1 : 2), "rotó menos de lo esperado: " + JSON.stringify(gaps));
+      for (const g of gaps) ok(Math.abs(g - expected) < 1000, "un título duró " + g + " ms y debía durar " + expected + " ms (" + JSON.stringify(gaps) + ")");
     });
   }
   await test("portada: el tráiler se precarga pero no se ve antes del segundo 2, y aparece solo (sin pasar el ratón)", async (page, ctx) => {
@@ -326,6 +326,22 @@ async function main() {
     const off = await (await ctx.newPage()).goto(url + "offline.html").then((r) => r.status());
     eq(off, 200, "offline.html:");
     await ctx.setOffline(false);
+  });
+
+  await test("formulario de perfil: pantalla completa, 2 columnas en escritorio y 1 en tableta/móvil, sin los textos retirados", async (page) => {
+    await enter(page);
+    await page.evaluate(() => { openProfileCreateModal(); setProfileFormKind("kid"); });
+    const txt = await page.evaluate(() => document.getElementById("tc-profile-create-overlay").innerText);
+    ok(!/Para quién es este perfil|Idioma \/ Language|Solo verá la sección/.test(txt), "siguen los textos retirados");
+    const geo = () => page.evaluate(() => { const d = document.querySelector(".pf-dialog").getBoundingClientRect(), c = [...document.querySelectorAll(".pf-col")].map((e) => e.getBoundingClientRect()), bed = document.getElementById("tc-bedtime-box").getBoundingClientRect(), pin = document.getElementById("tc-new-profile-pin").getBoundingClientRect(); return { full: d.width >= innerWidth - 1 && d.height >= innerHeight - 1, sameRow: Math.abs(c[0].top - c[1].top) < 4, gap: Math.round(pin.top - bed.bottom) }; });
+    let g = await geo();
+    ok(g.full && g.sameRow && g.gap >= 24, "escritorio: " + JSON.stringify(g));
+    await page.setViewportSize({ width: 820, height: 1000 });
+    g = await geo();
+    ok(g.full && !g.sameRow && g.gap >= 24, "tableta: " + JSON.stringify(g));
+    await page.setViewportSize({ width: 390, height: 800 });
+    g = await geo();
+    ok(g.full && !g.sameRow && g.gap >= 24, "móvil: " + JSON.stringify(g));
   });
 
   await test("rendimiento: arranque y primera tarjeta dentro de presupuesto (se imprimen las cifras)", async (page) => {

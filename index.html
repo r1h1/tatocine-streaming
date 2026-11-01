@@ -574,30 +574,37 @@
   <!-- Modal independiente para crear perfiles locales -->
   <div class="tc-profile-create-overlay" id="tc-profile-create-overlay" role="dialog" aria-modal="true"
     aria-labelledby="tc-profile-create-title" data-h="h50">
-    <section class="tc-profile-create-dialog">
+    <section class="tc-profile-create-dialog pf-dialog">
       <button class="tc-profile-create-close" type="button" data-h="h51"
         aria-label="Cerrar">×</button>
       <h3 id="tc-profile-create-title">Agregar perfil</h3>
       <p class="tc-profile-create-subtitle" id="tc-profile-create-subtitle" hidden></p>
+      <div class="pf-grid">
+        <div class="pf-col">
+          <div class="pf-field">
       <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre del perfil</label>
       <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
         placeholder="Escribe un nombre" autocomplete="off" data-hk="h52">
-      <label class="tc-profile-create-label tc-profile-create-label-gap">¿Para quién es este perfil?</label>
+          </div>
+          <div class="pf-field pf-choice">
       <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo de perfil">
         <button type="button" class="tc-kind-btn active" data-kind="adult" role="radio" aria-checked="true"
           data-h="h53">Adulto</button>
         <button type="button" class="tc-kind-btn" data-kind="kid" role="radio" aria-checked="false"
           data-h="h54">Niño</button>
       </div>
-      <p class="tc-profile-hint" id="tc-kind-help" hidden></p>
-      <label class="tc-profile-create-label">Idioma / Language</label>
+          </div>
+          <div class="pf-field pf-choice">
       <div class="tc-profile-kind" role="radiogroup" aria-label="Idioma / Language">
         <button type="button" class="tc-lang-btn active" data-lang="es" role="radio" aria-checked="true"
           data-h="h55" data-i18n="skip">ESP · Español</button>
         <button type="button" class="tc-lang-btn" data-lang="en" role="radio" aria-checked="false"
           data-h="h56" data-i18n="skip">ENG · English</button>
       </div>
-      <div id="tc-bedtime-box" class="tc-bedtime-box" hidden>
+          </div>
+        </div>
+        <div class="pf-col">
+      <div id="tc-bedtime-box" class="tc-bedtime-box pf-field" hidden>
         <label class="tc-profile-create-label">Hora de dormir (opcional)</label>
         <div class="tc-bedtime-row">
           <input class="tc-profile-input" id="tc-bed-from" type="time" value="21:00" aria-label="Desde" />
@@ -606,10 +613,15 @@
           <label class="tc-bedtime-on"><input type="checkbox" id="tc-bed-on" /> Activar</label>
         </div>
       </div>
+          <div class="pf-field">
       <label class="tc-profile-create-label" for="tc-new-profile-pin">PIN de acceso (opcional)</label>
       <input class="tc-profile-input" id="tc-new-profile-pin" type="password" inputmode="numeric" pattern="[0-9]*"
         maxlength="4" autocomplete="off" placeholder="4 dígitos">
             <button type="button" class="tc-link-btn" id="tc-remove-pin-btn" data-h="h57" hidden>Quitar PIN</button>
+          </div>
+        </div>
+      </div>
+      <div class="pf-footer">
       <div class="tc-profile-create-actions">
         <button class="tc-profile-cancel-btn" type="button" data-h="h51"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
         <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
@@ -617,6 +629,7 @@
       </div>
       <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
         data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+      </div>
     </section>
   </div>
 
@@ -835,86 +848,86 @@
   </div>
 
 
-    <script src="config.js"></script>
-  <script src="js/core/config.js"></script>
-  <script src="js/core/storage.js"></script>
-  <script src="js/core/extend.js"></script>
-  <script src="js/core/actions.js"></script>
-  <script src="js/core/handlers.js"></script>
-  <script src="js/core/env.js"></script>
-  <script src="js/profiles/profile-store.js"></script>
-  <script src="js/profiles/profile-ui.js"></script>
-  <script src="js/profiles/pin-strong.js"></script>
-  <script src="js/core/state.js"></script>
-  <script src="js/core/ui-utils.js"></script>
-  <script src="js/ui/command-palette.js"></script>
-  <script src="js/core/tmdb.js"></script>
-  <script src="js/profiles/profile-backdrop.js"></script>
-  <script src="js/features/analytics.js"></script>
-  <script src="js/core/utils.js"></script>
-  <script src="js/ui/skeletons.js"></script>
-  <script src="js/features/favorites.js"></script>
-  <script src="js/features/continue-watching.js"></script>
-  <script src="js/player/servers.js"></script>
-  <script src="js/features/share.js"></script>
-  <script src="js/ui/cards.js"></script>
-  <script src="js/ui/hero.js"></script>
-  <script src="js/core/seo.js"></script>
-  <script src="js/ui/details.js"></script>
-  <script src="js/ui/filters.js"></script>
-  <script src="js/features/search.js"></script>
-  <script src="js/ui/views.js"></script>
-  <script src="js/ui/settings.js"></script>
-  <script src="js/player/player.js"></script>
-  <script src="js/core/events.js"></script>
-  <script src="js/ui/keyboard.js"></script>
-  <script src="js/features/kids.js"></script>
-  <script src="js/i18n/i18n.js"></script>
-  <script src="js/core/storage-maintenance.js"></script>
-  <script src="js/features/watch-tracking.js"></script>
-  <script src="js/features/recommendations.js"></script>
-  <script src="js/features/favorites-lists.js"></script>
-  <script src="js/features/stats.js"></script>
-  <script src="js/features/brands.js"></script>
-  <script src="js/features/recent-searches.js"></script>
-  <script src="js/profiles/profile-switch.js"></script>
-  <script src="js/features/pwa-install.js"></script>
-  <script src="js/ui/tv-navigation.js"></script>
-  <script src="js/core/pwa.js"></script>
-  <script src="js/features/details-favorite.js"></script>
-  <script src="js/features/watched.js"></script>
-  <script src="js/features/details-extras.js"></script>
-  <script src="js/features/search-suggest.js"></script>
-  <script src="js/features/infinite-feed.js"></script>
-  <script src="js/features/discover-wizard.js"></script>
-  <script src="js/features/streak.js"></script>
-  <script src="js/features/new-episodes.js"></script>
-  <script src="js/features/qr-payload.js"></script>
-  <script src="js/features/backup-sanitize.js"></script>
-  <script src="js/features/import-target.js"></script>
-  <script src="js/features/backup-crypto.js"></script>
-  <script src="js/features/backup.js"></script>
-  <script src="js/features/qr-transfer.js"></script>
-  <script src="js/features/parental.js"></script>
-  <script src="js/features/watch-later.js"></script>
-  <script src="js/features/calendar.js"></script>
-  <script src="js/features/release-alerts.js"></script>
-  <script src="js/features/wrapped.js"></script>
-  <script src="js/features/couple-picker.js"></script>
-  <script src="js/ui/undo.js"></script>
-  <script src="js/player/autoplay-next.js"></script>
-  <script src="js/player/player-robust.js"></script>
-  <script src="js/ui/gestures.js"></script>
-  <script src="js/ui/hero-trailer.js"></script>
-  <script src="js/ui/dynamic-color.js"></script>
-  <script src="js/ui/open-motion.js"></script>
-  <script src="js/ui/a11y.js"></script>
-  <script src="js/ui/accessibility-prefs.js"></script>
-  <script src="js/features/voice-search.js"></script>
-  <script src="js/ui/onboarding.js"></script>
-  <script src="js/core/performance.js"></script>
-  <script src="js/core/data-guard.js"></script>
-  <script src="js/app.js"></script>
+    <script defer src="config.js"></script>
+  <script defer src="js/core/config.js"></script>
+  <script defer src="js/core/storage.js"></script>
+  <script defer src="js/core/extend.js"></script>
+  <script defer src="js/core/actions.js"></script>
+  <script defer src="js/core/handlers.js"></script>
+  <script defer src="js/core/env.js"></script>
+  <script defer src="js/profiles/profile-store.js"></script>
+  <script defer src="js/profiles/profile-ui.js"></script>
+  <script defer src="js/profiles/pin-strong.js"></script>
+  <script defer src="js/core/state.js"></script>
+  <script defer src="js/core/ui-utils.js"></script>
+  <script defer src="js/ui/command-palette.js"></script>
+  <script defer src="js/core/tmdb.js"></script>
+  <script defer src="js/profiles/profile-backdrop.js"></script>
+  <script defer src="js/features/analytics.js"></script>
+  <script defer src="js/core/utils.js"></script>
+  <script defer src="js/ui/skeletons.js"></script>
+  <script defer src="js/features/favorites.js"></script>
+  <script defer src="js/features/continue-watching.js"></script>
+  <script defer src="js/player/servers.js"></script>
+  <script defer src="js/features/share.js"></script>
+  <script defer src="js/ui/cards.js"></script>
+  <script defer src="js/ui/hero.js"></script>
+  <script defer src="js/core/seo.js"></script>
+  <script defer src="js/ui/details.js"></script>
+  <script defer src="js/ui/filters.js"></script>
+  <script defer src="js/features/search.js"></script>
+  <script defer src="js/ui/views.js"></script>
+  <script defer src="js/ui/settings.js"></script>
+  <script defer src="js/player/player.js"></script>
+  <script defer src="js/core/events.js"></script>
+  <script defer src="js/ui/keyboard.js"></script>
+  <script defer src="js/features/kids.js"></script>
+  <script defer src="js/i18n/i18n.js"></script>
+  <script defer src="js/core/storage-maintenance.js"></script>
+  <script defer src="js/features/watch-tracking.js"></script>
+  <script defer src="js/features/recommendations.js"></script>
+  <script defer src="js/features/favorites-lists.js"></script>
+  <script defer src="js/features/stats.js"></script>
+  <script defer src="js/features/brands.js"></script>
+  <script defer src="js/features/recent-searches.js"></script>
+  <script defer src="js/profiles/profile-switch.js"></script>
+  <script defer src="js/features/pwa-install.js"></script>
+  <script defer src="js/ui/tv-navigation.js"></script>
+  <script defer src="js/core/pwa.js"></script>
+  <script defer src="js/features/details-favorite.js"></script>
+  <script defer src="js/features/watched.js"></script>
+  <script defer src="js/features/details-extras.js"></script>
+  <script defer src="js/features/search-suggest.js"></script>
+  <script defer src="js/features/infinite-feed.js"></script>
+  <script defer src="js/features/discover-wizard.js"></script>
+  <script defer src="js/features/streak.js"></script>
+  <script defer src="js/features/new-episodes.js"></script>
+  <script defer src="js/features/qr-payload.js"></script>
+  <script defer src="js/features/backup-sanitize.js"></script>
+  <script defer src="js/features/import-target.js"></script>
+  <script defer src="js/features/backup-crypto.js"></script>
+  <script defer src="js/features/backup.js"></script>
+  <script defer src="js/features/qr-transfer.js"></script>
+  <script defer src="js/features/parental.js"></script>
+  <script defer src="js/features/watch-later.js"></script>
+  <script defer src="js/features/calendar.js"></script>
+  <script defer src="js/features/release-alerts.js"></script>
+  <script defer src="js/features/wrapped.js"></script>
+  <script defer src="js/features/couple-picker.js"></script>
+  <script defer src="js/ui/undo.js"></script>
+  <script defer src="js/player/autoplay-next.js"></script>
+  <script defer src="js/player/player-robust.js"></script>
+  <script defer src="js/ui/gestures.js"></script>
+  <script defer src="js/ui/hero-trailer.js"></script>
+  <script defer src="js/ui/dynamic-color.js"></script>
+  <script defer src="js/ui/open-motion.js"></script>
+  <script defer src="js/ui/a11y.js"></script>
+  <script defer src="js/ui/accessibility-prefs.js"></script>
+  <script defer src="js/features/voice-search.js"></script>
+  <script defer src="js/ui/onboarding.js"></script>
+  <script defer src="js/core/performance.js"></script>
+  <script defer src="js/core/data-guard.js"></script>
+  <script defer src="js/app.js"></script>
 </body>
 
 </html>
