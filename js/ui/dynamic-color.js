@@ -5,6 +5,17 @@
  * alrededor del reproductor. No se usa en modo ligero ni con alto contraste. Guarda hasta 150 colores en memoria.
  */
 var dcCache = {}, dcCount = 0;
+/** Pasa el color medio a un acento VIVO (misma tonalidad, saturación y luminosidad fijas) para que el brillo se vea siempre. */
+function vividAccent(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  var mx = Math.max(r, g, b), mn = Math.min(r, g, b), h = 0, d = mx - mn;
+  if (d > 0.02) h = mx === r ? ((g - b) / d + (g < b ? 6 : 0)) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h /= 6;
+  var s = 0.78, l = 0.52;                                           // saturación y luz fijas
+  if (d <= 0.02) { h = 0.62; s = 0.55; }                            // imagen casi gris: azul suave
+  function f(n) { var k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); }
+  return [f(0), f(8), f(4)];
+}
 function dominantColor(path) {
   if (!path || !/^\/[A-Za-z0-9_.-]{4,80}$/.test(path)) return Promise.resolve(null);
   if (dcCache[path]) return Promise.resolve(dcCache[path]);
@@ -23,9 +34,7 @@ function dominantColor(path) {
           if (w > 0) { r += d[i] * w; g += d[i + 1] * w; b += d[i + 2] * w; wsum += w; }
         }
         if (!wsum) return finish(null);
-        r /= wsum; g /= wsum; b /= wsum;
-        var m = Math.max(r, g, b) || 1, k = Math.min(2.2, 185 / m);  // se aviva si es muy oscuro (para que el brillo se note)
-        finish([Math.min(255, Math.round(r * k)), Math.min(255, Math.round(g * k)), Math.min(255, Math.round(b * k))]);
+        finish(vividAccent(r / wsum, g / wsum, b / wsum));
       } catch (e) { finish(null); }
     };
     img.onerror = function () { finish(null); };

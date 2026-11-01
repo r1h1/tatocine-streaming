@@ -1,8 +1,8 @@
 /**
  * TatoCine · js/features/watched.js
- * «Ya vistas» y valoraciones personales (👍 / 👎) por perfil. Alimenta las recomendaciones:
- *   - 👍 suma peso a sus géneros y aporta un título de referencia.
- *   - 👎 resta peso a sus géneros y oculta el título de las recomendaciones.
+ * «Ya vistas» y valoraciones personales (me gusta / no me gusta) por perfil. Alimenta las recomendaciones:
+ *   - me gusta suma peso a sus géneros y aporta un título de referencia.
+ *   - no me gusta resta peso a sus géneros y oculta el título de las recomendaciones.
  * Los títulos finalizados en el reproductor se marcan solos como vistos (autoMarkWatched).
  */
 var WATCHED_KEY = "tatoWatched";
@@ -42,7 +42,7 @@ function setWatched(m, on, genres) {
   cleanupWatched(m);
   saveWatched();
 }
-/** Alterna 👍 (1) o 👎 (-1); al valorar, el título pasa a «visto». */
+/** Alterna me gusta (1) o no me gusta (-1); al valorar, el título pasa a «visto». */
 function setUserRating(m, value, genres) {
   var r = touchWatched(m, genres);
   r.ur = r.ur === value ? 0 : value;
@@ -79,7 +79,7 @@ function tasteExtras() {
   });
   return extras;
 }
-/** Títulos con 👍 más recientes, usados como referencia de recomendaciones. */
+/** Títulos con me gusta más recientes, usados como referencia de recomendaciones. */
 function likedSeeds() {
   return Object.keys(watchedMap).map(function (k) { return watchedMap[k]; })
     .filter(function (r) { return r.ur > 0; })
@@ -96,7 +96,7 @@ function watchedSection() {
   return '<section class="fav-section">' + head + '<div class="grid-container">' + items.map(getCardHTML).join("") + "</div></section>";
 }
 
-// ---- Botones de la ficha: «Marcar como vista» y 👍 / 👎 ----
+// ---- Botones de la ficha: «Marcar como vista» y me gusta / no me gusta ----
 var USER_ACTION_ICONS = {
   check: '<path d="M20 6L9 17l-5-5"/>',
   up: '<path d="M7 11v9H3v-9h4zM7 11l4-8a2 2 0 0 1 2 2v4h6a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/>',

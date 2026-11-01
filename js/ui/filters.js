@@ -70,7 +70,7 @@
       var filterBtn = document.createElement("button");
       filterBtn.className = "genre-chip";
       filterBtn.style.marginLeft = "auto";
-      filterBtn.innerHTML = "⚙ Filtros";
+      filterBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg> Filtros';
       filterBtn.onclick = openFilters;
       div.appendChild(filterBtn);
       $genreContainer.appendChild(div);

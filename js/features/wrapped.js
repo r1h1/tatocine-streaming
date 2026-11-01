@@ -45,7 +45,7 @@ function drawWrapped(canvas, d, name) {
     ctx.font = "600 40px " + F; ctx.fillStyle = "#fff"; ctx.fillText(wrappedFit(ctx, bkText(it.title, 60), 700), 150, y);
     ctx.font = "500 34px " + F; ctx.globalAlpha = .7; var m = Math.round((it.secs || 0) / 60); ctx.fillText(m >= 60 ? Math.floor(m / 60) + " h " + (m % 60) + " min" : m + " min", W - 270, y); ctx.globalAlpha = 1;
   });
-  ctx.fillStyle = "#fff"; ctx.font = "700 40px " + F; ctx.fillText("🔥 " + L("Mejor racha: ", "Best streak: ") + d.best + L(" días", " days"), 90, 1860);
+  ctx.fillStyle = "#fff"; ctx.font = "700 40px " + F; ctx.fillText(L("Mejor racha: ", "Best streak: ") + d.best + L(" días", " days"), 90, 1860);
 }
 function openWrapped() {
   if (isKidProfile() || isGuestProfile()) { showToast(L("No disponible en este perfil", "Not available on this profile")); return; }
@@ -75,7 +75,7 @@ registerAction("open-wrapped", openWrapped);
 decorate("openStats", function (original) {
   return function () {
     var r = original.apply(this, arguments), wrap = document.querySelector("#stats-modal .stats-wrap");
-    if (wrap && !wrap.querySelector('[data-act="open-wrapped"]')) wrap.insertAdjacentHTML("afterbegin", '<div class="wrapped-cta"><button type="button" class="genre-chip chip-primary" data-act="open-wrapped">✨ ' + L("Tu año en películas", "Your year in movies") + "</button></div>");
+    if (wrap && !wrap.querySelector('[data-act="open-wrapped"]')) wrap.insertAdjacentHTML("afterbegin", '<div class="wrapped-cta"><button type="button" class="hero-btn" data-act="open-wrapped"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>' + L("Tu año en películas", "Your year in movies") + "</button></div>");
     return r;
   };
 });

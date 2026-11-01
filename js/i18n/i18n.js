@@ -19,7 +19,7 @@
       "Anterior": "Previous", "Siguiente": "Next", "Cargando...": "Loading...", "Cargando": "Loading", "Cargando descripción...": "Loading description...",
       "Todos": "All", "General": "General", "Cargar más": "Load more", "Cancelar": "Cancel", "Borrar": "Delete", "Limpiar": "Clear", "Entendido": "Got it", "Entrar": "Enter",
       "Crear": "Create", "Cambiar": "Change", "Resetear": "Reset", "Reintentar": "Retry", "Copiar": "Copy", "Copiado ✓": "Copied ✓", "Aceptar y continuar": "Accept and continue",
-      "⚙ Filtros": "⚙ Filters", "Filtros Avanzados": "Advanced Filters", "Año": "Year", "Rating mínimo": "Minimum rating", "Ordenar por": "Sort by",
+      "Filtros": "Filters", "Filtros Avanzados": "Advanced Filters", "Año": "Year", "Rating mínimo": "Minimum rating", "Ordenar por": "Sort by",
       "Popularidad": "Popularity", "Mejor puntuadas": "Top rated", "Más recientes": "Most recent",
       "Sin conexión a internet": "No internet connection", "Conexión restaurada": "Connection restored",
       // --- filas del inicio ---

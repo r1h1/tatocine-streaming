@@ -13,7 +13,7 @@
       $heroVideoWrap.classList.remove("active");
       $heroVideoWrap.innerHTML = "";
       $heroVideoWrap.dataset.key = "";
-      $heroBg.style.backgroundImage = "none";
+      heroBgClear();
       $heroTitle.textContent = "No encontramos resultados";
       $heroYear.textContent = 'Búsqueda: "' + q + '"';
       $heroMeta.innerHTML = "";
@@ -31,7 +31,7 @@
       $heroSection.classList.add("empty-search");
       $heroVideoWrap.classList.remove("active");
       $heroVideoWrap.innerHTML = "";
-      $heroBg.style.backgroundImage = "none";
+      heroBgClear();
       $heroTitle.textContent = "No se pudo completar la búsqueda";
       $heroYear.textContent = "Comprueba tu conexión";
       $heroMeta.innerHTML = "";

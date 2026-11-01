@@ -89,6 +89,18 @@ async function main() {
     ok(await page.locator(".tc-profile-skel, .tc-profile-card").count() > 0, "ni esqueleto ni perfiles");
   });
 
+  await test("recargar (Ctrl+R) conserva el perfil elegido y no vuelve a pedirlo; una pestaña nueva sí", async (page, ctx) => {
+    await enter(page);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    eq(await page.evaluate(() => document.getElementById("tc-profile-overlay").classList.contains("open")), false, "el selector reapareció al recargar:");
+    eq(await page.evaluate(() => document.documentElement.classList.contains("tc-picker-boot")), false, "la portada se ocultó al recargar:");
+    const tab2 = await ctx.newPage();
+    await tab2.goto(url, { waitUntil: "domcontentloaded" });
+    await tab2.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    await tab2.close();
+  });
+
   await test("sin scripts en línea, ni eval, ni atributos on*: la CSP no tiene excepciones", async (page) => {
     await enter(page);
     const info = await page.evaluate(() => ({
@@ -214,7 +226,7 @@ async function main() {
     });
     eq(r.v, 2); ok(r.it >= 150000 && r.good && !r.bad && r.wait, JSON.stringify(r));
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForSelector("#tc-profile-overlay.open");
+    await page.waitForFunction(() => document.body.classList.contains("app-ready"));
     ok(await page.evaluate(() => pinGuardWait("pintest") > 25000), "el bloqueo no persistió");
   });
 
@@ -225,12 +237,21 @@ async function main() {
     await page.click('#tc-wizard-overlay [data-wiz="go"]');
     await page.waitForSelector("#tc-wizard-overlay .wiz-result", { timeout: 25000 });
     eq(await page.locator("#tc-wizard-overlay .wiz-result").count(), 3, "recomendaciones:");
+    await page.evaluate(() => openWizard());
+    ok(await page.locator('#tc-wizard-overlay [data-act="wizard-couple"]').isVisible(), "falta el botón Decidir en pareja");
+    const bx = await page.evaluate(() => [...document.querySelectorAll("#tc-wizard-overlay .wiz-actions > button")].map((b) => Math.round(b.getBoundingClientRect().top)));
+    eq(bx.length, 2, "botones del asistente:"); eq(bx[0], bx[1], "en pantallas grandes van uno al lado del otro:");
     await page.evaluate(() => closeWizard());
     await page.evaluate(() => openCouplePicker());
     await page.click('[data-cp="start"]');
     await page.waitForSelector("#cp-card", { timeout: 20000 });
     await page.keyboard.press("ArrowRight");
     ok((await page.locator(".tc-qr-meta").first().innerText()).includes("2/"), "← → no responden");
+    await page.click('[data-cp="info"]');
+    await page.waitForSelector("#details-real-content", { state: "visible", timeout: 20000 });
+    eq(await page.evaluate(() => document.getElementById("tc-profile-overlay").classList.contains("open")), false, "Info abrió el selector de perfiles:");
+    await page.evaluate(() => closeDetails());
+    await page.waitForSelector("#cp-card", { timeout: 5000 });
     await page.evaluate(() => closeQr());
     await page.evaluate(() => openPlayer(603, "movie", "Matrix", null, null, null));
     await page.waitForSelector("#player-view iframe", { timeout: 10000 });

@@ -70,7 +70,7 @@
             (counts[id] || 0) + tasteWeight(item) * recency;
         });
       });
-      // Señales extra (valoraciones 👍/👎 del usuario) definidas en features/watched.js
+      // Señales extra (valoraciones me gusta/no me gusta del usuario) definidas en features/watched.js
       if (typeof tasteExtras === "function") {
         tasteExtras().forEach(function (x) {
           x.genres.forEach(function (id) { counts[id] = Math.max(0, (counts[id] || 0) + x.weight); });

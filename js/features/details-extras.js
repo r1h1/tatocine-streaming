@@ -3,7 +3,7 @@
  * Extras de la ficha del título (se invoca desde ui/details.js tras pintar el detalle):
  *   - Director (películas) o creadores (series), con enlace a sus obras.
  *   - Temporadas y episodios con imagen, duración y sinopsis; al tocar un episodio se reproduce.
- *   - Botones «Marcar como vista» y 👍/👎 (ver watched.js).
+ *   - Botones «Marcar como vista» y me gusta/no me gusta (ver watched.js).
  */
 var detailsGenres = [];
 var episodesRequest = 0;

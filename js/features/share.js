@@ -82,7 +82,7 @@
         }
         if (copied) {
           feedback.textContent = "Enlace copiado al portapapeles.";
-          copyButton.textContent = "Copiado ✓";
+          copyButton.textContent = "Copiado";
         } else {
           feedback.textContent = "Enlace seleccionado. Mantén pulsado o usa Ctrl+C para copiarlo.";
         }
@@ -92,7 +92,7 @@
         if (navigator.clipboard && typeof navigator.clipboard.writeText === "function" && window.isSecureContext) {
           navigator.clipboard.writeText(shareUrl).then(function () {
             feedback.textContent = "Enlace copiado al portapapeles.";
-            copyButton.textContent = "Copiado ✓";
+            copyButton.textContent = "Copiado";
           }).catch(legacyCopy);
         } else {
           legacyCopy();

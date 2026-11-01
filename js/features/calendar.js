@@ -47,27 +47,25 @@ function calDayLabel(date) {
   return a.toLocaleDateString(UI_LANG === "en" ? "en" : "es", { weekday: "short", day: "numeric", month: "short" });
 }
 function calSkeleton() {
-  var h = '<div class="cal-skel" aria-hidden="true">';
-  for (var i = 0; i < 4; i++) h += '<div class="cal-item"><span class="skel cal-thumb"></span><span class="cal-info"><span class="skel skel-line"></span><span class="skel skel-line short"></span></span></div>';
+  var h = '<div class="cal-skel cal-grid" aria-hidden="true">';
+  for (var i = 0; i < 6; i++) h += '<div class="cal-item"><span class="skel cal-thumb"></span><span class="cal-info"><span class="skel skel-line"></span><span class="skel skel-line short"></span></span></div>';
   return h + "</div>";
 }
 async function openCalendar() {
   if (isKidProfile() || isGuestProfile()) { showToast(L("El calendario no está disponible en este perfil", "The calendar is not available on this profile")); return; }
   var run = ++calRun;
-  qrOpen(L("Mi calendario", "My calendar"));
+  qrOpen(L("Mi calendario", "My calendar"), true);
   qrBody().innerHTML = '<p class="tc-qr-note">' + L("Próximos estrenos y episodios de lo que sigues.", "Upcoming releases and episodes of what you follow.") + "</p>" + calSkeleton();
   var items = await calendarCollect(false);
   if (run !== calRun || !$("tc-qr-overlay").classList.contains("open")) return;
   if (!items.length) { qrBody().innerHTML = emptyStateHTML("calendar", L("Sin estrenos próximos", "No upcoming releases"), L("Guarda series o películas por estrenar en Favoritos o Ver más tarde y aparecerán aquí.", "Save upcoming series or movies to Favorites or Watch later and they'll show up here."), "", ""); return; }
-  var html = '<p class="tc-qr-note">' + L("Próximos estrenos y episodios de lo que sigues.", "Upcoming releases and episodes of what you follow.") + "</p>", last = "";
+  var html = '<p class="tc-qr-note">' + L("Próximos estrenos y episodios de lo que sigues.", "Upcoming releases and episodes of what you follow.") + '</p><div class="cal-grid">';
   items.forEach(function (it) {
-    var day = calDayLabel(it.date);
-    if (day !== last) { html += '<h4 class="cal-day">' + escapeHTML(day) + "</h4>"; last = day; }
     html += '<button type="button" class="cal-item" data-act="cal-open" data-type="' + it.type + '" data-id="' + it.id + '">' +
       (it.bg ? '<img class="cal-thumb" alt="" loading="lazy" src="' + IMG_W185 + it.bg + '">' : '<span class="cal-thumb skel"></span>') +
-      '<span class="cal-info"><span class="cal-title" data-i18n="skip">' + escapeHTML(it.title) + '</span><span class="cal-sub">' + (it.type === "tv" ? L("Episodio nuevo", "New episode") + " · " + escapeHTML(it.label) : L("Estreno de película", "Movie release")) + "</span></span></button>";
+      '<span class="cal-info"><span class="cal-date">' + escapeHTML(calDayLabel(it.date)) + '</span><span class="cal-title" data-i18n="skip">' + escapeHTML(it.title) + '</span><span class="cal-sub">' + (it.type === "tv" ? L("Episodio nuevo", "New episode") + " · " + escapeHTML(it.label) : L("Estreno de película", "Movie release")) + "</span></span></button>";
   });
-  qrBody().innerHTML = html;
+  qrBody().innerHTML = html + "</div>";
 }
 registerAction("open-calendar", openCalendar);
 registerAction("cal-open", function (el) { var id = Number(el.getAttribute("data-id")), type = el.getAttribute("data-type") === "tv" ? "tv" : "movie"; closeQr(); openDetails(id, type); });

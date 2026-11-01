@@ -278,18 +278,23 @@ body.hc .hero-desc, body.hc .sub-label, body.hc .card-overlay span, body.hc .her
 .cp-btns .cp-info-btn { width: 44px; height: 44px; font-size: 20px; }
 .cp-kid { margin: 10px 0 2px; }
 .cp-win { box-shadow: 0 0 0 3px #3ddc84; cursor: default; }
-.wiz-couple { display: block; margin: 10px auto 2px; }
-@media (max-width: 600px) { .tc-wizard .wiz-couple { margin: 6px auto 12px; } }
+/* Asistente: botones principales en 2 columnas (pantallas grandes) o apilados a todo el ancho (pequeñas) */
+.tc-wizard .wiz-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tc-wizard .wiz-actions > button { width: 100%; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.tc-wizard .wiz-pair svg { flex: none; }
+@media (max-width: 600px) { .tc-wizard .wiz-actions { grid-template-columns: 1fr; } .tc-wizard .wiz-actions > button { min-height: 44px; } }
 
 /* ---------- Efecto «wow»: tráiler en la portada, color dinámico y esqueletos con brillo ---------- */
 .hero-sound-btn { position: absolute; right: var(--gutter, 24px); bottom: 118px; z-index: 6; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(0, 0, 0, .45); color: #fff; cursor: pointer; transition: background .2s; }
 .hero-sound-btn:hover, .hero-sound-btn:focus-visible { background: rgba(255, 255, 255, .25); }
 .hero-sound-btn .snd-on { display: none; } .hero-sound-btn[aria-pressed="true"] .snd-on { display: inline; } .hero-sound-btn[aria-pressed="true"] .snd-off { display: none; }
 body.hero-trailer-on .hero-bg { opacity: 0 !important; transition: opacity .8s ease; }
-#details-modal.has-accent .details-content { background: radial-gradient(120% 55% at 18% 0%, rgba(var(--accent-rgb), .32), transparent 64%), rgba(12, 12, 14, .94) !important; transition: background .6s ease; }
+#details-modal.has-accent .details-content { background: radial-gradient(130% 60% at 16% 0%, rgba(var(--accent-rgb), .55), transparent 66%), radial-gradient(70% 45% at 100% 100%, rgba(var(--accent-rgb), .22), transparent 70%), rgba(12, 12, 14, .94) !important; box-shadow: inset 0 3px 0 rgba(var(--accent-rgb), .9) !important; transition: background .6s ease; }
+#details-modal.has-accent .details-genres span, #details-modal.has-accent .details-meta span { border-color: rgba(var(--accent-rgb), .55); }
 #details-modal.has-accent .details-actions .hero-btn:not(.secondary) { box-shadow: 0 0 30px rgba(var(--accent-rgb), .5); }
 #player-modal .player-container { transition: box-shadow .9s ease; }
-#player-modal.has-accent .player-container { box-shadow: 0 0 150px 26px rgba(var(--accent-rgb), .4), 0 0 44px rgba(var(--accent-rgb), .28); }
+#player-modal.has-accent .player-container { box-shadow: 0 0 160px 34px rgba(var(--accent-rgb), .55), 0 0 50px 4px rgba(var(--accent-rgb), .4); }
+#player-modal.has-accent { background: radial-gradient(90% 70% at 50% 40%, rgba(var(--accent-rgb), .22), rgba(0, 0, 0, .96) 70%); }
 .card img:not(.loaded) { transform: scale(1.06); }
 
 /* Esqueletos: un brillo que cruza (solo transform → barato para la GPU) en lugar del parpadeo */
@@ -300,3 +305,45 @@ body.hero-trailer-on .hero-bg { opacity: 0 !important; transition: opacity .8s e
 @keyframes tcShimmer { to { transform: translateX(100%); } }
 body.lite .skeleton-card::after, body.lite .skel::after, body.lite .sk-line::after, body.rm *::after { animation: none; }
 .fav-lists .list-card:not(.has-cover) .list-cover { animation: none; }
+
+/* Decidir en pareja: número de turno y botones del resultado */
+.tour-num { font-size: calc(30px * var(--ts, 1)); font-weight: 800; color: #fff; }
+.cp-res-btn { flex: 1; min-width: 0; }
+.cp-btns button { display: inline-flex; align-items: center; justify-content: center; }
+
+/* Portada: fundido cruzado más suave (dos capas de fondo) */
+.hero-bg { transition: opacity .9s ease-in-out; will-change: opacity; }
+.hero-content.fading .hero-title, .hero-content.fading .hero-year, .hero-content.fading .hero-desc, .hero-content.fading .hero-actions, .hero-content.fading .hero-meta { transition: opacity .35s ease; }
+body.rm .hero-bg { transition: none; }
+
+/* Ajustes → Accesibilidad: tarjeta a todo el ancho (col-lg-12) y controles que se reparten sin solaparse */
+#settings-modal .settings-option.a11y-option { grid-column: 1 / -1; flex-wrap: wrap; row-gap: 12px; }
+.a11y-option .a11y-controls { margin-left: auto; flex: 0 1 auto; justify-content: flex-end; gap: 10px; }
+.a11y-option .danger-btn { white-space: nowrap; }
+@media (max-width: 1023px) { .a11y-option { flex-direction: column; align-items: stretch !important; } .a11y-option .a11y-controls { margin-left: 0; justify-content: flex-start; } }
+
+/* Calendario: diálogo ancho con rejilla */
+.tc-qr.tc-qr-wide { width: min(1000px, 100%); max-height: 90vh; max-height: 90dvh; overflow-y: auto; text-align: left; padding: 30px 32px; }
+.tc-qr.tc-qr-wide .tc-qr-note { text-align: left; }
+.tc-qr.tc-qr-wide #tc-qr-title { text-align: left; }
+.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px 14px; }
+.cal-grid .cal-day { grid-column: 1 / -1; }
+.tc-qr-wide .cal-thumb { width: 132px; height: 74px; }
+.tc-qr-wide .cal-item { padding: 10px; margin: 0; }
+@media (max-width: 600px) { .tc-qr.tc-qr-wide { padding: 22px 16px; } .cal-grid { grid-template-columns: 1fr; } }
+
+/* Ajustes (rejilla): las filas crecen con su texto en vez de recortarlo */
+@media (min-width: 1024px) {
+  #settings-modal .modal-body { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 14px; }
+  #settings-modal .settings-option { flex: 1 1 calc(50% - 7px); min-width: 0; height: auto; min-height: 76px; }
+  #settings-modal .settings-option.a11y-option { flex-basis: 100%; }
+}
+
+/* Calendario: tarjetas con la fecha dentro, 2-3 columnas en pantallas grandes */
+.cal-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.cal-date { align-self: flex-start; padding: 2px 10px; border-radius: 20px; background: rgba(255, 255, 255, .14); font-size: calc(11.5px * var(--ts, 1)); font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+.cal-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 600px) { .cal-grid { grid-template-columns: 1fr; } }
+.tc-qr .tour-title { text-align: center; }
+.cp-res-btn { justify-content: center; }
+#details-modal.has-accent .details-body { background: radial-gradient(60% 40% at 25% 60%, rgba(var(--accent-rgb), .20), transparent 70%); }

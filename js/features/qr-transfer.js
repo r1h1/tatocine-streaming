@@ -50,7 +50,11 @@ function qrCanTransfer() {
 /** Importar: no en el Invitado. Los perfiles infantiles sí pueden, pero solo datos infantiles (ver import-target.js). */
 function qrCanImport() { return qrCanTransfer(); }
 function closeQr() { clearInterval(qrTtlTimer); qrStopCamera(); qrBusy = false; closeOverlay("tc-qr-overlay"); }
-function qrOpen(title) { $("tc-qr-title").textContent = title; openOverlay("tc-qr-overlay"); }
+function qrOpen(title, wide) {
+  $("tc-qr-title").textContent = title;
+  document.querySelector("#tc-qr-overlay .tc-qr").classList.toggle("tc-qr-wide", !!wide);       // diálogo ancho (calendario)
+  openOverlay("tc-qr-overlay");
+}
 
 /* ---------- Mostrar ---------- */
 function qrSeenList() {

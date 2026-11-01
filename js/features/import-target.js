@@ -43,7 +43,7 @@ function pickImportTarget(opts) {
     '<p class="tc-qr-meta">' + L("Origen: perfil " + kindLabel(kind), "Source: " + kindLabel(kind) + " profile") + "</p>" +
     '<label class="tc-qr-label" for="tc-import-target">' + L("Importar en el perfil", "Import into profile") + "</label>" +
     '<select id="tc-import-target" class="tc-qr-select">' + targets.map(function (p) {
-      return '<option value="' + escapeHTML(p.id) + '"' + (p.id === def ? " selected" : "") + ">" + escapeHTML(p.name) + (p.id === activeProfileId ? L(" (actual)", " (current)") : "") + (profileHasPin(p) ? " 🔒" : "") + "</option>";
+      return '<option value="' + escapeHTML(p.id) + '"' + (p.id === def ? " selected" : "") + ">" + escapeHTML(p.name) + (p.id === activeProfileId ? L(" (actual)", " (current)") : "") + (profileHasPin(p) ? L(" · con PIN", " · PIN") : "") + "</option>";
     }).join("") + "</select>" +
     '<p class="tc-qr-hint">' + (kind === "kid" ? L("Solo perfiles infantiles. Se omite lo que no sea apto para niños. ", "Kid profiles only. Anything not suitable for kids is skipped. ") : L("Solo perfiles de adulto. ", "Adult profiles only. ")) + L("Se combina con lo que ya tiene el perfil: no se borra nada.", "It is merged with what the profile already has: nothing is deleted.") + "</p>" +
     '<div class="tc-qr-bar" hidden><span></span></div><p class="tc-qr-status" id="tc-qr-status" role="status"></p>' +

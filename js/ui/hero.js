@@ -230,17 +230,9 @@
         if (m.bg) {
           var u = m.bg.startsWith("http") ? m.bg : IMG_BG + m.bg;
 
-          // Fundido: se espera a que la imagen esté lista para que el cambio sea limpio
-          $heroBg.style.opacity = "0";
-          var heroImg = new Image();
-          heroImg.onload = heroImg.onerror = function () {
-            if (request !== heroRequestId) return;
-            $heroBg.style.backgroundImage = "url('" + u + "')";
-            $heroBg.style.opacity = "1";
-          };
-          heroImg.src = u;
+          heroSwapBg(u, request);        // fundido cruzado entre dos capas: sin parpadeo ni salto
         } else {
-          $heroBg.style.backgroundImage = "none";
+          heroBgClear();
         }
 
         $heroTitle.textContent = m.title || "Sin título";
@@ -328,6 +320,41 @@
       currentHeroIndex = i;
       document.querySelectorAll("#hero-dots .hero-dot").forEach(function (b, n) { b.classList.toggle("active", n === i); });
     }
+    // Fundido cruzado de la portada: dos capas de fondo; la nueva (siempre encima) aparece sobre la actual ya cargada.
+    var heroBgLayers = null, heroBgFront = 0;
+    function heroBgInit() {
+      if (heroBgLayers) return;
+      var b2 = $heroBg.cloneNode(false);
+      b2.id = "hero-bg2";
+      b2.setAttribute("aria-hidden", "true");
+      b2.style.opacity = "0";
+      $heroBg.parentNode.insertBefore(b2, $heroBg.nextSibling);
+      heroBgLayers = [$heroBg, b2];
+    }
+    function heroSwapBg(url, request) {
+      heroBgInit();
+      var front = heroBgLayers[heroBgFront], back = heroBgLayers[1 - heroBgFront], img = new Image();
+      img.onload = img.onerror = function () {
+        if (request !== heroRequestId) return;
+        back.style.zIndex = "2"; front.style.zIndex = "1";
+        back.style.backgroundImage = "url('" + url + "')";
+        back.style.opacity = "1";                       // la capa nueva se funde por encima (transición en CSS)
+        heroBgFront = 1 - heroBgFront;
+        setTimeout(function () {                        // la anterior ya está tapada: se vacía sin animación
+          front.style.transition = "none"; front.style.opacity = "0"; void front.offsetWidth; front.style.transition = "";
+        }, 1000);
+      };
+      img.src = url;
+    }
+    function heroBgClear() {
+      heroBgInit();
+      heroBgLayers.forEach(function (l) { l.style.backgroundImage = "none"; });
+    }
+    function heroPreloadNext() {
+      if (heroMoviesList.length < 2) return;
+      var n = heroMoviesList[(currentHeroIndex + 1) % heroMoviesList.length];
+      if (n && n.bg) { var i = new Image(); i.src = n.bg.startsWith("http") ? n.bg : IMG_BG + n.bg; }   // la imagen ya está lista al llegar su turno
+    }
     function startHeroCarousel(m) {
       heroMoviesList = (m || []).slice(0, 10);          // Top 10 de la semana
       currentHeroIndex = 0;
@@ -339,7 +366,9 @@
         if (document.hidden || isSearching || heroSectionIsEmpty() || document.body.style.overflow === "hidden" || document.body.classList.contains("rm") || document.body.classList.contains("hero-trailer-on") || window.scrollY > $heroSection.offsetHeight) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 8000);
+        setTimeout(heroPreloadNext, 1500);
+      }, 7000);
+      heroPreloadNext();
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");
