@@ -82,6 +82,6 @@ function finishImport(targetId, message, extra) {
   var p = localProfiles.find(function (x) { return x.id === targetId; }), same = targetId === activeProfileId;
   qrBody().innerHTML = '<p class="tc-qr-note">' + escapeHTML(message) + " " + (same ? L("Recargando…", "Reloading…") : L("Cámbiate al perfil «" + (p ? p.name : "") + "» para verlo.", "Switch to profile “" + (p ? p.name : "") + "” to see it.")) + "</p>" +
     (extra ? '<p class="tc-qr-warn">' + escapeHTML(extra) + "</p>" : "") +
-    (same ? "" : '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" onclick="closeQr()">' + L("Entendido", "Got it") + "</button></div>");
+    (same ? "" : '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-act="close-qr">' + L("Entendido", "Got it") + "</button></div>");
   if (same) reloadApp(extra ? 2600 : 1100);
 }

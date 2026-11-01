@@ -6,14 +6,6 @@
  */
     function getCardHTML(i) {
       var s = isSaved(i);
-      var st = String(i.title || "")
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-      var sb = String(i.bg || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
       var cid = Number(i.id) || 0, ctype = i.type === "tv" ? "tv" : "movie";      // nunca se interpolan valores sin validar en los atributos
       var b = i.bg ? escapeHTML(String(i.bg).startsWith("http") ? i.bg : IMG_CARD + i.bg) : "";
       var upcomingClass = (i.isUpcoming ? "upcoming" : "") + (i.topRank ? " top-ranked" + (Number(i.topRank) >= 10 ? " rank-wide" : "") : "");
@@ -39,51 +31,17 @@
           getStatusText(i.status).toUpperCase() +
           "</div>"
           : "";
+      var at = ' data-id="' + cid + '" data-type="' + ctype + '"', stt = ' data-title="' + escapeHTML(i.title) + '"';
       return (
-        '<div class="card ' +
-        upcomingClass +
-        '" tabindex="0" role="group" aria-label="' + escapeHTML(i.title) + '" onclick="openDetails(' +
-        cid +
-        ",'" +
-        ctype +
-        '\')" onmouseenter="prefetchDetails(' +
-        cid +
-        ",'" +
-        ctype +
-        '\')"><img alt="' + escapeHTML(i.title) + '" src="' +
-        (b || FALLBACK_IMG) +
-        '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')" onerror="this.onerror=null;this.src=\'' +
-        FALLBACK_IMG +
-        "'\"/>" +
+        '<div class="card ' + upcomingClass + '" tabindex="0" role="group" aria-label="' + escapeHTML(i.title) + '" data-act="open-details" data-hover="prefetch"' + at + '>' +
+        '<img alt="' + escapeHTML(i.title) + '" src="' + (b || FALLBACK_IMG) + '" loading="lazy" decoding="async" data-lc="loaded" data-fb="card"/>' +
         ratingBadge +
         statusBadge +
         upcomingBadge +
         topRankBadge +
-        '<button class="share-card-btn" onclick="shareCard(event,{id:' +
-        cid +
-        ",type:'" +
-        ctype +
-        "',title:'" +
-        st +
-        '\'})" title="Compartir" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button><button class="save-btn ' +
-        (s ? "saved" : "") +
-        '" title="Favoritos" aria-label="Favoritos" onclick="toggleSave(event,{id:' +
-        cid +
-        ",type:'" +
-        ctype +
-        "',title:'" +
-        st +
-        "',bg:'" +
-        sb +
-        "',rating:" +
-        (i.rating || 0) +
-        ",year:'" +
-        (i.year || "") +
-        '\'})"><svg width="14" height="14" viewBox="0 0 24 24" fill="' +
-        (s ? "currentColor" : "none") +
-        '" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><div class="card-overlay"><div class="card-title">' +
-        escapeHTML(i.title) +
-        "</div></div></div>"
+        '<button class="share-card-btn" data-act="share-card"' + at + stt + ' title="Compartir" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
+        '<button class="save-btn ' + (s ? "saved" : "") + '" title="Favoritos" aria-label="Favoritos" data-act="toggle-save"' + at + stt + ' data-bg="' + escapeHTML(i.bg || "") + '" data-rating="' + (Number(i.rating) || 0) + '" data-year="' + escapeHTML(String(i.year || "")) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="' + (s ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>' +
+        '<div class="card-overlay"><div class="card-title">' + escapeHTML(i.title) + "</div></div></div>"
       );
     }
     function renderRow(t, m) {
@@ -94,7 +52,7 @@
       d.innerHTML =
         '<div class="row-header"><h2 class="row-title">' +
         escapeHTML(t) +
-        '</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">' +
+        '</h2></div><button class="row-nav prev" data-act="row-scroll" data-dir="-1" aria-label="Anterior">‹</button><button class="row-nav next" data-act="row-scroll" data-dir="1" aria-label="Siguiente">›</button><div class="row-scroll">' +
         h +
         "</div>";
       $rowsContainer.appendChild(d);
@@ -117,3 +75,13 @@
         a = s.clientWidth * 0.85;
       s.scrollBy({ left: a * d, behavior: "smooth" });
     }
+
+/* Acciones de las tarjetas (ver core/actions.js). Los datos viajan en atributos data-*, ya escapados. */
+function cardMedia(el) {
+  return { id: Number(el.dataset.id) || 0, type: el.dataset.type === "tv" ? "tv" : "movie", title: el.dataset.title || "", bg: el.dataset.bg || "", rating: Number(el.dataset.rating) || 0, year: el.dataset.year || "" };
+}
+registerAction("open-details", function (el) { openDetails(Number(el.dataset.id) || 0, el.dataset.type === "tv" ? "tv" : "movie"); });
+registerAction("prefetch", function (el) { prefetchDetails(Number(el.dataset.id) || 0, el.dataset.type === "tv" ? "tv" : "movie"); });
+registerAction("share-card", function (el, e) { shareCard(e, cardMedia(el)); });
+registerAction("toggle-save", function (el, e) { toggleSave(e, cardMedia(el)); });
+registerAction("row-scroll", function (el) { scrollRow(el, Number(el.dataset.dir) || 1); });

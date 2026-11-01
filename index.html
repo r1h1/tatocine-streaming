@@ -3,17 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
-  <!-- Política de seguridad: solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
-  <script>
-    /* Antes de pintar nada: si toca elegir perfil, la página queda oculta y el selector aparece primero. */
-    (function () {
-      var root = document.documentElement, skip = false;
-      try { skip = sessionStorage.getItem("tatoSkipPickerOnce") === "1"; sessionStorage.removeItem("tatoSkipPickerOnce"); } catch (e) { }
-      window.__tcSkipPicker = skip;
-      if (!skip) { root.classList.add("tc-picker-boot"); setTimeout(function () { root.classList.remove("tc-picker-boot"); }, 8000); }
-    })();
-  </script>
+  <!-- Política de seguridad (CSP): SIN scripts en línea ni eval; solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <script src="js/boot.js"></script>
   <style>
     html.tc-picker-boot body { background: #000; }
     html.tc-picker-boot body > *:not(#tc-profile-overlay):not(script):not(style):not(link) { visibility: hidden !important; }
@@ -85,87 +77,66 @@
 
 <body>
   <div class="mobile-menu" id="mobile-menu">
-    <button class="close-btn" onclick="toggleMenu()">✕</button>
-    <button class="nav-item active" data-view="home" data-adult-only onclick="
-          switchView('home');
-          toggleMenu();
-        ">
+    <button class="close-btn" data-h="h1">✕</button>
+    <button class="nav-item active" data-view="home" data-adult-only data-h="h2">
       Inicio
     </button>
-    <button class="nav-item" data-view="movies" data-adult-only onclick="
-          switchView('movies');
-          toggleMenu();
-        ">
+    <button class="nav-item" data-view="movies" data-adult-only data-h="h3">
       Películas
     </button>
-    <button class="nav-item" data-view="anime" data-adult-only onclick="
-          switchView('anime');
-          toggleMenu();
-        ">
+    <button class="nav-item" data-view="anime" data-adult-only data-h="h4">
       Anime
     </button>
-    <button class="nav-item" data-view="series" data-adult-only onclick="
-          switchView('series');
-          toggleMenu();
-        ">
+    <button class="nav-item" data-view="series" data-adult-only data-h="h5">
       Series
     </button>
-    <button class="nav-item" data-view="kids" onclick="
-          switchView('kids');
-          toggleMenu();
-        ">
+    <button class="nav-item" data-view="kids" data-h="h6">
       Niños
     </button>
-    <button class="nav-item" data-view="list" data-adult-only onclick="
-          switchView('list');
-          toggleMenu();
-        ">
+    <button class="nav-item" data-view="list" data-adult-only data-h="h7">
       Favoritos
     </button>
-    <button class="nav-item" onclick="
-          showDisclaimer();
-          toggleMenu();
-        ">
+    <button class="nav-item" data-h="h8">
       Aviso Legal
     </button>
   </div>
 
   <header class="top-nav" id="top-bar">
     <div style="display: flex; align-items: center">
-      <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+      <button class="hamburger-btn" data-h="h1">☰</button>
       <span class="nav-brand">TatoCine</span>
       <div class="nav-skel nav-skel-links" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="nav-links">
-        <button class="nav-item active" data-view="home" data-adult-only onclick="switchView('home')">
+        <button class="nav-item active" data-view="home" data-adult-only data-h="h9">
           Inicio
         </button>
-        <button class="nav-item" data-view="movies" data-adult-only onclick="switchView('movies')">
+        <button class="nav-item" data-view="movies" data-adult-only data-h="h10">
           Películas
         </button>
-        <button class="nav-item" data-view="anime" data-adult-only onclick="switchView('anime')">
+        <button class="nav-item" data-view="anime" data-adult-only data-h="h11">
           Anime
         </button>
-        <button class="nav-item" data-view="series" data-adult-only onclick="switchView('series')">
+        <button class="nav-item" data-view="series" data-adult-only data-h="h12">
           Series
         </button>
-        <button class="nav-item" data-view="kids" onclick="switchView('kids')">
+        <button class="nav-item" data-view="kids" data-h="h13">
           Niños
         </button>
-        <button class="nav-item" data-view="list" data-adult-only onclick="switchView('list')">
+        <button class="nav-item" data-view="list" data-adult-only data-h="h14">
           Favoritos
         </button>
       </div>
     </div>
     <div class="nav-right">
       <div class="nav-skel nav-skel-right" aria-hidden="true"><span></span><span></span><span class="wide"></span></div>
-      <button class="tc-fs-btn tc-install-btn" id="app-install-btn" type="button" onclick="installApp()" hidden
+      <button class="tc-fs-btn tc-install-btn" id="app-install-btn" type="button" data-h="h15" hidden
         title="Instalar aplicación" aria-label="Instalar aplicación">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
         </svg>
       </button>
-      <button class="tc-fs-btn" id="app-fullscreen-btn" type="button" onclick="toggleAppFullscreen()" hidden
+      <button class="tc-fs-btn" id="app-fullscreen-btn" type="button" data-h="h16" hidden
         title="Pantalla completa" aria-label="Pantalla completa" aria-pressed="false">
         <svg class="fs-icon-enter" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -176,7 +147,7 @@
           <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" />
         </svg>
       </button>
-      <button class="tc-fs-btn tc-settings-btn" id="app-settings-btn" type="button" onclick="showSettings()"
+      <button class="tc-fs-btn tc-settings-btn" id="app-settings-btn" type="button" data-h="h17"
         title="Ajustes" aria-label="Ajustes">
         <svg width="18" height="18" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -191,7 +162,7 @@
         </svg>
         <span id="streak-count">Racha: 0</span>
       </span>
-      <button class="tc-profile-trigger" type="button" onclick="showProfiles()" title="Cambiar perfil local">
+      <button class="tc-profile-trigger" type="button" data-h="h18" title="Cambiar perfil local">
         <span class="tc-profile-trigger-avatar" id="profile-button-avatar">U</span>
         <span class="tc-profile-trigger-name" id="profile-button-name">Yo</span>
       </button>
@@ -219,7 +190,7 @@
       </div>
       <div class="hero-gradient"></div>
       <div class="hero-content" id="hero-content">
-        <button type="button" class="back-home-btn" id="back-home-btn" onclick="switchView('home')">
+        <button type="button" class="back-home-btn" id="back-home-btn" data-h="h9">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
             stroke-linejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6" />
@@ -246,7 +217,7 @@
             </svg>
             Ver
           </button>
-          <button class="hero-btn secondary" id="hero-details-btn" onclick="openHeroDetails()">
+          <button class="hero-btn secondary" id="hero-details-btn" data-h="h19">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -256,7 +227,7 @@
             Info
           </button>
           <button type="button" class="hero-btn secondary hero-wizard-btn" id="hero-wizard-btn"
-            onclick="openWizard()" title="¿Qué ver hoy?" aria-label="¿Qué ver hoy?">
+            data-h="h20" title="¿Qué ver hoy?" aria-label="¿Qué ver hoy?">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
@@ -269,7 +240,7 @@
             <span class="hero-wizard-label">¿Qué ver hoy?</span>
           </button>
           <button type="button" class="hero-btn secondary hero-save-btn" id="hero-save-btn"
-            onclick="toggleHeroSave(event)" title="Agregar a favoritos" aria-label="Agregar a favoritos"
+            data-h="h21" title="Agregar a favoritos" aria-label="Agregar a favoritos"
             aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true">
@@ -293,7 +264,7 @@
       <div class="modal-header">
         <h2 class="modal-title" id="modal-title">Reproduciendo...</h2>
         <div class="player-head-actions">
-          <button class="player-fullscreen-btn" id="player-fullscreen-btn" onclick="togglePlayerFullscreen()"
+          <button class="player-fullscreen-btn" id="player-fullscreen-btn" data-h="h22"
             aria-label="Pantalla completa" title="Pantalla completa">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round">
@@ -301,7 +272,7 @@
             </svg>
             <span class="fullscreen-label">Pantalla completa</span>
           </button>
-          <button class="modal-close" onclick="closePlayer()" aria-label="Cerrar reproductor">
+          <button class="modal-close" data-h="h23" aria-label="Cerrar reproductor">
             ✕
           </button>
         </div>
@@ -310,7 +281,7 @@
         <div class="tv-controls" id="tv-controls">
           <select id="season-select" class="tv-select"></select>
           <select id="episode-select" class="tv-select"></select>
-          <button type="button" id="auto-next-toggle" class="auto-next-toggle on" onclick="toggleAutoNextEpisode()"
+          <button type="button" id="auto-next-toggle" class="auto-next-toggle on" data-h="h24"
             title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Siguiente: ACTIVADO</button>
         </div>
         <div class="server-switcher" id="server-switcher"></div>
@@ -322,7 +293,7 @@
   <!-- MODAL DETALLES -->
   <div class="modal" id="details-modal">
     <div class="details-content">
-      <button class="details-close" onclick="closeDetails()">✕</button>
+      <button class="details-close" data-h="h25">✕</button>
       <div class="details-backdrop" id="details-backdrop"></div>
       <div class="details-body" id="details-body">
         <div id="details-skeleton">
@@ -385,7 +356,7 @@
               Compartir
             </button>
             <button type="button" class="hero-btn secondary hero-save-btn" id="details-fav-btn" aria-pressed="false"
-              title="Agregar a favoritos" aria-label="Agregar a favoritos" onclick="toggleDetailsFav()">
+              title="Agregar a favoritos" aria-label="Agregar a favoritos" data-h="h26">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" aria-hidden="true">
                 <path
@@ -400,10 +371,10 @@
           <div id="details-cast-container">
             <div class="details-cast-title">Reparto</div>
             <div class="cast-wrapper">
-              <button class="cast-nav prev" onclick="scrollCast(this, -1)" aria-label="Anterior">
+              <button class="cast-nav prev" data-h="h27" aria-label="Anterior">
                 ‹
               </button>
-              <button class="cast-nav next" onclick="scrollCast(this, 1)" aria-label="Siguiente">
+              <button class="cast-nav next" data-h="h28" aria-label="Siguiente">
                 ›
               </button>
               <div class="details-cast" id="details-cast"></div>
@@ -412,10 +383,10 @@
           <div id="details-similar-container" style="display: none; margin-top: 24px">
             <div class="details-cast-title">Recomendados para ti</div>
             <div class="cast-wrapper">
-              <button class="cast-nav prev" onclick="scrollSimilar(this, -1)" aria-label="Anterior">
+              <button class="cast-nav prev" data-h="h29" aria-label="Anterior">
                 ‹
               </button>
-              <button class="cast-nav next" onclick="scrollSimilar(this, 1)" aria-label="Siguiente">
+              <button class="cast-nav next" data-h="h30" aria-label="Siguiente">
                 ›
               </button>
               <div class="details-cast" id="details-similar"></div>
@@ -429,7 +400,7 @@
   <!-- MODAL ACTOR -->
   <div class="modal" id="actor-modal">
     <div class="actor-content">
-      <button class="modal-close" onclick="closeActor()">✕</button>
+      <button class="modal-close" data-h="h31">✕</button>
       <div class="actor-header">
         <img class="actor-photo" id="actor-photo" src="" alt="" />
         <div class="actor-info">
@@ -446,7 +417,7 @@
     <div class="settings-content">
       <div class="modal-header">
         <h2 class="modal-title">Ajustes</h2>
-        <button class="modal-close" onclick="closeSettings()">✕</button>
+        <button class="modal-close" data-h="h32">✕</button>
       </div>
       <div class="modal-body" style="padding: 0">
         <div class="settings-option" data-adult-only>
@@ -454,7 +425,7 @@
             <div class="label">Continuar Viendo</div>
             <div class="sub-label">Borrar historial de reproducción</div>
           </div>
-          <button class="danger-btn" onclick="clearContinueWatching()">
+          <button class="danger-btn" data-h="h33">
             Borrar
           </button>
         </div>
@@ -463,7 +434,7 @@
             <div class="label">Favoritos</div>
             <div class="sub-label">Eliminar todos los favoritos</div>
           </div>
-          <button class="danger-btn" onclick="clearFavorites()">
+          <button class="danger-btn" data-h="h34">
             Borrar
           </button>
         </div>
@@ -472,7 +443,7 @@
             <div class="label">Servidor Preferido</div>
             <div class="sub-label" id="preferred-server-label">Ninguno</div>
           </div>
-          <button class="danger-btn" onclick="resetPreferredServer()">
+          <button class="danger-btn" data-h="h35">
             Resetear
           </button>
         </div>
@@ -484,7 +455,7 @@
               envían a TatoCine.
             </div>
           </div>
-          <button class="danger-btn" onclick="clearLocalAnalytics()">
+          <button class="danger-btn" data-h="h36">
             Borrar preferencias
           </button>
         </div>
@@ -502,21 +473,21 @@
             <div class="label">Modo ligero</div>
             <div class="sub-label" id="lite-summary">Automático</div>
           </div>
-          <button class="danger-btn" onclick="cycleLiteMode()">Cambiar</button>
+          <button class="danger-btn" data-h="h37">Cambiar</button>
         </div>
         <div class="settings-option" data-adult-only id="install-option" hidden>
           <div>
             <div class="label">Instalar aplicación</div>
             <div class="sub-label" id="install-sub">Añade TatoCine a tu pantalla de inicio.</div>
           </div>
-          <button class="danger-btn" onclick="installApp()">Instalar</button>
+          <button class="danger-btn" data-h="h15">Instalar</button>
         </div>
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Almacenamiento</div>
             <div class="sub-label" id="storage-summary">Calculando…</div>
           </div>
-          <button class="danger-btn" onclick="freeStorage()">Liberar espacio</button>
+          <button class="danger-btn" data-h="h38">Liberar espacio</button>
         </div>
                 <div class="settings-option">
           <div>
@@ -524,11 +495,11 @@
             <div class="sub-label">Texto, contraste y movimiento</div>
           </div>
           <div class="a11y-controls">
-            <button class="danger-btn" type="button" onclick="changeTextScale(-1)" aria-label="Texto más pequeño">A−</button>
+            <button class="danger-btn" type="button" data-h="h39" aria-label="Texto más pequeño">A−</button>
             <span class="a11y-scale" id="a11y-scale-label" aria-live="polite">100 %</span>
-            <button class="danger-btn" type="button" onclick="changeTextScale(1)" aria-label="Texto más grande">A+</button>
-            <button class="danger-btn" type="button" id="a11y-hc-btn" aria-pressed="false" onclick="toggleHighContrast()">Alto contraste</button>
-            <button class="danger-btn" type="button" id="a11y-rm-btn" aria-pressed="false" onclick="toggleReduceMotion()">Reducir movimiento</button>
+            <button class="danger-btn" type="button" data-h="h40" aria-label="Texto más grande">A+</button>
+            <button class="danger-btn" type="button" id="a11y-hc-btn" aria-pressed="false" data-h="h41">Alto contraste</button>
+            <button class="danger-btn" type="button" id="a11y-rm-btn" aria-pressed="false" data-h="h42">Reducir movimiento</button>
           </div>
         </div>
 <div class="settings-option">
@@ -536,8 +507,8 @@
             <div class="label">Copia de seguridad completa</div>
           </div>
           <div class="settings-actions">
-            <button class="danger-btn" onclick="exportProfileData()">Exportar</button>
-            <button class="danger-btn" onclick="document.getElementById('backup-file').click()">Importar</button>
+            <button class="danger-btn" data-h="h43">Exportar</button>
+            <button class="danger-btn" data-h="h44">Importar</button>
             <input type="file" id="backup-file" accept="application/json,.json" hidden />
           </div>
         </div>
@@ -547,8 +518,8 @@
             <div class="sub-label">Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.</div>
           </div>
           <div class="settings-actions">
-            <button class="danger-btn" onclick="openQrShow()">Mostrar QR</button>
-            <button class="danger-btn" onclick="openQrScan()">Escanear</button>
+            <button class="danger-btn" data-h="h45">Mostrar QR</button>
+            <button class="danger-btn" data-h="h46">Escanear</button>
           </div>
         </div>
                 <div class="settings-option" data-adult-only>
@@ -566,7 +537,7 @@
             <div class="sub-label">Revisa cuánto y qué vieron en la última semana.</div>
           </div>
           <div class="settings-actions">
-            <button class="danger-btn" onclick="openWeeklySummary()">Ver</button>
+            <button class="danger-btn" data-h="h47">Ver</button>
           </div>
         </div>
         <div class="settings-option" data-adult-only>
@@ -581,7 +552,7 @@
 
   <!-- Selector local de perfiles, integrado visualmente con TatoCine -->
   <div class="tc-profile-overlay" id="tc-profile-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-profile-title" onclick="if(event.target===this)closeProfiles()">
+    aria-labelledby="tc-profile-title" data-h="h48">
     <div class="tc-profile-backdrop" id="tc-profile-backdrop" aria-hidden="true">
       <div class="tc-profile-backdrop-layer visible"></div>
       <div class="tc-profile-backdrop-layer"></div>
@@ -593,43 +564,38 @@
           <h2 id="tc-profile-title">¿Quién está viendo?</h2>
           <p class="tc-profile-note" id="tc-profile-count">Elige un perfil para continuar</p>
         </div>
-        <button class="tc-profile-close" type="button" onclick="closeProfiles()" aria-label="Cerrar">×</button>
+        <button class="tc-profile-close" type="button" data-h="h49" aria-label="Cerrar">×</button>
       </div>
       <div class="tc-profile-grid" id="tc-profile-grid"><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div></div>
     </section>
   </div>
-  <script>
-    if (document.documentElement.classList.contains("tc-picker-boot")) {
-      document.getElementById("tc-profile-overlay").classList.add("open", "startup");
-      document.body.classList.add("tc-profile-screen-open");
-    }
-  </script>
+  <script src="js/core/picker-open.js"></script>
 
   <!-- Modal independiente para crear perfiles locales -->
   <div class="tc-profile-create-overlay" id="tc-profile-create-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-profile-create-title" onclick="if(event.target===this)closeProfileCreateModal()">
+    aria-labelledby="tc-profile-create-title" data-h="h50">
     <section class="tc-profile-create-dialog">
-      <button class="tc-profile-create-close" type="button" onclick="closeProfileCreateModal()"
+      <button class="tc-profile-create-close" type="button" data-h="h51"
         aria-label="Cerrar">×</button>
       <h3 id="tc-profile-create-title">Agregar perfil</h3>
       <p class="tc-profile-create-subtitle" id="tc-profile-create-subtitle" hidden></p>
       <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre del perfil</label>
       <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
-        placeholder="Escribe un nombre" autocomplete="off" onkeydown="if(event.key==='Enter')saveProfileFromModal()">
+        placeholder="Escribe un nombre" autocomplete="off" data-hk="h52">
       <label class="tc-profile-create-label tc-profile-create-label-gap">¿Para quién es este perfil?</label>
       <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo de perfil">
         <button type="button" class="tc-kind-btn active" data-kind="adult" role="radio" aria-checked="true"
-          onclick="setProfileFormKind('adult')">Adulto</button>
+          data-h="h53">Adulto</button>
         <button type="button" class="tc-kind-btn" data-kind="kid" role="radio" aria-checked="false"
-          onclick="setProfileFormKind('kid')">Niño</button>
+          data-h="h54">Niño</button>
       </div>
       <p class="tc-profile-hint" id="tc-kind-help" hidden></p>
       <label class="tc-profile-create-label">Idioma / Language</label>
       <div class="tc-profile-kind" role="radiogroup" aria-label="Idioma / Language">
         <button type="button" class="tc-lang-btn active" data-lang="es" role="radio" aria-checked="true"
-          onclick="setProfileFormLang('es')" data-i18n="skip">ESP · Español</button>
+          data-h="h55" data-i18n="skip">ESP · Español</button>
         <button type="button" class="tc-lang-btn" data-lang="en" role="radio" aria-checked="false"
-          onclick="setProfileFormLang('en')" data-i18n="skip">ENG · English</button>
+          data-h="h56" data-i18n="skip">ENG · English</button>
       </div>
       <div id="tc-bedtime-box" class="tc-bedtime-box" hidden>
         <label class="tc-profile-create-label">Hora de dormir (opcional)</label>
@@ -643,27 +609,27 @@
       <label class="tc-profile-create-label" for="tc-new-profile-pin">PIN de acceso (opcional)</label>
       <input class="tc-profile-input" id="tc-new-profile-pin" type="password" inputmode="numeric" pattern="[0-9]*"
         maxlength="4" autocomplete="off" placeholder="4 dígitos">
-            <button type="button" class="tc-link-btn" id="tc-remove-pin-btn" onclick="markPinForRemoval()" hidden>Quitar PIN</button>
+            <button type="button" class="tc-link-btn" id="tc-remove-pin-btn" data-h="h57" hidden>Quitar PIN</button>
       <div class="tc-profile-create-actions">
-        <button class="tc-profile-cancel-btn" type="button" onclick="closeProfileCreateModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
+        <button class="tc-profile-cancel-btn" type="button" data-h="h51"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
         <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
-          onclick="saveProfileFromModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
+          data-h="h58"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
       </div>
       <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
-        onclick="deleteProfileFromModal()" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+        data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
     </section>
   </div>
 
   <!-- Cómo instalar la aplicación (cuando el navegador no ofrece instalación directa) -->
   <div class="tc-profile-create-overlay" id="tc-install-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-install-title" aria-hidden="true" onclick="if(event.target===this)closeInstallHelp()">
+    aria-labelledby="tc-install-title" aria-hidden="true" data-h="h60">
     <section class="tc-profile-create-dialog">
-      <button class="tc-profile-create-close" type="button" onclick="closeInstallHelp()" aria-label="Cerrar">×</button>
+      <button class="tc-profile-create-close" type="button" data-h="h61" aria-label="Cerrar">×</button>
       <h3 id="tc-install-title">Instalar TatoCine</h3>
       <p class="tc-profile-create-subtitle" id="tc-install-sub"></p>
       <ol class="tc-install-steps" id="tc-install-steps"></ol>
       <div class="tc-profile-create-actions">
-        <button class="tc-profile-create-btn" type="button" onclick="closeInstallHelp()">Entendido</button>
+        <button class="tc-profile-create-btn" type="button" data-h="h61">Entendido</button>
       </div>
     </section>
   </div>
@@ -679,9 +645,9 @@
 
   <!-- Pasar datos a otro dispositivo con un código QR -->
   <div class="tc-profile-create-overlay" id="tc-qr-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-qr-title" aria-hidden="true" onclick="if(event.target===this)closeQr()">
+    aria-labelledby="tc-qr-title" aria-hidden="true" data-h="h62">
     <section class="tc-profile-create-dialog tc-qr">
-      <button class="tc-profile-create-close" type="button" onclick="closeQr()" aria-label="Cerrar">×</button>
+      <button class="tc-profile-create-close" type="button" data-h="h63" aria-label="Cerrar">×</button>
       <h3 id="tc-qr-title">Pasar a otro dispositivo</h3>
       <div id="tc-qr-body"></div>
     </section>
@@ -704,7 +670,7 @@
       <h3 id="tc-kid-lock-title">Hora de descansar</h3>
       <p class="tc-profile-create-subtitle">Se alcanzó el límite de 6 h 30 min de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.</p>
       <div class="tc-kid-lock-time" id="tc-kid-lock-time" aria-live="polite">60:00</div>
-      <button class="tc-profile-create-btn" type="button" onclick="showProfiles()">Cambiar de perfil</button>
+      <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
     </section>
   </div>
 
@@ -713,44 +679,44 @@
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-bed-lock-title">Es hora de dormir</h3>
       <p class="tc-profile-create-subtitle" id="tc-bed-lock-sub"></p>
-      <button class="tc-profile-create-btn" type="button" onclick="showProfiles()">Cambiar de perfil</button>
+      <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
     </section>
   </div>
 
   <!-- Guardar en favoritos: General o una lista -->
   <div class="tc-profile-create-overlay" id="tc-fav-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-fav-title" aria-hidden="true" onclick="if(event.target===this)closeFavPicker()">
+    aria-labelledby="tc-fav-title" aria-hidden="true" data-h="h64">
     <section class="tc-profile-create-dialog">
-      <button class="tc-profile-create-close" type="button" onclick="closeFavPicker()" aria-label="Cerrar">×</button>
+      <button class="tc-profile-create-close" type="button" data-h="h65" aria-label="Cerrar">×</button>
       <h3 id="tc-fav-title">Guardar en favoritos</h3>
       <p class="tc-profile-create-subtitle" id="tc-fav-subtitle"></p>
       <div class="tc-fav-options" id="tc-fav-options"></div>
       <div class="tc-fav-new" id="tc-fav-new" hidden>
         <input class="tc-profile-input" id="tc-fav-new-name" type="text" maxlength="24" placeholder="Nombre de la lista"
-          autocomplete="off" onkeydown="if(event.key==='Enter')submitFavNew()">
-        <button class="tc-profile-create-btn" type="button" onclick="submitFavNew()">Crear</button>
+          autocomplete="off" data-hk="h66">
+        <button class="tc-profile-create-btn" type="button" data-h="h67">Crear</button>
       </div>
       <div class="tc-profile-create-actions">
-        <button class="tc-profile-cancel-btn" type="button" onclick="closeFavPicker()">Cancelar</button>
+        <button class="tc-profile-cancel-btn" type="button" data-h="h65">Cancelar</button>
       </div>
     </section>
   </div>
 
   <!-- Crear / editar / borrar lista de favoritos -->
   <div class="tc-profile-create-overlay" id="tc-list-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-list-title" aria-hidden="true" onclick="if(event.target===this)closeListModal()">
+    aria-labelledby="tc-list-title" aria-hidden="true" data-h="h68">
     <section class="tc-profile-create-dialog">
-      <button class="tc-profile-create-close" type="button" onclick="closeListModal()" aria-label="Cerrar">×</button>
+      <button class="tc-profile-create-close" type="button" data-h="h69" aria-label="Cerrar">×</button>
       <h3 id="tc-list-title">Nueva lista</h3>
       <p class="tc-profile-create-subtitle">Agrupa tus favoritos, por ejemplo «Romance» o «Para el fin de semana». Si borras una lista, sus títulos pasan a General.</p>
       <label class="tc-profile-create-label" for="tc-list-name">Nombre de la lista</label>
       <input class="tc-profile-input" id="tc-list-name" type="text" maxlength="24" placeholder="Escribe un nombre"
-        autocomplete="off" onkeydown="if(event.key==='Enter')saveListFromModal()">
+        autocomplete="off" data-hk="h70">
       <div class="tc-profile-create-actions">
-        <button class="tc-profile-cancel-btn" type="button" onclick="closeListModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
-        <button class="tc-profile-create-btn" id="tc-list-save-btn" type="button" onclick="saveListFromModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
+        <button class="tc-profile-cancel-btn" type="button" data-h="h69"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
+        <button class="tc-profile-create-btn" id="tc-list-save-btn" type="button" data-h="h71"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
       </div>
-      <button class="tc-profile-delete-btn" id="tc-list-delete-btn" type="button" onclick="deleteListFromModal()" title="Eliminar lista" aria-label="Eliminar lista" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+      <button class="tc-profile-delete-btn" id="tc-list-delete-btn" type="button" data-h="h72" title="Eliminar lista" aria-label="Eliminar lista" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
     </section>
   </div>
 
@@ -759,7 +725,7 @@
     <div class="settings-content">
       <div class="modal-header">
         <h2 class="modal-title">Estadísticas</h2>
-        <button class="modal-close" onclick="closeStats()" aria-label="Cerrar">✕</button>
+        <button class="modal-close" data-h="h73" aria-label="Cerrar">✕</button>
       </div>
       <div class="modal-body" id="stats-body" style="padding: 0"></div>
     </div>
@@ -767,19 +733,19 @@
 
   <!-- Solicitud de PIN para perfiles protegidos -->
   <div class="tc-profile-create-overlay" id="tc-pin-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="tc-pin-title" aria-hidden="true" onclick="if(event.target===this)closePinModal()">
+    aria-labelledby="tc-pin-title" aria-hidden="true" data-h="h74">
     <section class="tc-profile-create-dialog">
-      <button class="tc-profile-create-close" type="button" onclick="closePinModal()" aria-label="Cerrar">×</button>
+      <button class="tc-profile-create-close" type="button" data-h="h75" aria-label="Cerrar">×</button>
       <h3 id="tc-pin-title">Perfil protegido</h3>
       <p class="tc-profile-create-subtitle" id="tc-pin-subtitle">Ingresa el PIN para continuar.</p>
       <label class="tc-profile-create-label" for="tc-pin-input">PIN</label>
       <input class="tc-profile-input tc-pin-input" id="tc-pin-input" type="password" inputmode="numeric"
         pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••"
-        onkeydown="if(event.key==='Enter')submitPinModal()">
+        data-hk="h76">
       <p class="tc-pin-error" id="tc-pin-error" role="alert"></p>
       <div class="tc-profile-create-actions">
-        <button class="tc-profile-cancel-btn" type="button" onclick="closePinModal()">Cancelar</button>
-        <button class="tc-profile-create-btn" type="button" onclick="submitPinModal()">Entrar</button>
+        <button class="tc-profile-cancel-btn" type="button" data-h="h75">Cancelar</button>
+        <button class="tc-profile-create-btn" type="button" data-h="h77">Entrar</button>
       </div>
     </section>
   </div>
@@ -789,7 +755,7 @@
     <div class="filters-content">
       <div class="modal-header">
         <h2 class="modal-title">Filtros Avanzados</h2>
-        <button class="modal-close" onclick="closeFilters()">✕</button>
+        <button class="modal-close" data-h="h78">✕</button>
       </div>
       <div class="modal-body" style="padding: 0">
         <div class="filter-group">
@@ -819,7 +785,7 @@
         ">
       <div class="modal-header">
         <h2 class="modal-title">Aviso Legal y Descargo de Responsabilidad</h2>
-        <button class="modal-close" onclick="acceptDisclaimer()">✕</button>
+        <button class="modal-close" data-h="h79">✕</button>
       </div>
       <div class="modal-body" style="padding: 24px">
         <p style="
@@ -843,7 +809,7 @@
           respetando los términos de esa licencia.
         </p>
         <button class="hero-btn" style="width: 100%; justify-content: center; padding: 16px"
-          onclick="acceptDisclaimer()">
+          data-h="h79">
           Aceptar y continuar
         </button>
       </div>
@@ -868,29 +834,13 @@
     Sin conexión a internet
   </div>
 
-  <script>
-    (function () {
-      var d = document;
-      if (typeof Promise === "undefined")
-        d.write(
-          '<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.3.0/dist/polyfill.min.js"><\/script>',
-        );
-      if (typeof window.fetch === "undefined")
-        d.write(
-          '<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"><\/script>',
-        );
-      if (typeof window.URLSearchParams === "undefined")
-        d.write(
-          '<script src="https://cdn.jsdelivr.net/npm/url-search-params-polyfill@8.2.1/index.js"><\/script>',
-        );
-    })();
-  </script>
 
     <script src="config.js"></script>
   <script src="js/core/config.js"></script>
   <script src="js/core/storage.js"></script>
   <script src="js/core/extend.js"></script>
   <script src="js/core/actions.js"></script>
+  <script src="js/core/handlers.js"></script>
   <script src="js/core/env.js"></script>
   <script src="js/profiles/profile-store.js"></script>
   <script src="js/profiles/profile-ui.js"></script>

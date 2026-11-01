@@ -86,10 +86,10 @@
       d.innerHTML =
         '<div class="row-header">' +
         '<h2 class="row-title">Continuar Viendo</h2>' +
-        '<button class="row-clear-btn" onclick="clearContinueWatching()">Limpiar</button>' +
+        '<button class="row-clear-btn" data-act="clear-continue">Limpiar</button>' +
         "</div>" +
-        '<button class="row-nav prev" onclick="scrollRow(this,-1)">‹</button>' +
-        '<button class="row-nav next" onclick="scrollRow(this,1)">›</button>' +
+        '<button class="row-nav prev" data-act="row-scroll" data-dir="-1">‹</button>' +
+        '<button class="row-nav next" data-act="row-scroll" data-dir="1">›</button>' +
         '<div class="row-scroll"></div>';
 
       var scroll = d.querySelector(".row-scroll");
@@ -185,3 +185,5 @@
 
       $rowsContainer.appendChild(d);
     }
+
+registerAction("clear-continue", function () { clearContinueWatching(); });

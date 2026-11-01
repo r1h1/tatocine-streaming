@@ -112,7 +112,7 @@ async function openQrShow() {
       var left = Math.max(0, built.expiresAt - Date.now());
       if (left <= 0) {
         clearInterval(qrTtlTimer);
-        qrBody().innerHTML = '<p class="tc-qr-warn">' + L("El QR caducó por seguridad.", "The QR expired for security.") + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" onclick="openQrShow()">' + L("Generar uno nuevo", "Generate a new one") + "</button></div>";
+        qrBody().innerHTML = '<p class="tc-qr-warn">' + L("El QR caducó por seguridad.", "The QR expired for security.") + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-act="qr-show">' + L("Generar uno nuevo", "Generate a new one") + "</button></div>";
         return;
       }
       var m = Math.floor(left / 60000), sec = Math.floor((left % 60000) / 1000);
@@ -200,7 +200,7 @@ async function qrHandleText(text) {
   qrBusy = false;
   if (!v.ok) {
     if (!$("tc-qr-overlay").classList.contains("open")) { showToast(qrErrorText(v.error)); return; }
-    qrBody().innerHTML = '<p class="tc-qr-warn">' + qrErrorText(v.error) + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" onclick="openQrScan()">' + L("Intentar de nuevo", "Try again") + "</button></div>";
+    qrBody().innerHTML = '<p class="tc-qr-warn">' + qrErrorText(v.error) + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-act="qr-scan">' + L("Intentar de nuevo", "Try again") + "</button></div>";
     return;
   }
   qrConfirm(v.data);
@@ -321,3 +321,7 @@ async function qrApply(data, targetId, targetKind) {
     "Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.": "Move favorites, lists and watched titles by scanning a QR. No PIN or keys included."
   });
 })();
+
+registerAction("qr-show", function () { openQrShow(); });
+registerAction("qr-scan", function () { openQrScan(); });
+registerAction("close-qr", function () { closeQr(); });

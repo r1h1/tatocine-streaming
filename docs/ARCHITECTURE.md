@@ -119,3 +119,7 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Fase 5 · efecto wow
 `ui/hero-trailer.js` (`htAllowed` decide cuándo; una sola iframe; se detiene al salir de la portada), `ui/dynamic-color.js` (`dominantColor` con miniatura w92 y canvas 16×16, variable `--accent-rgb`), `ui/open-motion.js` (FLIP con Web Animations) y esqueletos con `::after` + `tcShimmer` en `css/19-responsive.css`.
+
+## Fase 6 · CSP estricta y pruebas
+- **Sin JavaScript en línea.** `js/boot.js` (cabecera) y `js/core/picker-open.js` sustituyen los scripts del HTML; `js/core/handlers.js` (generado al migrar) contiene los antiguos `onclick`/`onkeydown` del HTML estático como `TC_H.hN`, y `js/core/actions.js` los despacha (`data-h`, `data-hk`) junto con `data-act` (acciones registradas con `registerAction`), `data-hover`, `data-lc` y `data-fb` (clase al cargar e imagen de respaldo). Las plantillas de JS ya no escriben atributos `on*`: pasan los datos en `data-*`.
+- **Pruebas.** `tests/*.test.js` (Node, sin dependencias) y `tests/e2e/run.js` (Playwright; solo desarrollo, el sitio sigue sin build). Las pruebas de navegador necesitan internet y la clave de TMDB en `config.js`.

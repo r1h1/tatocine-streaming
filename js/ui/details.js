@@ -113,13 +113,13 @@
           $("details-cast").innerHTML = cast
             .map(function (c) {
               return (
-                '<div class="cast-item" tabindex="0" role="button" onclick="openActor(' +
-                c.id +
-                ')"><img class="cast-photo" alt="" loading="lazy" decoding="async" src="' +
+                '<div class="cast-item" tabindex="0" role="button" data-act="open-actor" data-id="' +
+                (Number(c.id) || 0) +
+                '"><img class="cast-photo" alt="" loading="lazy" decoding="async" src="' +
                 (c.profile_path
                   ? IMG_W185 + c.profile_path
                   : "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%2240%22 fill=%22%23333%22/%3E%3C/svg%3E") +
-                '" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%2240%22 fill=%22%23333%22/%3E%3C/svg%3E\'"/><div class="cast-name">' +
+                '" data-fb="cast"/><div class="cast-name">' +
                 escapeHTML(c.name) +
                 '</div><div class="cast-char">' +
                 escapeHTML(c.character || "") +
@@ -138,13 +138,13 @@
                 ? IMG_CARD + s.poster_path
                 : "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22%3E%3Crect fill=%22%23222%22 width=%22200%22 height=%22300%22/%3E%3C/svg%3E";
               return (
-                '<div class="similar-card" tabindex="0" role="button" onclick="openDetails(' +
-                s.id +
-                ",'" +
-                type +
-                '\')"><img class="similar-poster" alt="" src="' +
+                '<div class="similar-card" tabindex="0" role="button" data-act="open-details" data-id="' +
+                (Number(s.id) || 0) +
+                '" data-type="' +
+                (type === "tv" ? "tv" : "movie") +
+                '"><img class="similar-poster" alt="" src="' +
                 sBg +
-                '" loading="lazy" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22%3E%3Crect fill=%22%23222%22 width=%22200%22 height=%22300%22/%3E%3C/svg%3E\'"/><div class="similar-title">' +
+                '" loading="lazy" data-fb="poster"/><div class="similar-title">' +
                 sTitle +
                 "</div></div>"
               );
@@ -179,7 +179,7 @@
               trailerUrl +
               '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe><a class="details-trailer-external" href="' +
               watchUrl +
-              '" target="_blank" rel="noopener noreferrer">Abrir en YouTube</a><button class="details-trailer-close" type="button" onclick="closeDetailsTrailer()" aria-label="Cerrar tráiler">✕</button>';
+              '" target="_blank" rel="noopener noreferrer">Abrir en YouTube</a><button class="details-trailer-close" type="button" data-act="close-trailer" aria-label="Cerrar tráiler">✕</button>';
             trailerBtn.querySelector("span").textContent = "Ocultar Tráiler";
           };
         } else trailerBtn.style.display = "none";
@@ -352,3 +352,6 @@
       $actorModal.classList.remove("is-loading");
       $actorModal.classList.remove("open");
     }
+
+registerAction("open-actor", function (el) { openActor(Number(el.dataset.id) || 0); });
+registerAction("close-trailer", function () { closeDetailsTrailer(); });

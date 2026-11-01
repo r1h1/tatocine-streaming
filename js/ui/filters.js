@@ -55,15 +55,15 @@
       div.innerHTML =
         '<button class="genre-chip ' +
         allActive +
-        '" onclick="filterByGenre(\'\',this)">Todos</button>';
+        '" data-act="filter-genre" data-id="">Todos</button>';
       GENRES[view].forEach(function (g) {
         var active = currentGenreFilter === String(g.id) ? "active" : "";
         div.innerHTML +=
           '<button class="genre-chip ' +
           active +
-          '" onclick="filterByGenre(\'' +
+          '" data-act="filter-genre" data-id="' +
           g.id +
-          "',this)\">" +
+          '">' +
           g.name +
           "</button>";
       });
@@ -100,9 +100,9 @@
           return (
             '<button class="filter-option ' +
             (filtersState.year === y ? "active" : "") +
-            "\" onclick=\"setFilter('year','" +
+            '" data-act="set-filter" data-k="year" data-v="' +
             y +
-            "',this)\">" +
+            '">' +
             (y || "Todos") +
             "</button>"
           );
@@ -120,9 +120,9 @@
           return (
             '<button class="filter-option ' +
             (filtersState.rating === r.v ? "active" : "") +
-            "\" onclick=\"setFilter('rating','" +
+            '" data-act="set-filter" data-k="rating" data-v="' +
             r.v +
-            "',this)\">" +
+            '">' +
             r.l +
             "</button>"
           );
@@ -138,9 +138,9 @@
           return (
             '<button class="filter-option ' +
             (filtersState.sort === s.v ? "active" : "") +
-            "\" onclick=\"setFilter('sort','" +
+            '" data-act="set-filter" data-k="sort" data-v="' +
             s.v +
-            "',this)\">" +
+            '">' +
             s.l +
             "</button>"
           );
@@ -169,3 +169,6 @@
         else if (currentView === "kids") loadKidsView();
       }, 200);
     }
+
+registerAction("filter-genre", function (el) { filterByGenre(el.dataset.id || "", el); });
+registerAction("set-filter", function (el) { setFilter(el.dataset.k, el.dataset.v || "", el); });

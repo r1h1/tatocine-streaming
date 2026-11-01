@@ -139,7 +139,7 @@
         return;
       }
       $loadMoreContainer.innerHTML =
-        '<button class="load-more-btn" onclick="loadMore()">Cargar más</button>';
+        '<button class="load-more-btn" data-act="load-more">Cargar más</button>';
     }
 
     function mapMovieResult(i) {
@@ -556,3 +556,5 @@
               emptyOffline();
         });
     }
+
+registerAction("load-more", function () { loadMore(); });

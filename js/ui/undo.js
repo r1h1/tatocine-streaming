@@ -48,10 +48,11 @@ function favSnapshot(media) {
 }
 /** Actualiza los corazones de las tarjetas visibles según los favoritos actuales. */
 function refreshHearts() {
-  document.querySelectorAll(".card[onclick]").forEach(function (c) {
-    var m = /openDetails\((\d+),'(movie|tv)'\)/.exec(c.getAttribute("onclick") || ""), b = c.querySelector(".save-btn");
-    if (!m || !b) return;
-    var saved = myList.some(function (x) { return String(x.id) === m[1] && x.type === m[2]; });
+  document.querySelectorAll(".card[data-id]").forEach(function (c) {
+    var b = c.querySelector(".save-btn");
+    if (!b) return;
+    var id = c.getAttribute("data-id"), type = c.getAttribute("data-type");
+    var saved = myList.some(function (x) { return String(x.id) === id && x.type === type; });
     b.classList.toggle("saved", saved);
     var svg = b.querySelector("svg");
     if (svg) svg.setAttribute("fill", saved ? "currentColor" : "none");

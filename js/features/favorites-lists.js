@@ -133,8 +133,8 @@
     function favSection(title, listId, editable) {
       var items = myList.filter(function (m) { return (m.list || null) === (listId || null); });
       var head = '<div class="row-header"><h2 class="row-title"' + (listId ? ' data-i18n="skip"' : "") + '>' + escapeHTML(title) + ' <span class="fav-count">(' + items.length + ')</span></h2>' +
-        (listId && favFilter === listId ? '<button type="button" class="fav-close-btn" onclick="setFavFilter(\'all\')" aria-label="Cerrar lista" title="Cerrar lista"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cerrar lista</span></button>' : "") +
-        (editable ? '<button type="button" class="fav-edit-btn" title="Editar lista" aria-label="Editar lista" onclick="openListModal(\'' + escapeHTML(listId) + '\')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' : "") + "</div>";
+        (listId && favFilter === listId ? '<button type="button" class="fav-close-btn" data-act="fav-filter" data-v="all" aria-label="Cerrar lista" title="Cerrar lista"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cerrar lista</span></button>' : "") +
+        (editable ? '<button type="button" class="fav-edit-btn" title="Editar lista" aria-label="Editar lista" data-act="open-list" data-id="' + escapeHTML(listId) + '"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' : "") + "</div>";
       if (!items.length) return '<section class="fav-section">' + head + '<p class="fav-empty">Esta lista aún no tiene títulos. Usa el corazón en cualquier título y elige esta lista.</p></section>';
       return '<section class="fav-section">' + head + '<div class="grid-container">' + items.slice(0, favLimit).map(getCardHTML).join("") + "</div></section>" + (items.length > favLimit ? markFavTruncated() : "");
     }
@@ -195,19 +195,19 @@
     }
     function listCardHTML(l) {
       var count = favCount(l.id), active = favFilter === l.id;
-      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="group" data-list="' + escapeHTML(l.id) + '" onclick="setFavFilter(favFilter === \'' + escapeHTML(l.id) + '\' ? \'all\' : \'' + escapeHTML(l.id) + '\')" aria-current="' + (active ? "true" : "false") + '" aria-label="' + escapeHTML(l.name) + '">' +
+      return '<div class="list-card' + (active ? " active" : "") + '" tabindex="0" role="group" data-list="' + escapeHTML(l.id) + '" data-act="fav-toggle" data-id="' + escapeHTML(l.id) + '" aria-current="' + (active ? "true" : "false") + '" aria-label="' + escapeHTML(l.name) + '">' +
         '<div class="list-cover"></div><div class="list-shade"></div>' +
-        '<button type="button" class="fav-edit-btn list-edit" title="Editar lista" aria-label="Editar lista" onclick="event.stopPropagation();openListModal(\'' + escapeHTML(l.id) + '\')">' + PENCIL_SVG + '</button>' +
+        '<button type="button" class="fav-edit-btn list-edit" title="Editar lista" aria-label="Editar lista" data-act="open-list" data-id="' + escapeHTML(l.id) + '">' + PENCIL_SVG + '</button>' +
         '<div class="list-info"><div class="list-name" data-i18n="skip">' + escapeHTML(l.name) + ' <span class="list-qty">(' + count + ")</span></div></div></div>";
     }
     function renderFavoritesView() {
       favTruncated = false;
       if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && favFilter !== "later" && !favListById(favFilter)) favFilter = "all";
-      var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" onclick="setFavFilter(\'' + id + '\')">' + label + "</button>"; };
+      var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" data-act="fav-filter" data-v="' + id + '">' + label + "</button>"; };
       var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") + chip("later", L("Ver más tarde", "Watch later") + (laterList.length ? " (" + laterList.length + ")" : "")) +
         '<span class="fav-toolbar-gap"></span>' +
-        (favLists.length < 12 ? '<button class="genre-chip chip-primary" onclick="openListModal()">+ Nueva lista</button>' : "") +
-        '<button class="genre-chip" data-act="open-calendar">' + L("Calendario", "Calendar") + '</button><button class="genre-chip" onclick="openStats()">Estadísticas</button></div>';
+        (favLists.length < 12 ? '<button class="genre-chip chip-primary" data-act="open-list" data-id="">+ Nueva lista</button>' : "") +
+        '<button class="genre-chip" data-act="open-calendar">' + L("Calendario", "Calendar") + '</button><button class="genre-chip" data-act="open-stats">Estadísticas</button></div>';
       var cards = favLists.length ? '<section class="fav-lists"><div class="row-header"><h2 class="row-title">Mis listas</h2></div><div class="list-cards">' + favLists.map(listCardHTML).join("") + "</div></section>" : "";
       var body = "";
       if (!myList.length && !favLists.length && favFilter !== "later") {
@@ -219,7 +219,7 @@
       else if (favFilter === "later") body = laterSection();
       else if (favFilter === "general") body = favSection("General", null, false);
       else body = favSection(favListById(favFilter).name, favFilter, false);
-      $rowsContainer.innerHTML = toolbar + cards + body;
+      $rowsContainer.innerHTML = '<h1 class="sr-only">' + L("Favoritos", "Favorites") + "</h1>" + toolbar + cards + body;
       $rowsContainer.querySelectorAll(".list-card").forEach(function (el) {
         var l = favListById(el.getAttribute("data-list"));
         if (!l) return;
@@ -274,3 +274,8 @@
       showToast("Lista eliminada" + (moved ? " · " + moved + " favorito" + (moved === 1 ? "" : "s") + " pasaron a General" : ""));
       if (currentView === "list") renderFavoritesView();
     }
+
+registerAction("fav-filter", function (el) { setFavFilter(el.dataset.v || "all"); });
+registerAction("fav-toggle", function (el) { var id = el.dataset.id; setFavFilter(favFilter === id ? "all" : id); });
+registerAction("open-list", function (el) { openListModal(el.dataset.id || undefined); });
+registerAction("open-stats", function () { openStats(); });

@@ -354,9 +354,9 @@
           isPref +
           '" id="server-btn-' +
           x +
-          '" onclick="playEmbed(' +
+          '" data-act="play-server" data-i="' +
           x +
-          ',this)">' +
+          '">' +
           s.icon +
           s.name +
           "</button>"
@@ -437,3 +437,5 @@
       document.body.style.overflow = "";
     }
     window.closePlayer = closePlayer;
+
+registerAction("play-server", function (el) { playEmbed(Number(el.dataset.i) || 0, el); });

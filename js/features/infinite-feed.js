@@ -127,10 +127,7 @@ function catalogFeedConfig(view) {
 }
 function renderedKeys() {
   var seen = {};
-  $rowsContainer.querySelectorAll(".card[onclick]").forEach(function (c) {
-    var m = /openDetails\((\d+),'(movie|tv)'\)/.exec(c.getAttribute("onclick") || "");
-    if (m) seen[m[2] + ":" + m[1]] = true;
-  });
+  $rowsContainer.querySelectorAll(".card[data-id]").forEach(function (c) { seen[c.getAttribute("data-type") + ":" + c.getAttribute("data-id")] = true; });
   return seen;
 }
 /** El feed por géneros solo manda si no hay género ni filtros avanzados elegidos (entonces pagina ese resultado). */
@@ -199,6 +196,13 @@ function feedLoadNext() {
     feedObserver = new IntersectionObserver(function (entries) { if (entries[0].isIntersecting) feedLoadNext(); }, { rootMargin: "900px 0px" });
     feedObserver.observe(sentinel);
   } else window.addEventListener("scroll", function () { var s = $("sentinel"); if (s && s.getBoundingClientRect().top < window.innerHeight + 900) feedLoadNext(); }, { passive: true });
+  // Pantallas altas o filas que tardan: el observador solo avisa al ENTRAR el centinela; este latido (cada 1,2 s, solo con un
+  // feed activo y sin cargar) asegura que se siga cargando mientras el centinela esté cerca de la pantalla.
+  setInterval(function () {
+    if (!feed || feed.loading || feed.done || document.hidden) return;
+    var s = $("sentinel");
+    if (s && s.getBoundingClientRect().top < window.innerHeight + 700) feedLoadNext();
+  }, 1200);
   // Reinicio según la vista
   decorate("switchView", function (original) {
     return function (v, r) {

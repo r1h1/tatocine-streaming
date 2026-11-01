@@ -9,7 +9,7 @@
       var row = document.createElement("div");
       row.className = "row catalog-row personalized-row " + (className || "");
       row.innerHTML =
-        '<div class="row-header"><h2 class="row-title">' + escapeHTML(title) + '</h2></div><button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button><div class="row-scroll">' +
+        '<div class="row-header"><h2 class="row-title">' + escapeHTML(title) + '</h2></div><button class="row-nav prev" data-act="row-scroll" data-dir="-1" aria-label="Anterior">‹</button><button class="row-nav next" data-act="row-scroll" data-dir="1" aria-label="Siguiente">›</button><div class="row-scroll">' +
         picks.map(getCardHTML).join("") + "</div>";
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(row, anchor.nextSibling);
       else $rowsContainer.insertBefore(row, $rowsContainer.querySelector(".catalog-row") || null);

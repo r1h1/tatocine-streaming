@@ -55,7 +55,7 @@
         html += '<div class="stat-top">';
         top.forEach(function (x, i) {
           var img = x.bg ? IMG_W185 + x.bg : FALLBACK_IMG;
-          html += '<div class="stat-top-item"><span class="stat-rank">' + (i + 1) + '</span><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(img) + '" onload="this.classList.add(\'loaded\')" onerror="this.onerror=null;this.classList.add(\'loaded\');this.src=FALLBACK_IMG"><div><div class="stat-top-title">' + escapeHTML(x.title || "Contenido") + '</div><div class="stat-top-sub">' + (x.secs ? fmtDur(x.secs) + " · " : "") + (x.plays || 1) + ((x.plays || 1) === 1 ? " reproducción" : " reproducciones") + "</div></div></div>";
+          html += '<div class="stat-top-item"><span class="stat-rank">' + (i + 1) + '</span><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(img) + '" data-lc="loaded" data-fb="stat"><div><div class="stat-top-title">' + escapeHTML(x.title || "Contenido") + '</div><div class="stat-top-sub">' + (x.secs ? fmtDur(x.secs) + " · " : "") + (x.plays || 1) + ((x.plays || 1) === 1 ? " reproducción" : " reproducciones") + "</div></div></div>";
         });
         html += "</div>";
       } else html += '<p class="stats-hint">Todavía no hay títulos en tu ranking.</p>';

@@ -177,7 +177,7 @@ function renderWizardResults(requestOk, reuse) {
   }
   body.innerHTML = (wizardRelaxed ? '<p class="wiz-note">' + L("Con tus respuestas había pocas opciones: ampliamos un poco la búsqueda para mostrarte 3.", "There were few matches for your answers, so we widened the search to show you 3.") + "</p>" : "") + '<div class="wiz-results">' + picks.map(function (m, i) {
     var saved = isSaved(m);
-    return '<article class="wiz-result" data-i="' + i + '"><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_CARD + m.bg) + '" onerror="this.onerror=null;this.src=FALLBACK_IMG">' +
+    return '<article class="wiz-result" data-i="' + i + '"><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_CARD + m.bg) + '" data-fb="card">' +
       '<div class="wiz-info"><h4 class="wiz-title" data-i18n="skip">' + escapeHTML(m.title) + '</h4>' +
       '<div class="wiz-meta">' + (m.type === "tv" ? L("Serie", "Series") : L("Película", "Movie")) + (m.year ? " · " + m.year : "") + (m.rating ? " · ★ " + Number(m.rating).toFixed(1) : "") + "</div>" +
       '<p class="wiz-reason">' + escapeHTML(m._reason) + '</p>' +

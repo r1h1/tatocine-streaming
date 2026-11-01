@@ -94,9 +94,9 @@
       var row = document.createElement("div");
       row.className = "row brand-row";
       row.innerHTML = '<div class="row-header"><h2 class="row-title">Plataformas y estudios</h2></div>' +
-        '<button class="row-nav prev" onclick="scrollRow(this,-1)" aria-label="Anterior">‹</button><button class="row-nav next" onclick="scrollRow(this,1)" aria-label="Siguiente">›</button>' +
+        '<button class="row-nav prev" data-act="row-scroll" data-dir="-1" aria-label="Anterior">‹</button><button class="row-nav next" data-act="row-scroll" data-dir="1" aria-label="Siguiente">›</button>' +
         '<div class="row-scroll">' + BRANDS.map(function (b) {
-          return '<button type="button" class="brand-tile" data-key="' + b.key + '" onclick="switchView(\'brand:' + b.key + '\')"><span>' + escapeHTML(b.name) + "</span></button>";
+          return '<button type="button" class="brand-tile" data-key="' + b.key + '" data-act="go-view" data-view="brand:' + b.key + '"><span>' + escapeHTML(b.name) + "</span></button>";
         }).join("") + "</div>";
       $rowsContainer.appendChild(row);
       if ("IntersectionObserver" in window) {
@@ -106,3 +106,5 @@
         io.observe(row);
       } else loadBrandImages(row);
     };
+
+registerAction("go-view", function (el) { switchView(el.dataset.view); });

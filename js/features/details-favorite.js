@@ -7,9 +7,9 @@
     // ---- Favoritos desde el modal Info + sincronía de corazones ----
     function syncCardHearts() {
       document.querySelectorAll(".save-btn").forEach(function (btn) {
-        var m = /id:(\d+),type:'(\w+)'/.exec(btn.getAttribute("onclick") || "");
-        if (!m) return;
-        var saved = isSaved({ id: Number(m[1]), type: m[2] });
+        var id = Number(btn.getAttribute("data-id")), type = btn.getAttribute("data-type");
+        if (!id || !type) return;
+        var saved = isSaved({ id: id, type: type });
         btn.classList.toggle("saved", saved);
         var svg = btn.querySelector("svg");
         if (svg) svg.setAttribute("fill", saved ? "currentColor" : "none");

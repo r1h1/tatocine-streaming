@@ -20,7 +20,7 @@ function suggestItemHTML(r) {
   var sub = isPerson ? (r.known_for_department === "Directing" ? L("Director/a", "Director") : L("Actor / Actriz", "Actor")) :
     (r.media_type === "tv" ? L("Serie", "Series") : L("Película", "Movie")) + (date ? " · " + date.slice(0, 4) : "");
   return '<button type="button" class="suggest-item" data-type="' + r.media_type + '" data-id="' + r.id + '" data-name="' + escapeHTML(title) + '">' +
-    '<span class="suggest-thumb' + (isPerson ? " round" : "") + '">' + (img ? '<img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_W185 + img) + '" onerror="this.remove()">' : "") + "</span>" +
+    '<span class="suggest-thumb' + (isPerson ? " round" : "") + '">' + (img ? '<img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_W185 + img) + '" data-fb="remove">' : "") + "</span>" +
     '<span class="suggest-text"><span class="suggest-title" data-i18n="skip">' + escapeHTML(title) + '</span><span class="suggest-sub">' + sub + "</span></span></button>";
 }
 

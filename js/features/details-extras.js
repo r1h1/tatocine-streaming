@@ -54,7 +54,7 @@ function episodeCardHTML(ep, season, isLastAired) {
   var img = ep.still_path ? IMG_W185 + ep.still_path : "";
   var meta = [ep.runtime ? ep.runtime + " min" : "", ep.air_date || ""].filter(Boolean).join(" · ");
   return '<div class="ep-item' + (upcoming ? " ep-upcoming" : "") + '" tabindex="0" role="button" data-season="' + season + '" data-ep="' + ep.episode_number + '"' + (upcoming ? ' aria-disabled="true"' : "") + ">" +
-    '<div class="ep-thumb">' + (img ? '<img loading="lazy" decoding="async" alt="" src="' + escapeHTML(img) + '" onerror="this.remove()">' : "") +
+    '<div class="ep-thumb">' + (img ? '<img loading="lazy" decoding="async" alt="" src="' + escapeHTML(img) + '" data-fb="remove">' : "") +
     '<span class="ep-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>' +
     '<div class="ep-info"><div class="ep-title" data-i18n="skip">' + ep.episode_number + ". " + escapeHTML(ep.name || "") + "</div>" +
     '<div class="ep-meta">' + (upcoming ? L("Próximamente", "Coming soon") + (ep.air_date ? " · " + ep.air_date : "") : escapeHTML(meta)) + "</div>" +
