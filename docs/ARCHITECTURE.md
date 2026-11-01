@@ -107,3 +107,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Fase 1 · seguridad
 `profiles/pin-strong.js` (PBKDF2 + bloqueo persistente, vía decorate), `core/data-guard.js` (validación al leer, no destructiva), `features/backup-crypto.js` (AES-GCM, probado en Node) y caducidad `e` en el QR (`qr-payload.js`).
+
+## Fase 2 · control parental
+`features/parental.js` (hora de dormir, registro de uso `tatoUsageV1` por perfil/día y resumen semanal) se añade con decorate sobre `setProfileModalMode`/`saveProfileFromModal`.

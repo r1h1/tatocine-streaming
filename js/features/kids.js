@@ -1,6 +1,6 @@
 /**
  * TatoCine · js/features/kids.js
- * Modo infantil: filtro de contenido apto y límite de uso (8 h + descanso de 1 h).
+ * Modo infantil: filtro de contenido apto y límite de uso (6 h 30 min + descanso de 1 h).
  * Script clásico (sin módulos): comparte el ámbito global con el resto de js/ para que los
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
@@ -82,8 +82,8 @@
     //      y modo ligero para Smart TV y dispositivos modestos.
     // ==========================================================
 
-    // ---- Límite de uso infantil: 8 h de uso y 1 h de descanso (local, compartido por los perfiles Niño del dispositivo) ----
-    var KID_LIMIT_SECS = 8 * 3600, KID_BREAK_MS = 3600 * 1000, KID_USAGE_KEY = "tatoKidUsageV1";
+    // ---- Límite de uso infantil: 6,5 h de uso (dos películas largas) y 1 h de descanso (local, compartido por los perfiles Niño del dispositivo) ----
+    var KID_LIMIT_SECS = 6.5 * 3600, KID_BREAK_MS = 3600 * 1000, KID_USAGE_KEY = "tatoKidUsageV1";
     var kidUsage = readLocalJSON(KID_USAGE_KEY, null);
     if (!kidUsage || typeof kidUsage !== "object") kidUsage = { day: "", secs: 0, lockedUntil: 0 };
     var kidLastTick = Date.now(), kidWarned = false, kidSavedAt = 0, kidLockTimer = null;

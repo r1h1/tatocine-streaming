@@ -339,7 +339,7 @@
         if (document.hidden || isSearching || heroSectionIsEmpty() || document.body.style.overflow === "hidden" || window.scrollY > $heroSection.offsetHeight) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
-      }, 7000);
+      }, 8000);
     }
     function heroSectionIsEmpty() {
       return $heroSection.classList.contains("empty-search");

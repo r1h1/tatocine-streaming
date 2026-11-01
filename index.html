@@ -531,6 +531,15 @@
         </div>
         <div class="settings-option" data-adult-only>
           <div>
+            <div class="label">Resumen semanal</div>
+            <div class="sub-label">Revisa cuánto y qué vieron en la última semana.</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" onclick="openWeeklySummary()">Ver</button>
+          </div>
+        </div>
+        <div class="settings-option" data-adult-only>
+          <div>
             <div class="label">Atajos de Teclado</div>
             <div class="sub-label">/ buscar · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
           </div>
@@ -591,6 +600,15 @@
         <button type="button" class="tc-lang-btn" data-lang="en" role="radio" aria-checked="false"
           onclick="setProfileFormLang('en')" data-i18n="skip">ENG · English</button>
       </div>
+      <div id="tc-bedtime-box" class="tc-bedtime-box" hidden>
+        <label class="tc-profile-create-label">Hora de dormir (opcional)</label>
+        <div class="tc-bedtime-row">
+          <input class="tc-profile-input" id="tc-bed-from" type="time" value="21:00" aria-label="Desde" />
+          <span aria-hidden="true">–</span>
+          <input class="tc-profile-input" id="tc-bed-to" type="time" value="07:00" aria-label="Hasta" />
+          <label class="tc-bedtime-on"><input type="checkbox" id="tc-bed-on" /> Activar</label>
+        </div>
+      </div>
       <label class="tc-profile-create-label" for="tc-new-profile-pin">PIN de acceso (opcional)</label>
       <input class="tc-profile-input" id="tc-new-profile-pin" type="password" inputmode="numeric" pattern="[0-9]*"
         maxlength="4" autocomplete="off" placeholder="4 dígitos">
@@ -644,8 +662,17 @@
   <div class="tc-kid-lock" id="tc-kid-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-kid-lock-title">
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-kid-lock-title">Hora de descansar</h3>
-      <p class="tc-profile-create-subtitle">Se alcanzó el límite de 8 horas de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.</p>
+      <p class="tc-profile-create-subtitle">Se alcanzó el límite de 6 h 30 min de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.</p>
       <div class="tc-kid-lock-time" id="tc-kid-lock-time" aria-live="polite">60:00</div>
+      <button class="tc-profile-create-btn" type="button" onclick="showProfiles()">Cambiar de perfil</button>
+    </section>
+  </div>
+
+  <!-- Hora de dormir (perfiles infantiles) -->
+  <div class="tc-kid-lock" id="tc-bed-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-bed-lock-title">
+    <section class="tc-profile-create-dialog tc-kid-lock-card">
+      <h3 id="tc-bed-lock-title">Es hora de dormir</h3>
+      <p class="tc-profile-create-subtitle" id="tc-bed-lock-sub"></p>
       <button class="tc-profile-create-btn" type="button" onclick="showProfiles()">Cambiar de perfil</button>
     </section>
   </div>
@@ -876,6 +903,7 @@
   <script src="js/features/backup-crypto.js"></script>
   <script src="js/features/backup.js"></script>
   <script src="js/features/qr-transfer.js"></script>
+  <script src="js/features/parental.js"></script>
   <script src="js/player/autoplay-next.js"></script>
   <script src="js/player/player-robust.js"></script>
   <script src="js/ui/gestures.js"></script>

@@ -198,3 +198,17 @@ body.lite .nav-skel span, body.lite .tc-profile-skel span, body.lite .tc-profile
 @media (max-width: 600px) {
   .tc-wizard .wiz-chips:has(> .wiz-chip:nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* ---------- Control parental: hora de dormir y resumen semanal ---------- */
+.tc-bedtime-box { margin-top: 4px; }
+.tc-bedtime-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tc-bedtime-row .tc-profile-input { width: auto; flex: 1 1 96px; min-width: 96px; color-scheme: dark; }
+.tc-bedtime-on { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+.wk-card { margin: 10px 0; padding: 14px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 14px; background: rgba(255, 255, 255, .04); text-align: left; }
+.wk-card h4 { margin: 0 0 4px; font-size: 16px; }
+.wk-line { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
+.wk-bars { display: flex; align-items: flex-end; gap: 6px; height: 74px; }
+.wk-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.wk-bar span { width: 100%; max-width: 28px; border-radius: 6px 6px 2px 2px; background: linear-gradient(to top, #ff8a3d, #ffd36b); }
+.wk-bar i { font-style: normal; font-size: 11px; color: rgba(255, 255, 255, .6); }
+.wk-top { margin: 10px 0 0; font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, .7); }

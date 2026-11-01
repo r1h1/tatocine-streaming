@@ -95,7 +95,7 @@
       "No se pudo cambiar de perfil en este dispositivo": "Could not switch profile on this device", "No se encontró el perfil que quieres editar": "The profile you want to edit was not found",
       "No se pudo abrir el formulario de perfiles": "Could not open the profiles form", "Demasiados intentos. Espera 30 s.": "Too many attempts. Wait 30 s.", "Fotografía de perfil": "Profile photo",
       "Este contenido no está disponible en la sección Niños": "This content is not available in the Kids section",
-      "Hora de descansar": "Time for a break", "Se alcanzó el límite de 8 horas de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.": "The 8-hour usage limit was reached. You can watch again when the 1-hour break ends.",
+      "Hora de descansar": "Time for a break", "Se alcanzó el límite de 6 h 30 min de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.": "The 6 h 30 min usage limit was reached. You can watch again when the 1-hour break ends.",
       "Descanso terminado: ya puedes volver a ver contenido": "Break over: you can watch again", "Quedan 15 minutos de uso antes del descanso": "15 minutes of use left before the break",
       // --- ajustes ---
       "Borrar historial de reproducción": "Clear watch history", "Servidor Preferido": "Preferred server", "Ninguno": "None", "Recomendaciones personalizadas": "Personalized recommendations", "Borrar preferencias": "Clear preferences",
