@@ -11,14 +11,14 @@
 
 ## Características
 
-- **Inicio estilo streaming:** portada con carrusel, Continuar viendo (con progreso), **Nuevos episodios**, Hecho para ti, Porque viste…, Tendencias, Top 10, colecciones y **Plataformas y estudios** (Netflix, Disney+, HBO Max, Prime Video, Marvel, Pixar, Ghibli…).
+- **Inicio estilo streaming:** portada con carrusel, Continuar viendo, **Nuevos episodios**, Hecho para ti, Porque viste…, Tendencias, Top 10, colecciones y **Plataformas y estudios** (Netflix, Disney+, HBO Max, Prime Video, Marvel, Pixar, Ghibli…).
 - **«¿Qué ver hoy?»:** 4 preguntas (ambiente, tiempo —incluye «Más de 120 min»—, compañía, qué evitar) → **siempre 3** recomendaciones con el motivo de cada una (si tus respuestas dejan pocas opciones, se amplía la búsqueda y se avisa); puedes pedir otras 3, ver, abrir la ficha o guardar.
 - **Ficha del título:** director (o creadores), reparto, tráiler, recomendados, compartir, favoritos y, en series, **temporadas y episodios** con imagen, duración y sinopsis en 1 columna (móvil/tableta), 2 (pantallas medianas) o 3 (grandes); tocas un episodio y se reproduce. El tráiler tiene un único botón de salir. **Marcar como vista** y valorar con 👍/👎 (afinan tus recomendaciones).
 - **Búsqueda inteligente:** sugerencias mientras escribes (títulos y personas), obras de un actor o director (también desde la ficha) y búsquedas recientes por perfil.
 - **Favoritos con listas** («Todos» y «+ Nueva lista» como botones primarios; abrir y cerrar una lista tocando su tarjeta de nuevo o con «Cerrar lista»; crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
 - **Carga sin saltos:** *skeletons* en toda la app y **scroll infinito** en todas las pestañas (Inicio, Películas, Series, Anime, Niños, búsqueda, plataformas y Favoritos).
 - **Hecho para ti:** se activa con **2 títulos finalizados** y mejora con cada uno; todo se calcula localmente.
-- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (solo al terminar de verdad: aviso «Siguiente episodio en 10 s» con Cancelar; si el vídeo está en pantalla completa se sale de ella para mostrarlo). El progreso de Continuar viendo se retoma donde quedó.
+- **Reproductor** con servidores externos, temporadas/episodios y **siguiente episodio automático** (solo al terminar de verdad: aviso «Siguiente episodio en 10 s» con Cancelar; si el vídeo está en pantalla completa se sale de ella para mostrarlo).
 - **Avisos de nuevo episodio** para tus series (se comprueban al abrir el Inicio; sin servidor no hay notificaciones push).
 - **Copia de seguridad** del perfil (Ajustes → Exportar/Importar archivo; sin PIN, se fusiona con los datos existentes).
 - **Portada automática:** el **Top 10 de la semana** rota solo cada 7 s con fundido e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).
