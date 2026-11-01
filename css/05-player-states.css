@@ -1,0 +1,294 @@
+/**
+ * TatoCine · css/05-player-states.css
+ * Reproductor, estados de tarjeta y avisos.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    .tv-controls {
+      display: none;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tv-controls.active {
+      display: flex;
+    }
+
+    .tv-select {
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      border: 1px solid #222;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      outline: 0;
+      cursor: pointer;
+      min-width: 150px;
+      transition: all 0.2s;
+    }
+
+    .tv-select:hover {
+      background: #1a1a1a;
+      border-color: #444;
+    }
+
+    .server-switcher {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 0 auto 20px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .server-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #111;
+      border: 1px solid #222;
+      color: #aaa;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .server-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .server-btn:hover {
+      background: #1a1a1a;
+      border-color: #444;
+      color: #fff;
+    }
+
+    .server-btn.active {
+      border-color: #fff;
+      background: #fff;
+      color: #000;
+    }
+
+    .server-btn.preferred::after {
+      content: "★";
+      color: #fff;
+      margin-left: 4px;
+      font-size: 10px;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 1100px;
+      aspect-ratio: 16/9;
+      max-height: calc(100dvh - 245px);
+      min-height: 180px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .player-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .player-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 500;
+      z-index: 1;
+      background: #000;
+    }
+
+    .player-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .player-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 15px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font: 600 13px var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .player-fullscreen-btn:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    .player-fullscreen-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .player-container:fullscreen,
+    .player-container:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      max-height: none;
+      min-height: 0;
+      aspect-ratio: auto;
+      border-radius: 0;
+      background: #000;
+    }
+
+    .player-container:fullscreen iframe,
+    .player-container:-webkit-full-screen iframe {
+      width: 100%;
+      height: 100%;
+    }
+
+    .card.upcoming {
+      cursor: not-allowed;
+    }
+
+    .card.upcoming img {
+      filter: grayscale(100%) brightness(0.3);
+    }
+
+    .card.upcoming:hover {
+      transform: none;
+      border-color: transparent;
+      box-shadow: none;
+      z-index: 1;
+    }
+
+    .card.upcoming .save-btn,
+    .card.upcoming .share-card-btn {
+      display: none;
+    }
+
+    .badge-upcoming {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      z-index: 6;
+      text-align: center;
+      text-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.9),
+        0 0 20px rgba(0, 0, 0, 0.8);
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(20, 20, 20, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      animation: toastIn 0.3s ease;
+      max-width: 340px;
+      backdrop-filter: blur(10px);
+      line-height: 1.4;
+    }
+
+    .toast.removing {
+      animation: toastOut 0.3s ease forwards;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+    }
+
+    .load-more-btn {
+      display: block;
+      margin: 40px auto;
+      padding: 16px 40px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .load-more-btn:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    .load-more-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }

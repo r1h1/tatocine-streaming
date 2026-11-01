@@ -1,0 +1,511 @@
+/**
+ * TatoCine · css/06-search-responsive.css
+ * Búsqueda sin resultados y reglas responsive de móvil/tableta.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* ESTADO DE BÚSQUEDA SIN RESULTADOS: conserva el hero y evita mostrar contenido ajeno */
+    .hero-empty-state {
+      display: none;
+      position: absolute;
+      z-index: 2;
+      right: 8%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(34vw, 390px);
+      aspect-ratio: 1;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .hero-empty-state svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.5));
+    }
+
+    .hero.empty-search .hero-bg {
+      background:
+        radial-gradient(ellipse at 72% 48%,
+          rgba(82, 82, 82, 0.24) 0%,
+          rgba(24, 24, 24, 0.1) 40%,
+          transparent 70%),
+        linear-gradient(115deg, #090909 0%, #171717 55%, #080808 100%);
+    }
+
+    .hero.empty-search .hero-empty-state {
+      display: flex;
+    }
+
+    .hero.empty-search .hero-gradient {
+      background:
+        linear-gradient(to top,
+          #000 0%,
+          rgba(0, 0, 0, 0.55) 55%,
+          rgba(0, 0, 0, 0.1) 100%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
+    }
+
+    .hero.empty-search .hero-content {
+      max-width: 850px;
+    }
+
+    .hero.empty-search .hero-title {
+      font-size: clamp(30px, calc(4.8vw - 4px), 60px);
+    }
+
+    .hero.empty-search .hero-year {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .hero.empty-search .hero-desc {
+      max-width: 610px;
+    }
+
+    /* BÚSQUEDA FIJA CUANDO EL MENÚ SE COLAPSA (TABLET Y MÓVIL) */
+    @media (max-width: 814px) {
+      .hero-content .search-wrap {
+        position: fixed;
+        top: 78px;
+        left: 20px;
+        right: 20px;
+        width: auto;
+        max-width: none;
+        margin: 0;
+        z-index: 1500;
+      }
+
+      .hero-content .search-input-large {
+        padding: 12px 18px 12px 44px;
+        font-size: 14px;
+        min-height: 44px;
+      }
+
+      .hero-content .search-wrap svg {
+        left: 15px;
+        width: 16px;
+        height: 16px;
+      }
+
+      .hero-content {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .hero-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 13px;
+        line-height: 1.45;
+        max-width: 95%;
+        margin-bottom: 18px;
+      }
+
+      .hero-meta {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .hero-meta-item {
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+
+      .hero.empty-search .hero-empty-state {
+        right: 3%;
+        top: 44%;
+        width: min(48vw, 300px);
+        opacity: 0.55;
+      }
+    }
+
+    /* MODAL DEL REPRODUCTOR: área centrada y botón fullscreen visible */
+    #player-modal .modal-content {
+      width: 100%;
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    #player-modal .modal-header {
+      padding: 14px 24px;
+    }
+
+    #player-modal .modal-body {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: 18px 24px 28px;
+      overscroll-behavior: contain;
+    }
+
+    #player-modal .tv-controls {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto 14px;
+    }
+
+    #player-modal .server-switcher {
+      margin-bottom: 16px;
+    }
+
+    #player-modal .player-container {
+      flex: 0 1 auto;
+    }
+
+    @media (max-width: 1066px) {
+      .hero-content {
+        padding: 0 30px 40px;
+      }
+
+      .rows-container {
+        padding: 0 30px;
+        gap: 24px;
+      }
+
+      .grid-container {
+        padding: 0 30px;
+      }
+
+      .genre-filters {
+        padding: 0 30px;
+      }
+
+      .details-body {
+        padding: 0 30px 60px;
+      }
+
+      .actor-header {
+        padding: 30px;
+      }
+
+      .actor-bio {
+        padding: 20px 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        height: 70vh;
+        min-height: 450px;
+      }
+
+      .hero-title {
+        font-size: 38px;
+      }
+
+      .hero-year {
+        font-size: 16px;
+      }
+
+      .hero-desc {
+        font-size: 15px;
+      }
+
+      .hero-content .search-input-large {
+        padding: 12px 20px 12px 44px;
+        font-size: 14px;
+      }
+
+      .hero-content .search-wrap svg {
+        left: 14px;
+        width: 16px;
+        height: 16px;
+      }
+
+      .rows-container {
+        padding: 0 20px;
+        gap: 24px;
+      }
+
+      .genre-filters {
+        padding: 0 20px;
+      }
+
+      .card {
+        flex: 0 0 200px;
+        height: 112px;
+      }
+
+      .skeleton-card {
+        flex: 0 0 200px;
+        height: 112px;
+      }
+
+      .server-switcher {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      }
+
+      .row-nav {
+        display: none;
+      }
+
+      .grid-container {
+        padding: 0 20px;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+      }
+
+      .details-backdrop {
+        height: 220px;
+      }
+
+      .details-body {
+        padding: 0 20px 60px;
+        margin-top: -50px;
+      }
+
+      .hero-btn.secondary {
+        padding: 12px 18px;
+        font-size: 14px;
+      }
+
+      .toast-container {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+      }
+
+      .toast {
+        max-width: none;
+      }
+
+      .actor-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .actor-photo {
+        width: 100px;
+        height: 100px;
+      }
+
+      .actor-name {
+        font-size: 24px;
+      }
+
+      .actor-bio {
+        padding: 20px;
+      }
+
+      .settings-option {
+        padding: 16px 20px;
+      }
+
+      .filter-group {
+        padding: 16px 20px;
+      }
+
+      #player-modal .modal-header {
+        padding: 12px 16px;
+        min-height: 66px;
+      }
+
+      #player-modal .modal-title {
+        font-size: 16px;
+      }
+
+      #player-modal .modal-body {
+        padding: 14px 14px 20px;
+      }
+
+      #player-modal .player-container {
+        max-height: calc(100dvh - 245px);
+        border-radius: 8px;
+      }
+
+      .player-fullscreen-btn {
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+        border-radius: 50%;
+      }
+
+      .player-fullscreen-btn .fullscreen-label {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        height: 60vh;
+        min-height: 400px;
+      }
+
+      .hero-desc {
+        font-size: 13px;
+        line-height: 1.45;
+        -webkit-line-clamp: 2;
+        max-width: 95%;
+      }
+
+      .hero-title {
+        font-size: 28px;
+      }
+
+      .hero-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+      }
+
+      .card {
+        flex: 0 0 160px;
+        height: 90px;
+      }
+
+      .skeleton-card {
+        flex: 0 0 160px;
+        height: 90px;
+      }
+
+      .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+      }
+
+      .details-backdrop {
+        height: 180px;
+      }
+
+      .details-body {
+        padding: 0 16px 60px;
+        margin-top: -40px;
+      }
+
+      .details-title {
+        font-size: 24px;
+      }
+
+      .details-meta {
+        gap: 8px;
+        font-size: 12px;
+      }
+
+      .details-meta span {
+        padding: 3px 8px;
+        font-size: 12px;
+      }
+
+      .details-genre {
+        font-size: 11px;
+        padding: 4px 10px;
+      }
+
+      .details-overview {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .details-actions {
+        gap: 8px;
+      }
+
+      .details-actions .hero-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        flex: 1;
+        justify-content: center;
+        min-width: 130px;
+      }
+
+      .details-actions .hero-btn.secondary {
+        flex: 0 1 auto;
+      }
+
+      .details-cast-title {
+        font-size: 14px;
+      }
+
+      .cast-item {
+        width: 75px;
+      }
+
+      .cast-photo {
+        width: 65px;
+        height: 65px;
+      }
+
+      .cast-name {
+        font-size: 11px;
+      }
+
+      .similar-card {
+        width: 110px;
+      }
+
+      .hero-meta {
+        max-width: 95%;
+      }
+
+      .hero.empty-search .hero-title {
+        font-size: 26px;
+      }
+
+      #player-modal .modal-body {
+        padding: 12px 10px 18px;
+      }
+
+      #player-modal .player-container {
+        max-height: calc(100dvh - 225px);
+        min-height: 150px;
+      }
+
+      #player-modal .server-switcher {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+
+      #player-modal .server-btn {
+        padding: 9px 5px;
+        font-size: 10px;
+        letter-spacing: 0.2px;
+      }
+
+      #player-modal .tv-controls {
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      #player-modal .tv-select {
+        min-width: 0;
+        flex: 1;
+        width: calc(50% - 4px);
+        padding: 10px 8px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-height: 520px) and (max-width: 900px) {
+      #player-modal .modal-header {
+        min-height: 54px;
+        padding: 6px 12px;
+      }
+
+      #player-modal .modal-body {
+        padding: 8px 12px;
+        overflow: auto;
+      }
+
+      #player-modal .tv-controls {
+        margin-bottom: 8px;
+      }
+
+      #player-modal .server-switcher {
+        margin-bottom: 8px;
+      }
+
+      #player-modal .player-container {
+        width: auto;
+        height: calc(100dvh - 175px);
+        max-height: none;
+        aspect-ratio: 16/9;
+        min-height: 120px;
+      }
+    }

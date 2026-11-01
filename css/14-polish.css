@@ -1,0 +1,253 @@
+/**
+ * TatoCine · css/14-polish.css
+ * Ajustes finos: favorito en Info, siguiente episodio, nombre del perfil, Top 10, engranaje y lápiz.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* V6: favorito en Info, siguiente episodio, ajustes de botones */
+    .next-ep-prompt {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 14px;
+      background: rgba(10, 10, 10, .92);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, .6);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .next-ep-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .next-ep-actions button {
+      min-height: 38px;
+      padding: 0 16px;
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .next-ep-actions .next-ep-play {
+      border-color: #fff;
+      background: #fff;
+      color: #000;
+    }
+
+    @media (max-width: 600px) {
+      .details-actions .hero-btn.secondary {
+        flex: 1 1 calc(33.333% - 6px);
+        gap: 6px;
+        padding: 12px 6px;
+        font-size: 13px;
+      }
+
+      .details-actions .hero-btn.secondary svg {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 auto;
+      }
+
+      .next-ep-prompt {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+      }
+    }
+
+    /* V7: menú superior más abajo (la imagen del hero lo cubre), barra de progreso y botón de instalar */
+    .top-nav {
+      height: calc(90px + env(safe-area-inset-top));
+      padding-top: calc(10px + env(safe-area-inset-top));
+    }
+
+    .tc-install-btn[hidden] {
+      display: none;
+    }
+
+    body.tv-mode .tc-install-btn:not([hidden]) {
+      display: inline-flex;
+    }
+
+    .continue-card.has-progress .card-overlay {
+      padding-bottom: 24px;
+    }
+
+    .continue-progress {
+      bottom: 9px;
+    }
+
+    .tc-install-steps {
+      margin: 0 0 6px 20px;
+      padding: 0;
+      color: rgba(255, 255, 255, .85);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .tc-install-steps li {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 814px) {
+      .top-nav {
+        height: calc(80px + env(safe-area-inset-top));
+        padding-top: calc(10px + env(safe-area-inset-top));
+      }
+
+      .hero-content .search-wrap {
+        top: calc(88px + env(safe-area-inset-top));
+      }
+
+      .hero {
+        padding-top: calc(150px + env(safe-area-inset-top));
+      }
+
+      .back-home-btn {
+        top: calc(84px + env(safe-area-inset-top));
+      }
+
+      body.brand-view .hero-content .search-wrap {
+        top: calc(124px + env(safe-area-inset-top));
+      }
+
+      body.brand-view .hero {
+        padding-top: calc(186px + env(safe-area-inset-top));
+      }
+    }
+
+    @media (max-width: 420px) {
+      #app-fullscreen-btn {
+        display: none;
+      }
+    }
+
+    /* V8: idioma por perfil, Top 10 y Continuar viendo */
+    .tc-lang-btn {
+      flex: 1;
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+
+    .tc-lang-btn:hover {
+      background: rgba(255, 255, 255, .18);
+    }
+
+    .tc-lang-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    /* Top 10: número grande a la izquierda y el título desplazado para no taparlo */
+    .card.top-ranked {
+      --rk: 118px;
+    }
+
+    .card.top-ranked .top10-rank-badge {
+      left: 4px;
+      bottom: 6px;
+      font-size: var(--rk);
+      line-height: .78;
+      letter-spacing: -8px;
+      -webkit-text-stroke: 3px rgba(255, 255, 255, .95);
+    }
+
+    .card.top-ranked .card-overlay {
+      padding-left: calc(var(--rk) * .78);
+    }
+
+    .card.top-ranked.rank-wide .card-overlay {
+      padding-left: calc(var(--rk) * 1.28);
+    }
+
+    @media (max-width: 1066px) {
+      .card.top-ranked {
+        --rk: 104px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .card.top-ranked {
+        --rk: 92px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card.top-ranked {
+        --rk: 80px;
+      }
+
+      .card.top-ranked .top10-rank-badge {
+        -webkit-text-stroke-width: 2.5px;
+      }
+    }
+
+    .continue-card.has-progress .card-overlay {
+      padding-bottom: 27px;
+    }
+
+    /* Modal de perfil sin texto de ayuda bajo el título */
+    .tc-profile-create-subtitle[hidden] {
+      display: none;
+    }
+
+    #tc-profile-create-title {
+      margin-bottom: 22px;
+    }
+
+    /* V9: engranaje de ajustes en la barra, lápiz de editar lista, ayudas ocultas */
+    .tc-profile-hint[hidden] {
+      display: none;
+    }
+
+    .fav-edit-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .fav-edit-btn:hover,
+    .fav-edit-btn:focus-visible {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .4);
+    }
+
+    @media (max-width: 480px) {
+      .nav-right {
+        gap: 6px;
+      }
+
+      .tc-fs-btn {
+        width: 34px;
+        height: 34px;
+      }
+    }

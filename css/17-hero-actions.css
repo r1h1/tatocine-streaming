@@ -1,0 +1,229 @@
+/**
+ * TatoCine · css/17-hero-actions.css
+ * Botones de la portada con el mismo tamaño y orden fijo: Ver · Info · ¿Qué ver hoy? · ♥.
+ * Botón primario (blanco) = Ver. Secundarios (translúcidos) = Info, ¿Qué ver hoy? y favorito.
+ * En pantallas ≤ 814 px se acomodan en dos filas: [Ver | Info] y [¿Qué ver hoy? | ♥] (el texto nunca se oculta).
+ */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.hero-actions .hero-btn {
+  min-height: 52px;
+  padding: 0 30px;
+  justify-content: center;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.hero-actions .hero-btn.secondary {
+  padding: 0 26px;
+}
+
+.hero-actions .hero-btn svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+/* Corazón: botón redondo del mismo alto; sin etiqueta vacía (no deja hueco) */
+.hero-actions .hero-save-btn {
+  width: 52px;
+  min-width: 52px;
+  padding: 0;
+}
+
+@media (max-width: 814px) {
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .hero-actions .hero-btn,
+  .hero-actions .hero-btn.secondary {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 12px;
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  #hero-play-btn,
+  #hero-details-btn {
+    grid-column: span 2;
+  }
+
+  .hero-wizard-btn {
+    grid-column: span 3;
+  }
+
+  .hero-actions .hero-save-btn {
+    grid-column: span 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+}
+
+@media (max-width: 360px) {
+
+  .hero-actions .hero-btn,
+  .hero-actions .hero-btn.secondary {
+    padding: 0 8px;
+    font-size: 13px;
+    gap: 6px;
+  }
+}
+
+/* Espacio entre el logo y las opciones del menú */
+.nav-brand {
+  margin-right: 32px;
+}
+
+@media (min-width: 815px) and (max-width: 1100px) {
+  .nav-brand {
+    margin-right: 18px;
+  }
+
+  .nav-item {
+    padding: 8px 9px;
+  }
+}
+
+@media (max-width: 814px) {
+  .nav-brand {
+    margin-right: 0;
+  }
+}
+
+/* ---------- Más aire bajo la barra superior (móvil/tableta): buscador y «Regresar a inicio» no quedan pegados ---------- */
+@media (max-width: 814px) {
+  .hero-content .search-wrap {
+    top: calc(98px + env(safe-area-inset-top));
+  }
+
+  .hero {
+    padding-top: calc(160px + env(safe-area-inset-top));
+  }
+
+  .back-home-btn {
+    top: calc(94px + env(safe-area-inset-top));
+  }
+
+  body.brand-view .hero-content .search-wrap {
+    top: calc(134px + env(safe-area-inset-top));
+  }
+
+  body.brand-view .hero {
+    padding-top: calc(196px + env(safe-area-inset-top));
+  }
+}
+
+/* ---------- Carrusel de la portada (Top 10): fundido entre títulos e indicadores ---------- */
+.hero-bg {
+  transition: opacity .45s ease;
+}
+
+.hero-dots {
+  position: absolute;
+  right: 50px;
+  bottom: 20px;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+}
+
+.hero-dots[hidden] {
+  display: none;
+}
+
+.hero-dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.hero-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .42);
+  transform: translate(-50%, -50%);
+  transition: width .25s, background .25s;
+}
+
+.hero-dot.active::after {
+  width: 22px;
+  background: #fff;
+}
+
+@media (max-width: 814px) {
+  .hero-dots {
+    right: auto;
+    left: 18px;
+    bottom: 8px;
+  }
+}
+
+/* ---------- Racha (junto al perfil) ---------- */
+.streak-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-pill[hidden] {
+  display: none;
+}
+
+.streak-pill svg {
+  color: #ff8a3d;
+}
+
+@media (max-width: 814px) {
+  .streak-pill {
+    height: 34px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .tc-profile-trigger-name {
+    max-width: 44px;
+  }
+}
+
+@media (max-width: 340px) {
+  .tc-profile-trigger-name {
+    display: none;
+  }
+
+  #app-install-btn {
+    display: none;
+  }
+}

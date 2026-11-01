@@ -1,0 +1,195 @@
+/**
+ * TatoCine · css/13-kids-brands-lite.css
+ * Límite infantil, tarjetas de plataformas, regreso a inicio y modo ligero.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* ==========================================================
+       V5: límite infantil, plataformas con imagen, regreso a inicio
+       y modo ligero.
+       ========================================================== */
+    .tc-kid-lock {
+      position: fixed;
+      inset: 0;
+      z-index: 4990;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .97);
+    }
+
+    .tc-kid-lock.open {
+      display: flex;
+    }
+
+    .tc-kid-lock-card {
+      text-align: center;
+    }
+
+    .tc-kid-lock-card h3 {
+      margin-right: 0;
+    }
+
+    .tc-kid-lock-time {
+      margin: 4px 0 22px;
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tc-kid-lock-card .tc-profile-create-btn {
+      width: 100%;
+      flex: none;
+    }
+
+    /* Plataformas y estudios: mismas tarjetas que los demás carruseles */
+    .row-scroll .brand-tile {
+      position: relative;
+      flex: 0 0 340px;
+      height: 191px;
+      min-width: 0;
+      padding: 0;
+      overflow: hidden;
+      align-items: flex-end;
+      justify-content: flex-start;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background-color: #111;
+      background-size: cover;
+      background-position: center;
+      text-align: left;
+    }
+
+    .row-scroll .brand-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, .9) 0%, rgba(0, 0, 0, .15) 65%);
+    }
+
+    .row-scroll .brand-tile span {
+      position: relative;
+      z-index: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
+    }
+
+    .row-scroll .brand-tile:hover,
+    .row-scroll .brand-tile:focus-visible {
+      transform: scale(1.02);
+      border-color: transparent;
+    }
+
+    @media (max-width: 1066px) {
+      .row-scroll .brand-tile {
+        flex-basis: 300px;
+        height: 169px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .row-scroll .brand-tile {
+        flex-basis: 262px;
+        height: 147px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .row-scroll .brand-tile {
+        flex-basis: 224px;
+        height: 126px;
+      }
+
+      .row-scroll .brand-tile span {
+        font-size: 14px;
+      }
+    }
+
+    /* Botón para regresar a inicio (vistas de plataformas y estudios) */
+    .back-home-btn {
+      display: none;
+      position: relative;
+      z-index: 11;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 14px;
+      padding: 9px 16px 9px 12px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .back-home-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .back-home-btn:hover {
+      background: rgba(255, 255, 255, .2);
+    }
+
+    body.brand-view .back-home-btn {
+      display: inline-flex;
+    }
+
+    @media (max-width: 814px) {
+      .back-home-btn {
+        position: fixed;
+        top: calc(74px + env(safe-area-inset-top));
+        left: 20px;
+        z-index: 1500;
+        margin: 0;
+        padding: 7px 14px 7px 10px;
+        font-size: 13px;
+      }
+
+      body.brand-view .hero-content .search-wrap {
+        top: calc(114px + env(safe-area-inset-top));
+      }
+
+      body.brand-view .hero {
+        padding-top: calc(176px + env(safe-area-inset-top));
+      }
+    }
+
+    /* Modo ligero (TV, conexiones lentas, equipos modestos): sin desenfoques ni efectos costosos */
+    body.lite *,
+    body.lite *::before,
+    body.lite *::after {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.lite .mobile-menu,
+    body.lite .tc-profile-create-overlay,
+    body.lite .modal,
+    body.lite .tc-kid-lock {
+      background: rgba(8, 8, 8, .98);
+    }
+
+    body.lite .card,
+    body.lite .brand-tile {
+      will-change: auto;
+      box-shadow: none;
+    }
+
+    body.lite .row-scroll .card:hover,
+    body.lite .row-scroll .brand-tile:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    body.lite .row-scroll {
+      scroll-behavior: auto;
+    }

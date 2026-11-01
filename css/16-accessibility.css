@@ -1,0 +1,40 @@
+/**
+ * TatoCine · css/16-accessibility.css
+ * Accesibilidad y copia de seguridad: enlace «Saltar al contenido», acciones de Ajustes y foco visible.
+ */
+.skip-link {
+  position: fixed;
+  top: -60px;
+  left: 12px;
+  z-index: 10001;
+  padding: 10px 18px;
+  border-radius: 50px;
+  background: #fff;
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top .15s;
+}
+
+.skip-link:focus {
+  top: calc(10px + env(safe-area-inset-top));
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.settings-actions[hidden],
+#backup-file {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .settings-actions {
+    align-self: flex-end;
+  }
+}

@@ -1,0 +1,1169 @@
+/**
+ * TatoCine · css/10-profiles.css
+ * Perfiles: selector, modal de crear/editar, Top 10 y reproductor PRO.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* TatoCine PRO: perfiles locales, Top 10 y reproducción */
+    .tc-profile-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 14px;
+      padding: 6px 10px 6px 6px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 24px;
+      color: #fff;
+      background: rgba(255, 255, 255, .08);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background .2s, border-color .2s
+    }
+
+    .tc-profile-trigger:hover {
+      background: rgba(255, 255, 255, .16);
+      border-color: rgba(255, 255, 255, .32)
+    }
+
+    .tc-profile-trigger-avatar {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #292929;
+      font-size: 19px
+    }
+
+    .tc-profile-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px)
+    }
+
+    .tc-profile-overlay.open {
+      display: flex
+    }
+
+    .tc-profile-panel {
+      width: min(760px, 100%);
+      max-height: min(90vh, 900px);
+      overflow: auto;
+      padding: 26px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #171717, #090909);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .55)
+    }
+
+    .tc-profile-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px
+    }
+
+    .tc-profile-heading h2 {
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: -.5px
+    }
+
+    .tc-profile-close {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(255, 255, 255, .1);
+      cursor: pointer;
+      font-size: 22px
+    }
+
+    .tc-profile-section-title {
+      margin: 18px 0 12px;
+      color: #aaa;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase
+    }
+
+    .tc-profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+      gap: 12px
+    }
+
+    .tc-profile-card {
+      min-height: 124px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(255, 255, 255, .045);
+      cursor: pointer;
+      transition: transform .18s, border-color .18s, background .18s
+    }
+
+    .tc-profile-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, .38);
+      background: rgba(255, 255, 255, .09)
+    }
+
+    .tc-profile-card.active {
+      border-color: #fff;
+      background: rgba(255, 255, 255, .13)
+    }
+
+    .tc-profile-card-avatar {
+      display: grid;
+      place-items: center;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #303030;
+      font-size: 34px
+    }
+
+    .tc-profile-card-name {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 650
+    }
+
+    .tc-profile-active-label {
+      color: #bbb;
+      font-size: 11px
+    }
+
+    .tc-profile-avatar-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .tc-avatar-option {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 50%;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      font-size: 23px
+    }
+
+    .tc-avatar-option.selected {
+      border: 2px solid #fff;
+      background: #454545
+    }
+
+    .tc-profile-create {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .035)
+    }
+
+    .tc-profile-input {
+      width: 100%;
+      height: 44px;
+      margin: 10px 0 14px;
+      padding: 0 13px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 9px;
+      outline: none;
+      color: #fff;
+      background: #171717;
+      font: inherit
+    }
+
+    .tc-profile-input:focus {
+      border-color: #aaa
+    }
+
+    .tc-profile-create-btn {
+      margin-top: 14px;
+      padding: 11px 17px;
+      border: 0;
+      border-radius: 9px;
+      color: #000;
+      background: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .tc-profile-note {
+      margin-top: 12px;
+      color: #858585;
+      font-size: 12px;
+      line-height: 1.5
+    }
+
+    .top10-rank-badge {
+      position: absolute;
+      z-index: 5;
+      left: -5px;
+      bottom: 8px;
+      color: #080808;
+      font-size: 82px;
+      line-height: .8;
+      font-weight: 950;
+      font-style: italic;
+      letter-spacing: -7px;
+      -webkit-text-stroke: 2px rgba(255, 255, 255, .9);
+      text-shadow: 3px 4px 0 rgba(0, 0, 0, .9);
+      pointer-events: none
+    }
+
+    .auto-next-toggle {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(255, 255, 255, .07);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer
+    }
+
+    .auto-next-toggle.on {
+      border-color: rgba(93, 190, 125, .55);
+      background: rgba(44, 130, 75, .2)
+    }
+
+    @media(max-width:814px) {
+      .tc-profile-trigger {
+        margin-left: 0;
+        padding: 5px
+      }
+
+      .tc-profile-trigger-name {
+        display: none
+      }
+
+      .tc-profile-panel {
+        padding: 20px 16px
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 21px
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+      }
+
+      .top10-rank-badge {
+        font-size: 66px
+      }
+    }
+
+    @media(max-width:480px) {
+      .tc-profile-overlay {
+        padding: 10px
+      }
+
+      .tc-profile-panel {
+        max-height: 94vh;
+        padding: 17px 13px;
+        border-radius: 15px
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .tc-profile-card {
+        min-height: 108px
+      }
+
+      .tc-profile-card-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 30px
+      }
+    }
+
+    /* Selector de perfiles estilo streaming: inicial + nombre, sin avatares ilustrados */
+    .tc-profile-panel {
+      position: relative;
+      width: min(900px, 100%);
+    }
+
+    .tc-profile-heading {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .tc-profile-heading>div {
+      width: 100%;
+    }
+
+    .tc-profile-heading h2 {
+      font-size: 30px;
+    }
+
+    .tc-profile-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    .tc-profile-grid {
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      justify-items: center;
+    }
+
+    .tc-profile-card {
+      width: 100%;
+      max-width: 170px;
+      min-height: 145px;
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .tc-profile-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, .28);
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .tc-profile-card-avatar {
+      width: 82px;
+      height: 82px;
+      font-size: 35px;
+      font-weight: 650;
+      color: #fff;
+      background: #303030;
+      border: 2px solid transparent;
+    }
+
+    .tc-profile-card.active .tc-profile-card-avatar {
+      border-color: #fff;
+      background: #414141;
+    }
+
+    .tc-profile-add-card .tc-profile-add-initial {
+      font-size: 42px;
+      font-weight: 300;
+      background: #202020;
+      border: 1px solid rgba(255, 255, 255, .35);
+    }
+
+    .tc-profile-create {
+      max-width: 520px;
+      margin: 28px auto 0;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-close {
+      display: none;
+    }
+
+    .tc-profile-overlay.startup {
+      background: rgba(0, 0, 0, .96);
+    }
+
+    .tc-profile-overlay.startup .tc-profile-panel {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-heading h2 {
+      font-size: clamp(27px, 4vw, 38px);
+    }
+
+    @media(max-width:480px) {
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tc-profile-card {
+        min-height: 125px
+      }
+
+      .tc-profile-card-avatar {
+        width: 68px;
+        height: 68px;
+        font-size: 30px
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 24px
+      }
+    }
+
+    /* Selector de perfiles: comparte la identidad visual real de la pantalla Inicio */
+    .tc-profile-overlay {
+      z-index: 5000;
+      padding: clamp(18px, 4vw, 42px);
+      background: #000;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .tc-profile-overlay.startup {
+      background: #000;
+    }
+
+    .tc-profile-panel {
+      position: relative;
+      width: min(980px, 100%);
+      max-height: min(90vh, 860px);
+      overflow: auto;
+      padding: 8px 12px 20px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .tc-profile-panel::before {
+      display: none;
+    }
+
+    .tc-profile-brand {
+      margin: 0 0 34px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .tc-profile-heading {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      margin: 0 0 36px;
+      padding: 0 48px;
+    }
+
+    .tc-profile-heading>div {
+      width: 100%;
+    }
+
+    .tc-profile-heading h2 {
+      color: #fff;
+      font-size: clamp(27px, 3.5vw, 36px);
+      font-weight: 700;
+      letter-spacing: -.9px;
+      line-height: 1.15;
+    }
+
+    .tc-profile-heading .tc-profile-note {
+      display: block;
+      margin: 10px 0 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: rgba(255, 255, 255, .68);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0;
+      line-height: 1.45;
+    }
+
+    .tc-profile-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 22px;
+      transition: background .2s, transform .2s, border-color .2s;
+    }
+
+    .tc-profile-close:hover {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .45);
+      transform: scale(1.05);
+    }
+
+    .tc-profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 160px));
+      justify-content: center;
+      justify-items: stretch;
+      gap: 24px 22px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .tc-profile-card {
+      position: relative;
+      display: flex;
+      width: 100%;
+      max-width: 160px;
+      min-height: 150px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 8px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #fff;
+      box-shadow: none;
+      cursor: pointer;
+      transition: transform .3s cubic-bezier(.2, 0, 0, 1), border-color .3s, background .3s, box-shadow .3s;
+    }
+
+    .tc-profile-card:hover {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, .82);
+      background: transparent;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, .5);
+    }
+
+    .tc-profile-card.active {
+      border-color: rgba(255, 255, 255, .26);
+      background: rgba(255, 255, 255, .035);
+      box-shadow: none;
+    }
+
+    .tc-profile-card-avatar {
+      display: grid;
+      place-items: center;
+      width: 82px;
+      height: 82px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      background: #242424;
+      color: #fff;
+      box-shadow: none;
+      font-size: 35px;
+      font-weight: 650;
+      transition: background .2s, border-color .2s, transform .2s;
+    }
+
+    .tc-profile-card:hover .tc-profile-card-avatar {
+      border-color: rgba(255, 255, 255, .72);
+      transform: scale(1.035);
+    }
+
+    .tc-profile-card.active .tc-profile-card-avatar {
+      border-color: #fff;
+      background: #363636;
+    }
+
+    .tc-profile-card-name {
+      max-width: 100%;
+      overflow: hidden;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tc-profile-active-label {
+      color: rgba(255, 255, 255, .62);
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .tc-profile-card.active .tc-profile-active-label {
+      color: rgba(255, 255, 255, .9);
+    }
+
+    .tc-profile-add-card {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .tc-profile-add-card .tc-profile-add-initial {
+      border: 1px solid rgba(255, 255, 255, .48);
+      background: #111;
+      color: #fff;
+      font-size: 42px;
+      font-weight: 300;
+    }
+
+    .tc-profile-add-card:hover .tc-profile-add-initial {
+      border-color: #fff;
+      background: #252525;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-close {
+      display: none;
+    }
+
+    .tc-profile-overlay.startup .tc-profile-panel {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    /* Crear perfil: modal sobrio, con los mismos botones y superficies de TatoCine */
+    .tc-profile-create-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5010;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .86);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .tc-profile-create-overlay.open {
+      display: flex;
+    }
+
+    .tc-profile-create-dialog {
+      position: relative;
+      width: min(460px, 100%);
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 18px;
+      background: #0a0a0a;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .7);
+      animation: tcProfileModalIn .2s ease-out;
+    }
+
+    @keyframes tcProfileModalIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.99)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .tc-profile-create-dialog h3 {
+      margin: 0 42px 8px 0;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -.4px;
+    }
+
+    .tc-profile-create-subtitle {
+      margin: 0 0 25px;
+      color: rgba(255, 255, 255, .68);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .tc-profile-create-label {
+      display: block;
+      margin: 0 0 9px;
+      color: rgba(255, 255, 255, .82);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tc-profile-create-dialog .tc-profile-input {
+      height: 48px;
+      margin: 0;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 9px;
+      outline: 0;
+      background: #171717;
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      box-shadow: none;
+      transition: border-color .2s, background .2s;
+    }
+
+    .tc-profile-create-dialog .tc-profile-input:focus {
+      border-color: rgba(255, 255, 255, .6);
+      background: #1d1d1d;
+      box-shadow: none;
+    }
+
+    .tc-profile-create-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn {
+      flex: 1;
+      min-height: 46px;
+      margin: 0;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 50px;
+      background: #fff;
+      color: #000;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform .2s, background .2s;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn:hover {
+      transform: scale(1.03);
+      background: #e5e5e5;
+    }
+
+    .tc-profile-create-dialog .tc-profile-create-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tc-profile-cancel-btn {
+      min-height: 46px;
+      padding: 0 22px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .tc-profile-cancel-btn:hover {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .35);
+    }
+
+    .tc-profile-create-dialog .tc-profile-note {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .52);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .tc-profile-create-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+
+    .tc-profile-create-close:hover {
+      background: rgba(255, 255, 255, .2);
+      transform: scale(1.05);
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-overlay {
+        padding: 14px;
+      }
+
+      .tc-profile-panel {
+        max-height: 92vh;
+        padding: 8px 0 16px;
+      }
+
+      .tc-profile-brand {
+        margin-bottom: 28px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 28px;
+        padding: 0 42px;
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 25px;
+      }
+
+      .tc-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 150px));
+        gap: 14px;
+      }
+
+      .tc-profile-card {
+        min-height: 132px;
+        padding: 10px 6px;
+      }
+
+      .tc-profile-card-avatar {
+        width: 68px;
+        height: 68px;
+        font-size: 30px;
+      }
+
+      .tc-profile-create-overlay {
+        padding: 14px;
+      }
+
+      .tc-profile-create-dialog {
+        padding: 28px 22px;
+        border-radius: 16px;
+      }
+
+      .tc-profile-create-actions {
+        flex-direction: column-reverse;
+      }
+
+      .tc-profile-cancel-btn {
+        width: 100%;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      .tc-profile-card,
+      .tc-profile-create-dialog,
+      .tc-profile-create-btn,
+      .tc-profile-close {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+
+
+    /* Selector de perfiles: fondos cinematográficos TMDB y acciones de edición. */
+    .tc-profile-overlay {
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .tc-profile-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: #050505;
+    }
+
+    .tc-profile-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0, 0, 0, .88) 0%, rgba(0, 0, 0, .66) 48%, rgba(0, 0, 0, .78) 100%), linear-gradient(180deg, rgba(0, 0, 0, .42) 0%, rgba(0, 0, 0, .28) 48%, rgba(0, 0, 0, .86) 100%);
+    }
+
+    .tc-profile-backdrop-layer {
+      position: absolute;
+      inset: 0;
+      background-position: center 35%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transform: scale(1.015);
+      transition: opacity 1.35s ease;
+      will-change: opacity;
+    }
+
+    .tc-profile-backdrop-layer.visible {
+      opacity: 1;
+    }
+
+    .tc-profile-panel {
+      z-index: 1;
+    }
+
+    .tc-profile-card-editable {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .tc-profile-select-btn {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      min-height: 146px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 12px 12px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .tc-profile-select-btn:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: -4px;
+      border-radius: 8px;
+    }
+
+    .tc-profile-card-editable .tc-profile-card-avatar {
+      margin-top: 2px;
+    }
+
+    .tc-profile-edit-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .23);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .72);
+      color: rgba(255, 255, 255, .86);
+      cursor: pointer;
+      opacity: .86;
+      transition: background .18s, border-color .18s, opacity .18s, transform .18s;
+    }
+
+    .tc-profile-edit-btn:hover,
+    .tc-profile-edit-btn:focus-visible {
+      opacity: 1;
+      background: #292929;
+      border-color: rgba(255, 255, 255, .75);
+      transform: scale(1.06);
+      outline: none;
+    }
+
+    .tc-profile-create-overlay {
+      z-index: 5020;
+    }
+
+    /* Acciones del selector: zonas clicables independientes y modal por encima del selector. */
+    #tc-profile-grid .tc-profile-select-btn,
+    #tc-profile-grid .tc-profile-edit-btn,
+    #tc-profile-grid .tc-profile-add-card {
+      position: relative;
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    #tc-profile-create-overlay {
+      pointer-events: none;
+    }
+
+    #tc-profile-create-overlay.open {
+      pointer-events: auto;
+      display: flex !important;
+    }
+
+    #tc-profile-create-overlay.open .tc-profile-create-dialog {
+      pointer-events: auto;
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-select-btn {
+        min-height: 128px;
+        padding: 16px 8px 10px
+      }
+
+      .tc-profile-edit-btn {
+        top: 6px;
+        right: 6px;
+        width: 28px;
+        height: 28px
+      }
+
+      .tc-profile-backdrop-layer {
+        background-position: center center;
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .tc-profile-backdrop-layer {
+        transition: none;
+        transform: none;
+      }
+    }
+
+    /* Selector de perfiles: carrusel de fondos TMDB a pantalla completa, sin hero ni scroll interno. */
+    body.tc-profile-screen-open {
+      overflow: hidden !important;
+    }
+
+    .tc-profile-overlay {
+      overflow: hidden !important;
+      overscroll-behavior: none;
+    }
+
+    .tc-profile-panel {
+      max-height: none !important;
+      overflow: visible !important;
+      scrollbar-width: none;
+    }
+
+    .tc-profile-panel::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .tc-profile-backdrop {
+      position: absolute;
+      inset: 0;
+    }
+
+    .tc-profile-backdrop-layer {
+      transition: opacity 1.15s ease-in-out;
+    }
+
+    @media(max-height:760px) {
+      .tc-profile-brand {
+        margin-bottom: 20px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 22px;
+      }
+
+      .tc-profile-grid {
+        gap: 12px 18px;
+      }
+
+      .tc-profile-card {
+        min-height: 116px;
+      }
+
+      .tc-profile-card-avatar {
+        width: 66px;
+        height: 66px;
+        font-size: 30px;
+      }
+    }
+
+    @media(max-width:600px) {
+      .tc-profile-panel {
+        width: 100%;
+        padding: 4px 6px 10px !important;
+      }
+
+      .tc-profile-brand {
+        margin-bottom: 20px !important;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 22px !important;
+      }
+
+      .tc-profile-grid {
+        gap: 10px 8px !important;
+      }
+
+      .tc-profile-card {
+        min-height: 112px !important;
+      }
+
+      .tc-profile-card-avatar {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 28px !important;
+      }
+    }
+
+    @media(max-height:640px) {
+      .tc-profile-brand {
+        margin-bottom: 12px !important;
+        font-size: 18px;
+      }
+
+      .tc-profile-heading {
+        margin-bottom: 12px !important;
+      }
+
+      .tc-profile-heading h2 {
+        font-size: 23px !important;
+      }
+
+      .tc-profile-heading .tc-profile-note {
+        margin-top: 6px !important;
+      }
+
+      .tc-profile-card {
+        min-height: 88px !important;
+        gap: 6px !important;
+        padding: 6px 4px !important;
+      }
+
+      .tc-profile-card-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 24px !important;
+      }
+
+      .tc-profile-grid {
+        gap: 6px !important;
+      }
+    }
+
+    /* TatoCine: posición original del lápiz de edición */
+    .tc-profile-card.tc-profile-card-editable {
+      position: relative !important;
+      overflow: hidden;
+    }
+
+    .tc-profile-card-editable .tc-profile-edit-btn {
+      position: absolute !important;
+      top: 8px !important;
+      right: 8px !important;
+      left: auto !important;
+      bottom: auto !important;
+
+      z-index: 30 !important;
+      display: grid !important;
+      place-items: center !important;
+
+      width: 30px !important;
+      height: 30px !important;
+      min-width: 30px !important;
+      margin: 0 !important;
+    }
+
+    /* Posición en móviles */
+    @media (max-width: 600px) {
+      .tc-profile-edit-btn {
+        top: 6px !important;
+        right: 6px !important;
+      }
+    }

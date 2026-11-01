@@ -1,0 +1,450 @@
+/**
+ * TatoCine · css/11-layout-pwa.css
+ * Zonas seguras iOS, barra superior, menú móvil, tarjetas grandes, detalle táctil y formulario de perfil.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* ==========================================================
+       Ajustes v3: PWA iOS (zonas seguras), menú móvil, tarjetas,
+       detalle táctil, perfiles infantiles/PIN y pantalla completa.
+       Se añade al final para mantener el diseño existente intacto.
+       ========================================================== */
+
+    /* PWA en iPhone: la barra superior respeta la hora/batería (notch) */
+    .top-nav {
+      padding-top: env(safe-area-inset-top);
+      height: calc(80px + env(safe-area-inset-top));
+      padding-left: max(40px, env(safe-area-inset-left));
+      padding-right: max(40px, env(safe-area-inset-right));
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .nav-right .tc-profile-trigger {
+      margin-left: 0;
+    }
+
+    /* Botón de pantalla completa junto al perfil */
+    .tc-fs-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(255, 255, 255, .08);
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .tc-fs-btn[hidden] {
+      display: none;
+    }
+
+    .tc-fs-btn:hover {
+      background: rgba(255, 255, 255, .16);
+      border-color: rgba(255, 255, 255, .32);
+    }
+
+    .tc-fs-btn .fs-icon-exit {
+      display: none;
+    }
+
+    .tc-fs-btn.is-active .fs-icon-enter {
+      display: none;
+    }
+
+    .tc-fs-btn.is-active .fs-icon-exit {
+      display: block;
+    }
+
+    /* Perfil: el nombre completo también en móvil */
+    .tc-profile-trigger-name {
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Descripción del hero: ya viene limitada a 250 caracteres con "..." */
+    .hero-desc,
+    .hero.empty-search .hero-desc {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+
+    @media (max-width: 814px) {
+      .top-nav {
+        height: calc(70px + env(safe-area-inset-top));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+
+      .hamburger-btn {
+        margin-right: 4px;
+      }
+
+      .tc-profile-trigger {
+        padding: 4px 10px 4px 4px;
+        gap: 6px;
+      }
+
+      .tc-profile-trigger-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+      }
+
+      .tc-profile-trigger-name {
+        display: block;
+        max-width: 96px;
+        font-size: 12px;
+      }
+
+      .tc-fs-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      /* La barra de búsqueda nunca queda bajo la hora/batería */
+      .hero-content .search-wrap {
+        top: calc(78px + env(safe-area-inset-top));
+      }
+
+      /* El hero crece con el texto en vez de empujar el contenido hacia arriba */
+      .hero {
+        height: auto;
+        min-height: 70vh;
+        padding-top: calc(140px + env(safe-area-inset-top));
+      }
+
+      .hero-content {
+        padding-bottom: 40px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        min-height: 60vh;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .tc-profile-trigger-name {
+        max-width: 60px;
+      }
+
+      .nav-brand {
+        font-size: 16px;
+      }
+    }
+
+    /* Tabletas y pantallas medianas: la barra cabe completa con el nombre del perfil */
+    @media (min-width: 815px) and (max-width: 1100px) {
+      .top-nav {
+        padding-left: max(22px, env(safe-area-inset-left));
+        padding-right: max(22px, env(safe-area-inset-right));
+      }
+
+      .nav-brand {
+        margin-right: 8px;
+      }
+
+      .nav-links {
+        gap: 2px;
+      }
+
+      .nav-item {
+        padding: 8px 11px;
+        font-size: 14px;
+      }
+
+      .tc-profile-trigger-name {
+        max-width: 90px;
+      }
+    }
+
+    /* Menú hamburguesa: botones y textos más compactos, con scroll para ver "Aviso Legal" */
+    .mobile-menu {
+      height: 100vh;
+      height: 100dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-top: calc(76px + env(safe-area-inset-top));
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
+      gap: 10px;
+    }
+
+    .mobile-menu .nav-item {
+      flex: 0 0 auto;
+      font-size: 15px;
+      padding: 10px 20px;
+      width: 78%;
+      max-width: 280px;
+    }
+
+    .mobile-menu .close-btn {
+      top: calc(16px + env(safe-area-inset-top));
+      right: 20px;
+      width: 38px;
+      height: 38px;
+      font-size: 20px;
+    }
+
+    /* Ventanas a pantalla completa: cabecera y botón cerrar bajo la barra de estado */
+    .modal-header {
+      padding-top: calc(20px + env(safe-area-inset-top));
+      min-height: calc(76px + env(safe-area-inset-top));
+    }
+
+    .details-close,
+    .modal-close {
+      top: calc(20px + env(safe-area-inset-top));
+    }
+
+    @media (max-width: 480px) {
+      .modal-header {
+        padding-top: calc(14px + env(safe-area-inset-top));
+        min-height: calc(64px + env(safe-area-inset-top));
+      }
+
+      .details-close,
+      .modal-close {
+        top: calc(12px + env(safe-area-inset-top));
+      }
+    }
+
+    /* Tarjetas de los carruseles más grandes (escritorio, tableta y móvil) */
+    .row-scroll .card {
+      flex: 0 0 340px;
+      height: 191px;
+      will-change: auto;
+    }
+
+    .skeleton-card {
+      flex: 0 0 340px;
+      height: 191px;
+    }
+
+    @media (max-width: 1066px) {
+
+      .row-scroll .card,
+      .skeleton-card {
+        flex: 0 0 300px;
+        height: 169px;
+      }
+    }
+
+    @media (max-width: 768px) {
+
+      .row-scroll .card,
+      .skeleton-card {
+        flex: 0 0 262px;
+        height: 147px;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .row-scroll .card,
+      .skeleton-card {
+        flex: 0 0 224px;
+        height: 126px;
+      }
+    }
+
+    /* Detalle: sin arrastre lateral, solo desplazamiento vertical */
+    .details-content,
+    .details-body {
+      overflow-x: hidden;
+    }
+
+    .details-body {
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .details-title,
+    .details-overview {
+      overflow-wrap: anywhere;
+    }
+
+    .details-cast {
+      touch-action: pan-x pan-y;
+      overscroll-behavior-x: contain;
+    }
+
+    /* Reparto y recomendados: en móvil/táctil se deslizan con el dedo, sin flechas */
+    @media (max-width: 768px),
+    (hover: none) {
+      .cast-nav {
+        display: none;
+      }
+    }
+
+    .details-actions .hero-btn {
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 600px) {
+      .details-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .details-actions .hero-btn,
+      .details-actions .hero-btn.secondary {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 0;
+        padding: 12px 10px;
+        font-size: 14px;
+      }
+
+      #details-play-btn {
+        flex-basis: 100%;
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 814px) {
+
+      .details-actions .hero-btn,
+      .details-actions .hero-btn.secondary {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 13px 14px;
+        font-size: 15px;
+      }
+    }
+
+    /* Perfiles: tipo (adulto/niño), PIN y eliminar */
+    .tc-profile-create-dialog {
+      max-height: calc(100vh - 40px);
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+    }
+
+    .tc-profile-create-label-gap {
+      margin-top: 18px;
+    }
+
+    .tc-profile-kind {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .tc-kind-btn {
+      flex: 1;
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+
+    .tc-kind-btn:hover {
+      background: rgba(255, 255, 255, .18);
+    }
+
+    .tc-kind-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    .tc-profile-hint {
+      margin: 0 0 14px;
+      color: rgba(255, 255, 255, .52);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .tc-profile-create-dialog .tc-profile-hint {
+      margin-top: 8px;
+    }
+
+    .tc-link-btn {
+      margin: -4px 0 12px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: rgba(255, 255, 255, .7);
+      font: inherit;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .tc-link-btn[hidden],
+    .tc-profile-delete-btn[hidden] {
+      display: none;
+    }
+
+    .tc-link-btn:hover {
+      color: #fff;
+    }
+
+    .tc-profile-delete-btn {
+      display: block;
+      width: 100%;
+      min-height: 46px;
+      margin-top: 10px;
+      padding: 0 22px;
+      border: 1px solid #ef5350;
+      border-radius: 50px;
+      background: #c62828;
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+
+    .tc-profile-delete-btn:hover {
+      background: #e53935;
+      transform: scale(1.02);
+    }
+
+    .tc-pin-input {
+      text-align: center;
+      font-size: 22px !important;
+      letter-spacing: .5em;
+    }
+
+    .tc-pin-error {
+      min-height: 16px;
+      margin: 8px 0 0;
+      color: #ef5350;
+      font-size: 12px;
+    }
+
+    #tc-pin-overlay {
+      z-index: 5020;
+    }
+
+    /* Perfil infantil: solo la sección Niños, sin administración de perfiles ni ajustes */
+    body.kid-mode [data-adult-only],
+    body.kid-mode .tc-profile-edit-btn,
+    body.kid-mode .tc-profile-add-card,
+    body.kid-mode #details-similar-container,
+    body.kids-view #details-similar-container {
+      display: none !important;
+    }

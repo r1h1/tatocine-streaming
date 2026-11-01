@@ -1,0 +1,407 @@
+/**
+ * TatoCine · css/18-lists-skeletons.css
+ * Tarjetas verticales de listas, esqueletos de carga y ajustes de rendimiento (sin animaciones pesadas).
+ */
+
+/* ---------- Listas de favoritos como tarjetas verticales ---------- */
+.fav-lists {
+  margin-bottom: 26px;
+}
+
+.list-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  padding: 4px 2px 10px;
+}
+
+.list-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #151515;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s;
+}
+
+/* Mismo hover que el selector de perfiles: sutil, sin borde blanco ni zoom */
+.list-card:hover,
+.list-card:focus-visible,
+.list-card.active {
+  border-color: rgba(255, 255, 255, .26);
+  background: #1b1b1b;
+}
+
+.list-card:hover .list-cover,
+.list-card.active .list-cover {
+  opacity: 1;
+}
+
+.list-cover {
+  position: absolute;
+  inset: 0;
+  background-color: #1b1b1b;
+  background-size: cover;
+  background-position: center;
+  opacity: .9;
+}
+
+.list-card:not(.has-cover) .list-cover {
+  background-image: linear-gradient(160deg, #262626, #0e0e0e);
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+.list-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .1) 62%);
+}
+
+.list-info {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+}
+
+.list-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
+}
+
+.list-count {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, .72);
+  font-size: 12px;
+}
+
+.list-edit {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, .6);
+}
+
+.list-qty {
+  color: rgba(255, 255, 255, .72);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .list-cards {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .list-name {
+    font-size: 14px;
+  }
+}
+
+/* ---------- Esqueletos ---------- */
+@keyframes skelPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .55;
+  }
+}
+
+/* Los esqueletos antiguos usaban un brillo animado (más costoso): ahora es un pulso de opacidad */
+@keyframes shimmer {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .6;
+  }
+}
+
+.skel {
+  display: block;
+  border-radius: 8px;
+  background: #1a1a1a;
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+.skel-title {
+  width: 160px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.skel-line {
+  height: 12px;
+  margin: 6px 0;
+}
+
+.skel-line.short {
+  width: 55%;
+}
+
+.skel-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.ep-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ep-skel {
+  cursor: default;
+  pointer-events: none;
+}
+
+.ep-skel .ep-thumb {
+  background: #1a1a1a;
+}
+
+.wiz-skel {
+  pointer-events: none;
+}
+
+.feed-skeleton {
+  margin-top: 8px;
+}
+
+/* Portada mientras llega el primer título */
+.hero.hero-loading .hero-title,
+.hero.hero-loading .hero-year,
+.hero.hero-loading .hero-desc {
+  color: transparent;
+  text-shadow: none;
+  background: #1a1a1a;
+  border-radius: 8px;
+  width: fit-content;
+  max-width: 100%;
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+.hero.hero-loading .hero-meta {
+  visibility: hidden;
+}
+
+/* Ficha del actor mientras carga */
+#actor-modal.is-loading .actor-name,
+#actor-modal.is-loading .actor-meta,
+#actor-modal.is-loading .actor-bio {
+  color: transparent;
+  background: #1a1a1a;
+  border-radius: 8px;
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+/* ---------- Rendimiento: sin zoom de imágenes ni transiciones largas ---------- */
+.card img,
+.card:hover img,
+.row-scroll .card:hover img {
+  transform: none;
+}
+
+.card {
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.hero-btn,
+.nav-item,
+.genre-chip {
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body.lite *,
+body.lite *::before,
+body.lite *::after {
+  animation: none !important;
+}
+
+/* ---------- Selector de perfiles: el hover es idéntico al perfil actual (sin borde blanco ni zoom) ---------- */
+.tc-profile-card:hover {
+  transform: none;
+  border-color: rgba(255, 255, 255, .26);
+  background: rgba(255, 255, 255, .035);
+  box-shadow: none;
+}
+
+.tc-profile-card:hover .tc-profile-card-avatar {
+  border-color: transparent;
+  transform: none;
+  background: #363636;
+}
+
+.tc-profile-card.active:hover .tc-profile-card-avatar {
+  border-color: #fff;
+}
+
+/* ---------- Selector de perfiles: 3 por fila (doble fila con 6) y sin botón de cerrar si es obligatorio elegir ---------- */
+.tc-profile-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  justify-items: stretch;
+  gap: 12px;
+}
+
+.tc-profile-overlay.startup .tc-profile-close {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .tc-profile-card-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+}
+
+/* ---------- Botones de los modales con icono (mismo trazo en toda la app) ---------- */
+.tc-profile-cancel-btn,
+.tc-profile-create-dialog .tc-profile-create-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tc-profile-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wiz-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wiz-btn.icon-only {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* ---------- Estadísticas y Ajustes en pantallas grandes: contenido centrado y en cuadrícula ---------- */
+.stat-top-item img {
+  background: #1a1a1a;
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+.stat-top-item img.loaded {
+  animation: none;
+}
+
+@media (min-width: 1024px) {
+
+  #settings-modal .modal-body {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    padding: 24px 32px 40px !important;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-content: start;
+  }
+
+  #settings-modal .settings-option {
+    margin: 0;
+    padding: 16px 18px;
+    min-height: 76px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .04);
+  }
+
+  #stats-modal .modal-body {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    padding: 0 !important;
+  }
+
+  .stats-wrap {
+    padding: 24px 32px 40px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stat-tile {
+    padding: 14px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .stats-card {
+    min-width: 0;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .035);
+  }
+
+  .stats-card .stats-title {
+    margin-top: 0;
+  }
+
+  .stats-cat {
+    grid-column: span 5;
+  }
+
+  .stats-top3 {
+    grid-column: span 7;
+  }
+
+  .stats-genres {
+    grid-column: span 4;
+  }
+
+  .stats-rank {
+    grid-column: span 12;
+  }
+
+  .stats-genres+.stats-rank {
+    grid-column: span 8;
+  }
+}

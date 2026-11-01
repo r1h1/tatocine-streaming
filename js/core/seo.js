@@ -1,0 +1,122 @@
+/**
+ * TatoCine · js/core/seo.js
+ * SEO dinámico: metaetiquetas, datos estructurados y título por pantalla.
+ * Script clásico (sin módulos): comparte el ámbito global con el resto de js/ para que los
+ * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
+ */
+    function setMetaByName(name, content) {
+      var el = document.querySelector('meta[name="' + name + '"]');
+      if (el) el.setAttribute("content", content);
+    }
+    function setMetaByProperty(property, content) {
+      var el = document.querySelector('meta[property="' + property + '"]');
+      if (el) el.setAttribute("content", content);
+    }
+    function updatePageSEO(title, description, type, data) {
+      document.title = title + " — TatoCine";
+      var shortDesc = String(
+        description || "Explora películas, series y anime en TatoCine.",
+      )
+        .replace(/\s+/g, " ")
+        .slice(0, 160);
+      setMetaByName("description", shortDesc);
+      setMetaByProperty("og:title", title + " — TatoCine");
+      setMetaByProperty("og:description", shortDesc);
+      setMetaByProperty(
+        "og:type",
+        type === "tv" ? "video.tv_show" : "video.movie",
+      );
+      setMetaByName("twitter:title", title + " — TatoCine");
+      setMetaByName("twitter:description", shortDesc);
+      var canonical = $("canonical-link");
+      var pageUrl =
+        location.origin +
+        location.pathname +
+        (data && data.id ? "?id=" + data.id + "&type=" + type : "");
+      if (canonical) canonical.href = pageUrl;
+      var ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl) ogUrl.setAttribute("content", pageUrl);
+      var schema = $("media-structured-data");
+      if (!schema) {
+        schema = document.createElement("script");
+        schema.type = "application/ld+json";
+        schema.id = "media-structured-data";
+        document.head.appendChild(schema);
+      }
+      var date = data && (data.release_date || data.first_air_date);
+      var payload = {
+        "@context": "https://schema.org",
+        "@type": type === "tv" ? "TVSeries" : "Movie",
+        name: title,
+        description: shortDesc,
+        inLanguage: "es",
+      };
+      if (date) payload.datePublished = date;
+      if (data && data.vote_average > 0 && Number(data.vote_count) > 0)
+        payload.aggregateRating = {
+          "@type": "AggregateRating",
+          ratingValue: Number(data.vote_average).toFixed(1),
+          bestRating: "10",
+          worstRating: "0",
+          ratingCount: Number(data.vote_count),
+        };
+      if (data && data.genres && data.genres.length)
+        payload.genre = data.genres.map(function (g) {
+          return g.name;
+        });
+      schema.textContent = JSON.stringify(payload);
+    }
+    function resetPageSEO() {
+      document.title = "TatoCine | Películas, series y anime";
+      setMetaByName(
+        "description",
+        "Explora películas, series y anime en TatoCine. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.",
+      );
+      setMetaByProperty("og:title", "TatoCine | Películas, series y anime");
+      setMetaByProperty(
+        "og:description",
+        "Explora películas, series y anime. Descubre títulos populares y recomendaciones personalizadas.",
+      );
+      setMetaByProperty("og:type", "website");
+      setMetaByName("twitter:title", "TatoCine | Películas, series y anime");
+      setMetaByName(
+        "twitter:description",
+        "Explora películas, series y anime en TatoCine.",
+      );
+      var canonical = $("canonical-link");
+      if (canonical) canonical.href = location.origin + location.pathname;
+      var ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl)
+        ogUrl.setAttribute("content", location.origin + location.pathname);
+      var schema = $("media-structured-data");
+      if (schema && schema.parentNode) schema.parentNode.removeChild(schema);
+    }
+
+    // ---- SEO: datos estructurados del sitio (buscador interno) ----
+    (function injectStructuredData() {
+      try {
+        if (location.protocol.indexOf("http") !== 0) return;
+        var base = location.origin + location.pathname;
+        var tag = document.createElement("script");
+        tag.type = "application/ld+json";
+        tag.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "TatoCine",
+          url: base,
+          inLanguage: "es",
+          description: "Explora películas, series y anime. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: base + "?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        });
+        document.head.appendChild(tag);
+      } catch (e) { }
+    })();
+
+    // ==========================================================
+    // V4 · Analítica de visualización, listas de favoritos, estadísticas,
+    //      estudios/plataformas, búsquedas recientes, navegación TV,
+    //      PWA y almacenamiento local optimizado.

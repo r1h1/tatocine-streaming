@@ -1,0 +1,354 @@
+/**
+ * TatoCine · css/09-carousels-share.css
+ * Carruseles, tráiler en capa y hoja de compartir.
+ * El orden numérico es el orden de la cascada: los archivos posteriores refinan a los anteriores.
+ */
+    /* Carruseles: flechas compactas, alineadas con los extremos del contenido. */
+    .row {
+      position: relative;
+      overflow: visible;
+      content-visibility: visible;
+      contain: none;
+    }
+
+    .row-scroll {
+      position: relative;
+      z-index: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-left: 26px;
+      margin-right: 26px;
+    }
+
+    .row-nav {
+      position: absolute;
+      top: calc(50% + 10px);
+      z-index: 30;
+      display: flex;
+      pointer-events: auto;
+      width: 38px;
+      height: 38px;
+      font-size: 20px;
+      border: 1.5px solid #333;
+      background: rgba(17, 17, 17, 0.96);
+      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.48);
+      transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+
+    .row-nav.prev {
+      left: 0;
+      transform: translate(-50%, -50%);
+    }
+
+    .row-nav.next {
+      right: 0;
+      transform: translate(50%, -50%);
+    }
+
+    .row-nav:hover {
+      background: #242424;
+      color: #fff;
+      border-color: #333;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .row-nav.prev:hover {
+      transform: translate(-50%, -50%) scale(1.04);
+    }
+
+    .row-nav.next:hover {
+      transform: translate(50%, -50%) scale(1.04);
+    }
+
+    /* Hover discreto en las tarjetas de todos los carruseles: sin marco blanco. */
+    .row-scroll .card:hover {
+      transform: scale(1.02);
+      border-color: transparent;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.38);
+      z-index: 4;
+    }
+
+    .row-scroll .card:hover img {
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+      .row-scroll {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .row-nav {
+        display: none;
+      }
+    }
+
+    @media (hover: none) {
+      .row-scroll .card:hover {
+        transform: none;
+        border-color: transparent;
+        box-shadow: none;
+      }
+
+      .row-scroll .card:hover img {
+        transform: none;
+      }
+    }
+
+    /* El tráiler se convierte en una capa del tamaño completo del modal de detalles. */
+    #details-modal .details-content {
+      position: relative;
+      isolation: isolate;
+    }
+
+    #details-modal .details-trailer {
+      display: none;
+    }
+
+    #details-modal .details-trailer.active {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 9000;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      min-height: 0;
+      aspect-ratio: auto;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #details-modal .details-trailer.active iframe {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      border: 0;
+      background: #000;
+    }
+
+    .details-trailer-close {
+      position: absolute;
+      top: 20px;
+      right: 76px;
+      z-index: 5;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      font: 600 20px var(--font);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .details-trailer-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .details-trailer-external {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 15px;
+      border-radius: 22px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(10px);
+    }
+
+    .details-trailer-external:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    @media (max-width: 768px) {
+      .details-trailer-close {
+        top: 12px;
+        right: 64px;
+        width: 40px;
+        height: 40px;
+      }
+
+      .details-trailer-external {
+        right: 12px;
+        bottom: 12px;
+        padding: 9px 12px;
+        font-size: 12px;
+      }
+    }
+
+    /* Hoja de compartir: respaldo visible cuando Web Share no está disponible */
+    .tato-share-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 12000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .tato-share-dialog {
+      position: relative;
+      width: min(100%, 480px);
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #191919, #090909);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+      color: #fff;
+    }
+
+    .tato-share-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font: 24px/1 var(--font);
+      cursor: pointer;
+    }
+
+    .tato-share-kicker {
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, .55);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+    }
+
+    .tato-share-title {
+      max-width: calc(100% - 30px);
+      margin-bottom: 8px;
+      font-size: 24px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .tato-share-description {
+      margin-bottom: 24px;
+      color: rgba(255, 255, 255, .68);
+      font-size: 14px;
+    }
+
+    .tato-share-label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, .58);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+    }
+
+    .tato-share-link-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tato-share-input {
+      min-width: 0;
+      flex: 1;
+      height: 46px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255, 255, 255, .07);
+      color: #fff;
+      font: 12px var(--font);
+    }
+
+    .tato-share-copy {
+      min-width: 88px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 10px;
+      background: #fff;
+      color: #000;
+      font: 700 13px var(--font);
+      cursor: pointer;
+    }
+
+    .tato-share-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .tato-share-option {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .07);
+      color: #fff;
+      font: 600 12px var(--font);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .tato-share-option:hover {
+      background: rgba(255, 255, 255, .15);
+    }
+
+    .tato-share-feedback {
+      min-height: 18px;
+      margin-top: 14px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 12px;
+    }
+
+    @media (max-width: 520px) {
+      .tato-share-dialog {
+        padding: 26px 18px 20px;
+        border-radius: 18px;
+      }
+
+      .tato-share-title {
+        font-size: 21px;
+      }
+
+      .tato-share-link-row {
+        flex-direction: column;
+      }
+
+      .tato-share-copy {
+        min-height: 44px;
+      }
+    }

@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
+  <title>TatoCine | Películas, series y anime</title>
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TatoCine" />
+  <meta name="description"
+    content="Explora películas, series y anime en TatoCine. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="color-scheme" content="dark" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TatoCine" />
+  <meta property="og:locale" content="es_LA" />
+  <meta name="application-name" content="TatoCine" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta property="og:url" id="og-url" content="" />
+  <meta property="og:title" content="TatoCine | Películas, series y anime" />
+  <meta property="og:description"
+    content="Explora películas, series y anime. Descubre títulos populares y recomendaciones personalizadas." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="TatoCine | Películas, series y anime" />
+  <meta name="twitter:description" content="Explora películas, series y anime en TatoCine." />
+  <link rel="canonical" id="canonical-link" />
+  <link rel="manifest" id="manifest-link" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+  <link rel="preconnect" href="https://api.themoviedb.org" crossorigin />
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
+  <link rel="preconnect" href="https://www.youtube.com" crossorigin />
+  <link rel="dns-prefetch" href="https://image.tmdb.org" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFFFFF'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23000000'/%3E%3C/svg%3E" />
+  <script type="application/ld+json" id="site-structured-data">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TatoCine",
+        "description": "Catálogo digital de películas, series y anime con búsqueda y recomendaciones personalizadas en el navegador.",
+        "inLanguage": "es"
+      }
+    </script>
+  <link rel="stylesheet" href="assets/app.da4cf0cf39.css" />
+</head>
+
+<body>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="close-btn" onclick="toggleMenu()">✕</button>
+    <button class="nav-item active" data-view="home" data-adult-only onclick="
+          switchView('home');
+          toggleMenu();
+        ">
+      Inicio
+    </button>
+    <button class="nav-item" data-view="movies" data-adult-only onclick="
+          switchView('movies');
+          toggleMenu();
+        ">
+      Películas
+    </button>
+    <button class="nav-item" data-view="anime" data-adult-only onclick="
+          switchView('anime');
+          toggleMenu();
+        ">
+      Anime
+    </button>
+    <button class="nav-item" data-view="series" data-adult-only onclick="
+          switchView('series');
+          toggleMenu();
+        ">
+      Series
+    </button>
+    <button class="nav-item" data-view="kids" onclick="
+          switchView('kids');
+          toggleMenu();
+        ">
+      Niños
+    </button>
+    <button class="nav-item" data-view="list" data-adult-only onclick="
+          switchView('list');
+          toggleMenu();
+        ">
+      Favoritos
+    </button>
+    <button class="nav-item" onclick="
+          showDisclaimer();
+          toggleMenu();
+        ">
+      Aviso Legal
+    </button>
+  </div>
+
+  <header class="top-nav" id="top-bar">
+    <div style="display: flex; align-items: center">
+      <button class="hamburger-btn" onclick="toggleMenu()">☰</button>
+      <span class="nav-brand">TatoCine</span>
+      <div class="nav-links">
+        <button class="nav-item active" data-view="home" data-adult-only onclick="switchView('home')">
+          Inicio
+        </button>
+        <button class="nav-item" data-view="movies" data-adult-only onclick="switchView('movies')">
+          Películas
+        </button>
+        <button class="nav-item" data-view="anime" data-adult-only onclick="switchView('anime')">
+          Anime
+        </button>
+        <button class="nav-item" data-view="series" data-adult-only onclick="switchView('series')">
+          Series
+        </button>
+        <button class="nav-item" data-view="kids" onclick="switchView('kids')">
+          Niños
+        </button>
+        <button class="nav-item" data-view="list" data-adult-only onclick="switchView('list')">
+          Favoritos
+        </button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="tc-fs-btn tc-install-btn" id="app-install-btn" type="button" onclick="installApp()" hidden
+        title="Instalar aplicación" aria-label="Instalar aplicación">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        </svg>
+      </button>
+      <button class="tc-fs-btn" id="app-fullscreen-btn" type="button" onclick="toggleAppFullscreen()" hidden
+        title="Pantalla completa" aria-label="Pantalla completa" aria-pressed="false">
+        <svg class="fs-icon-enter" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" />
+        </svg>
+        <svg class="fs-icon-exit" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" />
+        </svg>
+      </button>
+      <button class="tc-fs-btn tc-settings-btn" id="app-settings-btn" type="button" data-adult-only onclick="showSettings()"
+        title="Ajustes" aria-label="Ajustes">
+        <svg width="18" height="18" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0l.06.06a2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+      </button>
+      <span class="streak-pill" id="streak-pill" hidden role="status">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+        </svg>
+        <span id="streak-count">0</span>
+      </span>
+      <button class="tc-profile-trigger" type="button" onclick="showProfiles()" title="Cambiar perfil local">
+        <span class="tc-profile-trigger-avatar" id="profile-button-avatar">U</span>
+        <span class="tc-profile-trigger-name" id="profile-button-name">Yo</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <header class="hero" id="hero-section">
+      <div class="hero-video-wrap" id="hero-video-wrap"></div>
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-empty-state" id="hero-empty-state" aria-hidden="true">
+        <svg viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="190" cy="178" r="112" stroke="rgba(255,255,255,.72)" stroke-width="15" />
+          <path d="M270 258L365 353" stroke="rgba(255,255,255,.72)" stroke-width="20" stroke-linecap="round" />
+          <path d="M145 157C157 139 178 128 200 130" stroke="rgba(255,255,255,.35)" stroke-width="9"
+            stroke-linecap="round" />
+          <circle cx="235" cy="205" r="8" fill="rgba(255,255,255,.65)" />
+          <path
+            d="M184 184C184 170 195 159 210 159C225 159 236 170 236 184C236 194 231 200 221 207C213 213 210 219 210 228"
+            stroke="rgba(255,255,255,.8)" stroke-width="11" stroke-linecap="round" />
+          <circle cx="210" cy="255" r="6" fill="rgba(255,255,255,.8)" />
+          <path d="M74 314L92 296M320 94L338 76M76 104L91 119" stroke="rgba(255,255,255,.22)" stroke-width="8"
+            stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="hero-gradient"></div>
+      <div class="hero-content" id="hero-content">
+        <button type="button" class="back-home-btn" id="back-home-btn" onclick="switchView('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Regresar a inicio
+        </button>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="search" class="search-input-large" placeholder="Buscar películas, series, anime..."
+            id="search-input" autocomplete="off" />
+        </div>
+        <h1 class="hero-title" id="hero-title">Cargando...</h1>
+        <div class="hero-year" id="hero-year">2024</div>
+        <div class="hero-meta" id="hero-meta"></div>
+        <p class="hero-desc" id="hero-desc">Cargando descripción...</p>
+        <div class="hero-actions" id="hero-actions">
+          <button class="hero-btn" id="hero-play-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Ver
+          </button>
+          <button class="hero-btn secondary" id="hero-details-btn" onclick="openHeroDetails()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            Info
+          </button>
+          <button type="button" class="hero-btn secondary hero-wizard-btn" id="hero-wizard-btn"
+            onclick="openWizard()" title="¿Qué ver hoy?" aria-label="¿Qué ver hoy?">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" />
+              <circle cx="15.5" cy="8.5" r="1.3" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" />
+              <circle cx="8.5" cy="15.5" r="1.3" fill="currentColor" />
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" />
+            </svg>
+            <span class="hero-wizard-label">¿Qué ver hoy?</span>
+          </button>
+          <button type="button" class="hero-btn secondary hero-save-btn" id="hero-save-btn"
+            onclick="toggleHeroSave(event)" title="Agregar a favoritos" aria-label="Agregar a favoritos"
+            aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div id="genre-filters-container"></div>
+    <div class="rows-container" id="rows-container"></div>
+    <div id="load-more-container"></div>
+    <div id="sentinel" style="height: 1px; width: 100%"></div>
+  </main>
+
+  <!-- MODAL REPRODUCTOR -->
+  <div class="modal" id="player-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Reproduciendo...</h2>
+        <div class="player-head-actions">
+          <button class="player-fullscreen-btn" id="player-fullscreen-btn" onclick="togglePlayerFullscreen()"
+            aria-label="Pantalla completa" title="Pantalla completa">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+            <span class="fullscreen-label">Pantalla completa</span>
+          </button>
+          <button class="modal-close" onclick="closePlayer()" aria-label="Cerrar reproductor">
+            ✕
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="tv-controls" id="tv-controls">
+          <select id="season-select" class="tv-select"></select>
+          <select id="episode-select" class="tv-select"></select>
+          <button type="button" id="auto-next-toggle" class="auto-next-toggle on" onclick="toggleAutoNextEpisode()"
+            title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Siguiente: ACTIVADO</button>
+        </div>
+        <div class="server-switcher" id="server-switcher"></div>
+        <div class="player-container" id="player-view"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLES -->
+  <div class="modal" id="details-modal">
+    <div class="details-content">
+      <button class="details-close" onclick="closeDetails()">✕</button>
+      <div class="details-backdrop" id="details-backdrop"></div>
+      <div class="details-body" id="details-body">
+        <div id="details-skeleton">
+          <div class="sk-title"></div>
+          <div class="sk-meta">
+            <div class="sk-badge"></div>
+            <div class="sk-badge"></div>
+            <div class="sk-badge"></div>
+          </div>
+          <div class="sk-genres">
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+          </div>
+          <div class="sk-overview">
+            <div class="sk-line"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line" style="width: 60%"></div>
+          </div>
+          <div class="sk-actions">
+            <div class="sk-btn"></div>
+            <div class="sk-btn"></div>
+          </div>
+          <div class="sk-cast">
+            <div class="sk-cast-item"></div>
+            <div class="sk-cast-item"></div>
+            <div class="sk-cast-item"></div>
+            <div class="sk-cast-item"></div>
+          </div>
+        </div>
+        <div id="details-real-content" style="display: none">
+          <h2 class="details-title" id="details-title"></h2>
+          <div class="details-meta" id="details-meta"></div>
+          <div class="details-genres" id="details-genres"></div>
+          <p class="details-overview" id="details-overview"></p>
+          <p class="details-credits" id="details-credits" hidden></p>
+          <div class="details-actions">
+            <button class="hero-btn" id="details-play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              Ver
+            </button>
+            <button class="hero-btn secondary" id="details-trailer-btn" style="display: none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+              </svg>
+              <span>Ver Tráiler</span>
+            </button>
+            <button type="button" class="hero-btn secondary" id="details-share-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              Compartir
+            </button>
+            <button type="button" class="hero-btn secondary hero-save-btn" id="details-fav-btn" aria-pressed="false"
+              title="Agregar a favoritos" aria-label="Agregar a favoritos" onclick="toggleDetailsFav()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span class="details-fav-label">Favoritos</span>
+            </button>
+          </div>
+          <div class="details-trailer" id="details-trailer"></div>
+          <div class="details-user-actions" id="details-user-actions"></div>
+          <div class="details-episodes" id="details-episodes" hidden></div>
+          <div id="details-cast-container">
+            <div class="details-cast-title">Reparto</div>
+            <div class="cast-wrapper">
+              <button class="cast-nav prev" onclick="scrollCast(this, -1)" aria-label="Anterior">
+                ‹
+              </button>
+              <button class="cast-nav next" onclick="scrollCast(this, 1)" aria-label="Siguiente">
+                ›
+              </button>
+              <div class="details-cast" id="details-cast"></div>
+            </div>
+          </div>
+          <div id="details-similar-container" style="display: none; margin-top: 24px">
+            <div class="details-cast-title">Recomendados para ti</div>
+            <div class="cast-wrapper">
+              <button class="cast-nav prev" onclick="scrollSimilar(this, -1)" aria-label="Anterior">
+                ‹
+              </button>
+              <button class="cast-nav next" onclick="scrollSimilar(this, 1)" aria-label="Siguiente">
+                ›
+              </button>
+              <div class="details-cast" id="details-similar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ACTOR -->
+  <div class="modal" id="actor-modal">
+    <div class="actor-content">
+      <button class="modal-close" onclick="closeActor()">✕</button>
+      <div class="actor-header">
+        <img class="actor-photo" id="actor-photo" src="" alt="" />
+        <div class="actor-info">
+          <div class="actor-name" id="actor-name">Cargando...</div>
+          <div class="actor-meta" id="actor-meta"></div>
+        </div>
+      </div>
+      <div class="actor-bio" id="actor-bio"></div>
+    </div>
+  </div>
+
+  <!-- MODAL AJUSTES -->
+  <div class="modal" id="settings-modal">
+    <div class="settings-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Ajustes</h2>
+        <button class="modal-close" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 0">
+        <div class="settings-option">
+          <div>
+            <div class="label">Continuar Viendo</div>
+            <div class="sub-label">Borrar historial de reproducción</div>
+          </div>
+          <button class="danger-btn" onclick="clearContinueWatching()">
+            Borrar
+          </button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Favoritos</div>
+            <div class="sub-label">Eliminar todos los favoritos</div>
+          </div>
+          <button class="danger-btn" onclick="clearFavorites()">
+            Borrar
+          </button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Servidor Preferido</div>
+            <div class="sub-label" id="preferred-server-label">Ninguno</div>
+          </div>
+          <button class="danger-btn" onclick="resetPreferredServer()">
+            Resetear
+          </button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Recomendaciones personalizadas</div>
+            <div class="sub-label" id="local-analytics-summary">
+              Tus preferencias se calculan localmente en este navegador. No se
+              envían a TatoCine.
+            </div>
+          </div>
+          <button class="danger-btn" onclick="clearLocalAnalytics()">
+            Borrar preferencias
+          </button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Modo ligero</div>
+            <div class="sub-label" id="lite-summary">Automático</div>
+          </div>
+          <button class="danger-btn" onclick="cycleLiteMode()">Cambiar</button>
+        </div>
+        <div class="settings-option" id="install-option" hidden>
+          <div>
+            <div class="label">Instalar aplicación</div>
+            <div class="sub-label" id="install-sub">Añade TatoCine a tu pantalla de inicio.</div>
+          </div>
+          <button class="danger-btn" onclick="installApp()">Instalar</button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Almacenamiento</div>
+            <div class="sub-label" id="storage-summary">Calculando…</div>
+          </div>
+          <button class="danger-btn" onclick="freeStorage()">Liberar espacio</button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Copia de seguridad</div>
+            <div class="sub-label">Guarda o recupera favoritos, listas, vistas e historial de este perfil (sin el PIN).</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" onclick="exportProfileData()">Exportar</button>
+            <button class="danger-btn" onclick="document.getElementById('backup-file').click()">Importar</button>
+            <input type="file" id="backup-file" accept="application/json,.json" hidden />
+          </div>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Atajos de Teclado</div>
+            <div class="sub-label">/ buscar · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selector local de perfiles, integrado visualmente con TatoCine -->
+  <div class="tc-profile-overlay" id="tc-profile-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-profile-title" onclick="if(event.target===this)closeProfiles()">
+    <div class="tc-profile-backdrop" id="tc-profile-backdrop" aria-hidden="true">
+      <div class="tc-profile-backdrop-layer visible"></div>
+      <div class="tc-profile-backdrop-layer"></div>
+    </div>
+    <section class="tc-profile-panel">
+      <div class="tc-profile-brand" aria-label="TatoCine">TatoCine</div>
+      <div class="tc-profile-heading">
+        <div>
+          <h2 id="tc-profile-title">¿Quién está viendo?</h2>
+          <p class="tc-profile-note" id="tc-profile-count">Elige un perfil para continuar</p>
+        </div>
+        <button class="tc-profile-close" type="button" onclick="closeProfiles()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="tc-profile-grid" id="tc-profile-grid"></div>
+    </section>
+  </div>
+
+  <!-- Modal independiente para crear perfiles locales -->
+  <div class="tc-profile-create-overlay" id="tc-profile-create-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-profile-create-title" onclick="if(event.target===this)closeProfileCreateModal()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closeProfileCreateModal()"
+        aria-label="Cerrar">×</button>
+      <h3 id="tc-profile-create-title">Agregar perfil</h3>
+      <p class="tc-profile-create-subtitle" id="tc-profile-create-subtitle" hidden></p>
+      <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre del perfil</label>
+      <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
+        placeholder="Escribe un nombre" autocomplete="off" onkeydown="if(event.key==='Enter')saveProfileFromModal()">
+      <label class="tc-profile-create-label tc-profile-create-label-gap">¿Para quién es este perfil?</label>
+      <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo de perfil">
+        <button type="button" class="tc-kind-btn active" data-kind="adult" role="radio" aria-checked="true"
+          onclick="setProfileFormKind('adult')">Adulto</button>
+        <button type="button" class="tc-kind-btn" data-kind="kid" role="radio" aria-checked="false"
+          onclick="setProfileFormKind('kid')">Niño</button>
+      </div>
+      <p class="tc-profile-hint" id="tc-kind-help" hidden></p>
+      <label class="tc-profile-create-label">Idioma / Language</label>
+      <div class="tc-profile-kind" role="radiogroup" aria-label="Idioma / Language">
+        <button type="button" class="tc-lang-btn active" data-lang="es" role="radio" aria-checked="true"
+          onclick="setProfileFormLang('es')" data-i18n="skip">ESP · Español</button>
+        <button type="button" class="tc-lang-btn" data-lang="en" role="radio" aria-checked="false"
+          onclick="setProfileFormLang('en')" data-i18n="skip">ENG · English</button>
+      </div>
+      <label class="tc-profile-create-label" for="tc-new-profile-pin">PIN de acceso (opcional)</label>
+      <input class="tc-profile-input" id="tc-new-profile-pin" type="password" inputmode="numeric" pattern="[0-9]*"
+        maxlength="4" autocomplete="off" placeholder="4 dígitos">
+            <button type="button" class="tc-link-btn" id="tc-remove-pin-btn" onclick="markPinForRemoval()" hidden>Quitar PIN</button>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" onclick="closeProfileCreateModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
+        <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
+          onclick="saveProfileFromModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
+      </div>
+      <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
+        onclick="deleteProfileFromModal()" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+    </section>
+  </div>
+
+  <!-- Cómo instalar la aplicación (cuando el navegador no ofrece instalación directa) -->
+  <div class="tc-profile-create-overlay" id="tc-install-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-install-title" aria-hidden="true" onclick="if(event.target===this)closeInstallHelp()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closeInstallHelp()" aria-label="Cerrar">×</button>
+      <h3 id="tc-install-title">Instalar TatoCine</h3>
+      <p class="tc-profile-create-subtitle" id="tc-install-sub"></p>
+      <ol class="tc-install-steps" id="tc-install-steps"></ol>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-create-btn" type="button" onclick="closeInstallHelp()">Entendido</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Asistente «¿Qué ver hoy?» -->
+  <div class="tc-profile-create-overlay" id="tc-wizard-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-wizard-title" aria-hidden="true">
+    <section class="tc-profile-create-dialog tc-wizard">
+      <button class="tc-profile-create-close" type="button" data-wiz="close" aria-label="Cerrar">×</button>
+      <h3 id="tc-wizard-title">¿Qué ver hoy?</h3>
+      <div id="tc-wizard-body"></div>
+    </section>
+  </div>
+
+  <!-- Descanso obligatorio de los perfiles Niño -->
+  <div class="tc-kid-lock" id="tc-kid-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-kid-lock-title">
+    <section class="tc-profile-create-dialog tc-kid-lock-card">
+      <h3 id="tc-kid-lock-title">Hora de descansar</h3>
+      <p class="tc-profile-create-subtitle">Se alcanzó el límite de 8 horas de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.</p>
+      <div class="tc-kid-lock-time" id="tc-kid-lock-time" aria-live="polite">60:00</div>
+      <button class="tc-profile-create-btn" type="button" onclick="showProfiles()">Cambiar de perfil</button>
+    </section>
+  </div>
+
+  <!-- Guardar en favoritos: General o una lista -->
+  <div class="tc-profile-create-overlay" id="tc-fav-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-fav-title" aria-hidden="true" onclick="if(event.target===this)closeFavPicker()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closeFavPicker()" aria-label="Cerrar">×</button>
+      <h3 id="tc-fav-title">Guardar en favoritos</h3>
+      <p class="tc-profile-create-subtitle" id="tc-fav-subtitle"></p>
+      <div class="tc-fav-options" id="tc-fav-options"></div>
+      <div class="tc-fav-new" id="tc-fav-new" hidden>
+        <input class="tc-profile-input" id="tc-fav-new-name" type="text" maxlength="24" placeholder="Nombre de la lista"
+          autocomplete="off" onkeydown="if(event.key==='Enter')submitFavNew()">
+        <button class="tc-profile-create-btn" type="button" onclick="submitFavNew()">Crear</button>
+      </div>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" onclick="closeFavPicker()">Cancelar</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Crear / editar / borrar lista de favoritos -->
+  <div class="tc-profile-create-overlay" id="tc-list-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-list-title" aria-hidden="true" onclick="if(event.target===this)closeListModal()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closeListModal()" aria-label="Cerrar">×</button>
+      <h3 id="tc-list-title">Nueva lista</h3>
+      <p class="tc-profile-create-subtitle">Agrupa tus favoritos, por ejemplo «Romance» o «Para el fin de semana». Si borras una lista, sus títulos pasan a General.</p>
+      <label class="tc-profile-create-label" for="tc-list-name">Nombre de la lista</label>
+      <input class="tc-profile-input" id="tc-list-name" type="text" maxlength="24" placeholder="Escribe un nombre"
+        autocomplete="off" onkeydown="if(event.key==='Enter')saveListFromModal()">
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" onclick="closeListModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
+        <button class="tc-profile-create-btn" id="tc-list-save-btn" type="button" onclick="saveListFromModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
+      </div>
+      <button class="tc-profile-delete-btn" id="tc-list-delete-btn" type="button" onclick="deleteListFromModal()" title="Eliminar lista" aria-label="Eliminar lista" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+    </section>
+  </div>
+
+  <!-- Estadísticas de visualización -->
+  <div class="modal" id="stats-modal">
+    <div class="settings-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Estadísticas</h2>
+        <button class="modal-close" onclick="closeStats()" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body" id="stats-body" style="padding: 0"></div>
+    </div>
+  </div>
+
+  <!-- Solicitud de PIN para perfiles protegidos -->
+  <div class="tc-profile-create-overlay" id="tc-pin-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="tc-pin-title" aria-hidden="true" onclick="if(event.target===this)closePinModal()">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" onclick="closePinModal()" aria-label="Cerrar">×</button>
+      <h3 id="tc-pin-title">Perfil protegido</h3>
+      <p class="tc-profile-create-subtitle" id="tc-pin-subtitle">Ingresa el PIN para continuar.</p>
+      <label class="tc-profile-create-label" for="tc-pin-input">PIN</label>
+      <input class="tc-profile-input tc-pin-input" id="tc-pin-input" type="password" inputmode="numeric"
+        pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••"
+        onkeydown="if(event.key==='Enter')submitPinModal()">
+      <p class="tc-pin-error" id="tc-pin-error" role="alert"></p>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" onclick="closePinModal()">Cancelar</button>
+        <button class="tc-profile-create-btn" type="button" onclick="submitPinModal()">Entrar</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL FILTROS -->
+  <div class="modal" id="filters-modal">
+    <div class="filters-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Filtros Avanzados</h2>
+        <button class="modal-close" onclick="closeFilters()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 0">
+        <div class="filter-group">
+          <span class="label">Año</span>
+          <div class="filter-options" id="filter-year-options"></div>
+        </div>
+        <div class="filter-group">
+          <span class="label">Rating mínimo</span>
+          <div class="filter-options" id="filter-rating-options"></div>
+        </div>
+        <div class="filter-group">
+          <span class="label">Ordenar por</span>
+          <div class="filter-options" id="filter-sort-options"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DISCLAIMER -->
+  <div class="modal" id="disclaimer-modal">
+    <div class="modal-content" style="
+          max-width: 700px;
+          height: auto;
+          max-height: 90vh;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        ">
+      <div class="modal-header">
+        <h2 class="modal-title">Aviso Legal y Descargo de Responsabilidad</h2>
+        <button class="modal-close" onclick="acceptDisclaimer()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 24px">
+        <p style="
+              font-size: 14px;
+              line-height: 1.7;
+              color: #d1d1d1;
+              margin-bottom: 24px;
+              text-align: justify;
+            ">
+          TatoCine solo es una página de reproducción multimedia que busca en
+          sitios de terceros y externos material audiovisual en base a un API
+          gratuito de TMDB. TatoCine no almacena datos de búsqueda de las
+          personas, no almacena ni aloja ningún tipo de material audiovisual
+          todo se consulta on-demand a través de terceros. No lucra ni busca
+          lucrar. Algunos reproductores pueden tener anuncios de terceros por
+          lo que TatoCine no se hace responsable por material indebido o con
+          derecho de autor porque los anuncios no están en nuestro código
+          fuente.
+          TatoCine es un proyecto totalmente gratuito y de código abierto: se distribuye bajo una licencia
+          gratuita (MIT), sin costo ni suscripciones, y puede usarse, copiarse y modificarse libremente
+          respetando los términos de esa licencia.
+        </p>
+        <button class="hero-btn" style="width: 100%; justify-content: center; padding: 16px"
+          onclick="acceptDisclaimer()">
+          Aceptar y continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <div class="offline-banner" id="offline-banner" style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        color: #000;
+        padding: 10px;
+        text-align: center;
+        font-weight: 600;
+        transform: translateY(100%);
+        transition: 0.3s;
+        z-index: 10000;
+      ">
+    Sin conexión a internet
+  </div>
+
+  <script>
+    (function () {
+      var d = document;
+      if (typeof Promise === "undefined")
+        d.write(
+          '<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.3.0/dist/polyfill.min.js"><\/script>',
+        );
+      if (typeof window.fetch === "undefined")
+        d.write(
+          '<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js"><\/script>',
+        );
+      if (typeof window.URLSearchParams === "undefined")
+        d.write(
+          '<script src="https://cdn.jsdelivr.net/npm/url-search-params-polyfill@8.2.1/index.js"><\/script>',
+        );
+    })();
+  </script>
+
+  <script src="assets/app.aa41482b7a.js"></script>
+</body>
+
+</html>
