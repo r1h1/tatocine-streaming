@@ -104,3 +104,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Roles al importar
 `import-target.js` aplica el control de acceso: mismo tipo de perfil (adulto→adulto, niño→niño), Invitado excluido, PIN del destino, y filtro de aptitud título a título en destinos infantiles. El tipo de origen viaja en el QR (`k`) y en `profile.kind` del JSON.
+
+## Fase 1 · seguridad
+`profiles/pin-strong.js` (PBKDF2 + bloqueo persistente, vía decorate), `core/data-guard.js` (validación al leer, no destructiva), `features/backup-crypto.js` (AES-GCM, probado en Node) y caducidad `e` en el QR (`qr-payload.js`).

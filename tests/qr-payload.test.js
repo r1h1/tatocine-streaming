@@ -3,7 +3,9 @@ const assert = require("node:assert");
 const P = require("../js/features/qr-payload.js");
 const ORIGIN = "https://tcine.example";
 const FAKE_KEY = "0123456789abcdef0123456789abcdef";      // 32 caracteres hexadecimales: lo que parece una clave
-const enc = async (obj, raw) => "TC1." + P.qrB64urlEncode(await P.qrDeflate(raw || JSON.stringify(obj)));
+const nowMin = () => Math.floor(Date.now() / 60000);
+const full = (o) => (o && typeof o === "object" && !Array.isArray(o) && o.v === 2 ? { k: 0, e: nowMin() + 5, c: [], h: [], ...o } : o);
+const enc = async (obj, raw) => "TC1." + P.qrB64urlEncode(await P.qrDeflate(raw || JSON.stringify(full(obj))));
 const link = (payload, origin) => (origin || ORIGIN) + "/#tcimport=" + payload;
 let n = 0;
 const ok = async (name, fn) => { await fn(); n++; console.log("✓", name); };
@@ -26,17 +28,29 @@ const ok = async (name, fn) => { await fn(); n++; console.log("✓", name); };
   await ok("el tipo de perfil viaja en el QR (adulto por defecto) y las versiones antiguas siguen valiendo", async () => {
     const a = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs: [{ type: "movie", id: 5 }], lists: [], seen: [], cont: [], hist: [] });
     assert.strictEqual((await P.qrValidate(a.link, ORIGIN)).data.kind, "adult");
-    assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 603, -1]], l: [], w: [] }), ORIGIN)).data.kind, "adult");
-    for (const o of [{ v: 2, k: 2, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [[0, 1, 999, 0]], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [], h: [[0, 1, -5, 0]] }])
+    assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 603, -1]], l: [], w: [] }), ORIGIN)).ok, false, "el formato 1 ya no se acepta");
+    for (const o of [{ v: 2, k: 2, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, k: undefined, f: [[0, 1, -1]], l: [], w: [], c: [], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [[0, 1, 999, 0]], h: [] }, { v: 2, k: 1, f: [], l: [], w: [], c: [], h: [[0, 1, -5, 0]] }])
       assert.strictEqual((await P.qrValidate(await enc(o), ORIGIN)).ok, false, JSON.stringify(o));
   });
 
+  await ok("el QR caduca a los 10 minutos", async () => {
+    const ex = (e) => enc({ v: 2, f: [[0, 603, -1]], l: [], w: [], e });
+    assert.strictEqual((await P.qrValidate(await ex(nowMin() + 9), ORIGIN)).ok, true);
+    assert.strictEqual((await P.qrValidate(await ex(nowMin() - 2), ORIGIN)).ok, true, "margen por relojes distintos");
+    const old = await P.qrValidate(await ex(nowMin() - 30), ORIGIN);
+    assert.strictEqual(old.ok, false); assert.strictEqual(old.error, "expired");
+    assert.strictEqual((await P.qrValidate(await ex(nowMin() + 5000), ORIGIN)).ok, false, "caducidad imposible");
+    assert.strictEqual((await P.qrValidate(await enc({ v: 2, f: [[0, 603, -1]], l: [], w: [], e: undefined }), ORIGIN)).ok, false, "sin caducidad no vale");
+    const r = await P.qrBuildLink(ORIGIN + "/", { kind: "adult", favs: [{ type: "movie", id: 5 }], lists: [], seen: [], cont: [], hist: [] });
+    assert(r.expiresAt > Date.now() && r.expiresAt <= Date.now() + 11 * 60000);
+  });
+
   await ok("acepta el código TC1 suelto", async () => {
-    assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 603, -1]], l: [], w: [] }), ORIGIN)).ok, true);
+    assert.strictEqual((await P.qrValidate(await enc({ v: 2, f: [[0, 603, -1]], l: [], w: [] }), ORIGIN)).ok, true);
   });
 
   await ok("rechaza QR de otro sitio y esquemas peligrosos", async () => {
-    const p = await enc({ v: 1, f: [[0, 603, -1]], l: [], w: [] });
+    const p = await enc({ v: 2, f: [[0, 603, -1]], l: [], w: [] });
     const bad = [link(p, "https://evil.example"), "javascript:alert(1)", "data:text/html,<script>alert(1)</script>",
       "WIFI:S:x;T:WPA;P:y;;", "tel:123", "https://user:pw@tcine.example/#tcimport=" + p, "hola", ""];
     for (const t of bad) assert.strictEqual((await P.qrValidate(t, ORIGIN)).ok, false, t);
@@ -45,21 +59,21 @@ const ok = async (name, fn) => { await fn(); n++; console.log("✓", name); };
   await ok("rechaza XSS, SQL y CSP en nombres de lista", async () => {
     const bad = ["<script>alert(1)</script>", 'x"onerror=alert(1)', "javascript:alert(1)", "a'; DROP TABLE users;--",
       "1 UNION SELECT pass FROM u", "Mi--lista", "script-src *", "${7*7}", "{{constructor}}", "a`b", "a\\b", "a/b", "a&b", "a=b"];
-    for (const name of bad) assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 1, 0]], l: [name], w: [] }), ORIGIN)).ok, false, name);
+    for (const name of bad) assert.strictEqual((await P.qrValidate(await enc({ v: 2, f: [[0, 1, 0]], l: [name], w: [] }), ORIGIN)).ok, false, name);
   });
 
   await ok("acepta nombres normales con tildes y signos", async () => {
     for (const name of ["Acción", "Para ver con Ana", "Terror (2024)", "¡Comedias!", "Anime 2"])
-      assert.strictEqual((await P.qrValidate(await enc({ v: 1, f: [[0, 1, 0]], l: [name], w: [] }), ORIGIN)).ok, true, name);
+      assert.strictEqual((await P.qrValidate(await enc({ v: 2, f: [[0, 1, 0]], l: [name], w: [] }), ORIGIN)).ok, true, name);
   });
 
   await ok("rechaza claves, enlaces y prototipos dentro de los datos", async () => {
     const raws = [
-      `{"v":1,"f":[],"l":["${FAKE_KEY}"],"w":[]}`,
-      '{"v":1,"f":[],"l":["api_key"],"w":[]}',
-      '{"v":1,"f":[],"l":["x"],"w":[],"u":"https://evil.example"}',
-      '{"v":1,"f":[],"l":["x"],"w":[],"__proto__":{"a":1}}',
-      '{"v":1,"f":[[0,1,-1]],"l":[],"w":[],"extra":1}',
+      `{"v":2,"k":0,"e":${nowMin() + 5},"c":[],"h":[],"f":[],"l":["${FAKE_KEY}"],"w":[]}`,
+      `{"v":2,"k":0,"e":${nowMin() + 5},"c":[],"h":[],"f":[],"l":["api_key"],"w":[]}`,
+      `{"v":2,"k":0,"e":${nowMin() + 5},"c":[],"h":[],"f":[],"l":["x"],"w":[],"u":"https://evil.example"}`,
+      `{"v":2,"k":0,"e":${nowMin() + 5},"c":[],"h":[],"f":[],"l":["x"],"w":[],"__proto__":{"a":1}}`,
+      `{"v":2,"k":0,"e":${nowMin() + 5},"c":[],"h":[],"f":[[0,1,-1]],"l":[],"w":[],"extra":1}`,
     ];
     for (const raw of raws) assert.strictEqual((await P.qrValidate(await enc(null, raw), ORIGIN)).ok, false, raw);
   });

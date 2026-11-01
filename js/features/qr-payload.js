@@ -12,6 +12,7 @@
  *   - Límites de tamaño de texto, de datos descomprimidos (anti «zip bomb») y de cantidad de elementos.
  *   - Esquema estricto: claves permitidas, enteros en rango; sin __proto__/constructor/prototype. Lleva el TIPO de
  *     perfil de origen (adulto/niño): solo se importa entre perfiles del mismo tipo (ver import-target.js).
+ *   - El QR CADUCA a los 10 minutos (`e`): una captura vieja no sirve.
  *   - Los nombres de lista pasan una lista blanca de caracteres (sin < > " ` \ / ; = $ { } &) y se rechazan
  *     patrones de XSS, inyección SQL y CSP (<script, javascript:, on…=, union select, --, script-src…).
  *   - Se rechaza todo lo que parezca una clave (32 hex, api_key, tmdb, bearer, JWT) o un enlace (http, //).
@@ -19,6 +20,7 @@
  */
 var QR_PREFIX = "TC1.", QR_HASH_KEY = "tcimport";
 var QR_MAX_TEXT = 4000, QR_MAX_URL = 2600, QR_MAX_JSON = 60 * 1024;
+var QR_TTL_MIN = 10, QR_SKEW_MIN = 3;       // el QR caduca a los 10 min (con 3 min de margen por relojes distintos)
 var QR_MAX_FAVS = 300, QR_MAX_SEEN = 400, QR_MAX_CONT = 20, QR_MAX_HIST = 120, QR_MAX_LISTS = 12, QR_NAME_MAX = 24;
 
 function qrB64urlEncode(bytes) {
@@ -82,9 +84,10 @@ async function qrBuildLink(origin, parts) {
   var f = (parts.favs || []).filter(function (m) { return m && (m.type === "movie" || m.type === "tv") && qrInt(Number(m.id), 1, 2147483647); })
     .map(function (m) { return [m.type === "tv" ? 1 : 0, Number(m.id), m.list && m.list in idx ? idx[m.list] : -1]; }).slice(0, QR_MAX_FAVS);
   var w = (parts.seen || []).slice(0, QR_MAX_SEEN), c = (parts.cont || []).slice(0, QR_MAX_CONT), h = (parts.hist || []).slice(0, QR_MAX_HIST);
+  var expires = Math.floor(Date.now() / 60000) + QR_TTL_MIN;
   var n = { f: f.length, w: w.length, c: c.length, h: h.length }, link = "", counts;
   for (var guard = 0; guard < 60; guard++) {
-    var obj = { v: 2, k: parts.kind === "kid" ? 1 : 0, f: f.slice(0, n.f), l: names, w: w.slice(0, n.w), c: c.slice(0, n.c), h: h.slice(0, n.h) };
+    var obj = { v: 2, k: parts.kind === "kid" ? 1 : 0, e: expires, f: f.slice(0, n.f), l: names, w: w.slice(0, n.w), c: c.slice(0, n.c), h: h.slice(0, n.h) };
     var packed = QR_PREFIX + qrB64urlEncode(await qrDeflate(JSON.stringify(obj)));
     link = origin + "#" + QR_HASH_KEY + "=" + packed;
     counts = { favs: n.f, seen: n.w, cont: n.c, hist: n.h, lists: names.length, totalFavs: f.length, totalSeen: w.length, totalHist: h.length, totalCont: c.length };
@@ -95,7 +98,7 @@ async function qrBuildLink(origin, parts) {
     else if (n.c > 0) n.c = 0;
     else break;
   }
-  return { link: link, counts: counts, fits: link.length <= QR_MAX_URL };
+  return { link: link, counts: counts, fits: link.length <= QR_MAX_URL, expiresAt: expires * 60000 };
 }
 
 /** Saca el código TC1.… de lo leído en un QR. Solo acepta el mismo sitio. */
@@ -125,11 +128,13 @@ async function qrValidate(text, origin) {
   if (/[a-f0-9]{32}|api[_-]?key|tmdb|bearer|eyJ|https?:|\/\/|<|>|javascript:/i.test(json)) return { ok: false, error: "unsafe" };
   var o;
   try { o = JSON.parse(json); } catch (e) { return { ok: false, error: "malformed" }; }
-  if (!o || typeof o !== "object" || Array.isArray(o) || (o.v !== 1 && o.v !== 2)) return { ok: false, error: "malformed" };
-  var allowed = o.v === 1 ? ["v", "f", "l", "w"] : ["v", "k", "f", "l", "w", "c", "h"];
-  if (Object.keys(o).some(function (k) { return allowed.indexOf(k) < 0; })) return { ok: false, error: "malformed" };
-  if (o.v === 2 && !qrInt(o.k, 0, 1)) return { ok: false, error: "malformed" };
-  var c0 = o.v === 2 ? o.c : [], h0 = o.v === 2 ? o.h : [];
+  if (!o || typeof o !== "object" || Array.isArray(o) || o.v !== 2) return { ok: false, error: "malformed" };
+  if (Object.keys(o).some(function (k) { return ["v", "k", "e", "f", "l", "w", "c", "h"].indexOf(k) < 0; })) return { ok: false, error: "malformed" };
+  if (!qrInt(o.k, 0, 1) || !qrInt(o.e, 1, 100000000)) return { ok: false, error: "malformed" };
+  var nowMin = Math.floor(Date.now() / 60000);
+  if (o.e < nowMin - QR_SKEW_MIN) return { ok: false, error: "expired" };                       // QR caducado
+  if (o.e > nowMin + QR_TTL_MIN + QR_SKEW_MIN) return { ok: false, error: "malformed" };        // fecha de caducidad imposible
+  var c0 = o.c, h0 = o.h;
   if (!Array.isArray(o.f) || !Array.isArray(o.l) || !Array.isArray(o.w) || !Array.isArray(c0) || !Array.isArray(h0)) return { ok: false, error: "malformed" };
   if (o.f.length > QR_MAX_FAVS || o.w.length > QR_MAX_SEEN || o.l.length > QR_MAX_LISTS || c0.length > QR_MAX_CONT || h0.length > QR_MAX_HIST) return { ok: false, error: "too_big" };
   var lists = [];
@@ -160,7 +165,7 @@ async function qrValidate(text, origin) {
     hist.push({ type: t[0] ? "tv" : "movie", id: t[1], mins: t[2], done: t[3] });
   }
   if (!favs.length && !seen.length && !lists.length && !cont.length && !hist.length) return { ok: false, error: "empty" };
-  return { ok: true, data: { kind: o.v === 2 && o.k ? "kid" : "adult", favs: favs, lists: lists, seen: seen, cont: cont, hist: hist } };
+  return { ok: true, data: { kind: o.k ? "kid" : "adult", favs: favs, lists: lists, seen: seen, cont: cont, hist: hist } };
 }
 
 if (typeof module !== "undefined" && module.exports) module.exports = { qrBuildLink: qrBuildLink, qrValidate: qrValidate, qrExtractPayload: qrExtractPayload, qrCleanListName: qrCleanListName, qrDeflate: qrDeflate, qrB64urlEncode: qrB64urlEncode };

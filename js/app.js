@@ -71,6 +71,7 @@
     if (!navigator.onLine) $offlineBanner.style.transform = "translateY(0)";
     $searchInput.value = "";
     updateProfileTrigger();
+    try { hardenLoadedData(); } catch (e) { if (window.console) console.warn("TatoCine: validación de datos", e); }
     if (profilePickerRequired) showProfiles(true);
     else document.documentElement.classList.remove("tc-picker-boot");
     switchView("home");

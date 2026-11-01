@@ -8,7 +8,7 @@
  * Las librerías del QR (js/vendor/) se cargan solo al usarlas. El importado se FUSIONA (no borra nada) y se
  * bloquea en perfiles Invitado e infantiles.
  */
-var qrStream = null, qrTimer = null, qrBusy = false, qrLoading = {};
+var qrStream = null, qrTimer = null, qrBusy = false, qrLoading = {}, qrTtlTimer = null;
 
 function qrLoadScript(src) {
   if (qrLoading[src]) return qrLoading[src];
@@ -30,6 +30,7 @@ function qrErrorText(code) {
     other_site: L("Este QR pertenece a otro sitio. Por seguridad no se importa.", "This QR belongs to another site. Not imported for safety."),
     unsafe_link: L("El enlace del QR no es seguro. No se importa.", "The QR link is not safe. Not imported."),
     unsafe: L("El QR contiene datos sospechosos (posible inyección o clave). Se descartó.", "The QR contains suspicious data (possible injection or key). Discarded."),
+    expired: L("Este QR caducó (dura 10 minutos). Genera uno nuevo en el otro dispositivo.", "This QR expired (it lasts 10 minutes). Generate a new one on the other device."),
     malformed: L("El QR está dañado o no tiene el formato de TatoCine.", "The QR is damaged or not in TatoCine format.")
   };
   return m[code] || m.malformed;
@@ -48,7 +49,7 @@ function qrCanTransfer() {
 }
 /** Importar: no en el Invitado. Los perfiles infantiles sí pueden, pero solo datos infantiles (ver import-target.js). */
 function qrCanImport() { return qrCanTransfer(); }
-function closeQr() { qrStopCamera(); qrBusy = false; closeOverlay("tc-qr-overlay"); }
+function closeQr() { clearInterval(qrTtlTimer); qrStopCamera(); qrBusy = false; closeOverlay("tc-qr-overlay"); }
 function qrOpen(title) { $("tc-qr-title").textContent = title; openOverlay("tc-qr-overlay"); }
 
 /* ---------- Mostrar ---------- */
@@ -102,6 +103,23 @@ async function openQrShow() {
       (cut ? '<p class="tc-qr-warn">' + L("No cupo todo en un solo QR; usa la copia de seguridad en archivo para el resto.", "Not everything fit in one QR; use the backup file for the rest.") + "</p>" : "") +
       '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" data-qr="png">' + L("Guardar imagen", "Save image") + '</button><button type="button" class="tc-profile-create-btn" data-qr="copy">' + L("Copiar enlace", "Copy link") + "</button></div>";
     qrBody().appendChild(info);
+    var ttl = document.createElement("p");
+    ttl.className = "tc-qr-meta";
+    ttl.setAttribute("role", "timer");
+    info.insertBefore(ttl, info.firstChild.nextSibling);
+    clearInterval(qrTtlTimer);
+    function tick() {
+      var left = Math.max(0, built.expiresAt - Date.now());
+      if (left <= 0) {
+        clearInterval(qrTtlTimer);
+        qrBody().innerHTML = '<p class="tc-qr-warn">' + L("El QR caducó por seguridad.", "The QR expired for security.") + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn" onclick="openQrShow()">' + L("Generar uno nuevo", "Generate a new one") + "</button></div>";
+        return;
+      }
+      var m = Math.floor(left / 60000), sec = Math.floor((left % 60000) / 1000);
+      ttl.textContent = L("Caduca en ", "Expires in ") + m + ":" + (sec < 10 ? "0" : "") + sec;
+    }
+    tick();
+    qrTtlTimer = setInterval(tick, 1000);
     info.querySelector('[data-qr="png"]').onclick = function () {
       var a = document.createElement("a");
       a.href = canvas.toDataURL("image/png");
