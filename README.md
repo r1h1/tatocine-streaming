@@ -57,7 +57,7 @@ Todo en `localStorage` (`tatoProfile_<id>_…` por perfil; lista completa en [do
 ```text
 index.html            Interfaz y orden de carga
 config.js             Tu clave de TMDB (único archivo de configuración)
-css/                  Hojas numeradas (01-base … 16-accessibility); la cascada va por orden
+css/                  Hojas numeradas (01-base … 18-lists-skeletons); la cascada va por orden
 js/core · profiles · i18n · ui · player · features · app.js     Código por responsabilidad
 sw.js · manifest.webmanifest · icons/ · LICENSE · docs/ · index.backup.html (monolito anterior, estable)
 ```

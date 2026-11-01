@@ -8,7 +8,7 @@ personal vive en `localStorage`; la única red es la API de TMDB y los reproduct
 ```text
 index.html                 Estructura de la interfaz + orden de carga (única fuente de verdad)
 config.js                  Configuración editable (clave de TMDB)
-css/                       Cascada numerada: 01-base … 16-accessibility (los posteriores refinan a los anteriores)
+css/                       Cascada numerada: 01-base … 18-lists-skeletons (los posteriores refinan a los anteriores)
 js/
   core/                    Servicios sin interfaz: config, storage, extend (decorate), env, state, tmdb, utils,
                            ui-utils, seo, events, storage-maintenance, performance, pwa
