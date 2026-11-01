@@ -21,7 +21,7 @@
       color: #fff;
       border: 1px solid #222;
       font-family: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 500;
       outline: 0;
       cursor: pointer;
@@ -53,7 +53,7 @@
       background: #111;
       border: 1px solid #222;
       color: #aaa;
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
@@ -88,7 +88,7 @@
       content: "★";
       color: #fff;
       margin-left: 4px;
-      font-size: 10px;
+      font-size: calc(10px * var(--ts, 1));
     }
 
     .player-container {
@@ -202,7 +202,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       color: #fff;
-      font-size: 16px;
+      font-size: calc(16px * var(--ts, 1));
       font-weight: 900;
       letter-spacing: 2px;
       z-index: 6;
@@ -231,7 +231,7 @@
       color: #fff;
       padding: 14px 22px;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 500;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       animation: toastIn 0.3s ease;
@@ -277,7 +277,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       font-family: inherit;
-      font-size: 15px;
+      font-size: calc(15px * var(--ts, 1));
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;

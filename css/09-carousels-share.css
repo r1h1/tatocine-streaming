@@ -28,7 +28,7 @@
       pointer-events: auto;
       width: 38px;
       height: 38px;
-      font-size: 20px;
+      font-size: calc(20px * var(--ts, 1));
       border: 1.5px solid #333;
       background: rgba(17, 17, 17, 0.96);
       box-shadow: 0 3px 9px rgba(0, 0, 0, 0.48);
@@ -175,7 +175,7 @@
       border-radius: 22px;
       color: #fff;
       text-decoration: none;
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       font-weight: 600;
       background: rgba(0, 0, 0, 0.78);
       border: 1px solid rgba(255, 255, 255, 0.24);
@@ -199,7 +199,7 @@
         right: 12px;
         bottom: 12px;
         padding: 9px 12px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ts, 1));
       }
     }
 
@@ -244,7 +244,7 @@
     .tato-share-kicker {
       margin-bottom: 10px;
       color: rgba(255, 255, 255, .55);
-      font-size: 10px;
+      font-size: calc(10px * var(--ts, 1));
       font-weight: 800;
       letter-spacing: 1.8px;
     }
@@ -252,7 +252,7 @@
     .tato-share-title {
       max-width: calc(100% - 30px);
       margin-bottom: 8px;
-      font-size: 24px;
+      font-size: calc(24px * var(--ts, 1));
       line-height: 1.2;
       overflow-wrap: anywhere;
     }
@@ -260,14 +260,14 @@
     .tato-share-description {
       margin-bottom: 24px;
       color: rgba(255, 255, 255, .68);
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
     }
 
     .tato-share-label {
       display: block;
       margin-bottom: 8px;
       color: rgba(255, 255, 255, .58);
-      font-size: 10px;
+      font-size: calc(10px * var(--ts, 1));
       font-weight: 800;
       letter-spacing: 1.2px;
     }
@@ -331,7 +331,7 @@
       min-height: 18px;
       margin-top: 14px;
       color: rgba(255, 255, 255, .72);
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
     }
 
     @media (max-width: 520px) {
@@ -341,7 +341,7 @@
       }
 
       .tato-share-title {
-        font-size: 21px;
+        font-size: calc(21px * var(--ts, 1));
       }
 
       .tato-share-link-row {

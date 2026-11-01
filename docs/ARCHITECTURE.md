@@ -110,3 +110,6 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 
 ## Fase 2 · control parental
 `features/parental.js` (hora de dormir, registro de uso `tatoUsageV1` por perfil/día y resumen semanal) se añade con decorate sobre `setProfileModalMode`/`saveProfileFromModal`.
+
+## Fase 3 · uso y accesibilidad
+`ui/undo.js` (avisos con acción), `ui/accessibility-prefs.js` (`--ts` multiplica cada `font-size`: `calc(Npx * var(--ts, 1))`), `ui/command-palette.js` (`registerCommand`), `features/voice-search.js`, `ui/onboarding.js`, `core/actions.js` (`data-act` + `registerAction`, base para quitar `unsafe-inline` de la CSP) y pantallas vacías en `ui/skeletons.js`.

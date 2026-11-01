@@ -509,7 +509,20 @@
           </div>
           <button class="danger-btn" onclick="freeStorage()">Liberar espacio</button>
         </div>
-        <div class="settings-option">
+                <div class="settings-option">
+          <div>
+            <div class="label">Accesibilidad</div>
+            <div class="sub-label">Texto, contraste y movimiento</div>
+          </div>
+          <div class="a11y-controls">
+            <button class="danger-btn" type="button" onclick="changeTextScale(-1)" aria-label="Texto más pequeño">A−</button>
+            <span class="a11y-scale" id="a11y-scale-label" aria-live="polite">100 %</span>
+            <button class="danger-btn" type="button" onclick="changeTextScale(1)" aria-label="Texto más grande">A+</button>
+            <button class="danger-btn" type="button" id="a11y-hc-btn" aria-pressed="false" onclick="toggleHighContrast()">Alto contraste</button>
+            <button class="danger-btn" type="button" id="a11y-rm-btn" aria-pressed="false" onclick="toggleReduceMotion()">Reducir movimiento</button>
+          </div>
+        </div>
+<div class="settings-option">
           <div>
             <div class="label">Copia de seguridad completa</div>
           </div>
@@ -541,7 +554,7 @@
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Atajos de Teclado</div>
-            <div class="sub-label">/ buscar · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
+            <div class="sub-label">/ buscar · Ctrl+K paleta de comandos · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
           </div>
         </div>
       </div>
@@ -634,6 +647,15 @@
       <div class="tc-profile-create-actions">
         <button class="tc-profile-create-btn" type="button" onclick="closeInstallHelp()">Entendido</button>
       </div>
+    </section>
+  </div>
+
+  <!-- Paleta de comandos (Ctrl/Cmd + K) -->
+  <div class="tc-profile-create-overlay" id="tc-cmd-overlay" role="dialog" aria-modal="true" aria-label="Paleta de comandos" aria-hidden="true">
+    <section class="tc-profile-create-dialog tc-cmd">
+      <input id="tc-cmd-input" class="tc-profile-input" type="text" role="combobox" aria-expanded="true" aria-controls="tc-cmd-list" aria-autocomplete="list" autocomplete="off" placeholder="Escribe un comando…" />
+      <ul id="tc-cmd-list" class="cmd-list" role="listbox"></ul>
+      <p class="tc-qr-hint">↑ ↓ moverse · Enter ejecutar · Esc cerrar</p>
     </section>
   </div>
 
@@ -850,6 +872,7 @@
   <script src="js/core/config.js"></script>
   <script src="js/core/storage.js"></script>
   <script src="js/core/extend.js"></script>
+  <script src="js/core/actions.js"></script>
   <script src="js/core/env.js"></script>
   <script src="js/profiles/profile-store.js"></script>
   <script src="js/profiles/profile-ui.js"></script>
@@ -904,10 +927,15 @@
   <script src="js/features/backup.js"></script>
   <script src="js/features/qr-transfer.js"></script>
   <script src="js/features/parental.js"></script>
+  <script src="js/ui/undo.js"></script>
   <script src="js/player/autoplay-next.js"></script>
   <script src="js/player/player-robust.js"></script>
   <script src="js/ui/gestures.js"></script>
   <script src="js/ui/a11y.js"></script>
+  <script src="js/ui/accessibility-prefs.js"></script>
+  <script src="js/ui/command-palette.js"></script>
+  <script src="js/features/voice-search.js"></script>
+  <script src="js/ui/onboarding.js"></script>
   <script src="js/core/performance.js"></script>
   <script src="js/core/data-guard.js"></script>
   <script src="js/app.js"></script>

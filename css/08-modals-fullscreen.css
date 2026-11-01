@@ -288,7 +288,7 @@
       }
 
       #player-modal .modal-title {
-        font-size: 16px;
+        font-size: calc(16px * var(--ts, 1));
       }
 
       #player-modal .modal-body {
@@ -317,7 +317,7 @@
       #player-modal .server-btn {
         min-width: 0;
         padding: 9px 5px;
-        font-size: 10px;
+        font-size: calc(10px * var(--ts, 1));
         letter-spacing: 0.2px;
       }
 

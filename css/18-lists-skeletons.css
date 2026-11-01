@@ -72,7 +72,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: 16px;
+  font-size: calc(16px * var(--ts, 1));
   font-weight: 700;
   line-height: 1.2;
   text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
@@ -81,7 +81,7 @@
 .list-count {
   margin-top: 3px;
   color: rgba(255, 255, 255, .72);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
 }
 
 .list-edit {
@@ -106,7 +106,7 @@
   }
 
   .list-name {
-    font-size: 14px;
+    font-size: calc(14px * var(--ts, 1));
   }
 }
 
@@ -281,7 +281,7 @@ body.lite *::after {
   .tc-profile-card-avatar {
     width: 56px;
     height: 56px;
-    font-size: 24px;
+    font-size: calc(24px * var(--ts, 1));
   }
 }
 
@@ -363,7 +363,7 @@ body.lite *::after {
   }
 
   .stat-value {
-    font-size: 20px;
+    font-size: calc(20px * var(--ts, 1));
   }
 
   .stats-cards {
@@ -465,7 +465,7 @@ body.lite *::after {
   background: rgba(255, 255, 255, .08);
   color: #fff;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   font-weight: 600;
   cursor: pointer;
 }
@@ -487,5 +487,5 @@ body.lite *::after {
 .wiz-note {
   margin: 12px 0 0;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
 }

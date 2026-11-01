@@ -400,7 +400,7 @@
         .catch(function () {
           if (snapshot !== catalogRequestId || currentView !== "home") return;
           $rowsContainer.innerHTML =
-            '<div class="empty-state"><h2>Error de conexión</h2><p>No se pudo cargar el catálogo.</p></div>';
+            emptyOffline();
         });
     }
 
@@ -422,13 +422,13 @@
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Sin resultados</h2><p>Prueba con otros filtros.</p></div>';
+              emptyNone();
           }
         })
         .catch(function () {
           if (snapshot === catalogRequestId && currentView === "movies")
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Error de conexión</h2></div>';
+              emptyOffline();
         });
     }
     function loadSeriesView() {
@@ -449,13 +449,13 @@
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Sin resultados</h2></div>';
+              emptyNone();
           }
         })
         .catch(function () {
           if (snapshot === catalogRequestId && currentView === "series")
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Error de conexión</h2></div>';
+              emptyOffline();
         });
     }
     function loadAnimeView() {
@@ -488,13 +488,13 @@
             renderLoadMore(d.total_pages || 1);
           } else {
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Sin resultados</h2></div>';
+              emptyNone();
           }
         })
         .catch(function () {
           if (snapshot === catalogRequestId && currentView === "anime")
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Error de conexión</h2></div>';
+              emptyOffline();
         });
     }
     function loadKidsView() {
@@ -546,13 +546,13 @@
             );
           } else {
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Sin contenido</h2></div>';
+              emptyNone();
             $loadMoreContainer.innerHTML = "";
           }
         })
         .catch(function () {
           if (snapshot === catalogRequestId && currentView === "kids")
             $rowsContainer.innerHTML =
-              '<div class="empty-state"><h2>Error de conexión</h2></div>';
+              emptyOffline();
         });
     }

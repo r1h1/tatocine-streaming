@@ -99,7 +99,7 @@
     }
 
     .actor-name {
-      font-size: clamp(24px, 3vw, 34px);
+      font-size: calc(clamp(24px, 3vw, 34px) * var(--ts, 1));
     }
 
     .actor-meta {
@@ -116,7 +116,7 @@
       white-space: normal;
       overflow-wrap: anywhere;
       line-height: 1.9;
-      font-size: 15px;
+      font-size: calc(15px * var(--ts, 1));
       color: rgba(255, 255, 255, 0.82);
     }
 
@@ -229,7 +229,7 @@
 
       .actor-bio {
         padding: 20px 22px 34px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
         line-height: 1.8;
       }
     }

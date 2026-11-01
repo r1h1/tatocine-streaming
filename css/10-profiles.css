@@ -16,7 +16,7 @@
       background: rgba(255, 255, 255, .08);
       cursor: pointer;
       font: inherit;
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       font-weight: 600;
       transition: background .2s, border-color .2s
     }
@@ -33,7 +33,7 @@
       height: 30px;
       border-radius: 50%;
       background: #292929;
-      font-size: 19px
+      font-size: calc(19px * var(--ts, 1))
     }
 
     .tc-profile-overlay {
@@ -73,7 +73,7 @@
     }
 
     .tc-profile-heading h2 {
-      font-size: 24px;
+      font-size: calc(24px * var(--ts, 1));
       font-weight: 750;
       letter-spacing: -.5px
     }
@@ -86,13 +86,13 @@
       color: #fff;
       background: rgba(255, 255, 255, .1);
       cursor: pointer;
-      font-size: 22px
+      font-size: calc(22px * var(--ts, 1))
     }
 
     .tc-profile-section-title {
       margin: 18px 0 12px;
       color: #aaa;
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase
@@ -138,7 +138,7 @@
       height: 62px;
       border-radius: 50%;
       background: #303030;
-      font-size: 34px
+      font-size: calc(34px * var(--ts, 1))
     }
 
     .tc-profile-card-name {
@@ -146,13 +146,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 650
     }
 
     .tc-profile-active-label {
       color: #bbb;
-      font-size: 11px
+      font-size: calc(11px * var(--ts, 1))
     }
 
     .tc-profile-avatar-options {
@@ -171,7 +171,7 @@
       background: #222;
       color: #fff;
       cursor: pointer;
-      font-size: 23px
+      font-size: calc(23px * var(--ts, 1))
     }
 
     .tc-avatar-option.selected {
@@ -219,7 +219,7 @@
     .tc-profile-note {
       margin-top: 12px;
       color: #858585;
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
       line-height: 1.5
     }
 
@@ -229,7 +229,7 @@
       left: -5px;
       bottom: 8px;
       color: #080808;
-      font-size: 82px;
+      font-size: calc(82px * var(--ts, 1));
       line-height: .8;
       font-weight: 950;
       font-style: italic;
@@ -248,7 +248,7 @@
       color: #fff;
       background: rgba(255, 255, 255, .07);
       font: inherit;
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
       font-weight: 650;
       cursor: pointer
     }
@@ -273,7 +273,7 @@
       }
 
       .tc-profile-heading h2 {
-        font-size: 21px
+        font-size: calc(21px * var(--ts, 1))
       }
 
       .tc-profile-grid {
@@ -281,7 +281,7 @@
       }
 
       .top10-rank-badge {
-        font-size: 66px
+        font-size: calc(66px * var(--ts, 1))
       }
     }
 
@@ -307,7 +307,7 @@
       .tc-profile-card-avatar {
         width: 54px;
         height: 54px;
-        font-size: 30px
+        font-size: calc(30px * var(--ts, 1))
       }
     }
 
@@ -327,7 +327,7 @@
     }
 
     .tc-profile-heading h2 {
-      font-size: 30px;
+      font-size: calc(30px * var(--ts, 1));
     }
 
     .tc-profile-close {
@@ -358,7 +358,7 @@
     .tc-profile-card-avatar {
       width: 82px;
       height: 82px;
-      font-size: 35px;
+      font-size: calc(35px * var(--ts, 1));
       font-weight: 650;
       color: #fff;
       background: #303030;
@@ -371,7 +371,7 @@
     }
 
     .tc-profile-add-card .tc-profile-add-initial {
-      font-size: 42px;
+      font-size: calc(42px * var(--ts, 1));
       font-weight: 300;
       background: #202020;
       border: 1px solid rgba(255, 255, 255, .35);
@@ -397,7 +397,7 @@
     }
 
     .tc-profile-overlay.startup .tc-profile-heading h2 {
-      font-size: clamp(27px, 4vw, 38px);
+      font-size: calc(clamp(27px, 4vw, 38px) * var(--ts, 1));
     }
 
     @media(max-width:480px) {
@@ -412,11 +412,11 @@
       .tc-profile-card-avatar {
         width: 68px;
         height: 68px;
-        font-size: 30px
+        font-size: calc(30px * var(--ts, 1))
       }
 
       .tc-profile-heading h2 {
-        font-size: 24px
+        font-size: calc(24px * var(--ts, 1))
       }
     }
 
@@ -452,7 +452,7 @@
     .tc-profile-brand {
       margin: 0 0 34px;
       color: #fff;
-      font-size: 22px;
+      font-size: calc(22px * var(--ts, 1));
       font-weight: 800;
       letter-spacing: -.5px;
       line-height: 1.2;
@@ -474,7 +474,7 @@
 
     .tc-profile-heading h2 {
       color: #fff;
-      font-size: clamp(27px, 3.5vw, 36px);
+      font-size: calc(clamp(27px, 3.5vw, 36px) * var(--ts, 1));
       font-weight: 700;
       letter-spacing: -.9px;
       line-height: 1.15;
@@ -488,7 +488,7 @@
       border-radius: 0;
       background: none;
       color: rgba(255, 255, 255, .68);
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       font-weight: 400;
       letter-spacing: 0;
       line-height: 1.45;
@@ -504,7 +504,7 @@
       border-radius: 50%;
       background: rgba(255, 255, 255, .08);
       color: #fff;
-      font-size: 22px;
+      font-size: calc(22px * var(--ts, 1));
       transition: background .2s, transform .2s, border-color .2s;
     }
 
@@ -567,7 +567,7 @@
       background: #242424;
       color: #fff;
       box-shadow: none;
-      font-size: 35px;
+      font-size: calc(35px * var(--ts, 1));
       font-weight: 650;
       transition: background .2s, border-color .2s, transform .2s;
     }
@@ -586,7 +586,7 @@
       max-width: 100%;
       overflow: hidden;
       color: #fff;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 600;
       letter-spacing: 0;
       text-overflow: ellipsis;
@@ -595,7 +595,7 @@
 
     .tc-profile-active-label {
       color: rgba(255, 255, 255, .62);
-      font-size: 11px;
+      font-size: calc(11px * var(--ts, 1));
       font-weight: 400;
     }
 
@@ -612,7 +612,7 @@
       border: 1px solid rgba(255, 255, 255, .48);
       background: #111;
       color: #fff;
-      font-size: 42px;
+      font-size: calc(42px * var(--ts, 1));
       font-weight: 300;
     }
 
@@ -675,7 +675,7 @@
     .tc-profile-create-dialog h3 {
       margin: 0 42px 8px 0;
       color: #fff;
-      font-size: 22px;
+      font-size: calc(22px * var(--ts, 1));
       font-weight: 600;
       letter-spacing: -.4px;
     }
@@ -683,7 +683,7 @@
     .tc-profile-create-subtitle {
       margin: 0 0 25px;
       color: rgba(255, 255, 255, .68);
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       line-height: 1.55;
     }
 
@@ -691,7 +691,7 @@
       display: block;
       margin: 0 0 9px;
       color: rgba(255, 255, 255, .82);
-      font-size: 13px;
+      font-size: calc(13px * var(--ts, 1));
       font-weight: 600;
     }
 
@@ -705,7 +705,7 @@
       background: #171717;
       color: #fff;
       font: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       box-shadow: none;
       transition: border-color .2s, background .2s;
     }
@@ -732,7 +732,7 @@
       background: #fff;
       color: #000;
       font: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 650;
       cursor: pointer;
       transition: transform .2s, background .2s;
@@ -757,7 +757,7 @@
       background: rgba(255, 255, 255, .1);
       color: #fff;
       font: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 600;
       cursor: pointer;
       transition: background .2s, border-color .2s;
@@ -773,7 +773,7 @@
       padding-top: 14px;
       border-top: 1px solid rgba(255, 255, 255, .08);
       color: rgba(255, 255, 255, .52);
-      font-size: 11px;
+      font-size: calc(11px * var(--ts, 1));
       line-height: 1.6;
     }
 
@@ -787,7 +787,7 @@
       border-radius: 50%;
       background: rgba(255, 255, 255, .08);
       color: #fff;
-      font-size: 20px;
+      font-size: calc(20px * var(--ts, 1));
       cursor: pointer;
       transition: background .2s, transform .2s;
     }
@@ -817,7 +817,7 @@
       }
 
       .tc-profile-heading h2 {
-        font-size: 25px;
+        font-size: calc(25px * var(--ts, 1));
       }
 
       .tc-profile-grid {
@@ -833,7 +833,7 @@
       .tc-profile-card-avatar {
         width: 68px;
         height: 68px;
-        font-size: 30px;
+        font-size: calc(30px * var(--ts, 1));
       }
 
       .tc-profile-create-overlay {
@@ -1069,7 +1069,7 @@
       .tc-profile-card-avatar {
         width: 66px;
         height: 66px;
-        font-size: 30px;
+        font-size: calc(30px * var(--ts, 1));
       }
     }
 
@@ -1098,14 +1098,14 @@
       .tc-profile-card-avatar {
         width: 60px !important;
         height: 60px !important;
-        font-size: 28px !important;
+        font-size: calc(28px * var(--ts, 1)) !important;
       }
     }
 
     @media(max-height:640px) {
       .tc-profile-brand {
         margin-bottom: 12px !important;
-        font-size: 18px;
+        font-size: calc(18px * var(--ts, 1));
       }
 
       .tc-profile-heading {
@@ -1113,7 +1113,7 @@
       }
 
       .tc-profile-heading h2 {
-        font-size: 23px !important;
+        font-size: calc(23px * var(--ts, 1)) !important;
       }
 
       .tc-profile-heading .tc-profile-note {
@@ -1129,7 +1129,7 @@
       .tc-profile-card-avatar {
         width: 48px !important;
         height: 48px !important;
-        font-size: 24px !important;
+        font-size: calc(24px * var(--ts, 1)) !important;
       }
 
       .tc-profile-grid {

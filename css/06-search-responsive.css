@@ -53,11 +53,11 @@
     }
 
     .hero.empty-search .hero-title {
-      font-size: clamp(29px, calc(4.8vw - 5px), 59px);
+      font-size: calc(clamp(29px, calc(4.8vw - 5px), 59px) * var(--ts, 1));
     }
 
     .hero.empty-search .hero-year {
-      font-size: 15px;
+      font-size: calc(15px * var(--ts, 1));
       color: rgba(255, 255, 255, 0.65);
     }
 
@@ -80,7 +80,7 @@
 
       .hero-content .search-input-large {
         padding: 12px 18px 12px 44px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
         min-height: 44px;
       }
 
@@ -100,7 +100,7 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        font-size: 13px;
+        font-size: calc(13px * var(--ts, 1));
         line-height: 1.45;
         max-width: 95%;
         margin-bottom: 18px;
@@ -112,7 +112,7 @@
       }
 
       .hero-meta-item {
-        font-size: 11px;
+        font-size: calc(11px * var(--ts, 1));
         padding: 4px 8px;
       }
 
@@ -196,20 +196,20 @@
       }
 
       .hero-title {
-        font-size: 37px;
+        font-size: calc(37px * var(--ts, 1));
       }
 
       .hero-year {
-        font-size: 16px;
+        font-size: calc(16px * var(--ts, 1));
       }
 
       .hero-desc {
-        font-size: 15px;
+        font-size: calc(15px * var(--ts, 1));
       }
 
       .hero-content .search-input-large {
         padding: 12px 20px 12px 44px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       .hero-content .search-wrap svg {
@@ -262,7 +262,7 @@
 
       .hero-btn.secondary {
         padding: 12px 18px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       .toast-container {
@@ -287,7 +287,7 @@
       }
 
       .actor-name {
-        font-size: 24px;
+        font-size: calc(24px * var(--ts, 1));
       }
 
       .actor-bio {
@@ -308,7 +308,7 @@
       }
 
       #player-modal .modal-title {
-        font-size: 16px;
+        font-size: calc(16px * var(--ts, 1));
       }
 
       #player-modal .modal-body {
@@ -339,19 +339,19 @@
       }
 
       .hero-desc {
-        font-size: 13px;
+        font-size: calc(13px * var(--ts, 1));
         line-height: 1.45;
         -webkit-line-clamp: 2;
         max-width: 95%;
       }
 
       .hero-title {
-        font-size: 27px;
+        font-size: calc(27px * var(--ts, 1));
       }
 
       .hero-btn {
         padding: 12px 24px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       .card {
@@ -379,26 +379,26 @@
       }
 
       .details-title {
-        font-size: 24px;
+        font-size: calc(24px * var(--ts, 1));
       }
 
       .details-meta {
         gap: 8px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ts, 1));
       }
 
       .details-meta span {
         padding: 3px 8px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ts, 1));
       }
 
       .details-genre {
-        font-size: 11px;
+        font-size: calc(11px * var(--ts, 1));
         padding: 4px 10px;
       }
 
       .details-overview {
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
         line-height: 1.6;
       }
 
@@ -408,7 +408,7 @@
 
       .details-actions .hero-btn {
         padding: 12px 20px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
         flex: 1;
         justify-content: center;
         min-width: 130px;
@@ -419,7 +419,7 @@
       }
 
       .details-cast-title {
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       .cast-item {
@@ -432,7 +432,7 @@
       }
 
       .cast-name {
-        font-size: 11px;
+        font-size: calc(11px * var(--ts, 1));
       }
 
       .similar-card {
@@ -444,7 +444,7 @@
       }
 
       .hero.empty-search .hero-title {
-        font-size: 25px;
+        font-size: calc(25px * var(--ts, 1));
       }
 
       #player-modal .modal-body {
@@ -464,7 +464,7 @@
 
       #player-modal .server-btn {
         padding: 9px 5px;
-        font-size: 10px;
+        font-size: calc(10px * var(--ts, 1));
         letter-spacing: 0.2px;
       }
 
@@ -478,7 +478,7 @@
         flex: 1;
         width: calc(50% - 4px);
         padding: 10px 8px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ts, 1));
       }
     }
 

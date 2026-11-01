@@ -97,7 +97,7 @@
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #fff;
-      font-size: 16px;
+      font-size: calc(16px * var(--ts, 1));
       font-weight: 500;
       padding: 14px 24px 14px 52px;
       border-radius: 30px;
@@ -134,7 +134,7 @@
     }
 
     .hero-title {
-      font-size: clamp(35px, calc(5.5vw - 5px), 75px);
+      font-size: calc(clamp(35px, calc(5.5vw - 5px), 75px) * var(--ts, 1));
       font-weight: 700;
       line-height: 1.1;
       letter-spacing: -1.5px;
@@ -143,7 +143,7 @@
     }
 
     .hero-year {
-      font-size: 18px;
+      font-size: calc(18px * var(--ts, 1));
       font-weight: 500;
       color: rgba(255, 255, 255, 0.8);
       margin-bottom: 10px;
@@ -173,7 +173,7 @@
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(8px);
       color: rgba(255, 255, 255, 0.92);
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
       font-weight: 650;
       line-height: 1.2;
       white-space: nowrap;
@@ -190,7 +190,7 @@
     }
 
     .hero-desc {
-      font-size: 16px;
+      font-size: calc(16px * var(--ts, 1));
       font-weight: 400;
       line-height: 1.6;
       color: rgba(255, 255, 255, 0.9);
@@ -217,7 +217,7 @@
       color: #000;
       padding: 16px 36px;
       border-radius: 50px;
-      font-size: 16px;
+      font-size: calc(16px * var(--ts, 1));
       font-weight: 600;
       cursor: pointer;
       border: 0;
@@ -278,7 +278,7 @@
       cursor: default;
       letter-spacing: 3px;
       font-weight: 800;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       padding: 16px 34px;
       backdrop-filter: blur(8px);
     }

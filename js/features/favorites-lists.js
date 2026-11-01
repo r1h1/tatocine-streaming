@@ -211,7 +211,7 @@
       var cards = favLists.length ? '<section class="fav-lists"><div class="row-header"><h2 class="row-title">Mis listas</h2></div><div class="list-cards">' + favLists.map(listCardHTML).join("") + "</div></section>" : "";
       var body = "";
       if (!myList.length && !favLists.length) {
-        body = '<div class="empty-state"><h2>Tus favoritos está vacío</h2><p>Haz clic en el corazón de cualquier película, anime o serie para guardarla aquí. También puedes crear listas para organizarlos.</p></div>';
+        body = emptyStateHTML("favorites", L("Aún no tienes favoritos", "No favorites yet"), L("Toca el corazón de cualquier película, anime o serie para guardarla aquí. También puedes crear listas para organizarlas.", "Tap the heart on any movie, anime or series to save it here. You can also create lists to organize them."), L("Explorar películas", "Explore movies"), "go-movies");
       } else if (favFilter === "all") {
         if (favCount(null) || !favLists.length) body += favSection("General", null, false);
         // Las listas se ven una sola vez, como tarjetas; al tocar una se abre su contenido.

@@ -336,7 +336,7 @@
       if (heroMoviesList.length < 2) return;
       heroInterval = setInterval(function () {
         // Sin rotar (ni descargar imágenes) si la pestaña está oculta, la portada fuera de vista o hay un modal/reproductor abierto.
-        if (document.hidden || isSearching || heroSectionIsEmpty() || document.body.style.overflow === "hidden" || window.scrollY > $heroSection.offsetHeight) return;
+        if (document.hidden || isSearching || heroSectionIsEmpty() || document.body.style.overflow === "hidden" || document.body.classList.contains("rm") || window.scrollY > $heroSection.offsetHeight) return;
         currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
         setHero(heroMoviesList[currentHeroIndex]);
       }, 8000);

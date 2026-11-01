@@ -19,7 +19,7 @@
 .wiz-q {
   margin: 16px 0 8px;
   color: rgba(255, 255, 255, .85);
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   font-weight: 600;
 }
 
@@ -37,7 +37,7 @@
   background: rgba(255, 255, 255, .08);
   color: #fff;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   font-weight: 600;
   cursor: pointer;
   transition: background .2s, color .2s, border-color .2s;
@@ -68,7 +68,7 @@
 .wiz-empty {
   padding: 28px 4px 8px;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: calc(14px * var(--ts, 1));
   text-align: center;
 }
 
@@ -99,7 +99,7 @@
 
 .wiz-title {
   margin: 0 0 2px;
-  font-size: 15px;
+  font-size: calc(15px * var(--ts, 1));
   font-weight: 700;
 }
 
@@ -107,7 +107,7 @@
 .wiz-reason {
   margin: 0;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
   line-height: 1.45;
 }
 
@@ -131,7 +131,7 @@
   background: rgba(255, 255, 255, .08);
   color: #fff;
   font: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
   font-weight: 600;
   cursor: pointer;
 }
@@ -158,7 +158,7 @@
 .details-credits {
   margin: -6px 0 16px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
 }
 
 .details-credits[hidden],
@@ -197,7 +197,7 @@
   background: rgba(255, 255, 255, .08);
   color: #fff;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   font-weight: 600;
   cursor: pointer;
   transition: background .2s, color .2s;
@@ -245,7 +245,7 @@
   background: rgba(255, 255, 255, .08);
   color: #fff;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
   font-weight: 600;
   cursor: pointer;
 }
@@ -266,7 +266,7 @@
 .ep-loading {
   padding: 14px 2px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--ts, 1));
 }
 
 .ep-item {
@@ -323,14 +323,14 @@
 }
 
 .ep-title {
-  font-size: 14px;
+  font-size: calc(14px * var(--ts, 1));
   font-weight: 600;
 }
 
 .ep-meta {
   margin-top: 2px;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
 }
 
 .ep-overview {
@@ -340,7 +340,7 @@
   margin: 6px 0 0;
   overflow: hidden;
   color: rgba(255, 255, 255, .72);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
   line-height: 1.45;
 }
 
@@ -404,7 +404,7 @@
 
 .suggest-title {
   overflow: hidden;
-  font-size: 14px;
+  font-size: calc(14px * var(--ts, 1));
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -412,7 +412,7 @@
 
 .suggest-sub {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ts, 1));
 }
 
 .people-scroll {
@@ -431,7 +431,7 @@
   border-radius: 50px;
   background: #fff;
   color: #000;
-  font-size: 10px;
+  font-size: calc(10px * var(--ts, 1));
   font-weight: 800;
   letter-spacing: .5px;
 }

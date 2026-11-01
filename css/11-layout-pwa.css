@@ -100,13 +100,13 @@
       .tc-profile-trigger-avatar {
         width: 28px;
         height: 28px;
-        font-size: 16px;
+        font-size: calc(16px * var(--ts, 1));
       }
 
       .tc-profile-trigger-name {
         display: block;
         max-width: 96px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ts, 1));
       }
 
       .tc-fs-btn {
@@ -143,7 +143,7 @@
       }
 
       .nav-brand {
-        font-size: 16px;
+        font-size: calc(16px * var(--ts, 1));
       }
     }
 
@@ -164,7 +164,7 @@
 
       .nav-item {
         padding: 8px 11px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       .tc-profile-trigger-name {
@@ -186,7 +186,7 @@
 
     .mobile-menu .nav-item {
       flex: 0 0 auto;
-      font-size: 15px;
+      font-size: calc(15px * var(--ts, 1));
       padding: 10px 20px;
       width: 78%;
       max-width: 280px;
@@ -197,7 +197,7 @@
       right: 20px;
       width: 38px;
       height: 38px;
-      font-size: 20px;
+      font-size: calc(20px * var(--ts, 1));
     }
 
     /* Ventanas a pantalla completa: cabecera y botón cerrar bajo la barra de estado */
@@ -309,7 +309,7 @@
         flex: 1 1 calc(50% - 4px);
         min-width: 0;
         padding: 12px 10px;
-        font-size: 14px;
+        font-size: calc(14px * var(--ts, 1));
       }
 
       #details-play-btn {
@@ -324,7 +324,7 @@
         flex: 1 1 0;
         min-width: 0;
         padding: 13px 14px;
-        font-size: 15px;
+        font-size: calc(15px * var(--ts, 1));
       }
     }
 
@@ -353,7 +353,7 @@
       background: rgba(255, 255, 255, .08);
       color: #fff;
       font: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 600;
       cursor: pointer;
       transition: background .2s, color .2s, border-color .2s;
@@ -372,7 +372,7 @@
     .tc-profile-hint {
       margin: 0 0 14px;
       color: rgba(255, 255, 255, .52);
-      font-size: 11px;
+      font-size: calc(11px * var(--ts, 1));
       line-height: 1.55;
     }
 
@@ -387,7 +387,7 @@
       background: none;
       color: rgba(255, 255, 255, .7);
       font: inherit;
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
       text-decoration: underline;
       cursor: pointer;
     }
@@ -412,7 +412,7 @@
       background: #c62828;
       color: #fff;
       font: inherit;
-      font-size: 14px;
+      font-size: calc(14px * var(--ts, 1));
       font-weight: 650;
       cursor: pointer;
       transition: background .2s, transform .2s;
@@ -425,7 +425,7 @@
 
     .tc-pin-input {
       text-align: center;
-      font-size: 22px !important;
+      font-size: calc(22px * var(--ts, 1)) !important;
       letter-spacing: .5em;
     }
 
@@ -433,7 +433,7 @@
       min-height: 16px;
       margin: 8px 0 0;
       color: #ef5350;
-      font-size: 12px;
+      font-size: calc(12px * var(--ts, 1));
     }
 
     #tc-pin-overlay {
