@@ -7,5 +7,5 @@
  * una clave de solo lectura del catálogo); usa una propia y no compartas claves privadas.
  */
 window.TATOCINE_CONFIG = {
-  TMDB_API_KEY: "xxxxx"
+  TMDB_API_KEY: "xxxxxxxxxxx"
 };
