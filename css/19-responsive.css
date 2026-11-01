@@ -87,7 +87,7 @@
 /* ---------- Móvil horizontal: portada compacta ---------- */
 @media (max-height: 500px) and (orientation: landscape) {
   .hero { min-height: 0; height: auto; padding-top: calc(76px + env(safe-area-inset-top)); }
-  .hero-title { font-size: clamp(24px, 5vw, 36px); }
+  .hero-title { font-size: clamp(23px, 5vw, 35px); }
   .hero-desc { -webkit-line-clamp: 2; }
   .hero-content .search-wrap { margin-bottom: 12px; }
 }
