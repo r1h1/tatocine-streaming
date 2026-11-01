@@ -5,7 +5,7 @@
    - Imágenes de TMDB: NO se interceptan (TMDB ya las sirve con caché HTTP de ~1 año y el navegador las guarda).
    - API de TMDB: red primero; caché solo como respaldo sin conexión (con límite y caducidad).
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v26";
+const VERSION = "v27";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const SHELL = ["./", "index.html", "offline.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];

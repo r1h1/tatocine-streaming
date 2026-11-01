@@ -65,7 +65,16 @@ async function htTrailerKeys(m) {
     var lang = UI_LANG === "en" ? "en" : "es";
     var d = await fetchTMDB("/" + (m.type === "tv" ? "tv" : "movie") + "/" + m.id + "/videos", "&include_video_language=" + lang + ",en,null");
     var vids = ((d && d.results) || []).filter(function (v) { return v.site === "YouTube" && /^[A-Za-z0-9_-]{6,15}$/.test(v.key || "") && (v.type === "Trailer" || v.type === "Teaser"); });
-    vids.sort(function (a, b) { return (b.official - a.official) || ((b.type === "Trailer") - (a.type === "Trailer")) || ((b.iso_639_1 === lang) - (a.iso_639_1 === lang)); });
+    // Idioma del tráiler: ES → español latino, si no español de España, si no inglés. EN → inglés, y solo si no hay, español.
+    var LATAM = /^(MX|AR|CO|CL|PE|VE|UY|PY|BO|EC|CR|GT|HN|SV|NI|PA|DO|CU|PR|419)$/;
+    function tier(v) {
+      var l = v.iso_639_1 || "", c = (v.iso_3166_1 || "").toUpperCase(), n = (v.name || "").toLowerCase();
+      var latinName = /latino|latam|latinoam|hispanoam|\bmx\b|méxico|mexico/.test(n), spainName = /castellano|españa|\bspain\b|\bes-es\b/.test(n);
+      if (lang === "en") return l === "en" ? 0 : !l ? 1 : 2;
+      if (l === "es") return (LATAM.test(c) || (latinName && c !== "ES")) ? 0 : (c === "ES" || spainName) ? 1 : 2;
+      return l === "en" ? 3 : 4;
+    }
+    vids.sort(function (a, b) { return (tier(a) - tier(b)) || ((b.type === "Trailer") - (a.type === "Trailer")) || (b.official - a.official); });
     keys = vids.slice(0, 3).map(function (v) { return v.key; });
   } catch (e) { }
   htCache[k] = keys;
