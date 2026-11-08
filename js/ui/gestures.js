@@ -17,11 +17,15 @@ function gestureHeroStep(dir) {
 
 /** Ventanas que se cierran deslizando hacia abajo: id → [zona con scroll, función de cierre]. */
 var SHEETS = {
-  "details-modal": [".details-body", function () { closeDetails(); }],
+  "details-modal": [".details-scroll", function () { closeDetails(); }],
   "settings-modal": [".modal-body", function () { closeSettings(); }],
   "stats-modal": [".modal-body", function () { closeStats(); }],
   "filters-modal": [".modal-body", function () { closeFilters(); }],
-  "actor-modal": [".actor-bio", function () { closeActor(); }]
+  "actor-modal": [".actor-bio", function () { closeActor(); }],
+  "tc-wizard-overlay": [".tc-profile-create-dialog", function () { closeWizard(); }],
+  "tc-qr-overlay": [".tc-profile-create-dialog", function () { closeQr(); }],
+  "tc-fav-overlay": [".tc-profile-create-dialog", function () { closeFavPicker(); }],
+  "tc-list-overlay": [".tc-profile-create-dialog", function () { closeListModal(); }]
 };
 
 (function bindGestures() {

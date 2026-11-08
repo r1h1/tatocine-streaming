@@ -8,7 +8,7 @@
     const TMDB_API_KEY = String((window.TATOCINE_CONFIG && window.TATOCINE_CONFIG.TMDB_API_KEY) || "").trim();
     if (!TMDB_API_KEY && window.console) console.error("TatoCine: falta la clave de TMDB. Edita config.js (TMDB_API_KEY).");
     var IMG_BG = "https://image.tmdb.org/t/p/w1280";
-    var IMG_CARD = "https://image.tmdb.org/t/p/w342";
+    var IMG_CARD = "https://image.tmdb.org/t/p/w300";
     const IMG_W185 = "https://image.tmdb.org/t/p/w185";
 
     const icons = {

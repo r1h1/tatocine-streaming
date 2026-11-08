@@ -96,3 +96,18 @@
     if (!IS_LOCAL_DEV) {
       document.addEventListener("contextmenu", function (e) { if (!isTypingTarget(e.target)) e.preventDefault(); });
     }
+
+/** Mando de juegos (Gamepad API): cruceta = flechas, A = aceptar, B = atrás. Solo se activa cuando se conecta un mando. */
+(function gamepadNav() {
+  var timer = 0, last = {};
+  function press(name, fn) { return function (down) { if (down && !last[name]) fn(); last[name] = down; }; }
+  var map = { 12: press("up", function () { spatialMove("ArrowUp"); }), 13: press("down", function () { spatialMove("ArrowDown"); }), 14: press("left", function () { spatialMove("ArrowLeft"); }), 15: press("right", function () { spatialMove("ArrowRight"); }),
+    0: press("a", function () { var ae = document.activeElement; if (ae && ae !== document.body) ae.click(); }), 1: press("b", function () { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); }) };
+  function poll() {
+    var pads = navigator.getGamepads ? navigator.getGamepads() : [], p = pads && Array.prototype.find.call(pads, function (x) { return x && x.connected; });
+    if (!p) { timer = 0; return; }
+    Object.keys(map).forEach(function (b) { map[b](!!(p.buttons[b] && p.buttons[b].pressed)); });
+    timer = requestAnimationFrame(poll);
+  }
+  window.addEventListener("gamepadconnected", function () { document.body.classList.add("tv-mode"); if (!timer) timer = requestAnimationFrame(poll); });
+})();

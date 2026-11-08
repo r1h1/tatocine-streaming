@@ -213,6 +213,7 @@ function runWizardRandom() {
   });
 }
 
+var WIZ_BACK = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>', WIZ_NEXT = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg>';
 function renderWizardResults(requestOk, reuse) {
   // `reuse`: volver a pintar las mismas tres (p. ej. tras guardar un favorito) sin elegir otras.
   var picks = reuse ? wizardCurrent : wizardRandom ? [wizardRandomPick()].filter(Boolean) : (requestOk === false ? [] : wizardPickThree());
@@ -234,8 +235,8 @@ function renderWizardResults(requestOk, reuse) {
       '<div class="wiz-btns"><button type="button" class="wiz-btn primary" data-wiz="play" data-i="' + i + '">' + WIZ_ICONS.play + L("Ver", "Watch") + '</button>' +
       '<button type="button" class="wiz-btn" data-wiz="info" data-i="' + i + '">' + WIZ_ICONS.info + 'Info</button>' +
       '<button type="button" class="wiz-btn icon-only' + (saved ? " active" : "") + '" data-wiz="fav" data-i="' + i + '" aria-pressed="' + saved + '" aria-label="' + (saved ? L("Quitar de favoritos", "Remove from favorites") : L("Agregar a favoritos", "Add to favorites")) + '" title="' + (saved ? L("Quitar de favoritos", "Remove from favorites") : L("Agregar a favoritos", "Add to favorites")) + '">' + (saved ? WIZ_ICONS.heartFilled : WIZ_ICONS.heart) + "</button></div></div></article>";
-  }).join("") + '</div><div class="wiz-actions"><button type="button" class="tc-profile-cancel-btn" data-wiz="back">' + L("Cambiar respuestas", "Change answers") + '</button>' +
-    '<button type="button" class="tc-profile-create-btn" data-wiz="more">' + L("Ver otras 3", "Show 3 more") + "</button></div>";
+  }).join("") + '</div><div class="wiz-actions"><button type="button" class="tc-profile-cancel-btn wiz-btn-ico" data-wiz="back">' + WIZ_BACK + "<span>" + (wizardRandom ? L("Volver", "Back") : L("Cambiar respuestas", "Change answers")) + '</span></button>' +
+    '<button type="button" class="tc-profile-create-btn wiz-btn-ico" data-wiz="more">' + WIZ_NEXT + "<span>" + (wizardRandom ? L("Ver otra", "Show another") : L("Ver otra", "Show another")) + "</span></button></div>";
   body.__picks = picks;
 }
 

@@ -24,7 +24,7 @@
     function countedItems(list) { return (list || []).filter(function (x) { return (x.secs || 0) >= COUNT_SECS || (x.done || 0) > 0; }); }
     function completedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0; }); }
     /** Títulos «vistos» para las recomendaciones: terminados O empezados de verdad (≥ 2 min de reproducción). Cuantos más, mejor se afina. */
-    var ENGAGED_SECS = 30;
+    var ENGAGED_SECS = 1;
     function engagedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0 || (x.secs || 0) >= ENGAGED_SECS; }); }
     function tasteWeight(it) {
       var d = it.done || 0;

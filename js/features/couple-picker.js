@@ -9,6 +9,7 @@ var cpState = null, CP_COUNT = 5;
 var EYE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>', DICE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/></svg>', PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
 var SEARCH_ICO = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+function cpMode() { var o = $("tc-qr-overlay"); if (o) o.classList.add("cp-mode"); }
 function cpName(i) { return cpState.names[i]; }
 function cpKey(m) { return m.type + ":" + m.id; }
 function cpMini(m) { return { id: m.id, type: m.type, title: m.title, bg: m.bg, year: m.year, rating: m.rating }; }
@@ -16,7 +17,7 @@ function cpMini(m) { return { id: m.id, type: m.type, title: m.title, bg: m.bg, 
 var CP_KEY = "tatoPairV2", CP_TTL = 3 * 3600 * 1000;
 function cpSave() {
   if (!cpState) return;
-  try { sessionStorage.setItem(CP_KEY, JSON.stringify({ t: Date.now(), names: cpState.names, kid: !!cpState.kid, phase: cpState.phase, picks: [cpState.picks[0].map(cpMini), cpState.picks[1].map(cpMini)], deck: (cpState.deck || []).map(cpMini), i: cpState.i || 0, oks: (cpState.oks || []).map(cpMini) })); } catch (e) { }
+  try { sessionStorage.setItem(CP_KEY, JSON.stringify({ t: Date.now(), names: cpState.names, kid: !!cpState.kid, phase: cpState.phase, picks: [cpState.picks[0].map(cpMini), cpState.picks[1].map(cpMini)], deck: (cpState.deck || []).map(cpMini), i: cpState.i || 0, oks: (cpState.oks || []).map(cpMini), noes: (cpState.noes || []).map(cpMini) })); } catch (e) { }
 }
 function cpClear() { try { sessionStorage.removeItem(CP_KEY); sessionStorage.removeItem("tatoPairV1"); } catch (e) { } }
 function cpCleanList(a, max) {
@@ -32,7 +33,7 @@ function cpLoad() {
   var phase = ["pick0", "pass", "pick1", "vote", "result"].includes(raw.phase) ? raw.phase : "pick0";
   var deck = cpCleanList(raw.deck, 12);
   return { names: [bkText(String(raw.names[0] || ""), 20) || L("Persona 1", "Person 1"), bkText(String(raw.names[1] || ""), 20) || L("Persona 2", "Person 2")], kid: !!raw.kid, phase: phase,
-    picks: [cpCleanList(raw.picks[0], CP_COUNT), cpCleanList(raw.picks[1], CP_COUNT)], deck: deck, i: Number.isInteger(raw.i) && raw.i >= 0 && raw.i <= deck.length ? raw.i : 0, oks: cpCleanList(raw.oks, 12) };
+    picks: [cpCleanList(raw.picks[0], CP_COUNT), cpCleanList(raw.picks[1], CP_COUNT)], deck: deck, i: Number.isInteger(raw.i) && raw.i >= 0 && raw.i <= deck.length ? raw.i : 0, oks: cpCleanList(raw.oks, 12), noes: cpCleanList(raw.noes, 12), ri: 0 };
 }
 function cpStep() {
   var s = cpState;
@@ -44,7 +45,7 @@ function cpStep() {
 function openCouplePicker() {
   var saved = cpLoad();
   if (!saved) return cpSetupScreen();
-  qrOpen(L("Decidir en pareja", "Decide as a couple"));
+  qrOpen(L("Decidir en pareja", "Decide as a couple")); cpMode();
   var done = saved.phase === "result";
   qrBody().innerHTML = '<p class="tc-qr-note">' + (done ? L("Tienes un resultado de la última ronda.", "You have a result from the last round.") : L("Tienes una ronda sin terminar con ", "You have an unfinished round with ") + "<strong>" + escapeHTML(saved.names[1]) + "</strong>.") + "</p>" +
     '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn cp-choice" data-cp="resume">' + (done ? EYE : PLAY) + "<span>" + (done ? L("Ver resultado", "See result") : L("Continuar", "Continue")) + '</span></button><button type="button" class="tc-profile-cancel-btn cp-choice" data-cp="fresh">' + DICE + "<span>" + L("Nueva ronda", "New round") + "</span></button></div>";
@@ -52,14 +53,14 @@ function openCouplePicker() {
   qrBody().querySelector('[data-cp="fresh"]').onclick = function () { cpClear(); cpState = null; cpSetupScreen(); };
 }
 function cpSetupScreen() {
-  qrOpen(L("Decidir en pareja", "Decide as a couple"));
+  qrOpen(L("Decidir en pareja", "Decide as a couple")); cpMode();
   qrBody().innerHTML = '<p class="tc-qr-note">' + L("Cada uno busca y elige 5 títulos, por turnos y sin ver lo que elige el otro. Los que coincidan quedan aprobados; los demás se votan juntos.", "Each person searches and picks 5 titles, in turns and without seeing the other's picks. Matching titles are approved; the rest are voted on together.") + "</p>" +
     '<label class="tc-qr-label" for="cp-name2">' + L("Nombre de la otra persona", "Name of the other person") + '</label><input id="cp-name2" class="tc-qr-select" maxlength="20" autocomplete="off" placeholder="' + L("Persona 2", "Person 2") + '" />' +
     '<label class="tc-bedtime-on cp-kid"><input type="checkbox" id="cp-kid"' + (isKidProfile() ? " checked disabled" : "") + " /> " + L("Hay un niño viendo (solo contenido infantil)", "A kid is watching (kid-friendly only)") + "</label>" +
     '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn cp-choice" data-cp="start">' + PLAY + "<span>" + L("Empezar", "Start") + "</span></button></div>";
   qrBody().querySelector('[data-cp="start"]').onclick = function () {
     var n2 = bkText($("cp-name2").value, 20) || L("Persona 2", "Person 2");
-    cpState = { names: [bkText(getActiveProfile().name, 20) || L("Persona 1", "Person 1"), n2], kid: $("cp-kid").checked || isKidProfile(), phase: "pick0", picks: [[], []], deck: [], i: 0, oks: [] };
+    cpState = { names: [bkText(getActiveProfile().name, 20) || L("Persona 1", "Person 1"), n2], kid: $("cp-kid").checked || isKidProfile(), phase: "pick0", picks: [[], []], deck: [], i: 0, oks: [], noes: [], ri: 0 };
     cpSave(); cpStep();
   };
 }
@@ -121,7 +122,7 @@ function cpBuildDeck() {
     var k = cpKey(m); if (seen[k]) return; seen[k] = 1;
     if (k1.includes(k) && k2.includes(k)) oks.push(m); else { m._by = k1.includes(k) ? 0 : 1; deck.push(m); }
   });
-  s.oks = oks; s.deck = shuffleInPlace(deck); s.i = 0; s.phase = s.deck.length ? "vote" : "result";
+  s.oks = oks; s.noes = []; s.ri = 0; s.deck = shuffleInPlace(deck); s.i = 0; s.phase = s.deck.length ? "vote" : "result";
 }
 function cpPass() {
   document.body.classList.remove("cp-active");
@@ -138,7 +139,7 @@ function cpShowCard() {
     '<div class="cp-btns"><button type="button" class="cp-no" data-cp="no" aria-label="' + L("No", "No") + '"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button><button type="button" class="cp-info-btn" data-cp="info" aria-label="Info"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button><button type="button" class="cp-yes" data-cp="yes" aria-label="' + L("Sí", "Yes") + '"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></button></div>' +
     '<p class="tc-qr-hint">' + L("Flecha izquierda: no · Flecha derecha: sí", "Left arrow: no · Right arrow: yes") + "</p>";
   var card = $("cp-card"), x0 = null;
-  function answer(yes) { if (yes) s.oks.push(m); s.i++; cpSave(); cpShowCard(); }
+  function answer(yes) { if (yes) s.oks.push(m); else s.noes.push(m); s.i++; cpSave(); cpShowCard(); }
   qrBody().querySelector('[data-cp="no"]').onclick = function () { answer(false); };
   qrBody().querySelector('[data-cp="yes"]').onclick = function () { answer(true); };
   qrBody().querySelector('[data-cp="info"]').onclick = function () { cpOpenInfo(m); };
@@ -152,21 +153,47 @@ window.addEventListener("keydown", function (e) {
   if (!cpState || !$("cp-card") || !$("tc-qr-overlay").classList.contains("open") || document.body.classList.contains("cp-details")) return;
   if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopImmediatePropagation(); qrBody().querySelector('[data-cp="' + (e.key === "ArrowRight" ? "yes" : "no") + '"]').click(); }
 }, true);
+var CP_I = {
+  play: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+  info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  next: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg>',
+  table: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg>',
+  back: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>'
+};
+function cpBtn(act, ico, label, primary) { return '<button type="button" class="cp-btn' + (primary ? " primary" : "") + '" data-cp="' + act + '">' + ico + "<span>" + label + "</span></button>"; }
 function cpResults() {
   document.body.classList.remove("cp-active");
   var s = cpState, both = s.oks || [];
   if (!both.length) {
-    qrBody().innerHTML = '<h4 class="tour-title">' + L("Sin coincidencias", "No matches") + '</h4><p class="tc-qr-note">' + L("Ningún título quedó aprobado. ¡Prueben otra ronda!", "No title was approved. Try another round!") + '</p><div class="tc-profile-create-actions"><button type="button" class="tc-profile-create-btn cp-choice" data-cp="again">' + DICE + "<span>" + L("Otra ronda", "Another round") + "</span></button></div>";
+    qrBody().innerHTML = '<h4 class="tour-title">' + L("Sin coincidencias", "No matches") + '</h4><p class="tc-qr-note">' + L("Ningún título quedó aprobado. ¡Prueben otra ronda!", "No title was approved. Try another round!") + '</p><div class="cp-actions">' + cpBtn("again", DICE, L("Otra ronda", "Another round"), true) + cpBtn("table", CP_I.table, L("Ver resultados", "See results")) + "</div>";
     qrBody().querySelector('[data-cp="again"]').onclick = function () { cpClear(); cpState = null; cpSetupScreen(); };
+    qrBody().querySelector('[data-cp="table"]').onclick = cpTable;
     return;
   }
-  var best = both[0];
+  var ri = (s.ri || 0) % both.length, cur = both[ri];
   qrBody().innerHTML = '<h4 class="tour-title">' + L("¡Aprobaron " + both.length + (both.length === 1 ? " título!" : " títulos!"), "You approved " + both.length + (both.length === 1 ? " title!" : " titles!")) + "</h4>" +
-    '<div class="cp-card cp-win"><img alt="" src="https://image.tmdb.org/t/p/w780' + escapeHTML(best.bg) + '"><div class="cp-info"><strong data-i18n="skip">' + escapeHTML(best.title) + "</strong><span>" + L("La mejor opción para los dos", "The best pick for both of you") + "</span></div></div>" +
-    '<div class="tc-profile-create-actions"><button type="button" class="hero-btn cp-res-btn" data-cp="play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' + L("Ver", "Watch") + '</button><button type="button" class="hero-btn secondary cp-res-btn" data-cp="detail">' + EYE + L("Info", "Info") + '</button><button type="button" class="hero-btn secondary cp-res-btn" data-cp="again">' + DICE + L("Otra ronda", "Another round") + "</button></div>" +
-    (both.length > 1 ? '<p class="wk-top">' + L("También aprobadas: ", "Also approved: ") + both.slice(1).map(function (m) { return escapeHTML(m.title); }).join(" · ") + "</p>" : "");
-  qrBody().querySelector('[data-cp="play"]').onclick = function () { closeQr(); openPlayer(best.id, best.type, best.title, null, null, best.bg || null); };
-  qrBody().querySelector('[data-cp="detail"]').onclick = function () { cpOpenInfo(best); };
+    '<div class="cp-card cp-win"><img alt="" src="https://image.tmdb.org/t/p/w780' + escapeHTML(cur.bg) + '"><div class="cp-info"><strong data-i18n="skip">' + escapeHTML(cur.title) + "</strong><span>" + (ri === 0 ? L("La mejor opción para los dos", "The best pick for both of you") : L("Opción ", "Option ") + (ri + 1) + "/" + both.length) + "</span></div></div>" +
+    '<div class="cp-actions">' + cpBtn("play", CP_I.play, L("Ver", "Watch"), true) + cpBtn("detail", CP_I.info, "Info") + (both.length > 1 ? cpBtn("skip", CP_I.next, L("Siguiente", "Next")) : "") + cpBtn("table", CP_I.table, L("Ver resultados", "See results")) + cpBtn("again", DICE, L("Otra ronda", "Another round")) + "</div>";
+  qrBody().querySelector('[data-cp="play"]').onclick = function () { closeQr(); openPlayer(cur.id, cur.type, cur.title, null, null, cur.bg || null); };
+  qrBody().querySelector('[data-cp="detail"]').onclick = function () { cpOpenInfo(cur); };
+  var sk = qrBody().querySelector('[data-cp="skip"]'); if (sk) sk.onclick = function () { s.ri = ri + 1; cpResults(); };
+  qrBody().querySelector('[data-cp="table"]').onclick = cpTable;
+  qrBody().querySelector('[data-cp="again"]').onclick = function () { cpClear(); cpState = null; cpSetupScreen(); };
+}
+/** Tabla con todos los títulos de la ronda: quién lo eligió y qué pasó con él. */
+function cpTable() {
+  var s = cpState, k0 = s.picks[0].map(cpKey), k1 = s.picks[1].map(cpKey), oks = (s.oks || []).map(cpKey), seen = {}, rows = [];
+  (s.oks || []).concat(s.noes || [], s.picks[0], s.picks[1]).forEach(function (m) {
+    var k = cpKey(m); if (seen[k]) return; seen[k] = 1;
+    var a = k0.includes(k), b = k1.includes(k), approved = oks.includes(k);
+    rows.push({ m: m, by: a && b ? L("Ambos", "Both") : a ? cpName(0) : cpName(1), status: a && b ? "match" : approved ? "voted" : "no" });
+  });
+  var label = { match: L("Coincidencia", "Match"), voted: L("Aprobada", "Approved"), no: L("Descartada", "Dropped") };
+  qrBody().innerHTML = '<h4 class="tour-title">' + L("Resultados", "Results") + '</h4><div class="cp-table-wrap"><table class="cp-table"><thead><tr><th>#</th><th>' + L("Título", "Title") + "</th><th>" + L("Elegida por", "Picked by") + "</th><th>" + L("Resultado", "Result") + '</th><th></th></tr></thead><tbody>' +
+    rows.map(function (r, i) { return '<tr class="cp-' + r.status + '"><td data-l="#">' + (i + 1) + '</td><td data-l="' + L("Título", "Title") + '"><strong data-i18n="skip">' + escapeHTML(r.m.title) + "</strong><small>" + (r.m.type === "tv" ? L("Serie", "Series") : L("Película", "Movie")) + (r.m.year ? " · " + escapeHTML(r.m.year) : "") + '</small></td><td data-l="' + L("Elegida por", "Picked by") + '" data-i18n="skip">' + escapeHTML(r.by) + '</td><td data-l="' + L("Resultado", "Result") + '"><span class="cp-pill">' + label[r.status] + '</span></td><td><button type="button" class="cp-icon-btn" data-row="' + i + '" aria-label="' + L("Ver", "Watch") + '">' + CP_I.play + "</button></td></tr>"; }).join("") +
+    '</tbody></table></div><div class="cp-actions">' + cpBtn("back", CP_I.back, L("Volver", "Back"), true) + cpBtn("again", DICE, L("Otra ronda", "Another round")) + "</div>";
+  qrBody().querySelectorAll("[data-row]").forEach(function (b) { b.onclick = function () { var m = rows[Number(b.getAttribute("data-row"))].m; closeQr(); openPlayer(m.id, m.type, m.title, null, null, m.bg || null); }; });
+  qrBody().querySelector('[data-cp="back"]').onclick = cpResults;
   qrBody().querySelector('[data-cp="again"]').onclick = function () { cpClear(); cpState = null; cpSetupScreen(); };
 }
 registerCommand({ id: "couple", es: "Decidir en pareja (qué ver juntos)", en: "Decide as a couple (what to watch together)", keys: "pareja decidir juntos amigos votar", run: openCouplePicker });
@@ -191,7 +218,7 @@ function cpOpenInfo(m) {
   var guard = setTimeout(function () { if (!seenOpen) finish(); }, 5000);          // la ficha no llegó a abrirse (p. ej. contenido bloqueado)
   openDetails(m.id, m.type);
 }
-decorate("closeQr", function (original) { return function () { document.body.classList.remove("cp-active"); return original.apply(this, arguments); }; });
+decorate("closeQr", function (original) { return function () { document.body.classList.remove("cp-active"); var o = $("tc-qr-overlay"); if (o) o.classList.remove("cp-mode"); return original.apply(this, arguments); }; });
 
 // Si la página se recarga con una ronda sin terminar, se ofrece retomarla.
 (function offerResume() {

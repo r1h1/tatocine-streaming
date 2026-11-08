@@ -235,7 +235,7 @@ async function main() {
     await page.evaluate(() => openWizard());
     await page.click('#tc-wizard-overlay .wiz-chip >> nth=0');
     await page.click('#tc-wizard-overlay [data-wiz="go"]');
-    await page.waitForSelector("#tc-wizard-overlay .wiz-result", { timeout: 25000 });
+    await page.waitForSelector("#tc-wizard-overlay [data-wiz=\"play\"]", { timeout: 25000 });          // resultados reales (no los esqueletos)
     eq(await page.locator("#tc-wizard-overlay .wiz-result").count(), 3, "recomendaciones:");
     await page.evaluate(() => openWizard());
     ok(await page.locator('#tc-wizard-overlay [data-act="wizard-couple"]').isVisible(), "falta el botón Decidir en pareja");
@@ -244,7 +244,7 @@ async function main() {
     ok(await page.locator('#tc-wizard-overlay [data-act="wizard-random"]').isVisible(), "falta el botón Random");
     // «Random»: una sola recomendación al azar, con «Otra al azar»
     await page.click('#tc-wizard-overlay [data-act="wizard-random"]');
-    await page.waitForSelector("#tc-wizard-overlay .wiz-result", { timeout: 25000 });
+    await page.waitForSelector("#tc-wizard-overlay [data-wiz=\"play\"]", { timeout: 25000 });
     eq(await page.locator("#tc-wizard-overlay .wiz-result").count(), 1, "Random debe mostrar UNA película:");
     await page.evaluate(() => closeWizard());
     // Decidir en pareja: cada uno BUSCA y elige sus títulos; los que coinciden se aprueban solos y el resto se vota

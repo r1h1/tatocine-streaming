@@ -473,3 +473,57 @@ body.lite .hero.hero-loading *, body.rm .hero.hero-loading * { animation: none !
 .marathon-next:hover, .marathon-next:focus-visible { background: #fff; color: #000; }
 
 .tc-wizard .wiz-actions > [data-wiz="go"] { grid-column: 1 / -1; }
+
+/* ---------- Ficha: la imagen se ve completa y NO es fija (se va con el scroll) ---------- */
+#details-modal .details-scroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#details-modal .details-scroll::-webkit-scrollbar { display: none; }
+#details-modal .details-content .details-body { overflow: visible; flex: none; min-height: 0; }
+#details-modal .details-backdrop { height: auto; aspect-ratio: 16 / 9; max-height: 62vh; background-position: center top; background-size: cover; }
+@media (min-width: 1100px) { #details-modal .details-backdrop { aspect-ratio: 21 / 9; background-position: center 20%; } }
+
+/* ---------- Menú hamburguesa más grande ---------- */
+.mobile-menu { gap: 18px; padding-top: calc(104px + env(safe-area-inset-top)); }
+.mobile-menu .nav-item { font-size: calc(22px * var(--ts, 1)); padding: 18px 28px; max-width: 380px; width: 86%; }
+.mobile-menu .close-btn { font-size: calc(32px * var(--ts, 1)); top: calc(20px + env(safe-area-inset-top)); }
+
+/* ---------- Ajustes con el mismo efecto «glass» del menú ---------- */
+#settings-modal { background: rgba(10, 10, 10, .6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+#settings-modal .modal-content, #settings-modal .settings-content { background: transparent; }
+
+/* ---------- Reproductor: el color del título tiñe TODO el modal, no solo el borde del vídeo ---------- */
+#player-modal.has-accent { background: radial-gradient(120% 100% at 50% 30%, rgba(var(--accent-rgb), .42), rgba(0, 0, 0, .97) 78%); }
+#player-modal.has-accent .modal-content, #player-modal.has-accent #player-view { background: transparent; }
+
+/* ---------- Botones con icono: tamaño estándar (alto 44 px, ancho al contenido) ---------- */
+.wiz-btn-ico, .cp-choice { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* ---------- Decidir en pareja: botones de tamaño estándar, tabla de resultados y ventana más amplia ---------- */
+.cp-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 14px 0 6px; }
+.cp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .08); color: #fff; font-size: calc(15px * var(--ts, 1)); font-weight: 700; cursor: pointer; }
+.cp-btn:hover, .cp-btn:focus-visible { background: rgba(255, 255, 255, .2); }
+.cp-btn.primary { background: #fff; color: #000; border-color: #fff; }
+.cp-btn.primary:hover, .cp-btn.primary:focus-visible { background: #e6e6e6; }
+.cp-table-wrap { overflow-x: auto; margin: 8px 0 4px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 14px; }
+.cp-table { width: 100%; border-collapse: collapse; font-size: calc(14px * var(--ts, 1)); text-align: left; }
+.cp-table th { padding: 10px 12px; color: rgba(255, 255, 255, .6); font-weight: 600; font-size: calc(12px * var(--ts, 1)); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.cp-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, .06); vertical-align: middle; }
+.cp-table tr:last-child td { border-bottom: 0; }
+.cp-table td small { display: block; color: rgba(255, 255, 255, .6); margin-top: 2px; }
+.cp-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, .12); font-size: calc(12px * var(--ts, 1)); font-weight: 700; white-space: nowrap; }
+.cp-match .cp-pill { background: #3ddc84; color: #000; } .cp-voted .cp-pill { background: #ffd36b; color: #000; } .cp-no { opacity: .55; }
+.cp-icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .08); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.cp-icon-btn:hover, .cp-icon-btn:focus-visible { background: #fff; color: #000; }
+@media (min-width: 821px) { #tc-qr-overlay.cp-mode .tc-profile-create-dialog { width: min(820px, 100%); max-height: 92vh; overflow-y: auto; } }
+@media (max-width: 600px) {
+  .cp-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .cp-actions .cp-btn:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+  .cp-table thead { display: none; } .cp-table, .cp-table tbody, .cp-table tr, .cp-table td { display: block; width: 100%; box-sizing: border-box; }
+  .cp-table tr { padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, .08); position: relative; }
+  .cp-table td { border: 0; padding: 3px 0; } .cp-table td:first-child { display: none; }
+  .cp-table td[data-l]:not(:nth-child(2))::before { content: attr(data-l) ": "; color: rgba(255, 255, 255, .55); }
+  .cp-table td:last-child { position: absolute; right: 10px; top: 10px; width: auto; }
+}
+
+/* Conocido por (ficha del actor) */
+.actor-films { padding: 0 24px calc(24px + env(safe-area-inset-bottom)); flex: none; }
+.actor-content { overflow-y: auto; }

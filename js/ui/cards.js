@@ -58,6 +58,14 @@
         h +
         "</div>";
       $rowsContainer.appendChild(d);
+      rowWarmObserve(d);
+    }
+    /** Cuando una fila está a punto de entrar en pantalla (600 px antes), sus imágenes se piden ya en vez de esperar al scroll. */
+    var rowWarmIO = null;
+    function rowWarmObserve(row) {
+      if (!("IntersectionObserver" in window)) return;
+      if (!rowWarmIO) rowWarmIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; rowWarmIO.unobserve(e.target); e.target.querySelectorAll('img[loading="lazy"]').forEach(function (im, k) { if (k < 8) im.loading = "eager"; }); }); }, { rootMargin: "600px 0px" });
+      rowWarmIO.observe(row);
     }
     function scrollRow(b, d) {
       var r = b.closest(".row"),

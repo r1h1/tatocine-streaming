@@ -120,7 +120,7 @@
       var input = document.getElementById("tc-pin-input");
       var sub = document.getElementById("tc-pin-subtitle");
       var err = document.getElementById("tc-pin-error");
-      if (sub) sub.textContent = "Ingresa el PIN de \u201C" + profile.name + "\u201D para continuar.";
+      if (sub) sub.textContent = L("Ingresa el PIN para continuar.", "Enter the PIN to continue.");
       if (err) err.textContent = "";
       if (input) input.value = "";
       overlay.classList.add("open");

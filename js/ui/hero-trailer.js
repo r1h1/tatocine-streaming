@@ -86,7 +86,7 @@ function htPlay(keys, i, token) {
   f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true"); f.setAttribute("title", "");
   f.setAttribute("allow", "autoplay; encrypted-media");
   f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=" + key + "&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
+  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
   function post(func) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: [] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
   function next(reason) { cleanup(); if (token === htToken) { if (i + 1 >= keys.length) htFail(reason); else htSetStatus(reason); $heroVideoWrap.innerHTML = ""; htPlay(keys, i + 1, token); } }
   function cleanup() { clearTimeout(giveUp); clearInterval(kick); window.removeEventListener("message", onMsg); }

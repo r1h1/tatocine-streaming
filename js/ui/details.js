@@ -371,3 +371,12 @@
 
 registerAction("open-actor", function (el) { openActor(Number(el.dataset.id) || 0); });
 registerAction("close-trailer", function () { closeDetailsTrailer(); });
+
+/** La imagen de la ficha NO es fija: forma parte del contenido y se va con el scroll (envoltorio .details-scroll). */
+(function wrapDetailsScroll() {
+  var c = document.querySelector("#details-modal .details-content"), bd = document.getElementById("details-backdrop"), body = document.getElementById("details-body");
+  if (!c || !bd || !body || document.getElementById("details-scroll")) return;
+  var w = document.createElement("div");
+  w.id = "details-scroll"; w.className = "details-scroll";
+  c.insertBefore(w, bd); w.appendChild(bd); w.appendChild(body);
+})();

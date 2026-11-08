@@ -205,6 +205,17 @@
       if (t.length <= 150) return t;
       return t.slice(0, 150).replace(/[\s.,;:!?¡¿-]+$/, "") + "...";
     }
+    /** Precarga la imagen (y los tráilers) del SIGUIENTE título para que el cambio sea instantáneo. */
+    function heroWarmNext(m) {
+      try {
+        var list = heroMoviesList || [], i = list.findIndex(function (x) { return x && x.id === m.id && x.type === m.type; });
+        var nx = i > -1 && list.length > 1 ? list[(i + 1) % list.length] : null;
+        if (!nx) return;
+        if (nx.bg) { var img = new Image(); img.decoding = "async"; img.src = nx.bg.startsWith("http") ? nx.bg : IMG_BG + nx.bg; }
+        if (typeof htTrailerKeys === "function") htTrailerKeys(nx);
+        fetchTMDB((nx.type === "tv" ? "/tv/" : "/movie/") + nx.id, nx.type === "tv" ? "&append_to_response=content_ratings" : "&append_to_response=release_dates").catch(function () { });
+      } catch (e) { }
+    }
     function setHero(m) {
       if (!m) return;
 
@@ -214,6 +225,7 @@
       setHeroLoading(false);
 
       currentHeroMedia = m;
+      heroWarmNext(m);
       updateHeroSaveButton(m);
       updateHeroDots(m);
 
