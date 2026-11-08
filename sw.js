@@ -6,13 +6,13 @@
    - API de TMDB: «stale-while-revalidate» como las plataformas grandes: si hay copia reciente (< 30 min) se usa tal cual; si es de hasta 6 h se muestra al instante
      y se actualiza en segundo plano; si es más vieja o no hay, red primero con la copia como respaldo sin conexión.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v39";
+const VERSION = "v40";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
 const MAX_IMG = 400;
 const API_FRESH = 30 * 60 * 1000;
-const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
+const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "js/core/error-page.js", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
 const MAX_API = 300;
 const API_MAX_AGE = 6 * 60 * 60 * 1000;
 
