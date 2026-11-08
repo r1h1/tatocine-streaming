@@ -152,7 +152,7 @@ function importBackupPayload(payload) {
         try {
           if (PROFILE_MERGERS[key]) {
             if (safeStorageSet(prefix + key, JSON.stringify(PROFILE_MERGERS[key](readLocalJSON(prefix + key, null), clean[key])))) applied++;
-          } else if (PROFILE_REPLACE_KEYS.indexOf(key) > -1) {
+          } else if (PROFILE_REPLACE_KEYS.includes(key)) {
             if (safeStorageSet(prefix + key, JSON.stringify(clean[key]))) applied++;
           }
         } catch (e) { }

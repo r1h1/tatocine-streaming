@@ -61,7 +61,7 @@
       if (!IS_LOCAL_DEV) {
         var k = String(e.key || "").toLowerCase();
         var ctrl = e.ctrlKey || e.metaKey;
-        if (e.key === "F12" || (ctrl && e.shiftKey && k.length === 1 && "ijcke".indexOf(k) > -1) || (ctrl && !e.shiftKey && k === "u") || (e.metaKey && e.altKey && k.length === 1 && "ijcu".indexOf(k) > -1)) {
+        if (e.key === "F12" || (ctrl && e.shiftKey && k.length === 1 && "ijcke".includes(k)) || (ctrl && !e.shiftKey && k === "u") || (e.metaKey && e.altKey && k.length === 1 && "ijcu".includes(k))) {
           e.preventDefault();
           e.stopImmediatePropagation();
           return;
@@ -83,7 +83,7 @@
         ae.click();
         return;
       }
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) > -1 && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         if (isTypingTarget(ae) || (document.body.classList.contains("cp-active") && !document.body.classList.contains("cp-details"))) return;     // «Decidir en pareja» usa ← → para responder
         var kb = false;
         try { kb = !!ae && ae !== document.body && ae.matches(":focus-visible"); } catch (err) { }

@@ -285,7 +285,7 @@
       if (
         !fromPlay &&
         location.search &&
-        location.search.indexOf("id=") > -1
+        location.search.includes("id=")
       ) {
         try {
           history.replaceState(null, "", location.pathname);
@@ -293,6 +293,22 @@
       }
     }
 
+    /** Biografía corta: 1 o 2 frases (máx. ~220 caracteres), sin paréntesis ni datos de edad o fechas de nacimiento. */
+    function shortBio(text) {
+      var t = String(text || "").replace(/\s+/g, " ").replace(/\([^)]*\)/g, "").replace(/\s{2,}/g, " ").trim();
+      var sentences = (t.match(/[^.!?]+[.!?]+(\s|$)/g) || [t]).map(function (x) { return x.trim(); }).filter(function (x) {
+        return x && !/\b(\d+ years? old|\d+ años|nació el|nacido el|born on|born in \d{4}|falleció|died)\b/i.test(x);
+      });
+      if (!sentences.length) sentences = [t];
+      var out = "";
+      for (var i = 0; i < sentences.length; i++) {
+        if (out && (out + " " + sentences[i]).length > 220) break;
+        out = out ? out + " " + sentences[i] : sentences[i];
+        if (out.length >= 110) break;
+      }
+      if (out.length > 240) out = out.slice(0, 237).replace(/[\s.,;:!?-]+\S*$/, "") + "…";
+      return out;
+    }
     function openActor(actorId) {
       $actorModal.classList.add("open");
       $actorModal.classList.add("is-loading");
@@ -328,7 +344,7 @@
             if (d.profile_path)
               $("actor-photo").src = IMG_W185 + d.profile_path;
             if (d.biography && d.biography.trim().length > 20)
-              $("actor-bio").textContent = d.biography;
+              $("actor-bio").textContent = shortBio(d.biography);
             else if (lang !== "en-US") {
               fetchAndRender("en-US");
               return;

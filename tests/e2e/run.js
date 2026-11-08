@@ -177,7 +177,7 @@ async function main() {
     await page.waitForFunction(() => document.body.classList.contains("kid-mode") && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
     await page.evaluate(() => showSettings());
     const rows = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option")].filter((e) => getComputedStyle(e).display !== "none").map((e) => e.querySelector(".label").textContent.trim()));
-    ok(rows.join("|").includes("Copia de seguridad") && rows.join("|").includes("QR") && rows.length <= 4, "filas visibles para el niño: " + rows.join(", "));
+    ok(rows.join("|").includes("Copiar tus datos") && rows.join("|").includes("QR") && rows.length <= 4, "filas visibles para el niño: " + rows.join(", "));
     eq(await page.evaluate(() => { switchView("movies"); return currentView; }), "kids", "un perfil infantil solo ve Niños:");
   });
 
@@ -240,11 +240,29 @@ async function main() {
     await page.evaluate(() => openWizard());
     ok(await page.locator('#tc-wizard-overlay [data-act="wizard-couple"]').isVisible(), "falta el botón Decidir en pareja");
     const bx = await page.evaluate(() => [...document.querySelectorAll("#tc-wizard-overlay .wiz-actions > button")].map((b) => Math.round(b.getBoundingClientRect().top)));
-    eq(bx.length, 2, "botones del asistente:"); eq(bx[0], bx[1], "en pantallas grandes van uno al lado del otro:");
+    eq(bx.length, 3, "botones del asistente (Mostrar, Random, Pareja):"); eq(bx[1], bx[2], "Random y Pareja van uno al lado del otro:");
+    ok(await page.locator('#tc-wizard-overlay [data-act="wizard-random"]').isVisible(), "falta el botón Random");
+    // «Random»: una sola recomendación al azar, con «Otra al azar»
+    await page.click('#tc-wizard-overlay [data-act="wizard-random"]');
+    await page.waitForSelector("#tc-wizard-overlay .wiz-result", { timeout: 25000 });
+    eq(await page.locator("#tc-wizard-overlay .wiz-result").count(), 1, "Random debe mostrar UNA película:");
     await page.evaluate(() => closeWizard());
+    // Decidir en pareja: cada uno BUSCA y elige sus títulos; los que coinciden se aprueban solos y el resto se vota
     await page.evaluate(() => openCouplePicker());
     await page.click('[data-cp="start"]');
-    await page.waitForSelector("#cp-card", { timeout: 20000 });
+    await page.fill("#cp-q", "matrix");
+    await page.waitForSelector(".cp-res", { timeout: 20000 });
+    await page.locator(".cp-res").nth(0).click(); await page.locator(".cp-res").nth(1).click();
+    eq(await page.locator(".cp-chip").count(), 2, "títulos elegidos por la persona 1:");
+    await page.click('[data-cp="done"]');
+    await page.waitForSelector('[data-cp="go"]');
+    await page.click('[data-cp="go"]');
+    await page.fill("#cp-q", "matrix");
+    await page.waitForSelector(".cp-res", { timeout: 20000 });
+    await page.locator(".cp-res").nth(0).click(); await page.locator(".cp-res").nth(2).click();
+    await page.click('[data-cp="done"]');
+    await page.waitForSelector("#cp-card", { timeout: 20000 });                         // 1 aprobado solo (coincidencia) + 2 por votar
+    ok((await page.locator(".tc-qr-meta").first().innerText()).includes("1/2"), "debían quedar 2 títulos por votar");
     await page.keyboard.press("ArrowRight");
     ok((await page.locator(".tc-qr-meta").first().innerText()).includes("2/"), "← → no responden");
     await page.click('[data-cp="info"]');
@@ -297,6 +315,27 @@ async function main() {
     eq(await page.evaluate(() => UI_LANG), "es", "idioma del Invitado:");
     ok(/Inicio/.test(await page.evaluate(() => document.querySelector(".top-nav, nav, body").innerText)), "la interfaz no está en español");
     await page.waitForFunction(() => heroMoviesList.length === 10, null, { timeout: 20000 });
+  });
+
+  await test("2 títulos empezados activan «Hecho para ti»; «Vistas» lista lo terminado; estadísticas ignoran lo de menos de 15 min; existe «Maratón de películas»", async (page) => {
+    await enter(page);
+    await page.evaluate(() => {
+      const now = Date.now();
+      localAnalytics.items = [
+        { id: 96721, type: "movie", title: "Rush: Pasión y Gloria", genreIds: [28, 18, 53], secs: 7860, plays: 4, done: 1, lastPlayedAt: now - 86400000, lang: "en" },
+        { id: 911430, type: "movie", title: "F1 la película", genreIds: [28, 18], secs: 60, plays: 1, done: 0, lastPlayedAt: now - 3600000, lang: "en" },
+        { id: 96677, type: "tv", title: "Lupin", genreIds: [18, 80, 9648], secs: 60, plays: 1, done: 0, lastPlayedAt: now - 7200000, lang: "fr" },
+        { id: 550, type: "movie", title: "Fight Club", genreIds: [18, 53], secs: 1000, plays: 1, done: 0, lastPlayedAt: now - 9000000, lang: "en" }];
+      saveLocalAnalytics(); switchView("home");
+    });
+    await page.waitForFunction(() => [...document.querySelectorAll(".row-title")].some((e) => e.textContent === "Hecho para ti"), null, { timeout: 25000 });
+    eq(await page.evaluate(() => countedItems(localAnalytics.items).length), 2, "títulos que cuentan (≥ 15 min o terminados):");
+    await page.evaluate(() => switchView("list"));
+    await page.waitForSelector('[data-v="watched"]');
+    ok(await page.locator('[data-act="start-marathon"]').isVisible(), "falta el botón Maratón de películas");
+    await page.click('[data-v="watched"]');
+    await page.waitForSelector("#rows-container .card", { timeout: 10000 });
+    ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
   await test("portada: sin botón de volumen, 1,8 s para verse, 31 s por título y menú «Mi cine»", async (page) => {

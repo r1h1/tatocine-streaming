@@ -14,7 +14,7 @@
       if (
         m.type === "tv" &&
         m.original_language === "ja" &&
-        (m.genre_ids || []).indexOf(16) > -1
+        (m.genre_ids || []).includes(16)
       )
         return "Anime";
       return "Serie";

@@ -49,6 +49,8 @@
       var d = document.createElement("div");
       d.className = "row catalog-row";
       var h = m.map(getCardHTML).join("");
+      // La primera fila es lo primero que se ve: sus primeras imágenes se piden ya (alta prioridad); el resto, perezosas.
+      if (!$rowsContainer.querySelector(".catalog-row")) { var eager = 0; h = h.replace(/loading="lazy" decoding="async"/g, function (x) { return eager++ < 4 ? 'loading="eager" fetchpriority="high" decoding="async"' : x; }); }
       d.innerHTML =
         '<div class="row-header"><h2 class="row-title">' +
         escapeHTML(t) +

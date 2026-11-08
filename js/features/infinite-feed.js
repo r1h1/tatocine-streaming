@@ -56,8 +56,8 @@ function homeFeedSource() {
         var movies = ((r[0] && r[0].results) || []).map(mapMovieResult), shows = ((r[1] && r[1].results) || []).map(function (x) { return mapTvResult(x); });
         function clean(list) { return list.filter(function (m) { return m.bg && !m.isUpcoming && !seen[m.type + ":" + m.id]; }); }
         movies = clean(movies); shows = clean(shows);
-        if (movies.length >= 6) feedAppendRow((forYou ? L("Para ti: ", "For you: ") : "") + name + " · " + L("Películas", "Movies"), movies);
-        if (shows.length >= 6) feedAppendRow((forYou ? L("Para ti: ", "For you: ") : "") + name + " · " + L("Series", "Series"), shows);
+        if (movies.length >= 6) feedAppendRow(name + " · " + L("Películas", "Movies"), movies);
+        if (shows.length >= 6) feedAppendRow(name + " · " + L("Series", "Series"), shows);
         return true;
       });
     }

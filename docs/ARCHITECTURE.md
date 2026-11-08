@@ -137,3 +137,5 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 - Hero: `heroTop10(view, snapshot)` en `ui/views.js` sustituye la lista de la sección por su Top 10 semanal (trending; Anime/Niños por popularidad con filtros). Tráiler: modo por defecto `on` (Siempre), idioma del perfil. Niños: `kidLimitSecs()/kidBreakMs()` leen `screenHours/breakHours` del perfil.
 
 - Errores: `core/errors.js` (manejadores globales, registro, pantalla de error grave), `ui/skeletons.js` (`apiProblem`, `emptyOffline`, `renderRowError`), `ui/views.js` (`rowOrRetry`), `404.html`/`500.html` (precacheadas por `sw.js`). Tráiler: `HERO_DWELL_TRAILER` 31 s, `HT_START_MS` 1,8 s, sin botón de volumen.
+
+- Nuevos: `features/marathon.js` (cola infinita, decora `playNextSimilar`/`closePlayer`), `features/couple-picker.js` (fases pick0 → pass → pick1 → vote → result, sesión `tatoPairV2`), `discover-wizard.js` (`runWizardRandom`), `watch-tracking.js` (`countedItems`, `COUNT_SECS` 900), `recommendations.js` (coseno + bayesiana + MMR + exploración), `sw.js` v31 (IMG_CACHE y SWR en API), `tests/compat.test.js`.

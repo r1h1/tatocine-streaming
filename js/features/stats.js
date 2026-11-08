@@ -11,14 +11,14 @@
       return h > 0 ? h + " h " + (m < 10 ? "0" : "") + m + " min" : m + " min";
     }
     function profileItems(pid) {
-      if (pid === activeProfileId) return localAnalytics.items || [];
+      if (pid === activeProfileId) return countedItems(localAnalytics.items || []);
       var d = readLocalJSON("tatoProfile_" + pid + "_" + LOCAL_ANALYTICS_KEY, { items: [] });
-      return d && Array.isArray(d.items) ? d.items : [];
+      return d && Array.isArray(d.items) ? countedItems(d.items) : [];
     }
     function sumSecs(items) { return items.reduce(function (s, x) { return s + (x.secs || 0); }, 0); }
     function openStats() {
       if (isKidProfile()) return;
-      var items = (localAnalytics.items || []).slice();
+      var items = countedItems(localAnalytics.items || []).slice();
       var totalSecs = sumSecs(items);
       var finished = completedTitles().length;
       var byCat = { movie: 0, tv: 0, anime: 0, doc: 0 }, byCatCount = { movie: 0, tv: 0, anime: 0, doc: 0 };

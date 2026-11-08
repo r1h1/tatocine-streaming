@@ -199,7 +199,7 @@
           "on_ended",
           "onended",
           "playback_ended",
-        ].indexOf(eventName) > -1
+        ].includes(eventName)
       )
         return true;
       if (

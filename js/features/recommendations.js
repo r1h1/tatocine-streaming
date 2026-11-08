@@ -4,7 +4,7 @@
  * Script clásico (sin módulos): comparte el ámbito global con el resto de js/ para que los
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
-    // ---- Recomendaciones locales: se activan con 2 títulos finalizados y mejoran con cada uno más ----
+    // ---- Recomendaciones locales: se activan con 2 títulos empezados (aunque no se terminen) y mejoran con cada uno más ----
     function insertPersonalRow(title, picks, anchor, className) {
       var row = document.createElement("div");
       row.className = "row catalog-row personalized-row " + (className || "");
@@ -63,6 +63,10 @@
       allSeeds.forEach(function (sd) {
         requests.push(fetchTMDB("/" + (sd.type === "tv" ? "tv" : "movie") + "/" + sd.id + "/recommendations"));
       });
+      var simOffset = requests.length;                                     // /similar de los 2 títulos más relevantes (segunda señal colaborativa)
+      seeds.slice(0, 2).forEach(function (sd) {
+        requests.push(fetchTMDB("/" + (sd.type === "tv" ? "tv" : "movie") + "/" + sd.id + "/similar"));
+      });
       Promise.all(requests.map(function (p) { return p.catch(function () { return null; }); })).then(function (res) {
         if (snapshot !== catalogRequestId || currentView !== "home") return;
         var seen = {};
@@ -75,7 +79,7 @@
           if (!(raw.backdrop_path || raw.poster_path)) return;
           var key = type + ":" + raw.id;
           if (!pool[key]) pool[key] = { raw: raw, type: type, seedHits: 0, discover: false, seeds: [] };
-          if (source === "seed") { pool[key].seedHits++; pool[key].seeds.push(seedIdx); } else pool[key].discover = true;
+          if (source === "seed") { pool[key].seedHits++; pool[key].seeds.push(seedIdx); } else if (source === "similar") pool[key].seedHits += 0.5; else pool[key].discover = true;
         }
         pages.forEach(function (pg, i) {
           ((res[i * 2] && res[i * 2].results) || []).forEach(function (x) { add(x, "movie", "discover"); });
@@ -85,19 +89,31 @@
           var r = res[seedOffset + i];
           ((r && r.results) || []).forEach(function (x) { add(x, sd.type === "tv" ? "tv" : "movie", "seed", i); });
         });
+        seeds.slice(0, 2).forEach(function (sd, i) {
+          var r = res[simOffset + i];
+          ((r && r.results) || []).forEach(function (x) { add(x, sd.type === "tv" ? "tv" : "movie", "similar"); });
+        });
+        var userNorm = Math.sqrt(Object.keys(weights).reduce(function (a, k) { return a + weights[k] * weights[k]; }, 0)) || 1;
+        var thisYear = new Date().getFullYear();
         var scored = Object.keys(pool).map(function (key) {
           var c = pool[key];
           var g = c.raw.genre_ids || [];
-          var genreScore = g.reduce(function (sum, id) { return sum + (weights[id] || 0); }, 0) / (maxWeight * 2);
-          var votes = c.raw.vote_count || 0;
-          var quality = votes >= 40 ? (c.raw.vote_average || 0) / 10 : 0.3;
+          // Afinidad de género: similitud coseno entre el perfil del usuario y los géneros del título.
+          var dot = g.reduce(function (sum, id) { return sum + (weights[id] || 0); }, 0);
+          var sim = dot / (userNorm * Math.sqrt(g.length || 1));
+          // Calidad con media bayesiana (pocos votos no inflan la nota): WR = v/(v+m)·R + m/(v+m)·C.
+          var votes = c.raw.vote_count || 0, R = c.raw.vote_average || 0, WR = (votes / (votes + 200)) * R + (200 / (votes + 200)) * 6.5;
+          var quality = Math.max(0, Math.min(1, (WR - 5) / 4));
           var pop = Math.min(1, Math.log10((c.raw.popularity || 0) + 1) / 3);
           var lang = topLang && c.raw.original_language === topLang ? 0.15 * langShare : 0;
-          var score = Math.min(1.5, genreScore) + c.seedHits * 0.55 + (c.discover ? 0.1 : 0) + quality * 0.8 + pop * 0.2 + typeShare[c.type] * 0.35 + lang;
+          var yr = Number(String(c.raw.release_date || c.raw.first_air_date || "").slice(0, 4)) || 0, age = yr ? thisYear - yr : 99;
+          var recent = age <= 2 ? 1 : age <= 5 ? 0.6 : age <= 10 ? 0.3 : 0;
+          var score = 1.4 * Math.min(1, sim) + Math.min(3, c.seedHits) * 0.55 + (c.discover ? 0.1 : 0) + quality * 0.8 + pop * 0.2 + typeShare[c.type] * 0.35 + lang + recent * 0.35;
           var mapped = c.type === "tv" ? mapTvResult(c.raw) : mapMovieResult(c.raw);
           if (mapped.isUpcoming) return null;
           mapped._tasteScore = score;
           mapped._seeds = c.seeds;
+          mapped._genres = g;
           return mapped;
         }).filter(Boolean);
         scored.sort(function (a, b) { return b._tasteScore - a._tasteScore; });
@@ -107,16 +123,31 @@
           tv: Math.max(6, Math.ceil(limit * Math.min(0.85, typeShare.tv + 0.25)))
         };
         var picks = [], counts = { movie: 0, tv: 0 }, used = {};
-        scored.forEach(function (m) {
-          if (picks.length >= limit || counts[m.type] >= cap[m.type]) return;
-          counts[m.type]++;
-          used[m.type + ":" + m.id] = true;
-          picks.push(m);
-        });
+        // Diversidad (MMR): cada elección penaliza lo muy parecido a lo ya elegido, para no llenar la fila de un solo género.
+        function jaccard(x, y) { var a = x._genres || [], b = y._genres || [], inter = a.filter(function (id) { return b.includes(id); }).length, uni = a.length + b.length - inter; return uni ? inter / uni : 0; }
+        var exploreN = Math.max(2, Math.round(limit * 0.15)), mainN = limit - exploreN, rest = scored.slice();
+        while (picks.length < mainN && rest.length) {
+          var bi = -1, bv = -Infinity;
+          for (var ri = 0; ri < rest.length; ri++) {
+            var cand = rest[ri];
+            if (counts[cand.type] >= cap[cand.type]) continue;
+            var maxSim = picks.reduce(function (mx, p0) { return Math.max(mx, jaccard(cand, p0)); }, 0);
+            var val = cand._tasteScore - 0.45 * maxSim;
+            if (val > bv) { bv = val; bi = ri; }
+          }
+          if (bi < 0) break;
+          var ch = rest.splice(bi, 1)[0];
+          counts[ch.type]++; used[ch.type + ":" + ch.id] = true; picks.push(ch);
+        }
+        // Exploración (serendipia): algunos títulos fuera de tus géneros principales, los de mejor calidad.
+        var topSet = {}; topGenres.forEach(function (id) { topSet[id] = true; });
+        rest.filter(function (m0) { return !(m0._genres || []).some(function (id) { return topSet[id]; }); })
+          .sort(function (a0, b0) { return b0._tasteScore - a0._tasteScore; }).slice(0, exploreN)
+          .forEach(function (m0) { used[m0.type + ":" + m0.id] = true; picks.push(m0); });
         if (!picks.length) return;
         var main = insertPersonalRow("Hecho para ti", picks, null, "");
         // "Porque viste X": recomendaciones directas del título finalizado más relevante.
-        var because = scored.filter(function (m) { return m._seeds.indexOf(0) > -1 && !used[m.type + ":" + m.id]; }).slice(0, 16);
+        var because = scored.filter(function (m) { return m._seeds.includes(0) && !used[m.type + ":" + m.id]; }).slice(0, 16);
         if (because.length >= 6 && seeds[0]) insertPersonalRow("Porque viste " + seeds[0].title, because, main, "because-row");
       }).catch(function () { });
     };

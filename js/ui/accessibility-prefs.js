@@ -11,7 +11,7 @@ var A11Y_KEY = "tatoA11yV1", A11Y_SCALES = [100, 115, 130];
 var a11yPrefs = (function () {
   var p = readLocalJSON(A11Y_KEY, {});
   if (!p || typeof p !== "object" || Array.isArray(p)) p = {};
-  return { scale: A11Y_SCALES.indexOf(p.scale) > -1 ? p.scale : 100, hc: p.hc === true, rm: p.rm === true };
+  return { scale: A11Y_SCALES.includes(p.scale) ? p.scale : 100, hc: p.hc === true, rm: p.rm === true };
 })();
 function applyA11yPrefs() {
   var b = document.body;

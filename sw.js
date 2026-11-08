@@ -2,14 +2,18 @@
    - Instalación: guarda TODO el shell (HTML, CSS, JS, iconos y página sin conexión) leyendo index.html: funciona sin internet desde la primera vez.
    - Actualización: una versión nueva espera a que pulses «Actualizar» (no cambia el código a mitad de una película).
    - Shell (HTML, manifest, iconos): red primero con respaldo offline.
-   - Imágenes de TMDB: NO se interceptan (TMDB ya las sirve con caché HTTP de ~1 año y el navegador las guarda).
-   - API de TMDB: red primero; caché solo como respaldo sin conexión (con límite y caducidad).
+   - Imágenes de TMDB: caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 400.
+   - API de TMDB: «stale-while-revalidate» como las plataformas grandes: si hay copia reciente (< 30 min) se usa tal cual; si es de hasta 6 h se muestra al instante
+     y se actualiza en segundo plano; si es más vieja o no hay, red primero con la copia como respaldo sin conexión.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v30";
+const VERSION = "v31";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
+const IMG_CACHE = "tatocine-img-v1";
+const MAX_IMG = 400;
+const API_FRESH = 30 * 60 * 1000;
 const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
-const MAX_API = 90;
+const MAX_API = 300;
 const API_MAX_AGE = 6 * 60 * 60 * 1000;
 
 self.addEventListener("install", (event) => {
@@ -29,7 +33,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      const keep = [SHELL_CACHE, API_CACHE];
+      const keep = [SHELL_CACHE, API_CACHE, IMG_CACHE];
       const names = await caches.keys();
       await Promise.all(names.filter((n) => n.startsWith("tatocine-") && !keep.includes(n)).map((n) => caches.delete(n)));
       if (self.registration.navigationPreload) { try { await self.registration.navigationPreload.enable(); } catch (e) { } }
@@ -83,10 +87,26 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (url.hostname === "image.tmdb.org") {                                              // imágenes: caché primero (la URL es inmutable)
+    event.respondWith((async () => {
+      const cache = await caches.open(IMG_CACHE);
+      const hit = await cache.match(req.url);
+      if (hit) return hit;
+      try {
+        const res = await fetch(new Request(req.url, { mode: "cors", credentials: "omit" }));    // CORS: la copia no es «opaca» (las opacas pesan 7 MB de cuota cada una)
+        if (res.ok) { cache.put(req.url, res.clone()).then(() => trim(IMG_CACHE, MAX_IMG)); }
+        return res;
+      } catch (e) { return fetch(req); }
+    })());
+    return;
+  }
+
   if (url.hostname === "api.themoviedb.org" && !url.searchParams.has("_g")) {          // «_g»: perfil Invitado, sin caché
     event.respondWith((async () => {
       const cache = await caches.open(API_CACHE);
-      try {
+      const hit = await cache.match(req);
+      const age = hit ? Date.now() - Number(hit.headers.get("x-tc-cached-at") || 0) : Infinity;
+      const refresh = async () => {
         const res = await timeoutFetch(req, 10000);
         if (res.ok) {
           const headers = new Headers(res.headers);
@@ -95,14 +115,11 @@ self.addEventListener("fetch", (event) => {
           cache.put(req, new Response(body, { status: 200, headers })).then(() => trim(API_CACHE, MAX_API));
         }
         return res;
-      } catch (e) {
-        const hit = await cache.match(req);
-        if (hit) {
-          const at = Number(hit.headers.get("x-tc-cached-at") || 0);
-          if (Date.now() - at < API_MAX_AGE * 4) return hit;
-        }
-        throw e;
-      }
+      };
+      if (hit && age < API_FRESH) return hit;                                          // reciente: instantáneo
+      if (hit && age < API_MAX_AGE) { event.waitUntil(refresh().catch(() => null)); return hit; }   // algo viejo: se muestra ya y se actualiza detrás
+      try { return await refresh(); }
+      catch (e) { if (hit && age < API_MAX_AGE * 4) return hit; throw e; }
     })());
   }
 });

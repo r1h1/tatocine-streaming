@@ -70,7 +70,7 @@ var BK_SANITIZERS = {
       m.firstPlayedAt = bkNum(x.firstPlayedAt, 0, 4102444800000, 0); m.lastPlayedAt = bkNum(x.lastPlayedAt, 0, 4102444800000, 0);
       m.lang = typeof x.lang === "string" && /^[a-z]{2,3}$/.test(x.lang) ? x.lang : "";
       m.runtime = bkNum(x.runtime, 0, 1000, 0);
-      m.cat = ["movie", "tv", "anime", "doc"].indexOf(x.cat) > -1 ? x.cat : "";
+      m.cat = ["movie", "tv", "anime", "doc"].includes(x.cat) ? x.cat : "";
       return m;
     }).filter(Boolean) };
   },
@@ -105,7 +105,7 @@ var BK_SANITIZERS = {
   tatoRecentSearches: function (raw) { return bkArr(raw).map(function (q) { return bkText(q, 60); }).filter(Boolean).slice(0, 8); }
 };
 var BK_REPLACE = {
-  tatoServer: function (raw, ctx) { return typeof raw === "string" && ctx.servers.indexOf(raw) > -1 ? raw : undefined; },
+  tatoServer: function (raw, ctx) { return typeof raw === "string" && ctx.servers.includes(raw) ? raw : undefined; },
   tatoAutoNextEpisode: function (raw) { return typeof raw === "boolean" ? raw : undefined; }
 };
 

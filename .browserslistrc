@@ -1,0 +1,7 @@
+# Navegadores objetivo: de 2022 en adelante (sin transpilar: la app es JavaScript y CSS nativos)
+chrome >= 100
+edge >= 100
+firefox >= 100
+safari >= 15.4
+ios_saf >= 15.4
+android >= 100

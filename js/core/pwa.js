@@ -76,5 +76,5 @@
       e.stopImmediatePropagation();
       img.setAttribute("data-retry", String(tries + 1));
       var base = img.src.replace(/[?&]r=\d+$/, "");
-      window.setTimeout(function () { img.src = base + (base.indexOf("?") > -1 ? "&" : "?") + "r=" + (tries + 1); }, 400 * (tries + 1));
+      window.setTimeout(function () { img.src = base + (base.includes("?") ? "&" : "?") + "r=" + (tries + 1); }, 400 * (tries + 1));
     }, true);

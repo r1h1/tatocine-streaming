@@ -13,6 +13,7 @@
     var LITE_FX = LITE_PREF === "on" || (LITE_PREF === "auto" && (IS_TV || slowNet || lowDevice));
     var LITE_DATA = LITE_PREF === "on" || (LITE_PREF === "auto" && slowNet);
     if (LITE_FX) document.body.classList.add("lite");
+    if (window.innerWidth <= 820) IMG_BG = "https://image.tmdb.org/t/p/w780";            // en móvil y tableta la portada no necesita 1280 px (ahorra ~50 % de bytes)
     if (LITE_DATA) { IMG_CARD = "https://image.tmdb.org/t/p/w185"; IMG_BG = "https://image.tmdb.org/t/p/w780"; }
     var LITE_LABELS = {
       auto: "Automático: se activa en TV, conexiones lentas y equipos modestos",

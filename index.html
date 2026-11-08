@@ -11,7 +11,7 @@
     html.tc-picker-boot body > *:not(#tc-profile-overlay):not(script):not(style):not(link) { visibility: hidden !important; }
   </style>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
-  <title>TatoCine | Películas, series y anime</title>
+  <title>TatoCine | Streaming Gratis</title>
   <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -170,7 +170,7 @@
   </header>
 
   <main class="main-content">
-    <header class="hero" id="hero-section">
+    <header class="hero hero-loading" id="hero-section">
       <div class="hero-video-wrap" id="hero-video-wrap"></div>
       <div class="hero-bg" id="hero-bg"></div>
       <div class="hero-empty-state" id="hero-empty-state" aria-hidden="true">
@@ -195,7 +195,7 @@
             stroke-linejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6" />
           </svg>
-          Regresar a inicio
+          Regresar
         </button>
         <div class="search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -207,9 +207,9 @@
             id="search-input" autocomplete="off" />
         </div>
         <h1 class="hero-title" id="hero-title">Cargando...</h1>
-        <div class="hero-year" id="hero-year">2024</div>
+        <div class="hero-year" id="hero-year">2026</div>
         <div class="hero-meta" id="hero-meta"></div>
-        <p class="hero-desc" id="hero-desc">Cargando descripción...</p>
+        <p class="hero-desc" id="hero-desc">Cargando...</p>
         <div class="hero-actions" id="hero-actions">
           <button class="hero-btn" id="hero-play-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -227,7 +227,7 @@
             Info
           </button>
           <button type="button" class="hero-btn secondary hero-wizard-btn" id="hero-wizard-btn"
-            data-h="h20" title="¿Qué ver hoy?" aria-label="¿Qué ver hoy?">
+            data-h="h20" title="¿Qué ver?" aria-label="¿Qué ver?">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
@@ -237,7 +237,7 @@
               <circle cx="8.5" cy="15.5" r="1.3" fill="currentColor" />
               <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" />
             </svg>
-            <span class="hero-wizard-label">¿Qué ver hoy?</span>
+            <span class="hero-wizard-label">¿Qué ver?</span>
           </button>
           <button type="button" class="hero-btn secondary hero-save-btn" id="hero-save-btn"
             data-h="h21" title="Agregar a favoritos" aria-label="Agregar a favoritos"
@@ -282,7 +282,7 @@
           <select id="season-select" class="tv-select"></select>
           <select id="episode-select" class="tv-select"></select>
           <button type="button" id="auto-next-toggle" class="auto-next-toggle on" data-h="h24"
-            title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Siguiente: ACTIVADO</button>
+            title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Auto: ACTIVADO</button>
         </div>
         <div class="server-switcher" id="server-switcher"></div>
         <div class="player-container" id="player-view"></div>
@@ -342,7 +342,7 @@
                 stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
               </svg>
-              <span>Ver Tráiler</span>
+              <span>Tráiler</span>
             </button>
             <button type="button" class="hero-btn secondary" id="details-share-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -381,7 +381,7 @@
             </div>
           </div>
           <div id="details-similar-container" style="display: none; margin-top: 24px">
-            <div class="details-cast-title">Recomendados para ti</div>
+            <div class="details-cast-title">Para ti</div>
             <div class="cast-wrapper">
               <button class="cast-nav prev" data-h="h29" aria-label="Anterior">
                 ‹
@@ -423,7 +423,7 @@
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Continuar Viendo</div>
-            <div class="sub-label">Borrar historial de reproducción</div>
+            <div class="sub-label">Borrar historial</div>
           </div>
           <button class="danger-btn" data-h="h33">
             Borrar
@@ -432,7 +432,7 @@
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Favoritos</div>
-            <div class="sub-label">Eliminar todos los favoritos</div>
+            <div class="sub-label">Eliminar favoritos</div>
           </div>
           <button class="danger-btn" data-h="h34">
             Borrar
@@ -449,19 +449,18 @@
         </div>
         <div class="settings-option" data-adult-only>
           <div>
-            <div class="label">Recomendaciones personalizadas</div>
+            <div class="label">Recomendar contenido</div>
             <div class="sub-label" id="local-analytics-summary">
-              Tus preferencias se calculan localmente en este navegador. No se
-              envían a TatoCine.
+              Tus preferidos se calculan localmente en este navegador.
             </div>
           </div>
           <button class="danger-btn" data-h="h36">
-            Borrar preferencias
+            Borrar preferidos
           </button>
         </div>
                 <div class="settings-option" data-adult-only>
           <div>
-            <div class="label">Tráiler en la portada</div>
+            <div class="label">Tráiler en portada</div>
             <div class="sub-label" id="hero-trailer-sub">Siempre</div>
           </div>
           <div class="settings-actions">
@@ -477,8 +476,8 @@
         </div>
         <div class="settings-option" data-adult-only id="install-option" hidden>
           <div>
-            <div class="label">Instalar aplicación</div>
-            <div class="sub-label" id="install-sub">Añade TatoCine a tu pantalla de inicio.</div>
+            <div class="label">Instalar app</div>
+            <div class="sub-label" id="install-sub">Añade TatoCine a tu dispositivo.</div>
           </div>
           <button class="danger-btn" data-h="h15">Instalar</button>
         </div>
@@ -487,7 +486,7 @@
             <div class="label">Almacenamiento</div>
             <div class="sub-label" id="storage-summary">Calculando…</div>
           </div>
-          <button class="danger-btn" data-h="h38">Liberar espacio</button>
+          <button class="danger-btn" data-h="h38">Liberar</button>
         </div>
                 <div class="settings-option a11y-option">
           <div>
@@ -504,7 +503,7 @@
         </div>
 <div class="settings-option">
           <div>
-            <div class="label">Copia de seguridad completa</div>
+            <div class="label">Copiar tus datos</div>
           </div>
           <div class="settings-actions">
             <button class="danger-btn" data-h="h43">Exportar</button>
@@ -514,7 +513,7 @@
         </div>
         <div class="settings-option">
           <div>
-            <div class="label">Pasar a otro dispositivo (QR)</div>
+            <div class="label">Copiar tus datos (QR)</div>
             <div class="sub-label">Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.</div>
           </div>
           <div class="settings-actions">
@@ -524,7 +523,7 @@
         </div>
                 <div class="settings-option" data-adult-only>
           <div>
-            <div class="label">Avisos de estreno</div>
+            <div class="label">Avisos de estrenos</div>
             <div class="sub-label" id="alerts-sub">Te avisa de estrenos de hoy y mañana al abrir la app.</div>
           </div>
           <div class="settings-actions">
@@ -534,7 +533,7 @@
 <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Resumen semanal</div>
-            <div class="sub-label">Revisa cuánto y qué vieron en la última semana.</div>
+            <div class="sub-label">Revisa tu semana.</div>
           </div>
           <div class="settings-actions">
             <button class="danger-btn" data-h="h47">Ver</button>
@@ -542,7 +541,7 @@
         </div>
         <div class="settings-option" data-adult-only>
           <div>
-            <div class="label">Atajos de Teclado</div>
+            <div class="label">Atajos</div>
             <div class="sub-label">/ buscar · Ctrl+K paleta de comandos · ← ↑ → ↓ moverse · Enter abrir · F pantalla completa · Esc o Atrás cerrar</div>
           </div>
         </div>
@@ -561,8 +560,8 @@
       <div class="tc-profile-brand" aria-label="TatoCine">TatoCine</div>
       <div class="tc-profile-heading">
         <div>
-          <h2 id="tc-profile-title">¿Quién está viendo?</h2>
-          <p class="tc-profile-note" id="tc-profile-count">Elige un perfil para continuar</p>
+          <h2 id="tc-profile-title">¿Quién eres?</h2>
+          <p class="tc-profile-note" id="tc-profile-count">Elige tu perfil</p>
         </div>
         <button class="tc-profile-close" type="button" data-h="h49" aria-label="Cerrar">×</button>
       </div>
@@ -577,17 +576,17 @@
     <section class="tc-profile-create-dialog pf-dialog">
       <button class="tc-profile-create-close" type="button" data-h="h51"
         aria-label="Cerrar">×</button>
-      <h3 id="tc-profile-create-title">Agregar perfil</h3>
+      <h3 id="tc-profile-create-title">Agregar</h3>
       <p class="tc-profile-create-subtitle" id="tc-profile-create-subtitle" hidden></p>
       <div class="pf-grid">
         <div class="pf-col">
           <div class="pf-field">
-      <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre del perfil</label>
+      <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre</label>
       <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
         placeholder="Escribe un nombre" autocomplete="off" data-hk="h52">
           </div>
           <div class="pf-field pf-choice">
-      <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo de perfil">
+      <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo">
         <button type="button" class="tc-kind-btn active" data-kind="adult" role="radio" aria-checked="true"
           data-h="h53">Adulto</button>
         <button type="button" class="tc-kind-btn" data-kind="kid" role="radio" aria-checked="false"
@@ -614,9 +613,9 @@
         </div>
       </div>
           <div id="tc-screen-box" class="pf-field" hidden>
-            <label class="tc-profile-create-label">Tiempo de pantalla (solo niños)</label>
+            <label class="tc-profile-create-label">Tiempo de uso (solo niños)</label>
             <div class="pf-two">
-              <label class="pf-mini"><span>Horas de pantalla al día</span><input class="tc-profile-input" id="tc-screen-hours" type="number" inputmode="decimal" min="0.5" max="12" step="0.5" value="6.5"></label>
+              <label class="pf-mini"><span>Horas de uso al día</span><input class="tc-profile-input" id="tc-screen-hours" type="number" inputmode="decimal" min="0.5" max="12" step="0.5" value="6.5"></label>
               <label class="pf-mini"><span>Horas de descanso</span><input class="tc-profile-input" id="tc-break-hours" type="number" inputmode="decimal" min="0.25" max="8" step="0.25" value="1"></label>
             </div>
           </div>
@@ -645,7 +644,7 @@
     aria-labelledby="tc-install-title" aria-hidden="true" data-h="h60">
     <section class="tc-profile-create-dialog">
       <button class="tc-profile-create-close" type="button" data-h="h61" aria-label="Cerrar">×</button>
-      <h3 id="tc-install-title">Instalar TatoCine</h3>
+      <h3 id="tc-install-title">Instalar</h3>
       <p class="tc-profile-create-subtitle" id="tc-install-sub"></p>
       <ol class="tc-install-steps" id="tc-install-steps"></ol>
       <div class="tc-profile-create-actions">
@@ -674,12 +673,12 @@
   </div>
   <input type="file" id="tc-qr-file" accept="image/*" hidden aria-label="Subir captura del QR" />
 
-  <!-- Asistente «¿Qué ver hoy?» -->
+  <!-- Asistente «¿Qué ver?» -->
   <div class="tc-profile-create-overlay" id="tc-wizard-overlay" role="dialog" aria-modal="true"
     aria-labelledby="tc-wizard-title" aria-hidden="true">
     <section class="tc-profile-create-dialog tc-wizard">
       <button class="tc-profile-create-close" type="button" data-wiz="close" aria-label="Cerrar">×</button>
-      <h3 id="tc-wizard-title">¿Qué ver hoy?</h3>
+      <h3 id="tc-wizard-title">¿Qué ver?</h3>
       <div id="tc-wizard-body"></div>
     </section>
   </div>
@@ -688,8 +687,8 @@
   <div class="tc-kid-lock" id="tc-kid-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-kid-lock-title">
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-kid-lock-title">Hora de descansar</h3>
-      <p class="tc-profile-create-subtitle">Se alcanzó el límite de 6 h 30 min de uso. Podrás volver a ver contenido cuando termine el descanso de 1 hora.</p>
-      <div class="tc-kid-lock-time" id="tc-kid-lock-time" aria-live="polite">60:00</div>
+      <p class="tc-profile-create-subtitle">Se alcanzó el límite de uso. Podrás volver a ver contenido cuando termine el descanso de pantallas.</p>
+      <div class="tc-kid-lock-time" id="tc-kid-lock-time" aria-live="polite">Haz algo diferente a ver una pantalla</div>
       <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
     </section>
   </div>
@@ -774,7 +773,7 @@
   <div class="modal" id="filters-modal">
     <div class="filters-content">
       <div class="modal-header">
-        <h2 class="modal-title">Filtros Avanzados</h2>
+        <h2 class="modal-title">Filtros</h2>
         <button class="modal-close" data-h="h78">✕</button>
       </div>
       <div class="modal-body" style="padding: 0">
@@ -815,22 +814,63 @@
               margin-bottom: 24px;
               text-align: justify;
             ">
-          TatoCine solo es una página de reproducción multimedia que busca en
-          sitios de terceros y externos material audiovisual en base a un API
+          PARA UTILIZAR ESTE APLICATIVO, DEBE LEER Y ACEPTAR TODO SU CONTENIDO. SI NO ESTÁ DE ACUERDO, NO UTILICE ESTE APLICATIVO. AL DAR "ACEPTAR Y CONTINUAR" USTED RECONOCE QUE HA LEÍDO Y COMPRENDIDO ESTE DESCARGO DE RESPONSABILIDAD Y ACEPTA TODO LO ESTABLECIDO POR NUESTRO SERVICIO.
+          NO BUSCAMOS FOMENTAR COMPORTAMIENTO INDEBIDOS, NI EL USO DE ESTE APLICATIVO PARA FINES ILEGALES. SI USTED ES MENOR DE EDAD, DEBE PEDIR PERMISO A SUS PADRES O TUTORES LEGALES ANTES DE UTILIZAR ESTE APLICATIVO.
+          TATOCINE NO SE HACE RESPONSABLE Y TIENE UN DESCARGO FUERTE DE RESPONSABILIDAD YA QUE ES UN PROYECTO GRATUITO PARA LA COMUNIDAD. LEA COMPLETO ANTES DE CONTINUAR.
+          El siguiente contrato se celebra entre "TatoCine" o "El app" y el usuario. Al presionar aceptar usted está firmando digitalmente este contrato y acepta este descargo de responsabilidad.
+          Al firmar digitalmente al presionar "Acepto y continuo" usted está aceptando nunca accionar legalmente contra "TatoCine" o "El app" ante cualquier inconveniente ya que es un proyecto libre y gratuito.
+          TatoCine solo es un app de reproducción multimedia que busca en
+          sitios de terceros (nunca dentro de nuestro servidor) y externos (nunca de nuestra propiedad) 
+          material audiovisual en base a un API
           gratuito de TMDB. TatoCine no almacena datos de búsqueda de las
-          personas, no almacena ni aloja ningún tipo de material audiovisual
-          todo se consulta on-demand a través de terceros. No lucra ni busca
-          lucrar. Algunos reproductores pueden tener anuncios de terceros por
-          lo que TatoCine no se hace responsable por material indebido o con
-          derecho de autor porque los anuncios no están en nuestro código
-          fuente.
-          TatoCine es un proyecto totalmente gratuito y de código abierto: se distribuye bajo una licencia
+          personas, estadísticas, preferidos o datos para comercializarlos, no almacena ni aloja ningún 
+          tipo de material audiovisual (imágenes, videos, trailers, etc.)
+          todo se consulta on-demand a través de terceros y externos. TatoCine no lucra ni busca
+          lucrar a través de suscripciones o métodos fraudulentos. 
+          Algunos reproductores pueden tener anuncios de terceros que no son de nuestra propiedad ni lucramos con ellos, por
+          lo que TatoCine no se hace responsable por material indebido reproducido mientras exista un anuncio o con
+          derecho de autor (copyright o DMCA) porque los anuncios, videos, imágenes y trailers no están en nuestro código
+          fuente ni fueron programados para mostrarse y hacemos la salvedad para evitar demandas.
+          TatoCine es un proyecto totalmente gratuito y de código abierto para libre modificación: 
+          se distribuye bajo una licencia
           gratuita (MIT), sin costo ni suscripciones, y puede usarse, copiarse y modificarse libremente
-          respetando los términos de esa licencia.
+          respetando los términos de esa licencia. Al dar "aceptar y continuar" usted reconoce que ha leído 
+          y comprendido este descargo de responsabilidad y acepta todo lo establecido por nuestro servicio. Se listan todos los descargos de responsabilidad a continuación:
+          TatoCine no se hace responsable de la pérdida de datos, daños o perjuicios que puedan surgir del uso de la aplicación.
+          TatoCine no garantiza la disponibilidad continua del servicio ni la exactitud de la información proporcionada.
+          TatoCine se reserva el derecho de modificar, suspender o interrumpir el servicio en cualquier momento sin previo aviso.
+          TatoCine no se hace responsable de los enlaces a sitios web de terceros ni de la calidad o legalidad del contenido que se pueda encontrar en ellos.
+          TatoCine no se hace responsable de la privacidad ni de la seguridad de los datos personales que puedan ser compartidos a través de la aplicación.
+          TatoCine no se hace responsable de los errores, fallos o interrupciones del servicio que puedan afectar la experiencia del usuario.
+          TatoCine no se hace responsable de las decisiones o acciones tomadas por los usuarios basadas en la información proporcionada por la aplicación.
+          TatoCine no se hace responsable de los problemas técnicos o de compatibilidad que puedan surgir al utilizar la aplicación en diferentes dispositivos o sistemas operativos.
+          TatoCine no se hace responsable de los problemas de conectividad o de acceso a Internet que puedan afectar el uso de la aplicación.
+          TatoCine no se hace responsable de los problemas de rendimiento o velocidad que puedan afectar la experiencia del usuario.
+          TatoCine no se hace responsable de los problemas de almacenamiento o de espacio en el dispositivo que puedan afectar el uso de la aplicación.
+          TatoCine no se hace responsable de los problemas de actualización o de compatibilidad con futuras versiones de la aplicación.
+          TatoCine no se hace responsable de los problemas de seguridad o de vulnerabilidades que puedan surgir al utilizar la aplicación.
+          TatoCine no acudirá a demandas ni juicios por el uso de la aplicación, ya que es un proyecto gratuito y de código abierto.
+          TatoCine no se hace responsable de los problemas legales o de derechos de autor que puedan surgir al utilizar la aplicación para acceder a contenido protegido.
+          TatoCine no se hace responsable del uso indebido o ilegal de la aplicación por parte de los usuarios.
+          TatoCine no cobra ni solicita pagos por el uso de la aplicación, y no se hace responsable de los problemas financieros o de transacciones que puedan surgir al utilizar la aplicación.
+          TatoCine no se hace responsable de los problemas de publicidad o de marketing que puedan surgir al utilizar la aplicación.
+          TatoCine no se hace responsable de las imágenes o videos que se muestran en la aplicación, ya que provienen de fuentes externas y no están bajo nuestro control.
+          TatoCine no garantiza que los perfiles de niños estén libres de contenido inapropiado.
+          TatoCine no se hace responsable por la adicción que puede generar el uso de la aplicación, ni por los problemas de salud que puedan surgir por el uso excesivo de la misma.
+          TatoCine no se hace responsable por la descarga de los datos locales que puedan utilizarse para fines maliciosos, ya que los datos locales son propiedad del usuario y no de TatoCine.
+          TatoCine no se hace responsable por el uso de los datos locales que cada persona pueda hacer.
+          TatoCine no se hace responsable si otra persona accede a los datos locales de su dispositivo y los utiliza para fines maliciosos.
+          TatoCine no busca que dejes de pagar servicios de streaming, cada persona es libre de pagar lo que guste, sólo ofrecemos una herramienta gratuita de búsqueda de material libre en internet.
+          TatoCine es un app de ordenamiento de servicios libres en internet que cada persona por cuenta propia puede buscar, TatoCine solamente ayuda a las personas con problemas de entendimiento hacia la informática.
+          TatoCine no se hace responsable de hackeos o inyección de código malicioso, TatoCine se compromete a velar porque no dañe al usuario final pero no garantiza que esté libre de ataques.
+          Habiendo leído todo y aceptado nuevamente, el usuario es el único responsable de sus acciones y de los datos locales que pueda compartir con terceros, ya que TatoCine no tiene control sobre ellos.
+          Gracias por confiar en TatoCine y por leer este descargo de responsabilidad. Gracias por utilizar este servicio que busca poner fin a los monopolios y miles de pagos para poder ver una simple película.
+          De parte del equipo de TatoCine estamos comprometidos para dar mantenimiento, soporte y mejoras a este proyecto sin fines de lucro, sin violar leyes, sin violar derechos de autor y sin causar daños a la industría. 
+          Fin. Equipo de TatoCine y su fundador.
         </p>
         <button class="hero-btn" style="width: 100%; justify-content: center; padding: 16px"
           data-h="h79">
-          Aceptar y continuar
+          ACEPTO Y CONTINUO
         </button>
       </div>
     </div>
@@ -922,6 +962,7 @@
   <script defer src="js/features/release-alerts.js"></script>
   <script defer src="js/features/wrapped.js"></script>
   <script defer src="js/features/couple-picker.js"></script>
+  <script defer src="js/features/marathon.js"></script>
   <script defer src="js/ui/undo.js"></script>
   <script defer src="js/player/autoplay-next.js"></script>
   <script defer src="js/player/player-robust.js"></script>

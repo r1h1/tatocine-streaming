@@ -12,11 +12,13 @@ if (!watchedMap || typeof watchedMap !== "object" || Array.isArray(watchedMap)) 
 function watchedKey(m) { return m.type + ":" + m.id; }
 function saveWatched() { return safeStorageSet(profileStorageKey(WATCHED_KEY), JSON.stringify(watchedMap)); }
 
+/** Visto sin marcarlo a mano: terminado, o (película) con 40 min o más de reproducción. */
+function autoWatchedItem(it) { return (it.done || 0) > 0 || (it.type === "movie" && (it.secs || 0) >= 2400); }
 function isWatched(m) {
   var r = watchedMap[watchedKey(m)];
   if (r && r.w !== undefined) return !!r.w;          // una decisión manual (vista / no vista) manda
   var it = analyticsItem(m.type, m.id);
-  return !!(it && it.done > 0);
+  return !!(it && autoWatchedItem(it));
 }
 function userRating(m) { var r = watchedMap[watchedKey(m)]; return r ? r.ur || 0 : 0; }
 
@@ -62,9 +64,9 @@ function autoMarkWatched(analyticsEntry) {
 function watchedList() {
   var out = {}, list = [];
   Object.keys(watchedMap).forEach(function (k) { if (watchedMap[k].w) out[k] = watchedMap[k]; });
-  completedTitles().forEach(function (it) {
+  (localAnalytics.items || []).filter(autoWatchedItem).forEach(function (it) {
     var k = watchedKey(it);
-    if (!out[k] && !watchedMap[k]) out[k] = { id: it.id, type: it.type, title: it.title, bg: it.bg || "", ts: it.lastPlayedAt || 0 };
+    if (!out[k] && !(watchedMap[k] && watchedMap[k].w === false)) out[k] = { id: it.id, type: it.type, title: it.title, bg: it.bg || "", ts: it.lastPlayedAt || 0 };
   });
   Object.keys(out).forEach(function (k) { list.push(out[k]); });
   return list.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });

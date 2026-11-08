@@ -15,13 +15,16 @@
     }
     function categoryOf(it) {
       var g = it.genreIds || [];
-      if (g.indexOf(99) > -1) return "doc";
-      if (g.indexOf(16) > -1 && it.lang === "ja") return "anime";
+      if (g.includes(99)) return "doc";
+      if (g.includes(16) && it.lang === "ja") return "anime";
       return it.type === "tv" ? "tv" : "movie";
     }
+    /** Solo cuenta un título (en estadísticas y resumen anual) si se vio 15 min o más, o si se terminó: 1 minuto no es «verlo». */
+    var COUNT_SECS = 900;
+    function countedItems(list) { return (list || []).filter(function (x) { return (x.secs || 0) >= COUNT_SECS || (x.done || 0) > 0; }); }
     function completedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0; }); }
     /** Títulos «vistos» para las recomendaciones: terminados O empezados de verdad (≥ 2 min de reproducción). Cuantos más, mejor se afina. */
-    var ENGAGED_SECS = 120;
+    var ENGAGED_SECS = 30;
     function engagedTitles() { return (localAnalytics.items || []).filter(function (x) { return x.done > 0 || (x.secs || 0) >= ENGAGED_SECS; }); }
     function tasteWeight(it) {
       var d = it.done || 0;

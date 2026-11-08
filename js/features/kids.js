@@ -21,20 +21,20 @@
     function kidSafeFromDetails(d, type) {
       if (!d || d.adult) return false;
       if (hasBlockedTerms(d.title, d.name, d.original_title, d.original_name, d.overview, d.tagline)) return false;
-      var blocked = (d.genres || []).some(function (g) { return KID_BLOCKED_GENRES.indexOf(g.id) > -1; });
+      var blocked = (d.genres || []).some(function (g) { return KID_BLOCKED_GENRES.includes(g.id); });
       if (blocked) return false;
       var certs = [];
       if (type === "tv") {
         ((d.content_ratings && d.content_ratings.results) || []).forEach(function (r) {
           if (r.iso_3166_1 === "US" && r.rating) certs.push(r.rating);
         });
-        return certs.length > 0 && certs.every(function (c) { return KID_TV_CERTS.indexOf(c) > -1; });
+        return certs.length > 0 && certs.every(function (c) { return KID_TV_CERTS.includes(c); });
       }
       ((d.release_dates && d.release_dates.results) || []).forEach(function (r) {
         if (r.iso_3166_1 !== "US") return;
         (r.release_dates || []).forEach(function (x) { if (x.certification) certs.push(x.certification); });
       });
-      return certs.length > 0 && certs.every(function (c) { return KID_MOVIE_CERTS.indexOf(c) > -1; });
+      return certs.length > 0 && certs.every(function (c) { return KID_MOVIE_CERTS.includes(c); });
     }
     function isKidSafe(id, type) {
       var key = type + ":" + id;
@@ -49,7 +49,7 @@
     }
     function kidsFilterSearch(list, limit) {
       var candidates = list.filter(function (x) {
-        return !x.adult && !hasBlockedTerms(x.title, x.desc) && !(x.genre_ids || []).some(function (g) { return KID_BLOCKED_GENRES.indexOf(g) > -1; });
+        return !x.adult && !hasBlockedTerms(x.title, x.desc) && !(x.genre_ids || []).some(function (g) { return KID_BLOCKED_GENRES.includes(g); });
       }).slice(0, limit || 16);
       return Promise.all(candidates.map(function (x) {
         return isKidSafe(x.id, x.type).then(function (ok) { return ok ? x : null; });

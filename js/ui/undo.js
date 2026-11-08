@@ -132,7 +132,7 @@ decorate("deleteListFromModal", function (original) {
     var l = favListById(editingListId), snap = l ? { list: JSON.parse(JSON.stringify(l)), ids: myList.filter(function (m) { return m.list === l.id; }).map(function (m) { return m.type + ":" + m.id; }) } : null;
     if (snap) offerUndo(/^Lista eliminada/, function () {
       if (!favListById(snap.list.id)) { favLists.push(snap.list); saveFavLists(); }
-      myList.forEach(function (m) { if (snap.ids.indexOf(m.type + ":" + m.id) > -1) m.list = snap.list.id; });
+      myList.forEach(function (m) { if (snap.ids.includes(m.type + ":" + m.id)) m.list = snap.list.id; });
       saveMyList();
       if (currentView === "list") renderFavoritesView();
       undoRestored();
