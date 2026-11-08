@@ -49,7 +49,7 @@
       if (after) after();
     }
     function createFavListNamed(name) {
-      name = String(name || "").trim().slice(0, 24);
+      name = bkText(name || "", 24);
       if (!name) { showToast("Escribe un nombre para la lista"); return null; }
       if (/^general$/i.test(name) || favLists.some(function (l) { return l.name.toLowerCase() === name.toLowerCase() && l.id !== editingListId; })) {
         showToast("Ya existe una lista con ese nombre");

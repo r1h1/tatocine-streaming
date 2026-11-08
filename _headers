@@ -4,7 +4,8 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), usb=()
   X-Frame-Options: SAMEORIGIN
-  Content-Security-Policy: frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
   Cross-Origin-Opener-Policy: same-origin-allow-popups
 /index.html
   Cache-Control: no-cache

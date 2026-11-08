@@ -99,7 +99,7 @@
             ? '<span class="status ' +
             statusClass +
             '">' +
-            statusText +
+            escapeHTML(statusText) +
             "</span>"
             : "");
         $("details-genres").innerHTML = genres

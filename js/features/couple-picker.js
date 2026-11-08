@@ -144,7 +144,7 @@ function cpShowCard() {
   qrBody().querySelector('[data-cp="yes"]').onclick = function () { answer(true); };
   qrBody().querySelector('[data-cp="info"]').onclick = function () { cpOpenInfo(m); };
   card.addEventListener("pointerdown", function (e) { x0 = e.clientX; card.setPointerCapture(e.pointerId); card.classList.add("drag"); });
-  card.addEventListener("pointermove", function (e) { if (x0 == null) return; var dx = e.clientX - x0; card.style.transform = "translateX(" + dx + "px) rotate(" + dx / 22 + "deg)"; card.style.boxShadow = dx > 40 ? "0 0 0 3px #3ddc84" : dx < -40 ? "0 0 0 3px #ff5c5c" : ""; });
+  card.addEventListener("pointermove", function (e) { if (x0 == null) return; var dx = e.clientX - x0; card.style.transform = "translateX(" + dx + "px) rotate(" + dx / 22 + "deg)"; card.style.boxShadow = dx > 40 ? "0 0 0 3px #fff" : dx < -40 ? "0 0 0 3px #bdbdbd" : ""; });
   card.addEventListener("pointerup", function (e) { if (x0 == null) return; var dx = e.clientX - x0; x0 = null; card.classList.remove("drag"); if (Math.abs(dx) > 90) answer(dx > 0); else { card.style.transform = ""; card.style.boxShadow = ""; } });
   card.focus({ preventScroll: true });
 }

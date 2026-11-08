@@ -36,7 +36,7 @@ function wrappedImage(d) {
   });
 }
 function drawWrapped(canvas, d, name, img) {
-  var W = 1080, H = 1920, ctx = canvas.getContext("2d"), F = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif", PAD = 84;
+  var W = 1080, H = 1920, ctx = canvas.getContext("2d"), F = (getComputedStyle(document.body).fontFamily || "system-ui, sans-serif"), PAD = 96;
   canvas.width = W; canvas.height = H;
   var g = ctx.createLinearGradient(0, 0, W, H);
   g.addColorStop(0, "#2b1055"); g.addColorStop(.5, "#0d0d1a"); g.addColorStop(1, "#000");
@@ -49,33 +49,32 @@ function drawWrapped(canvas, d, name, img) {
   shade.addColorStop(0, "rgba(0,0,0,.72)"); shade.addColorStop(.35, "rgba(0,0,0,.55)"); shade.addColorStop(.7, "rgba(0,0,0,.82)"); shade.addColorStop(1, "rgba(0,0,0,.94)");
   ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
   ctx.textBaseline = "alphabetic"; ctx.fillStyle = "#fff";
-  // Logo de TatoCine (círculo con triángulo de reproducción + nombre)
-  ctx.beginPath(); ctx.arc(PAD + 32, 142, 32, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
-  ctx.beginPath(); ctx.moveTo(PAD + 24, 124); ctx.lineTo(PAD + 50, 142); ctx.lineTo(PAD + 24, 160); ctx.closePath(); ctx.fillStyle = "#000"; ctx.fill();
-  ctx.fillStyle = "#fff"; ctx.font = "800 54px " + F; ctx.fillText("TatoCine", PAD + 84, 160);
-  ctx.font = "800 100px " + F; ctx.fillText(L("Tu año en", "Your year in"), PAD, 360); ctx.fillText(L("películas", "movies"), PAD, 470);
-  ctx.font = "600 44px " + F; ctx.fillStyle = "#ffb26b"; ctx.fillText(wrappedFit(ctx, name + " · " + d.label, W - PAD * 2), PAD, 548);
+  // Zona segura de Stories/Reels: 1080x1920 con ~270 px libres arriba y ~360 px abajo (perfil, comentario y barra de IG). Todo el contenido vive entre y=290 y y=1540.
+  ctx.beginPath(); ctx.arc(PAD + 24, 300, 24, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(PAD + 17, 286); ctx.lineTo(PAD + 37, 300); ctx.lineTo(PAD + 17, 314); ctx.closePath(); ctx.fillStyle = "#000"; ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "800 40px " + F; ctx.fillText("TatoCine", PAD + 64, 314);
+  ctx.font = "800 74px " + F; ctx.fillText(L("Tu año en", "Your year in"), PAD, 438); ctx.fillText(L("películas", "movies"), PAD, 518);
+  ctx.font = "600 34px " + F; ctx.fillStyle = "rgba(255,255,255,.72)"; ctx.fillText(wrappedFit(ctx, name + " · " + d.label, W - PAD * 2), PAD, 574);
   var mins = Math.round(d.secs / 60);
-  ctx.fillStyle = "#fff"; ctx.font = "800 230px " + F; ctx.fillText(String(mins), PAD, 810);
-  ctx.font = "600 58px " + F; ctx.fillText(L("minutos viendo", "minutes watched"), PAD, 888);
-  ctx.font = "500 44px " + F; ctx.globalAlpha = .85; ctx.fillText(d.titles + L(" reproducidos · ", " played · ") + d.finished + L(" terminados", " finished"), PAD, 960); ctx.globalAlpha = 1;
-  // Géneros: nombre completo y porcentaje arriba, barra debajo (nada recortado)
-  ctx.font = "700 48px " + F; ctx.fillText(L("Tus géneros", "Your genres"), PAD, 1080);
+  ctx.fillStyle = "#fff"; ctx.font = "800 150px " + F; ctx.fillText(String(mins), PAD, 748);
+  ctx.font = "600 42px " + F; ctx.fillText(L("minutos viendo", "minutes watched"), PAD, 808);
+  ctx.font = "500 32px " + F; ctx.globalAlpha = .85; ctx.fillText(d.titles + L(" reproducidos · ", " played · ") + d.finished + L(" terminados", " finished"), PAD, 860); ctx.globalAlpha = 1;
+  // Géneros: nombre y porcentaje arriba, barra fina debajo
+  ctx.font = "700 38px " + F; ctx.fillText(L("Tus géneros", "Your genres"), PAD, 970);
   d.genres.forEach(function (gn, i) {
-    var y = 1150 + i * 112, bw = W - PAD * 2;
-    ctx.font = "600 40px " + F; ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(wrappedFit(ctx, gn.name, bw - 130), PAD, y);
-    ctx.textAlign = "right"; ctx.fillStyle = "#ffb26b"; ctx.fillText(gn.pct + "%", PAD + bw, y); ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.fillRect(PAD, y + 18, bw, 16);
-    var bar = ctx.createLinearGradient(PAD, 0, PAD + bw, 0); bar.addColorStop(0, "#ff8a3d"); bar.addColorStop(1, "#ffd36b"); ctx.fillStyle = bar; ctx.fillRect(PAD, y + 18, Math.max(24, bw * gn.pct / 100), 16);
+    var y = 1036 + i * 88, bw = W - PAD * 2;
+    ctx.font = "600 32px " + F; ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(wrappedFit(ctx, gn.name, bw - 110), PAD, y);
+    ctx.textAlign = "right"; ctx.fillStyle = "rgba(255,255,255,.72)"; ctx.fillText(gn.pct + "%", PAD + bw, y); ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.fillRect(PAD, y + 14, bw, 12);
+    var bar = ctx.createLinearGradient(PAD, 0, PAD + bw, 0); bar.addColorStop(0, "rgba(255,255,255,.55)"); bar.addColorStop(1, "#fff"); ctx.fillStyle = bar; ctx.fillRect(PAD, y + 14, Math.max(20, bw * gn.pct / 100), 12);
   });
-  ctx.fillStyle = "#fff"; ctx.font = "700 48px " + F; ctx.fillText(L("Lo que más viste", "Most watched"), PAD, 1540);
+  ctx.fillStyle = "#fff"; ctx.font = "700 38px " + F; ctx.fillText(L("Lo que más viste", "Most watched"), PAD, 1350);
   d.top.forEach(function (it, i) {
-    var y = 1610 + i * 74;
-    ctx.font = "800 42px " + F; ctx.fillStyle = "#ffb26b"; ctx.fillText(String(i + 1), PAD, y);
-    ctx.font = "600 38px " + F; ctx.fillStyle = "#fff"; ctx.fillText(wrappedFit(ctx, bkText(it.title, 60), 640), PAD + 56, y);
-    ctx.font = "500 32px " + F; ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(fmtDur(it.secs || 0), W - PAD, y); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+    var y = 1414 + i * 62;
+    ctx.font = "800 34px " + F; ctx.fillStyle = "rgba(255,255,255,.72)"; ctx.fillText(String(i + 1), PAD, y);
+    ctx.font = "600 32px " + F; ctx.fillStyle = "#fff"; ctx.fillText(wrappedFit(ctx, bkText(it.title, 60), 600), PAD + 50, y);
+    ctx.font = "500 28px " + F; ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(fmtDur(it.secs || 0), W - PAD, y); ctx.textAlign = "left"; ctx.globalAlpha = 1;
   });
-  ctx.fillStyle = "#fff"; ctx.font = "700 38px " + F; ctx.fillText(L("Mejor racha: ", "Best streak: ") + d.best + L(" días", " days"), PAD, 1862);
 }
 function openWrapped() {
   if (isKidProfile() || isGuestProfile()) { showToast(L("No disponible en este perfil", "Not available on this profile")); return; }

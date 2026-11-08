@@ -7,7 +7,7 @@
     setTimeout(function () { document.body.classList.add("app-ready"); var hh = document.getElementById("hero-section"); if (hh) hh.classList.remove("hero-loading"); }, 6000);   // por si algo falla: nunca se queda en esqueleto
     function checkDeepLink() {
       var params = new URLSearchParams(location.search);
-      var id = params.get("id");
+      var id = /^\d{1,10}$/.test(params.get("id") || "") ? params.get("id") : null;     // solo números
       var type = params.get("type");
       var tab = params.get("tab");
       var q = params.get("q");
@@ -23,6 +23,7 @@
           openDetails(parseInt(id, 10), type);
         }, 600);
       else if (q) {
+        q = bkText(q, 100);
         $searchInput.value = q;
         setTimeout(function () {
           performSearch(q);

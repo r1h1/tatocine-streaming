@@ -28,7 +28,7 @@
           (isEndedStatus(i.status) ? "ended" : "") +
           (i.rating ? " has-rating" : "") +
           '">' +
-          getStatusText(i.status).toUpperCase() +
+          escapeHTML(getStatusText(i.status).toUpperCase()) +
           "</div>"
           : "";
       var at = ' data-id="' + cid + '" data-type="' + ctype + '"', stt = ' data-title="' + escapeHTML(i.title) + '"';

@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Política de seguridad (CSP): SIN scripts en línea ni eval; solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org; frame-src https:; font-src 'self' data:; manifest-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <script src="js/boot.js"></script>
   <style>
     html.tc-picker-boot body { background: #000; }
@@ -730,6 +730,16 @@
     </section>
   </div>
 
+  <!-- Bloqueo por exceso de recargas (2 min) -->
+  <div class="tc-kid-lock" id="tc-rate-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-rate-lock-title">
+    <section class="tc-bed-card">
+      <svg class="tc-bed-moon" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <h3 id="tc-rate-lock-title">Demasiadas peticiones</h3>
+      <p class="tc-bed-sub"></p>
+      <div class="tc-kid-lock-time" id="tc-rate-lock-time" aria-live="polite">03:00</div>
+    </section>
+  </div>
+
   <!-- Hora de dormir (perfiles infantiles) -->
   <div class="tc-kid-lock" id="tc-bed-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-bed-lock-title">
     <section class="tc-bed-card">
@@ -941,6 +951,8 @@
   <script defer src="js/core/handlers.js"></script>
   <script defer src="js/core/env.js"></script>
   <script defer src="js/core/errors.js"></script>
+  <script defer src="js/core/rate-limit.js"></script>
+  <script defer src="js/core/input-guard.js"></script>
   <script defer src="js/profiles/profile-store.js"></script>
   <script defer src="js/profiles/profile-ui.js"></script>
   <script defer src="js/profiles/pin-strong.js"></script>

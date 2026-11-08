@@ -42,6 +42,8 @@
       $loadMoreContainer.innerHTML = "";
     }
     function performSearch(q) {
+      q = bkText(q, 100);
+      if (!q) return;
       var myId = ++searchRequestId;
       catalogRequestId++;
       isSearching = true;

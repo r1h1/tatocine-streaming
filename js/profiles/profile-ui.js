@@ -167,7 +167,7 @@
     function saveProfileFromModal() {
       if (!canManageProfiles()) { showToast("Solo un perfil de adulto puede administrar perfiles"); return; }
       var input = document.getElementById("tc-new-profile-name");
-      var name = String(input && input.value || "").trim().slice(0, 24);
+      var name = bkText(input && input.value || "", 24);
       if (!name) { showToast("Escribe un nombre para el perfil"); if (input) input.focus(); return; }
       if (!editingLocalProfileId) { createLocalProfile(); return; }
       var profile = localProfiles.find(function (p) { return p.id === editingLocalProfileId; });
@@ -264,8 +264,15 @@
       var create = document.getElementById("tc-create-profile-btn");
       if (create) create.disabled = localProfiles.length >= 6;
     }
+    function profileSkeletonCards(n) {
+      var h = "";
+      for (var i = 0; i < n; i++) h += '<div class="tc-profile-card is-skel" aria-hidden="true"><span class="skel skel-avatar"></span><span class="skel skel-name"></span><span class="skel skel-sub"></span></div>';
+      return h;
+    }
     function showProfiles(isStartup) {
-      renderProfilesPanel();
+      var gridEl = document.getElementById("tc-profile-grid");
+      if (gridEl) gridEl.innerHTML = profileSkeletonCards(Math.min(Math.max(localProfiles.length, 2), 6));
+      setTimeout(renderProfilesPanel, 280);
       var panel = document.getElementById("tc-profile-overlay");
       if (panel) {
         document.body.classList.add("tc-profile-screen-open");
@@ -318,7 +325,7 @@
     function createLocalProfile() {
       if (localProfiles.length >= 6) { showToast("Puedes crear hasta 6 perfiles"); return; }
       var input = document.getElementById("tc-new-profile-name");
-      var name = String(input && input.value || "").trim().slice(0, 24);
+      var name = bkText(input && input.value || "", 24);
       if (!name) { showToast("Escribe un nombre para el perfil"); if (input) input.focus(); return; }
       if (!canManageProfiles()) { showToast("Solo un perfil de adulto puede administrar perfiles"); return; }
       var pinResult = readProfileFormPin();
