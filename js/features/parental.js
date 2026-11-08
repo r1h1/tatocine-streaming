@@ -53,6 +53,16 @@ function inBedtime(profile, date) {
   return f < t ? n >= f && n < t : n >= f || n < t;
 }
 var bedLockOpen = false;
+/** Fondo fijo de la pantalla de dormir: «Buscando a Nemo» (TMDB 12). La ruta de la imagen se guarda para no pedirla cada vez. */
+function bedLockBackground(el) {
+  function paint(path) { if (path) el.style.setProperty("--bed-bg", 'url("https://image.tmdb.org/t/p/w1280' + path + '")'); }
+  var saved = ""; try { saved = localStorage.getItem("tatoNemoBg") || ""; } catch (e) { }
+  if (/^\/[A-Za-z0-9]+\.jpg$/.test(saved)) paint(saved);
+  fetchTMDB("/movie/12").then(function (d) {
+    var path = d && d.backdrop_path;
+    if (path && /^\/[A-Za-z0-9]+\.jpg$/.test(path)) { paint(path); try { localStorage.setItem("tatoNemoBg", path); } catch (e) { } }
+  }).catch(function () { });
+}
 function bedtimeCheck() {
   var p = getActiveProfile(), on = !!p && p.kind === "kid" && inBedtime(p);
   var el = $("tc-bed-lock");
@@ -60,7 +70,9 @@ function bedtimeCheck() {
   if (on && !bedLockOpen) {
     bedLockOpen = true;
     el.classList.add("open");
-    $("tc-bed-lock-sub").textContent = L("Es hora de dormir. Podrás volver a ver contenido a las " + p.bedtime.to + ".", "It's bedtime. You can watch again at " + p.bedtime.to + ".");
+    $("tc-bed-lock-title").textContent = L("Tus padres configuraron tu hora de dormir", "Your parents set your bedtime");
+    $("tc-bed-lock-sub").textContent = L("Tranquilo, podrás volver a ver contenido a las " + p.bedtime.to + " horas, mientras eso descansa y recupera energías.", "Don't worry, you can watch again at " + p.bedtime.to + ". Until then, rest and recharge your energy.");
+    bedLockBackground(el);
     try { if ($modal.classList.contains("open")) closePlayer(); } catch (e) { }
     try { if ($detailsModal.classList.contains("open")) closeDetails(true); } catch (e) { }
     document.body.style.overflow = "hidden";

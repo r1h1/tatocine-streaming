@@ -1,0 +1,20 @@
+# TatoCine · robots.txt
+User-agent: *
+Allow: /
+Disallow: /404.html
+Disallow: /500.html
+Disallow: /offline.html
+Disallow: /config.js
+Disallow: /tests/
+
+# Rastreadores de IA: pueden leer el sitio y el resumen en /llms.txt
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://tatocine.netlify.app/sitemap.xml

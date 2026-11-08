@@ -1,0 +1,29 @@
+# TatoCine
+
+> Interfaz web (frontend) de código abierto para explorar el catálogo de TMDB: películas, series y anime. No aloja, almacena ni distribuye contenido audiovisual; solo muestra datos e imágenes de TMDB (themoviedb.org) y funciona como PWA. Licencia GPLv3.
+
+Sitio: https://tatocine.netlify.app/
+Código: https://github.com/r1h1/tatocine-streaming
+Licencia: GNU GPL v3 o posterior (LICENSE)
+
+## Qué es
+- Una aplicación estática (HTML, CSS y JavaScript nativos, sin servidor ni cuentas) que consulta la API pública de TMDB desde el navegador.
+- Perfiles, favoritos, estadísticas y recomendaciones se guardan solo en el dispositivo del usuario (localStorage); no se envían a ningún servidor.
+- Idiomas: español (latino) e inglés. Funciona en móvil, tableta, escritorio y TV; se instala como PWA y abre sin conexión.
+
+## Qué NO es
+- No es un servicio de streaming ni de descargas, no aloja películas y no enlaza a descargas de terceros.
+- No es afiliado a TMDB: «This product uses the TMDB API but is not endorsed or certified by TMDB».
+
+## Funciones principales
+- Inicio con portada rotativa (Top 10 de la semana), filas por género, estrenos y plataformas.
+- Búsqueda, filtros, fichas con reparto, sagas, tráileres de YouTube y recomendados.
+- Mi cine: favoritos con listas, vistas, ver más tarde, calendario de estrenos y estadísticas.
+- «¿Qué ver?»: asistente, Random y Decidir en pareja (cada persona elige títulos y votan juntos).
+- Perfiles (adulto, niño con límites de tiempo, invitado), copia de seguridad cifrada y traspaso por QR.
+- Accesibilidad: tamaños de texto, alto contraste, reducir movimiento, navegación por teclado y mando.
+
+## Para desarrolladores
+- Sin build: `css/` y `js/` por capas; ver docs/ARCHITECTURE.md y README.md.
+- Pruebas: `node tests/*.test.js` y `tests/e2e/run.js` (Playwright).
+- Navegadores objetivo: Chrome/Edge/Firefox ≥ 100 y Safari ≥ 15.4 (2022 en adelante).

@@ -527,3 +527,18 @@ body.lite .hero.hero-loading *, body.rm .hero.hero-loading * { animation: none !
 /* Conocido por (ficha del actor) */
 .actor-films { padding: 0 24px calc(24px + env(safe-area-inset-bottom)); flex: none; }
 .actor-content { overflow-y: auto; }
+
+/* ---------- Hora de dormir: pantalla completa con el fondo de «Buscando a Nemo» ---------- */
+#tc-bed-lock { z-index: 99990; padding: 0; background: #02060f var(--bed-bg, none) center / cover no-repeat; }
+#tc-bed-lock::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(2, 6, 15, .55), rgba(2, 6, 15, .78)); }
+#tc-bed-lock .tc-bed-card { position: relative; width: min(560px, 100%); padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+#tc-bed-lock .tc-bed-moon { color: #ffd36b; }
+#tc-bed-lock h3 { margin: 0; font-size: calc(clamp(26px, 6vw, 38px) * var(--ts, 1)); line-height: 1.15; color: #fff; }
+#tc-bed-lock .tc-bed-sub { margin: 0 0 10px; font-size: calc(clamp(16px, 3.6vw, 20px) * var(--ts, 1)); line-height: 1.5; color: rgba(255, 255, 255, .88); max-width: 34ch; }
+#tc-bed-lock .tc-profile-create-btn { width: auto; min-height: 48px; padding: 0 26px; }
+
+/* ---------- Con una ventana abierta, solo se desplaza la ventana (no la página de fondo) ---------- */
+html.modal-lock, html.modal-lock body { overflow: hidden !important; overscroll-behavior: none; }
+.modal .modal-body, .modal .details-scroll, .modal .actor-content, .modal .actor-bio, .tc-profile-create-dialog, #settings-modal .settings-content { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#settings-modal .modal-body { touch-action: pan-y; }
+.modal .modal-header { touch-action: none; }

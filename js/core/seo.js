@@ -67,18 +67,18 @@
       schema.textContent = JSON.stringify(payload);
     }
     function resetPageSEO() {
-      document.title = "TatoCine | Películas, series y anime";
+      document.title = "TatoCine Streaming Gratis";
       setMetaByName(
         "description",
-        "Explora películas, series y anime en TatoCine. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.",
+        "TatoCine es una interfaz web (frontend) de código abierto para explorar el catálogo de TMDB: películas, series y anime, estrenos, Top 10, listas, perfiles locales y recomendaciones en tu dispositivo.",
       );
-      setMetaByProperty("og:title", "TatoCine | Películas, series y anime");
+      setMetaByProperty("og:title", "TatoCine Streaming Gratis");
       setMetaByProperty(
         "og:description",
-        "Explora películas, series y anime. Descubre títulos populares y recomendaciones personalizadas.",
+        "Frontend de código abierto para explorar el catálogo de TMDB: estrenos, Top 10, listas, perfiles locales y recomendaciones en tu dispositivo.",
       );
       setMetaByProperty("og:type", "website");
-      setMetaByName("twitter:title", "TatoCine | Películas, series y anime");
+      setMetaByName("twitter:title", "TatoCine Streaming Gratis");
       setMetaByName(
         "twitter:description",
         "Explora películas, series y anime en TatoCine.",
@@ -92,29 +92,7 @@
       if (schema && schema.parentNode) schema.parentNode.removeChild(schema);
     }
 
-    // ---- SEO: datos estructurados del sitio (buscador interno) ----
-    (function injectStructuredData() {
-      try {
-        if (location.protocol.indexOf("http") !== 0) return;
-        var base = location.origin + location.pathname;
-        var tag = document.createElement("script");
-        tag.type = "application/ld+json";
-        tag.textContent = JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "TatoCine",
-          url: base,
-          inLanguage: "es",
-          description: "Explora películas, series y anime. Descubre estrenos, títulos populares y recomendaciones basadas en tus preferencias locales.",
-          potentialAction: {
-            "@type": "SearchAction",
-            target: base + "?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-          }
-        });
-        document.head.appendChild(tag);
-      } catch (e) { }
-    })();
+    // Los datos estructurados del sitio (WebSite + WebApplication) ya vienen en index.html, visibles para rastreadores sin JavaScript.
 
     // ==========================================================
     // V4 · Analítica de visualización, listas de favoritos, estadísticas,

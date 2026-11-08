@@ -1,11 +1,11 @@
 # TatoCine — Películas, series y anime
 
 ![Versión](https://img.shields.io/badge/Versión-5.5.0-blue)
-![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
+![Licencia](https://img.shields.io/badge/Licencia-GPLv3-blue)
 ![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20CSS%20%7C%20JS-orange)
 ![PWA](https://img.shields.io/badge/PWA-Instalable-purple)
 
-**TatoCine** es una app web gratuita y de código abierto para explorar películas, series y anime con la API de [TMDB](https://www.themoviedb.org/). Sin backend ni cuentas: perfiles, favoritos, estadísticas y recomendaciones viven **solo en tu dispositivo**. Funciona en móvil, tableta, escritorio y Smart TV, y se instala como PWA.
+**TatoCine** es una **interfaz web (frontend)** gratuita y de código abierto para explorar películas, series y anime con la API de [TMDB](https://www.themoviedb.org/). Sin backend ni cuentas: perfiles, favoritos, estadísticas y recomendaciones viven **solo en tu dispositivo**. Funciona en móvil, tableta, escritorio y Smart TV, y se instala como PWA.
 
 🌎 [English summary](#english-summary) · 📐 [Arquitectura](docs/ARCHITECTURE.md)
 
@@ -110,13 +110,13 @@ Controles propios de audio/subtítulos/calidad/«saltar intro» (el video lo sir
 
 TatoCine **no aloja ni almacena material audiovisual**: consulta metadatos de TMDB y abre reproductores de terceros, que pueden mostrar publicidad; quien despliegue debe verificar que su uso sea lícito. No está afiliado a TMDB, plataformas ni estudios (sus nombres solo filtran el catálogo). *Este producto usa la API de TMDB, pero no está respaldado ni certificado por TMDB* ([términos](https://www.themoviedb.org/api-terms-of-use)).
 
-Gratuito y de código abierto bajo **licencia MIT** ([`LICENSE`](LICENSE)); no concede derechos sobre marcas, imágenes ni vídeos de terceros. Contribuciones bienvenidas respetando el estilo visual.
+Gratuito y de código abierto bajo **licencia GNU GPL v3 o posterior** ([`LICENSE`](LICENSE)); no concede derechos sobre marcas, imágenes ni vídeos de terceros. Contribuciones bienvenidas respetando el estilo visual.
 
 ---
 
 ## English summary
 
-**TatoCine** is a free, open-source (MIT) static web app to browse movies, series and anime with the TMDB API. No backend, no accounts: everything personal stays in your browser.
+**TatoCine** is a free, open-source (GPLv3) static web app to browse movies, series and anime with the TMDB API. No backend, no accounts: everything personal stays in your browser.
 
 - Fluid responsive layer (`css/19-responsive.css`: card width and gutters scale from 320 px phones to 4K TVs) with deferred rendering of off-screen rows. Responsive dark UI for phones, tablets, desktops and Smart TVs; installable **PWA** (install button, offline shell, D-pad/remote navigation, lite mode, accessibility support).
 - **Local profiles** (adult/kids, optional PIN, per-profile language ESP/ENG, delete). Kids profiles see only the Kids section with strict age-rating filtering and a 6 h 30 min use limit plus a 1 h break.
@@ -150,3 +150,9 @@ No Python, Node or build tools needed. Deploy over HTTPS. TatoCine hosts no vide
 - **Ficha y actor:** la imagen de la ficha se ve completa (16:9, 21:9 en pantallas anchas) y **no es fija** (se va con el scroll); «Más de esta saga» (colección de TMDB) y, en el actor, «Conocido por». La portada precarga la imagen, los tráileres y los detalles del **siguiente** título y las filas piden sus imágenes 600 px antes de entrar en pantalla. Imágenes más ligeras: tarjetas 300 px y portada 780 px.
 - **Mando y gestos:** además de flechas y mando de TV, ahora funciona el **mando de juegos** (cruceta, A aceptar, B atrás) y las ventanas del asistente, pareja, QR y listas se cierran deslizando hacia abajo. El tráiler de la portada ya no usa lista de reproducción (de ahí salían los botones anterior/siguiente de YouTube).
 - **Decidir en pareja:** botones de tamaño estándar (44 px), **Siguiente** (salta a la siguiente aprobada) y **Ver resultados** (tabla: título, quién lo eligió, resultado); ventana más amplia en escritorio y pantalla completa en móvil/PWA.
+
+## SEO y licencia
+- **Presentación:** TatoCine es un *frontend*: no aloja ni distribuye contenido audiovisual; solo muestra datos e imágenes de TMDB.
+- **SEO:** `<title>` y meta descriptions, `robots` (meta y `robots.txt`), `canonical`, `hreflang`, Open Graph y Twitter Cards (imagen 1200×630 en `icons/og-image.png`), datos estructurados JSON-LD (WebSite con búsqueda y WebApplication), `sitemap.xml`, y `llms.txt` (`llm.txt` es una copia) con un resumen para asistentes de IA. Si cambias de dominio, actualiza la URL en `index.html`, `robots.txt`, `sitemap.xml` y `llms.txt`.
+- **Licencia:** GNU GPL v3 o posterior. Cualquier versión modificada que se distribuya debe seguir siendo GPL y publicar su código.
+- **Hora de dormir:** pantalla completa con el fondo de «Buscando a Nemo» (TMDB 12), mensaje «Tus padres configuraron…» con la hora de regreso y botón «Cambiar de perfil» con icono. **Ventanas:** con una abierta (Ajustes, ficha…) la página de fondo no se desplaza (`js/ui/scroll-lock.js`). Título de la pestaña: «TatoCine Streaming Gratis».
