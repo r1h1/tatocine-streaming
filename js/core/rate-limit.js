@@ -1,11 +1,11 @@
 /**
  * TatoCine · js/core/rate-limit.js
- * Limitador de recargas: si la app se recarga 7 veces seguidas con ≤ 1 s entre cada una se bloquea 3 minutos (pantalla tipo «hora de dormir»,
+ * Limitador de recargas: si la app se recarga 5 veces seguidas con ≤ 1,5 s entre cada una se bloquea 3 minutos (pantalla tipo «hora de dormir»,
  * fondo: The Social Network, TMDB 37799). Mientras dura el bloqueo no se hace ninguna petición a TMDB.
  * El estado vive en localStorage, así que recargar o abrir otra pestaña no lo salta. No afecta a nadie más: todo es local.
  */
 (function () {
-  var KEY = "tatoLoadsV2", LOCK_KEY = "tatoRateLockUntil", BG_KEY = "tatoSocialBg", MAX = 7, GAP_MS = 1000, LOCK_MS = 180000, MOVIE = "/movie/37799";
+  var KEY = "tatoLoadsV3", LOCK_KEY = "tatoRateLockUntil", BG_KEY = "tatoSocialBg", MAX = 5, GAP_MS = 1500, LOCK_MS = 180000, MOVIE = "/movie/37799";
   function read(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
   var now = Date.now(), until = Number(read(LOCK_KEY, 0)) || 0;
@@ -18,6 +18,9 @@
   }
   if (until <= now) return;
   window.tcRateLocked = true;
+  // Este script va en <head> y sin defer: cuenta la recarga al instante, aunque la página se cancele antes de terminar de cargar.
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ui); else ui();
+  function ui() {
   var el = document.getElementById("tc-rate-lock");
   if (!el) return;
   var es = (document.documentElement.lang || "es").slice(0, 2) !== "en";
@@ -45,5 +48,6 @@
       window.tcRateAllow = true;
       fetchTMDB(MOVIE).then(function (d) { var p = d && d.backdrop_path; if (p) { write(BG_KEY, p); paint(p); } }).catch(function () { }).then(function () { window.tcRateAllow = false; });
     })();
+  }
   }
 })();
