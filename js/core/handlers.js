@@ -32,6 +32,9 @@ TC_H.h7 = function (event) { // click
   switchView('list');
   toggleMenu();
 };
+TC_H.h8d = function (event) { // click (menú de escritorio)
+  showDisclaimer()
+};
 TC_H.h8 = function (event) { // click
   showDisclaimer();
   toggleMenu();

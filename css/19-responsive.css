@@ -556,3 +556,8 @@ body.tc-profile-screen-open .tc-profile-overlay { z-index: 100000; }
 
 #tc-rate-lock { z-index: 100020; }
 #tc-rate-lock .tc-kid-lock-time { color: #fff; font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Aviso legal: el scroll lo hace toda la ventana (rueda, teclado y gestos sirven con el cursor en cualquier parte, también sobre el título) */
+#disclaimer-modal .modal-content { overflow-y: auto !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#disclaimer-modal .modal-body { overflow: visible !important; max-height: none !important; height: auto !important; flex: 0 0 auto; justify-content: flex-start; }
+#disclaimer-modal .modal-header { position: sticky; top: 0; z-index: 2; background: rgba(13, 13, 15, .96); }
