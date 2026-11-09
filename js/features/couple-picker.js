@@ -89,8 +89,12 @@ function cpPickScreen(who) {
       row.innerHTML = '<img alt="" loading="lazy" decoding="async" src="' + (m.bg ? "https://image.tmdb.org/t/p/w92" + escapeHTML(m.bg) : FALLBACK_IMG) + '"><span class="cp-res-t"><strong>' + escapeHTML(m.title) + "</strong><span>" + (m.type === "tv" ? L("Serie", "Series") : L("Película", "Movie")) + (m.year ? " · " + escapeHTML(m.year) : "") + '</span></span><span class="cp-res-a" aria-hidden="true">' + (has ? "✓" : "+") + "</span>";
       row.onclick = function () {
         var idx = picked.findIndex(function (p) { return cpKey(p) === cpKey(m); });
-        if (idx > -1) picked.splice(idx, 1); else if (picked.length < CP_COUNT) picked.push(m);
-        cpSave(); paintChips(); paintDone(); paintResults(list);
+        var added = false;
+        if (idx > -1) picked.splice(idx, 1); else if (picked.length < CP_COUNT) { picked.push(m); added = true; }
+        cpSave(); paintChips(); paintDone();
+        if (added) {                                                   // al agregar: se vacía el buscador, se limpian los resultados y el cursor vuelve al campo
+          var q = $("cp-q"); clearTimeout(timer); token++; q.value = ""; box.innerHTML = ""; q.focus();
+        } else paintResults(list);
       };
       box.appendChild(row);
     });

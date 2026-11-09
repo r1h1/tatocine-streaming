@@ -252,14 +252,20 @@ async function main() {
     await page.click('[data-cp="start"]');
     await page.fill("#cp-q", "matrix");
     await page.waitForSelector(".cp-res", { timeout: 20000 });
-    await page.locator(".cp-res").nth(0).click(); await page.locator(".cp-res").nth(1).click();
+    await page.locator(".cp-res").nth(0).click();
+    eq(await page.inputValue("#cp-q"), "", "el buscador no se vació al agregar:");
+    eq(await page.evaluate(() => document.activeElement && document.activeElement.id), "cp-q", "el buscador no quedó con el foco:");
+    await page.fill("#cp-q", "matrix"); await page.waitForSelector(".cp-res", { timeout: 20000 });
+    await page.locator(".cp-res").nth(1).click();
     eq(await page.locator(".cp-chip").count(), 2, "títulos elegidos por la persona 1:");
     await page.click('[data-cp="done"]');
     await page.waitForSelector('[data-cp="go"]');
     await page.click('[data-cp="go"]');
     await page.fill("#cp-q", "matrix");
     await page.waitForSelector(".cp-res", { timeout: 20000 });
-    await page.locator(".cp-res").nth(0).click(); await page.locator(".cp-res").nth(2).click();
+    await page.locator(".cp-res").nth(0).click();
+    await page.fill("#cp-q", "matrix"); await page.waitForSelector(".cp-res", { timeout: 20000 });
+    await page.locator(".cp-res").nth(2).click();
     await page.click('[data-cp="done"]');
     await page.waitForSelector("#cp-card", { timeout: 20000 });                         // 1 aprobado solo (coincidencia) + 2 por votar
     ok((await page.locator(".tc-qr-meta").first().innerText()).includes("1/2"), "debían quedar 2 títulos por votar");
