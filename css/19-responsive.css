@@ -561,3 +561,17 @@ body.tc-profile-screen-open .tc-profile-overlay { z-index: 100000; }
 #disclaimer-modal .modal-content { overflow-y: auto !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 #disclaimer-modal .modal-body { overflow: visible !important; max-height: none !important; height: auto !important; flex: 0 0 auto; justify-content: flex-start; }
 #disclaimer-modal .modal-header { position: sticky; top: 0; z-index: 2; background: rgba(13, 13, 15, .96); }
+
+/* Menú hamburguesa hasta 912 px; por encima, el menú de enlaces (con texto grande también caben: el perfil es solo un círculo) */
+@media (min-width: 913px) { .mobile-menu, .mobile-menu.open { display: none !important; } }
+
+/* Barra superior: los enlaces nunca se parten en dos líneas y el nombre del perfil se acorta con «…» en vez de romper el diseño */
+.nav-links { flex-shrink: 0; flex-wrap: nowrap; }
+.nav-links .nav-item { white-space: nowrap; }
+.nav-right { min-width: 0; flex: 0 1 auto; }
+.tc-profile-trigger { min-width: 0; max-width: 100%; }
+.tc-profile-trigger-name { min-width: 0; flex: 0 1 auto; max-width: clamp(60px, 12vw, 140px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Perfil: en todos los tamaños solo se muestra la inicial en un círculo (el nombre completo va en el título y en el lector de pantalla) */
+.tc-profile-trigger-name { display: none !important; }
+.tc-profile-trigger { padding: 4px !important; gap: 0 !important; }
