@@ -6,8 +6,8 @@
   <meta charset="UTF-8" />
   <!-- Política de seguridad (CSP): SIN scripts en línea ni eval; solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org https://image.tmdb.org; frame-src https:; font-src 'self' data:; manifest-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
-  <script src="js/boot.js"></script>
-  <script src="js/core/rate-limit.js"></script>
+  <script src="js/boot.js?v=64ebfee4"></script>
+  <script src="js/core/rate-limit.js?v=65a8b733"></script>
   <style>
     html.tc-picker-boot body { background: #000; }
     html.tc-picker-boot body > *:not(#tc-profile-overlay):not(script):not(style):not(link) { visibility: hidden !important; }
@@ -20,8 +20,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="TatoCine" />
   <meta name="description"
-    content="TatoCine es una interfaz web (frontend) de código abierto para explorar el catálogo de TMDB: películas, series y anime, estrenos, Top 10, listas, perfiles locales y recomendaciones en tu dispositivo." />
-  <meta name="keywords" content="catálogo de películas, series, anime, TMDB, frontend, interfaz web, PWA, código abierto, recomendaciones, estrenos" />
+    content="TatoCine es una interfaz web (frontend) de código abierto, gratuita y sin fines de lucro para explorar el catálogo de TMDB: películas, series y anime, estrenos, Top 10, listas, perfiles locales y recomendaciones. Funciona en celulares, tabletas, plegables, computadoras y televisores (Fire TV, Android TV, Smart TV) y se instala como PWA." />
+  <meta name="keywords" content="catálogo de películas, series, anime, TMDB, frontend, interfaz web, PWA, código abierto, sin fines de lucro, Fire TV, Android TV, Smart TV, plegables, recomendaciones, estrenos" />
   <meta name="author" content="TatoCine contributors" />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <meta name="googlebot" content="index,follow,max-image-preview:large" />
@@ -41,17 +41,17 @@
   <meta property="og:url" id="og-url" content="https://tatocine.netlify.app/" />
   <meta property="og:title" content="TatoCine Streaming Gratis" />
   <meta property="og:description"
-    content="Frontend de código abierto para explorar el catálogo de TMDB: estrenos, Top 10, listas, perfiles locales y recomendaciones en tu dispositivo." />
-  <meta property="og:image" content="https://tatocine.netlify.app/icons/og-image.png" />
-  <meta property="og:image:secure_url" content="https://tatocine.netlify.app/icons/og-image.png" />
-  <meta property="og:image:type" content="image/png" />
+    content="Frontend de código abierto y sin fines de lucro para explorar el catálogo de TMDB: estrenos, Top 10, listas, perfiles locales y recomendaciones. PWA para móvil, tableta, plegable, PC y TV." />
+  <meta property="og:image" content="https://tatocine.netlify.app/icons/og-image.jpg" />
+  <meta property="og:image:secure_url" content="https://tatocine.netlify.app/icons/og-image.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="TatoCine: interfaz para explorar películas, series y anime" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="TatoCine Streaming Gratis" />
-  <meta name="twitter:description" content="Frontend de código abierto para explorar el catálogo de TMDB: estrenos, Top 10, listas y recomendaciones." />
-  <meta name="twitter:image" content="https://tatocine.netlify.app/icons/og-image.png" />
+  <meta name="twitter:description" content="Frontend de código abierto y sin fines de lucro para explorar el catálogo de TMDB. PWA para móvil, tableta, plegable, PC y TV." />
+  <meta name="twitter:image" content="https://tatocine.netlify.app/icons/og-image.jpg" />
   <meta name="twitter:image:alt" content="TatoCine: interfaz para explorar películas, series y anime" />
   <link rel="manifest" id="manifest-link" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
@@ -60,58 +60,87 @@
   <link rel="icon" type="image/png" sizes="48x48" href="icons/icon-48.png" />
   <link rel="preconnect" href="https://api.themoviedb.org" crossorigin />
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
-  <link rel="preconnect" href="https://www.youtube.com" crossorigin />
   <link rel="dns-prefetch" href="https://image.tmdb.org" />
-  <link rel="stylesheet" href="css/01-base.css" />
-  <link rel="stylesheet" href="css/02-hero.css" />
-  <link rel="stylesheet" href="css/03-catalog.css" />
-  <link rel="stylesheet" href="css/04-modals-details.css" />
-  <link rel="stylesheet" href="css/05-player-states.css" />
-  <link rel="stylesheet" href="css/06-search-responsive.css" />
-  <link rel="stylesheet" href="css/07-visual-layer.css" />
-  <link rel="stylesheet" href="css/08-modals-fullscreen.css" />
-  <link rel="stylesheet" href="css/09-carousels-share.css" />
-  <link rel="stylesheet" href="css/10-profiles.css" />
-  <link rel="stylesheet" href="css/11-layout-pwa.css" />
-  <link rel="stylesheet" href="css/12-features.css" />
-  <link rel="stylesheet" href="css/13-kids-brands-lite.css" />
-  <link rel="stylesheet" href="css/14-polish.css" />
-  <link rel="stylesheet" href="css/15-discovery.css" />
-  <link rel="stylesheet" href="css/16-accessibility.css" />
-  <link rel="stylesheet" href="css/17-hero-actions.css" />
-  <link rel="stylesheet" href="css/18-lists-skeletons.css" />
-  <link rel="stylesheet" href="css/19-responsive.css" />
-  <link rel="stylesheet" href="css/20-modales.css" />
-  <link rel="stylesheet" href="css/21-fluidez.css" />
+  <link rel="stylesheet" href="css/01-base.css?v=41fa2dc4" />
+  <link rel="stylesheet" href="css/02-hero.css?v=714483ec" />
+  <link rel="stylesheet" href="css/03-catalog.css?v=c1f78991" />
+  <link rel="stylesheet" href="css/04-modals-details.css?v=828218b6" />
+  <link rel="stylesheet" href="css/05-player-states.css?v=28ad3c58" />
+  <link rel="stylesheet" href="css/06-search-responsive.css?v=e910d83d" />
+  <link rel="stylesheet" href="css/07-visual-layer.css?v=9f6acff4" />
+  <link rel="stylesheet" href="css/08-modals-fullscreen.css?v=d7e1a9d4" />
+  <link rel="stylesheet" href="css/09-carousels-share.css?v=925a68d6" />
+  <link rel="stylesheet" href="css/10-profiles.css?v=54ee97c2" />
+  <link rel="stylesheet" href="css/11-layout-pwa.css?v=93bf9873" />
+  <link rel="stylesheet" href="css/12-features.css?v=5d5ae039" />
+  <link rel="stylesheet" href="css/13-kids-brands-lite.css?v=eebec06b" />
+  <link rel="stylesheet" href="css/14-polish.css?v=39c22a92" />
+  <link rel="stylesheet" href="css/15-discovery.css?v=68925b39" />
+  <link rel="stylesheet" href="css/16-accessibility.css?v=9145d554" />
+  <link rel="stylesheet" href="css/17-hero-actions.css?v=f8cc9a2f" />
+  <link rel="stylesheet" href="css/18-lists-skeletons.css?v=31bc1894" />
+  <link rel="stylesheet" href="css/19-responsive.css?v=531e8e1e" />
+  <link rel="stylesheet" href="css/20-modales.css?v=71b5b4cd" />
+  <link rel="stylesheet" href="css/21-fluidez.css?v=26c3d841" />
   <script type="application/ld+json" id="site-structured-data">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "WebSite",
-            "@id": "https://tatocine.netlify.app/#website",
-            "url": "https://tatocine.netlify.app/",
-            "name": "TatoCine",
-            "description": "Interfaz web (frontend) de código abierto para explorar el catálogo de TMDB.",
-            "inLanguage": ["es", "en"],
-            "potentialAction": { "@type": "SearchAction", "target": { "@type": "EntryPoint", "urlTemplate": "https://tatocine.netlify.app/?q={search_term_string}" }, "query-input": "required name=search_term_string" }
-          },
-          {
-            "@type": "WebApplication",
-            "@id": "https://tatocine.netlify.app/#app",
-            "name": "TatoCine",
-            "url": "https://tatocine.netlify.app/",
-            "applicationCategory": "MultimediaApplication",
-            "operatingSystem": "Web, Android, iOS, Windows, macOS, Linux",
-            "browserRequirements": "Chrome, Edge, Firefox o Safari de 2022 en adelante",
-            "isAccessibleForFree": true,
-            "license": "https://www.gnu.org/licenses/gpl-3.0.html",
-            "image": "https://tatocine.netlify.app/icons/og-image.png",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-          }
-        ]
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://tatocine.netlify.app/#website",
+      "url": "https://tatocine.netlify.app/",
+      "name": "TatoCine",
+      "description": "Interfaz web (frontend) de código abierto para explorar el catálogo de TMDB.",
+      "inLanguage": [
+        "es",
+        "en"
+      ],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://tatocine.netlify.app/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
       }
-    </script>
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://tatocine.netlify.app/#app",
+      "name": "TatoCine",
+      "url": "https://tatocine.netlify.app/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web, Android, iOS, iPadOS, Windows, macOS, Linux, ChromeOS, Fire OS, Android TV, Tizen, webOS",
+      "browserRequirements": "Navegador Chromium 68 o posterior, Firefox 78 o posterior, o Safari 12 o posterior",
+      "isAccessibleForFree": true,
+      "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "image": "https://tatocine.netlify.app/icons/og-image.jpg",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "softwareVersion": "5.6",
+      "dateModified": "2026-11-12",
+      "inLanguage": [
+        "es",
+        "en"
+      ],
+      "description": "Interfaz web (frontend) de código abierto, gratuita y sin fines de lucro para explorar el catálogo de TMDB. No aloja ni distribuye contenido ni ofrece descargas.",
+      "featureList": [
+        "PWA instalable",
+        "Perfiles locales con PIN y perfil Niño",
+        "Top 10 de la semana y recomendaciones locales",
+        "Compatible con Fire TV, Android TV y Smart TV",
+        "Plegables y tabletas",
+        "Español e inglés"
+      ],
+      "screenshot": "https://tatocine.netlify.app/icons/og-image.jpg"
+    }
+  ]
+}
+  </script>
 </head>
 
 <body>
@@ -559,6 +588,19 @@
             <button class="danger-btn" type="button" data-act="diag-download">Descargar</button>
           </div>
         </div>
+        <div class="settings-option" data-adult-only>
+          <div>
+            <div class="label">Tiempo de uso</div>
+            <div class="sub-label" id="adult-usage-label">Al llegar a 10 h de uso hay un descanso de 2 h.</div>
+          </div>
+        </div>
+        <div class="settings-option" data-adult-only>
+          <div>
+            <div class="label">Restablecer a cero</div>
+            <div class="sub-label">Borra TODO lo guardado y deja TatoCine como recién instalada.</div>
+          </div>
+          <button class="danger-btn" type="button" data-act="reset-open">Restablecer</button>
+        </div>
                 <div class="settings-option a11y-option">
           <div>
             <div class="label">Accesibilidad</div>
@@ -601,6 +643,51 @@
   </div>
 
   <!-- Selector local de perfiles, integrado visualmente con TatoCine -->
+  <!-- Bienvenida (solo usuarios nuevos; se guarda el flag tatoWelcomeSeenV1). Va ANTES del selector de perfiles para que este nunca parpadee. -->
+  <!-- Bienvenida (solo usuarios nuevos; flag tatoWelcomeSeenV1). Misma estructura y estilo que las ventanas de la app (Ajustes). Va ANTES del selector de perfiles para que este nunca parpadee. -->
+  <div class="modal tc-welcome" id="tc-welcome" role="dialog" aria-modal="true" aria-labelledby="tc-welcome-title">
+    <div class="settings-content">
+      <div class="modal-header">
+        <h2 class="modal-title">TatoCine</h2>
+        <button class="modal-close" type="button" data-tw="skip" aria-label="Saltar" title="Saltar">✕</button>
+      </div>
+      <div class="modal-body tw-body">
+        <section class="tw-slide on" data-i="0">
+          <span class="tw-logo skel" aria-hidden="true"><img src="icons/icon-192.png" width="112" height="112" alt="" decoding="async" fetchpriority="high"></span>
+        <h2 id="tc-welcome-title">Bienvenido a TatoCine</h2>
+        </section>
+        <section class="tw-slide" data-i="1">
+          <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></span>
+        <h2>Elige o crea tu perfil</h2>
+        <p>En la siguiente pantalla verás tus perfiles. Toca «Mi perfil» para entrar o «Agregar perfil» para crear uno nuevo (hasta 6).</p>
+        <ul><li>Nombre, avatar e idioma (español o inglés).</li><li>PIN de 4 números, si quieres protegerlo.</li><li>Perfil Niño: solo contenido infantil, con horarios y límites que tú eliges.</li></ul>
+        </section>
+        <section class="tw-slide" data-i="2">
+          <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+        <h2>Sin miedo: tus perfiles son tuyos</h2>
+        <p>Cada perfil es único: tiene sus propios favoritos, historial, listas y gustos, y nunca se mezcla con los de otra persona.</p>
+        <ul><li>Todo se guarda solo en este dispositivo: no hay cuenta ni servidor.</li><li>Puedes editar o borrar un perfil cuando quieras.</li><li>«Invitado» entra sin guardar nada.</li></ul>
+        </section>
+        <section class="tw-slide" data-i="3">
+          <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v13"/></svg></span>
+        <h2>Llévalos contigo</h2>
+        <p>¿Cambias de celular o de navegador? Pasa tus perfiles en segundos.</p>
+        <ul><li>Ajustes → Copiar tus datos (QR) o (JSON).</li><li>Hazlo antes de borrar los datos del navegador: si se borran, tus perfiles también.</li><li>Los códigos QR y las copias no incluyen tu PIN.</li></ul>
+        </section>
+        <section class="tw-slide" data-i="4">
+          <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <h2>Antes de empezar</h2>
+        <p>Después de elegir tu perfil verás el aviso legal: léelo y acéptalo para continuar.</p>
+        <ul><li>Usa TatoCine con calma: hay descansos de uso para cuidar tu tiempo.</li><li>Siempre puedes releer todo esto desde Legal.</li></ul>
+        </section>
+      </div>
+      <div class="tw-foot">
+        <div class="tour-dots" id="tw-dots" aria-hidden="true"></div>
+        <div class="tw-btns"><button type="button" class="hero-btn secondary tw-back" data-tw="back">Atrás</button><button type="button" class="hero-btn tw-next" data-tw="next">Siguiente</button></div>
+      </div>
+    </div>
+  </div>
+
   <div class="tc-profile-overlay" id="tc-profile-overlay" role="dialog" aria-modal="true"
     aria-labelledby="tc-profile-title" data-h="h48">
     <div class="tc-profile-backdrop" id="tc-profile-backdrop" aria-hidden="true">
@@ -619,8 +706,8 @@
       <div class="tc-profile-grid" id="tc-profile-grid"><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div></div>
     </section>
   </div>
-  <script src="js/profiles/avatars.js"></script>
-  <script src="js/core/picker-open.js"></script>
+  <script src="js/profiles/avatars.js?v=e59bbbc2"></script>
+  <script src="js/core/picker-open.js?v=c490712b"></script>
 
   <!-- Modal independiente para crear perfiles locales -->
   <div class="tc-profile-create-overlay" id="tc-profile-create-overlay" role="dialog" aria-modal="true"
@@ -683,15 +770,15 @@
           </div>
         </div>
       </div>
-      <div class="pf-footer">
+      <div class="pf-footer"><div class="pf-bar">
+      <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
+        data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
       <div class="tc-profile-create-actions">
         <button class="tc-profile-cancel-btn" type="button" data-h="h51"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
         <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
           data-h="h58"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="btn-label">Crear</span></button>
       </div>
-      <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
-        data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
-      </div>
+      </div></div>
     </section>
   </div>
 
@@ -759,13 +846,34 @@
     </section>
   </div>
 
-  <!-- Descanso obligatorio de los perfiles de adulto (12 h al día o 10 h seguidas) -->
+  <!-- Descanso obligatorio de los perfiles de adulto (10 h de uso → 2 h de descanso, por dispositivo) -->
   <div class="tc-kid-lock" id="tc-adult-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-adult-lock-title">
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-adult-lock-title">Hora de descansar</h3>
       <p class="tc-profile-create-subtitle" id="tc-adult-lock-sub"></p>
       <div class="tc-kid-lock-time" id="tc-adult-lock-time" aria-live="polite">00:00</div>
       <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
+    </section>
+  </div>
+
+  <!-- Restablecer a cero: confirmación -->
+  <div class="tc-profile-create-overlay" id="tc-reset-overlay" role="alertdialog" aria-modal="true" aria-labelledby="tc-reset-title" aria-hidden="true">
+    <section class="tc-profile-create-dialog">
+      <button class="tc-profile-create-close" type="button" data-act="reset-cancel" aria-label="Cerrar">×</button>
+      <h3 id="tc-reset-title">Restablecer a cero</h3>
+      <p class="tc-profile-create-subtitle">Se borra TODO lo guardado en este dispositivo y TatoCine queda como recién instalada. No se puede deshacer.</p>
+      <ul class="tc-reset-list">
+        <li>Perfiles, avatares y PIN</li>
+        <li>Favoritos, listas, historial y «Vistas»</li>
+        <li>Preferencias y ajustes</li>
+        <li>Cookies, almacenamiento local y de sesión, e IndexedDB</li>
+        <li>Cachés y Service Worker (todo se vuelve a descargar)</li>
+      </ul>
+      <p class="tc-profile-create-subtitle">Antes puedes copiar tus datos (QR o JSON) desde Ajustes.</p>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-cancel-btn" type="button" data-act="reset-cancel">Cancelar</button>
+        <button class="tc-profile-create-btn tc-danger" type="button" data-act="reset-confirm" id="tc-reset-go">Restablecer a cero</button>
+      </div>
     </section>
   </div>
 
@@ -882,17 +990,11 @@
   </div>
 
   <!-- MODAL DISCLAIMER -->
-  <div class="modal" id="disclaimer-modal">
-    <div class="modal-content" style="
-          max-width: 700px;
-          height: auto;
-          max-height: 90vh;
-          border-radius: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        ">
+  <div class="modal" id="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="dc-title">
+    <div class="settings-content">
       <div class="modal-header">
-        <h2 class="modal-title">Legal y no responsabilidad</h2>
-        <button class="modal-close" data-h="h79">✕</button>
+        <h2 class="modal-title" id="dc-title">Legal y no responsabilidad</h2>
+        <button class="modal-close dc-x" type="button" data-act="close-disclaimer" aria-label="Cerrar">✕</button>
       </div>
       <div class="modal-body" style="padding: 24px">
         <p style="
@@ -906,7 +1008,7 @@
           NO BUSCAMOS FOMENTAR COMPORTAMIENTO INDEBIDOS, NI EL USO DE ESTE APLICATIVO PARA FINES ILEGALES. SI USTED ES MENOR DE EDAD, DEBE PEDIR PERMISO A SUS PADRES O TUTORES LEGALES ANTES DE UTILIZAR ESTE APLICATIVO.
           TATOCINE NO SE HACE RESPONSABLE Y TIENE UN DESCARGO FUERTE DE RESPONSABILIDAD YA QUE ES UN PROYECTO GRATUITO PARA LA COMUNIDAD. LEA COMPLETO ANTES DE CONTINUAR.
           El siguiente contrato se celebra entre "TatoCine" o "El app" y el usuario. Al presionar aceptar usted está firmando digitalmente este contrato y acepta este descargo de responsabilidad.
-          Al firmar digitalmente al presionar "Acepto y continuo" usted está aceptando nunca accionar legalmente contra "TatoCine" o "El app" ante cualquier inconveniente ya que es un proyecto libre y gratuito.
+          Al firmar digitalmente al presionar "Aceptar y continuar" usted está aceptando nunca accionar legalmente contra "TatoCine" o "El app" ante cualquier inconveniente ya que es un proyecto libre y gratuito.
           TatoCine solo es un app de reproducción multimedia que busca en
           sitios de terceros (nunca dentro de nuestro servidor) y externos (nunca de nuestra propiedad) 
           material audiovisual en base a un API
@@ -956,10 +1058,12 @@
           De parte del equipo de TatoCine estamos comprometidos para dar mantenimiento, soporte y mejoras a este proyecto sin fines de lucro, sin violar leyes, sin violar derechos de autor y sin causar daños a la industría. 
           Fin. Equipo de TatoCine y su fundador.
         </p>
-        <button class="hero-btn" style="width: 100%; justify-content: center; padding: 16px"
-          data-h="h79">
-          ACEPTO Y CONTINUO
-        </button>
+      </div>
+      <p class="dc-source" id="dc-source"></p>
+      <div class="dc-foot">
+        <button type="button" class="hero-btn dc-accept" data-act="accept-disclaimer">Aceptar y continuar</button>
+        <button type="button" class="hero-btn secondary dc-decline" data-act="decline-disclaimer">No utilizar</button>
+        <button type="button" class="hero-btn secondary dc-close" data-act="close-disclaimer">Cerrar</button>
       </div>
     </div>
   </div>
@@ -984,95 +1088,99 @@
 
 
     <script defer src="config.js"></script>
-  <script defer src="js/core/config.js"></script>
-  <script defer src="js/core/storage.js"></script>
-  <script defer src="js/core/extend.js"></script>
-  <script defer src="js/core/actions.js"></script>
-  <script defer src="js/core/handlers.js"></script>
-  <script defer src="js/core/env.js"></script>
-  <script defer src="js/core/errors.js"></script>
-  <script defer src="js/core/input-guard.js"></script>
-  <script defer src="js/profiles/profile-store.js"></script>
-  <script defer src="js/profiles/profile-ui.js"></script>
-  <script defer src="js/profiles/pin-strong.js"></script>
-  <script defer src="js/core/state.js"></script>
-  <script defer src="js/core/ui-utils.js"></script>
-  <script defer src="js/ui/command-palette.js"></script>
-  <script defer src="js/core/tmdb.js"></script>
-  <script defer src="js/data/profile-backdrops.js"></script>
-  <script defer src="js/profiles/profile-backdrop.js"></script>
-  <script defer src="js/features/analytics.js"></script>
-  <script defer src="js/core/utils.js"></script>
-  <script defer src="js/ui/skeletons.js"></script>
-  <script defer src="js/features/favorites.js"></script>
-  <script defer src="js/features/continue-watching.js"></script>
-  <script defer src="js/player/servers.js"></script>
-  <script defer src="js/features/share.js"></script>
-  <script defer src="js/ui/cards.js"></script>
-  <script defer src="js/ui/hero.js"></script>
-  <script defer src="js/core/seo.js"></script>
-  <script defer src="js/ui/details.js"></script>
-  <script defer src="js/ui/filters.js"></script>
-  <script defer src="js/features/search.js"></script>
-  <script defer src="js/ui/views.js"></script>
-  <script defer src="js/ui/settings.js"></script>
-  <script defer src="js/player/player.js"></script>
-  <script defer src="js/core/events.js"></script>
-  <script defer src="js/ui/keyboard.js"></script>
-  <script defer src="js/features/kids.js"></script>
-  <script defer src="js/i18n/i18n.js"></script>
-  <script defer src="js/core/storage-maintenance.js"></script>
-  <script defer src="js/features/watch-tracking.js"></script>
-  <script defer src="js/features/recommendations.js"></script>
-  <script defer src="js/features/favorites-lists.js"></script>
-  <script defer src="js/features/stats.js"></script>
-  <script defer src="js/features/brands.js"></script>
-  <script defer src="js/features/recent-searches.js"></script>
-  <script defer src="js/profiles/profile-switch.js"></script>
-  <script defer src="js/features/pwa-install.js"></script>
-  <script defer src="js/ui/tv-navigation.js"></script>
-  <script defer src="js/core/pwa.js"></script>
-  <script defer src="js/features/details-favorite.js"></script>
-  <script defer src="js/features/watched.js"></script>
-  <script defer src="js/features/details-extras.js"></script>
-  <script defer src="js/features/search-suggest.js"></script>
-  <script defer src="js/features/infinite-feed.js"></script>
-  <script defer src="js/features/discover-wizard.js"></script>
-  <script defer src="js/features/streak.js"></script>
-  <script defer src="js/features/new-episodes.js"></script>
-  <script defer src="js/features/qr-payload.js"></script>
-  <script defer src="js/features/backup-sanitize.js"></script>
-  <script defer src="js/features/import-target.js"></script>
-  <script defer src="js/features/backup-crypto.js"></script>
-  <script defer src="js/features/backup.js"></script>
-  <script defer src="js/features/qr-transfer.js"></script>
-  <script defer src="js/features/parental.js"></script>
-  <script defer src="js/features/adult-limit.js"></script>
-  <script defer src="js/features/watch-later.js"></script>
-  <script defer src="js/features/calendar.js"></script>
-  <script defer src="js/features/release-alerts.js"></script>
-  <script defer src="js/features/wrapped.js"></script>
-  <script defer src="js/features/couple-picker.js"></script>
-  <script defer src="js/features/marathon.js"></script>
-  <script defer src="js/ui/scroll-lock.js"></script>
-  <script defer src="js/features/details-sagas.js"></script>
-  <script defer src="js/features/legal-hub.js"></script>
-  <script defer src="js/ui/undo.js"></script>
-  <script defer src="js/player/autoplay-next.js"></script>
-  <script defer src="js/player/player-robust.js"></script>
-  <script defer src="js/ui/gestures.js"></script>
-  <script defer src="js/ui/hero-trailer.js"></script>
-  <script defer src="js/ui/dynamic-color.js"></script>
-  <script defer src="js/ui/open-motion.js"></script>
-  <script defer src="js/ui/a11y.js"></script>
-  <script defer src="js/ui/accessibility-prefs.js"></script>
-  <script defer src="js/features/voice-search.js"></script>
-  <script defer src="js/ui/onboarding.js"></script>
-  <script defer src="js/core/performance.js"></script>
-  <script defer src="js/core/refresh-rate.js"></script>
-  <script defer src="js/core/diagnostics.js"></script>
-  <script defer src="js/core/data-guard.js"></script>
-  <script defer src="js/app.js"></script>
+  <script defer src="js/core/config.js?v=6f1cc99f"></script>
+  <script defer src="js/core/storage.js?v=ad784e87"></script>
+  <script defer src="js/core/extend.js?v=6cfcf5d1"></script>
+  <script defer src="js/core/actions.js?v=7d8d4bcc"></script>
+  <script defer src="js/core/handlers.js?v=931eac9b"></script>
+  <script defer src="js/core/env.js?v=60422e0c"></script>
+  <script defer src="js/core/fold.js?v=e0bfae7a"></script>
+  <script defer src="js/core/errors.js?v=302fb3d7"></script>
+  <script defer src="js/core/input-guard.js?v=35f2f82b"></script>
+  <script defer src="js/profiles/profile-store.js?v=9a0bb1ea"></script>
+  <script defer src="js/profiles/profile-ui.js?v=6a3bfd20"></script>
+  <script defer src="js/profiles/pin-strong.js?v=2762f95c"></script>
+  <script defer src="js/core/state.js?v=16580616"></script>
+  <script defer src="js/core/ui-utils.js?v=ba78508e"></script>
+  <script defer src="js/ui/command-palette.js?v=3e7e6fbd"></script>
+  <script defer src="js/core/tmdb.js?v=a9bd7bc7"></script>
+  <script defer src="js/data/profile-backdrops.js?v=3d962c01"></script>
+  <script defer src="js/profiles/profile-backdrop.js?v=c6b872b5"></script>
+  <script defer src="js/features/analytics.js?v=074c73a2"></script>
+  <script defer src="js/core/utils.js?v=9e293ff2"></script>
+  <script defer src="js/ui/skeletons.js?v=b92c41e7"></script>
+  <script defer src="js/features/favorites.js?v=830da41e"></script>
+  <script defer src="js/features/continue-watching.js?v=b3380636"></script>
+  <script defer src="js/player/servers.js?v=d8b06821"></script>
+  <script defer src="js/features/share.js?v=ea471e80"></script>
+  <script defer src="js/ui/cards.js?v=b2d3a26c"></script>
+  <script defer src="js/ui/hero.js?v=3747afe6"></script>
+  <script defer src="js/core/seo.js?v=f9d19c94"></script>
+  <script defer src="js/ui/details.js?v=f2c98d26"></script>
+  <script defer src="js/ui/filters.js?v=9d82f692"></script>
+  <script defer src="js/features/search.js?v=948de9ee"></script>
+  <script defer src="js/ui/views.js?v=8f7127df"></script>
+  <script defer src="js/ui/settings.js?v=f3730fae"></script>
+  <script defer src="js/player/player.js?v=46fa18dd"></script>
+  <script defer src="js/core/events.js?v=1541830a"></script>
+  <script defer src="js/ui/keyboard.js?v=4ccc7320"></script>
+  <script defer src="js/features/kids.js?v=7bde180d"></script>
+  <script defer src="js/i18n/i18n.js?v=3443952c"></script>
+  <script defer src="js/core/storage-maintenance.js?v=feab3020"></script>
+  <script defer src="js/features/watch-tracking.js?v=557bccd4"></script>
+  <script defer src="js/features/recommendations.js?v=6fadd620"></script>
+  <script defer src="js/features/favorites-lists.js?v=fd77ef4d"></script>
+  <script defer src="js/features/stats.js?v=297a730e"></script>
+  <script defer src="js/features/brands.js?v=f9e755be"></script>
+  <script defer src="js/features/recent-searches.js?v=aef674bf"></script>
+  <script defer src="js/profiles/profile-switch.js?v=70615535"></script>
+  <script defer src="js/features/pwa-install.js?v=ffef29e1"></script>
+  <script defer src="js/ui/tv-navigation.js?v=6721d123"></script>
+  <script defer src="js/core/pwa.js?v=c93c8e92"></script>
+  <script defer src="js/features/details-favorite.js?v=a551f4c7"></script>
+  <script defer src="js/features/watched.js?v=ea6f0026"></script>
+  <script defer src="js/features/details-extras.js?v=b21b12cf"></script>
+  <script defer src="js/features/search-suggest.js?v=b01b3236"></script>
+  <script defer src="js/features/infinite-feed.js?v=6fcbf5a4"></script>
+  <script defer src="js/features/discover-wizard.js?v=2ce2c2a3"></script>
+  <script defer src="js/features/streak.js?v=ecd42a1a"></script>
+  <script defer src="js/features/new-episodes.js?v=fa00bb34"></script>
+  <script defer src="js/features/qr-payload.js?v=a832cae1"></script>
+  <script defer src="js/features/backup-sanitize.js?v=98daf798"></script>
+  <script defer src="js/features/import-target.js?v=b71cdfd6"></script>
+  <script defer src="js/features/backup-crypto.js?v=3b4c9cb7"></script>
+  <script defer src="js/features/backup.js?v=1de9889c"></script>
+  <script defer src="js/features/qr-transfer.js?v=b427eadb"></script>
+  <script defer src="js/features/parental.js?v=2bf5cf31"></script>
+  <script defer src="js/features/adult-limit.js?v=028105ba"></script>
+  <script defer src="js/features/watch-later.js?v=198c8fc6"></script>
+  <script defer src="js/features/calendar.js?v=6ac3cb5c"></script>
+  <script defer src="js/features/release-alerts.js?v=e0add2ac"></script>
+  <script defer src="js/features/wrapped.js?v=7ff5ab9b"></script>
+  <script defer src="js/features/couple-picker.js?v=4c2adbf5"></script>
+  <script defer src="js/features/marathon.js?v=e578025f"></script>
+  <script defer src="js/ui/scroll-lock.js?v=096cf86f"></script>
+  <script defer src="js/features/details-sagas.js?v=60b13281"></script>
+  <script defer src="js/features/legal-hub.js?v=2b940532"></script>
+  <script defer src="js/ui/welcome.js?v=f38add2e"></script>
+  <script defer src="js/ui/legal-gate.js?v=efc26162"></script>
+  <script defer src="js/features/reset.js?v=4df5738f"></script>
+  <script defer src="js/ui/undo.js?v=e1f06a78"></script>
+  <script defer src="js/player/autoplay-next.js?v=c5e3e271"></script>
+  <script defer src="js/player/player-robust.js?v=b2220bb0"></script>
+  <script defer src="js/ui/gestures.js?v=65bbabd8"></script>
+  <script defer src="js/ui/hero-trailer.js?v=97683a61"></script>
+  <script defer src="js/ui/dynamic-color.js?v=53cfe7c2"></script>
+  <script defer src="js/ui/open-motion.js?v=7e4329b4"></script>
+  <script defer src="js/ui/a11y.js?v=e48fed4f"></script>
+  <script defer src="js/ui/accessibility-prefs.js?v=c7be7d46"></script>
+  <script defer src="js/features/voice-search.js?v=de25b00e"></script>
+  <script defer src="js/ui/onboarding.js?v=b228fc35"></script>
+  <script defer src="js/core/performance.js?v=40da4139"></script>
+  <script defer src="js/core/refresh-rate.js?v=eafff583"></script>
+  <script defer src="js/core/diagnostics.js?v=4f9d2b3b"></script>
+  <script defer src="js/core/data-guard.js?v=e7f88fce"></script>
+  <script defer src="js/app.js?v=be37098e"></script>
 </body>
 
 </html>

@@ -21,6 +21,7 @@
       stored.forEach(function (p) {
         if (p.kind !== "kid") p.kind = "adult";
         if (p.lang !== "en") p.lang = "es";
+        if (p.id === "main" && p.name === "Yo") p.name = "Mi perfil";       // el perfil principal de usuarios anteriores se llamaba «Yo»: ahora se llama igual que el de los nuevos
         if (!p.pin || typeof p.pin.h !== "string" || typeof p.pin.s !== "string") delete p.pin;
       });
       // «Invitado» existe siempre (no se edita ni se elimina y no guarda nada). El orden es: Yo, Invitado y los demás.

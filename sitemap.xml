@@ -2,10 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://tatocine.netlify.app/</loc>
-    <lastmod>2026-11-07</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="es" href="https://tatocine.netlify.app/" />
-    <image:image><image:loc>https://tatocine.netlify.app/icons/og-image.png</image:loc><image:title>TatoCine</image:title></image:image>
+    <image:image><image:loc>https://tatocine.netlify.app/icons/og-image.jpg</image:loc><image:title>TatoCine</image:title></image:image>
   </url>
 </urlset>

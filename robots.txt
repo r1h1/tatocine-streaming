@@ -6,6 +6,8 @@ Disallow: /500.html
 Disallow: /offline.html
 Disallow: /config.js
 Disallow: /tests/
+Disallow: /build.json
+Disallow: /sw.js
 
 # Rastreadores de IA: pueden leer el sitio y el resumen en /llms.txt
 User-agent: GPTBot
@@ -15,6 +17,10 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 User-agent: Google-Extended
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: Applebot-Extended
 Allow: /
 
 Sitemap: https://tatocine.netlify.app/sitemap.xml

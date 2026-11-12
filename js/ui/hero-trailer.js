@@ -20,6 +20,7 @@ function htWhyNot() {
   var forced = htMode === "on";
   htWhyNotify = false;
   if (htMode === "off") return L("Desactivado en Ajustes.", "Off in Settings.");
+  if (document.body.classList.contains("legal-pending")) return "legal-pending";                    // sin aceptar el aviso legal no se reproduce nada (ni el tráiler de la portada)
   try { if (navigator.connection && navigator.connection.saveData) return L("Ahorro de datos activado en el dispositivo.", "Data saver is on."); } catch (e) { }
   var picker = document.getElementById("tc-profile-overlay");
   if (picker && picker.classList.contains("open")) return L("Hay que elegir perfil primero.", "Choose a profile first.");
@@ -78,6 +79,14 @@ async function htTrailerKeys(m) {
   htCache[k] = keys;
   return keys;
 }
+/** El reproductor mide SIEMPRE 854×480 px y se escala (CSS) hasta cubrir la portada: YouTube elige la resolución según el tamaño del reproductor, así que por defecto baja ~480p
+ *  en lugar de 1080p (menos datos y menos CPU, sobre todo en móviles y TV); el aspecto en pantalla es el mismo. */
+function htFit() {
+  var w = $heroVideoWrap.clientWidth, h = $heroVideoWrap.clientHeight; if (!w || !h) return;
+  var H = Math.max(1.3 * h, 1.3 * w * 9 / 16);                                    // 30 % de margen arriba y abajo para recortar los rótulos de YouTube
+  $heroVideoWrap.style.setProperty("--ht-s", (H / 480).toFixed(4));
+}
+var htFitRaf = 0; window.addEventListener("resize", function () { cancelAnimationFrame(htFitRaf); htFitRaf = requestAnimationFrame(htFit); });
 var HT_PRELOAD_MS = 300, HT_PLAY_MS = 800, HT_START_MS = 1800;   // se precarga a los 0,5 s, arranca (oculto) a 1 s y SE VE a los 2 s del título: los controles que YouTube muestra al empezar ya pasaron
 /** Prepara keys[i] en pausa y lo arranca oculto y lo muestra en el segundo 2. Solo se muestra cuando YouTube confirma que reproduce; si falla, prueba el siguiente. */
 function htPlay(keys, i, token) {
@@ -87,7 +96,7 @@ function htPlay(keys, i, token) {
   f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true"); f.setAttribute("title", "");
   f.setAttribute("allow", "autoplay; encrypted-media");
   f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
+  f.src = "https://www.youtube-nocookie.com/embed/" + key + "?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&vq=large&enablejsapi=1&origin=" + encodeURIComponent(location.origin);
   function post(func) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: [] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
   function next(reason) { cleanup(); if (token === htToken) { if (i + 1 >= keys.length) htFail(reason); else htSetStatus(reason); $heroVideoWrap.innerHTML = ""; htPlay(keys, i + 1, token); } }
   function cleanup() { clearTimeout(giveUp); clearInterval(kick); window.removeEventListener("message", onMsg); }
@@ -124,6 +133,7 @@ function htPlay(keys, i, token) {
   htWrapGen++;
   $heroVideoWrap.innerHTML = "";
   $heroVideoWrap.dataset.key = key;
+  htFit();
   $heroVideoWrap.appendChild(f);
 }
 function htReveal(f, key, token, post) {
@@ -132,8 +142,23 @@ function htReveal(f, key, token, post) {
   document.body.classList.add("hero-trailer-on");
   htPlayingKey = key;
   htSetStatus("");
+  function setQ() { post2("setPlaybackQuality", ["large"]); }                          // pista de calidad 480p (YouTube puede ignorarla; el tamaño 854×480 del reproductor es lo que más pesa)
+  function post2(func, args) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
+  setQ(); setTimeout(setQ, 1500);
   function setVol(v) { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [v] }), "https://www.youtube-nocookie.com"); } catch (e) { } }
-  function soundOn() { post("unMute"); setVol(70); }
+  // Sonido sin saltos: entra con un fundido de 0 a 70 en ~0,9 s (nunca de golpe) y sale igual (curva suave, 12 pasos), como un reproductor profesional.
+  var rampTimer = null;
+  function ramp(from, to, ms, done) {
+    clearInterval(rampTimer);
+    var steps = Math.max(2, Math.round(ms / 70)), i = 0;
+    rampTimer = setInterval(function () {
+      if (token !== htToken) { clearInterval(rampTimer); return; }
+      i++; var t = i / steps, e = 1 - Math.pow(1 - t, 2);
+      setVol(Math.round(from + (to - from) * e));
+      if (i >= steps) { clearInterval(rampTimer); if (done) done(); }
+    }, 70);
+  }
+  function soundOn() { setVol(0); post("unMute"); ramp(0, 70, 900); }
   // Siempre con sonido. En una PWA instalada (o sin interacción previa) el navegador puede bloquear el audio: entonces sigue en silencio,
   // avisa una vez y el PRIMER toque, clic o tecla (cuenta al soltar, no al pulsar) lo activa; si aun así no suena, vuelve a esperar el siguiente.
   var GEST = ["pointerup", "click", "touchend", "keydown"], armed = false;
@@ -153,11 +178,11 @@ function htReveal(f, key, token, post) {
   soundOn();
   setTimeout(check, 1200);
   setTimeout(check, 3500);
-  // A los 19 s de tráiler: el sonido baja, el vídeo se pausa y el iframe se destruye (no queda vídeo oculto descargando); 5 s después pasa al siguiente.
+  // A los 15 s de tráiler: el sonido baja, el vídeo se pausa y el iframe se destruye (no queda vídeo oculto descargando); 10 s después pasa al siguiente.
   var untilPause = Math.max(0, heroShownAt + HT_START_MS + HT_VIEW_MS - 1000 - Date.now());
   htPauseTimer = setTimeout(function () {
     if (token !== htToken) return;
-    ["40", "25", "10", "0"].forEach(function (v, k) { setTimeout(function () { if (token === htToken) try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [Number(v)] }), "https://www.youtube-nocookie.com"); } catch (e) { } }, k * 200); });
+    ramp(70, 0, 850);                                                                   // fundido de salida suave
     setTimeout(function () { if (token === htToken) post("pauseVideo"); }, 850);
     setTimeout(function () { if (token === htToken) htStop(); }, 1000);                 // destruye el iframe y los temporizadores del tráiler
   }, untilPause);
@@ -184,8 +209,8 @@ function htSchedule(m) {
     htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
   });
 }
-/** Con tráiler: se ve desde HT_START_MS, suena HT_VIEW_MS (19 s), se detiene y se DESTRUYE el iframe, y tras HT_REST_MS (5 s) pasa al siguiente título. */
-var HT_VIEW_MS = 19000, HT_REST_MS = 5000, HERO_DWELL_TRAILER = HT_START_MS + HT_VIEW_MS + HT_REST_MS;
+/** Con tráiler: se ve desde HT_START_MS, suena HT_VIEW_MS (15 s), se detiene y se DESTRUYE el iframe, y tras HT_REST_MS (10 s) pasa al siguiente título. */
+var HT_VIEW_MS = 15000, HT_REST_MS = 10000, HERO_DWELL_TRAILER = HT_START_MS + HT_VIEW_MS + HT_REST_MS;
 decorate("setHero", function (original) { return function (m) { var r = original(m); htSchedule(m); return r; }; });
 decorate("openDetails", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });

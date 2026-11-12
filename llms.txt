@@ -9,7 +9,12 @@ Licencia: GNU GPL v3 o posterior (LICENSE)
 ## Qué es
 - Una aplicación estática (HTML, CSS y JavaScript nativos, sin servidor ni cuentas) que consulta la API pública de TMDB desde el navegador.
 - Perfiles, favoritos, estadísticas y recomendaciones se guardan solo en el dispositivo del usuario (localStorage); no se envían a ningún servidor.
-- Idiomas: español (latino) e inglés. Funciona en móvil, tableta, escritorio y TV; se instala como PWA y abre sin conexión.
+- Idiomas: español (latino) e inglés. Funciona en celular, tableta (iPad, Samsung, Xiaomi, Lenovo, Fire), plegable (Galaxy Fold/Flip, Pixel Fold), computadora y televisor (Fire TV, Android TV, Tizen, webOS y cualquier navegador Chromium); se instala como PWA y abre sin conexión.
+
+## Primer uso y legal
+- Bienvenida de 5 pasos para usuarios nuevos, selector de perfiles y aviso legal obligatorio («Aceptar y continuar»).
+- Proyecto de código abierto (GPLv3), gratuito y sin fines de lucro; su autor no obtiene ingresos. No aloja, almacena ni distribuye contenido y no ofrece descargas: solo muestra datos de TMDB e incrusta reproductores operados por terceros, que no controla.
+- Ajustes → «Restablecer a cero» borra todo lo guardado en el dispositivo.
 
 ## Qué NO es
 - No es un servicio de streaming ni de descargas, no aloja películas y no enlaza a descargas de terceros.
@@ -26,4 +31,5 @@ Licencia: GNU GPL v3 o posterior (LICENSE)
 ## Para desarrolladores
 - Sin build: `css/` y `js/` por capas; ver docs/ARCHITECTURE.md y README.md.
 - Pruebas: `node tests/*.test.js` y `tests/e2e/run.js` (Playwright).
-- Navegadores objetivo: Chrome/Edge/Firefox ≥ 100 y Safari ≥ 15.4 (2022 en adelante).
+- Navegadores: Chromium ≥ 68 (televisores incluidos), Firefox ≥ 78, Safari ≥ 12. El código fuente es moderno; `node tools/package.js` genera el paquete de producción con respaldos para Chromium viejo.
+- Publicación: `node tools/gen-headers.js && node tools/stamp.js && node tools/package.js` (cabeceras de Netlify/Vercel desde una sola fuente, versionado de caché por hash y ZIP limpio).

@@ -6,7 +6,7 @@
    - API de TMDB: «stale-while-revalidate» como las plataformas grandes: si hay copia reciente (< 30 min) se usa tal cual; si es de hasta 6 h se muestra al instante
      y se actualiza en segundo plano; si es más vieja o no hay, red primero con la copia como respaldo sin conexión.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-14449f48";
+const VERSION = "5.6-53da52a1";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";

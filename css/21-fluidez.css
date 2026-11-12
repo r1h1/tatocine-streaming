@@ -14,3 +14,59 @@ html.hz-low .card, html.hz-low .hero-btn, html.hz-low .tc-profile-card { box-sha
 .row-scroll, .modal-content, .settings-content, .details-content, .actor-content { -webkit-overflow-scrolling: touch; }
 /* Los carruseles se desplazan en el compositor: sin pintar de nuevo las tarjetas de cada fila mientras se mueven */
 .row-scroll { contain: layout paint style; }
+
+/* ============================================================================================================================
+ * Menos animaciones: solo las que ayudan (esta sección va al final a propósito y manda sobre las anteriores).
+ *   Se conservan: fundidos de la portada y del selector (sin ellos hay saltos), brillo de los esqueletos de carga, foco visible y la
+ *   respuesta al pulsar. Se quitan: zoom/elevación al pasar el ratón, entradas con desplazamiento y transiciones largas.
+ * ========================================================================================================================== */
+*, *::before, *::after { transition-duration: .15s !important; }                    /* antes entre 0,2 y 1,35 s */
+.hero-bg, .hero-video-wrap { transition-duration: .45s !important; }                  /* fundido entre títulos de la portada */
+.tc-profile-backdrop-layer { transition-duration: .8s !important; }                   /* fundido entre fondos del selector */
+.hero-dots span, .hero-dots button { transition-duration: .2s !important; }
+
+/* Sin zoom ni elevación al pasar el ratón (el cambio de borde/sombra basta; además en pantallas táctiles no existe «hover») */
+.card:hover, .row-scroll .card:hover, .cast-item:hover, .similar-card:hover, .tc-profile-card:hover, .hero-btn:hover, .hamburger-btn:hover,
+.pf-av:hover, .brand-tile:hover, .continue-remove-btn:active, .tc-profile-create-dialog .tc-profile-create-btn:hover { transform: none !important; }
+.card:hover img, .row-scroll .card:hover img, .tc-profile-card:hover .tc-profile-card-avatar { transform: none !important; }
+.row-nav.prev:hover, .row-nav.next:hover { transform: translate(0, -50%) !important; }                 /* queda centrado en vertical, sin crecer */
+
+/* Avisos y diálogos: aparecen con un fundido corto, sin desplazarse */
+@keyframes toastIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes tcProfileModalIn { from { opacity: 0; } to { opacity: 1; } }
+.toast { animation-duration: .15s !important; }
+.toast.removing { animation-duration: .15s !important; }
+
+/* Esqueletos: el brillo cruza más despacio (menos fotogramas) y se detiene con «reducir movimiento», modo ligero o pantalla lenta */
+.skeleton-card::after, .skel::after, .sk-title::after, .sk-badge::after, .sk-chip::after, .sk-line::after, .sk-btn::after, .sk-cast-item::after { animation-duration: 2.2s !important; }
+html.hz-low .skeleton-card::after, html.hz-low .skel::after, html.hz-low .sk-line::after, html.hz-low .sk-title::after { animation: none !important; }
+
+/* «Reducir movimiento» del sistema o de Ajustes: nada se anima */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
+body.rm *, body.rm *::before, body.rm *::after { transition-duration: 0s !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+
+/* ============================================================================================================================
+ * Sensación nativa: la PWA instalada (y cualquier móvil/tableta) no se comporta como una página web.
+ * ========================================================================================================================== */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; background: #000; }
+button, a, [role="button"], .card, .similar-card, .cast-item, .nav-item, .genre-chip, summary, select, label { touch-action: manipulation; }   /* sin la espera de 300 ms del doble toque: respuesta inmediata */
+img, svg { -webkit-user-drag: none; }
+.row-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.row-scroll::-webkit-scrollbar { display: none; }
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui), (display-mode: window-controls-overlay) {
+  html, body { overscroll-behavior: none; }                                       /* sin «tirar para recargar» ni rebote: como una app */
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable="true"], .tw-slide p, .tw-slide li, #disclaimer-modal .modal-body, .details-overview, .actor-bio, .legal-third, .tc-reset-list, .player-notice { -webkit-user-select: text; user-select: text; }
+}
+
+/* ============================================================================================================================
+ * Televisores y Fire TV (body.tv-mode): GPU modesta, mando a distancia, navegadores Chromium viejos.
+ * ========================================================================================================================== */
+body.tv-mode *, body.tv-mode *::before, body.tv-mode *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+body.tv-mode :focus { outline: 4px solid #fff !important; outline-offset: 3px; }       /* foco siempre visible aunque el navegador no conozca :focus-visible */
+body.tv-mode .top-nav { padding-left: max(40px, 3vw); padding-right: max(40px, 3vw); }  /* margen de seguridad contra el sobrebarrido de algunos televisores */
+body.tv-mode .card:focus, body.tv-mode .similar-card:focus, body.tv-mode .cast-item:focus, body.tv-mode .brand-tile:focus { z-index: 6; }
+html.no-focus-visible :focus { outline: 3px solid #fff; outline-offset: 3px; }          /* navegadores sin :focus-visible (Chromium < 86): el foco se ve con el teclado y el mando */

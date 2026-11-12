@@ -27,14 +27,4 @@ function renderTour() {
 function endTour() { safeStorageSet(TOUR_KEY, "1"); closeQr(); }
 function startTour() { tourStep = 0; qrOpen(L("Bienvenido a TatoCine", "Welcome to TatoCine")); renderTour(); }
 registerCommand({ id: "tour", es: "Ver el recorrido de bienvenida", en: "Watch the welcome tour", keys: "ayuda tutorial recorrido bienvenida", run: startTour });
-(function maybeTour() {
-  var done = false;
-  try { done = !!localStorage.getItem(TOUR_KEY); } catch (e) { done = true; }
-  if (done || isKidProfile() || isGuestProfile()) return;
-  var tries = 0;
-  (function wait() {
-    var picker = $("tc-profile-overlay"), busy = document.querySelector(".modal.open, .tc-profile-create-overlay.open, .tc-kid-lock.open");
-    if (document.body.classList.contains("app-ready") && !(picker && picker.classList.contains("open")) && !busy) { startTour(); return; }
-    if (tries++ < 120) setTimeout(wait, 1000);
-  })();
-})();
+// El recorrido ya no se abre solo: la bienvenida (js/ui/welcome.js) lo sustituye para usuarios nuevos. Sigue disponible desde Ctrl+K.

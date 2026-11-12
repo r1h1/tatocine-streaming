@@ -2,7 +2,7 @@
   "id": "./",
   "name": "TatoCine - Películas, series y anime",
   "short_name": "TatoCine",
-  "description": "Interfaz web de código abierto para explorar el catálogo de TMDB: películas, series y anime, con perfiles locales, listas y recomendaciones en tu dispositivo.",
+  "description": "Interfaz web de código abierto, gratuita y sin fines de lucro para explorar el catálogo de TMDB: películas, series y anime, con perfiles locales, listas y recomendaciones en tu dispositivo.",
   "lang": "es",
   "dir": "ltr",
   "start_url": "./?source=pwa",
@@ -151,5 +151,49 @@
       "focus-existing",
       "auto"
     ]
-  }
+  },
+  "screenshots": [
+    {
+      "src": "icons/screens/bienvenida-movil.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Bienvenida a TatoCine"
+    },
+    {
+      "src": "icons/screens/privacidad-movil.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tus perfiles son tuyos"
+    },
+    {
+      "src": "icons/screens/ajustes-movil.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Ajustes"
+    },
+    {
+      "src": "icons/screens/bienvenida-escritorio.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Bienvenida a TatoCine"
+    },
+    {
+      "src": "icons/screens/privacidad-escritorio.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tus perfiles son tuyos"
+    },
+    {
+      "src": "icons/screens/ajustes-escritorio.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Ajustes"
+    }
+  ]
 }

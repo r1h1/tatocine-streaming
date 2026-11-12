@@ -1,3 +1,5 @@
+/* Dominio canónico: los despliegues espejo (netlify, vercel…) apuntan al principal para no competir entre sí en buscadores. */
+var SEO_ORIGIN = "https://tatocine.netlify.app";
 /**
  * TatoCine · js/core/seo.js
  * SEO dinámico: metaetiquetas, datos estructurados y título por pantalla.
@@ -30,7 +32,7 @@
       setMetaByName("twitter:description", shortDesc);
       var canonical = $("canonical-link");
       var pageUrl =
-        location.origin +
+        SEO_ORIGIN +
         location.pathname +
         (data && data.id ? "?id=" + data.id + "&type=" + type : "");
       if (canonical) canonical.href = pageUrl;
@@ -84,10 +86,10 @@
         "Explora películas, series y anime en TatoCine.",
       );
       var canonical = $("canonical-link");
-      if (canonical) canonical.href = location.origin + location.pathname;
+      if (canonical) canonical.href = SEO_ORIGIN + location.pathname;
       var ogUrl = document.querySelector('meta[property="og:url"]');
       if (ogUrl)
-        ogUrl.setAttribute("content", location.origin + location.pathname);
+        ogUrl.setAttribute("content", SEO_ORIGIN + location.pathname);
       var schema = $("media-structured-data");
       if (schema && schema.parentNode) schema.parentNode.removeChild(schema);
     }

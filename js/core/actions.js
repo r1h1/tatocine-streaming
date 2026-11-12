@@ -45,13 +45,22 @@ document.addEventListener("keydown", function (e) {
   var el = e.target.closest("[data-act]");
   if (el && el.tagName !== "BUTTON" && el.tagName !== "A" && el.tagName !== "INPUT" && TC_ACTIONS[el.getAttribute("data-act")]) { e.preventDefault(); TC_ACTIONS[el.getAttribute("data-act")](el, e); }
 });
-var hoverSeen = new WeakSet();
+/* Precarga al pasar el ratón: solo si el cursor SE QUEDA 350 ms sobre la tarjeta (al cruzar la fila con el ratón no se piden fichas que nadie va a abrir)
+ * y nunca con «ahorro de datos». Cada precarga es una llamada pesada a TMDB (créditos, vídeos, similares y recomendaciones). */
+var hoverTimer = null, hoverEl = null;
 document.addEventListener("mouseover", function (e) {
   var el = e.target.closest && e.target.closest("[data-hover]");
-  if (!el || hoverSeen.has(el) && false) return;
+  if (!el) return;
   if (el.contains(e.relatedTarget)) return;                       // equivale a onmouseenter: solo al entrar
   var fn = TC_ACTIONS[el.getAttribute("data-hover")];
-  if (fn) fn(el, e);
+  if (!fn) return;
+  try { if (navigator.connection && navigator.connection.saveData) return; } catch (x) { }
+  clearTimeout(hoverTimer); hoverEl = el;
+  hoverTimer = setTimeout(function () { if (hoverEl === el && el.matches(":hover")) fn(el, e); }, 350);
+});
+document.addEventListener("mouseout", function (e) {
+  var el = e.target.closest && e.target.closest("[data-hover]");
+  if (el && el === hoverEl && !el.contains(e.relatedTarget)) { clearTimeout(hoverTimer); hoverEl = null; }
 });
 /* Imágenes: clase al cargar e imagen de respaldo si falla (los eventos load/error no suben, pero sí se capturan). */
 var FB_CAST = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%2240%22 fill=%22%23333%22/%3E%3C/svg%3E";

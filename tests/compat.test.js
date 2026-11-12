@@ -8,7 +8,7 @@ const fs = require("node:fs"), path = require("node:path"), vm = require("node:v
 const ROOT = path.resolve(__dirname, "..");
 function walk(dir, ext, out = []) {
   for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (["node_modules", ".git", "tests", "docs"].includes(f.name)) continue;
+    if (["node_modules", ".git", "tests", "docs", "tools", "dist"].includes(f.name)) continue;
     const p = path.join(dir, f.name);
     if (f.isDirectory()) walk(p, ext, out); else if (p.endsWith(ext)) out.push(p);
   }

@@ -82,7 +82,7 @@ async function openQrShow() {
       return;
     }
     if (!built.fits) throw new Error("size");
-    await qrLoadScript("js/vendor/qrcode.js");
+    await qrLoadScript("js/vendor/qrcode.js?v=4c79be16");
     var qr = qrcode(0, "L");
     qr.addData(built.link, "Byte");
     qr.make();
@@ -157,7 +157,7 @@ function qrStopCamera() {
 async function qrStartCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { qrStatus(L("Este navegador no permite usar la cámara. Sube una captura del QR.", "This browser can't use the camera. Upload a screenshot of the QR."), true); return; }
   try {
-    await qrLoadScript("js/vendor/jsQR.js");
+    await qrLoadScript("js/vendor/jsQR.js?v=ae81b7cf");
     qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
   } catch (e) { qrStatus(L("No se pudo abrir la cámara (permiso denegado o no disponible). Sube una captura.", "Could not open the camera (permission denied or unavailable). Upload a screenshot."), true); return; }
   var video = document.createElement("video");
@@ -180,7 +180,7 @@ async function qrStartCamera() {
 }
 async function qrDecodeImageFile(file) {
   if (!file || !/^image\//.test(file.type) || file.size > 12 * 1024 * 1024) throw new Error("bad_file");
-  await qrLoadScript("js/vendor/jsQR.js");
+  await qrLoadScript("js/vendor/jsQR.js?v=ae81b7cf");
   var bmp = await createImageBitmap(file);
   var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d", { willReadFrequently: true });
   var found = null, widths = [Math.min(bmp.width, 1600), 1000, 700, 450];

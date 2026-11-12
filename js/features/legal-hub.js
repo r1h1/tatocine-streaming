@@ -42,9 +42,9 @@ function renderLegalHub() {
   $("legal-body").innerHTML =
     legalRow(L("Legal y no responsabilidad", "Legal and disclaimer"), escapeHTML(L("Aviso legal, descargo de responsabilidad y condiciones de uso.", "Legal notice, disclaimer and terms of use.")),
       '<button type="button" class="danger-btn" data-act="open-disclaimer">' + L("Leer", "Read") + "</button>") +
-    legalRow(L("Código fuente", "Source code"), escapeHTML(L("TatoCine es software libre (GPLv3) publicado en GitHub.", "TatoCine is free software (GPLv3) published on GitHub.")),
+    legalRow(L("Código fuente", "Source code"), escapeHTML(L("Proyecto de código abierto (GPLv3), gratuito y sin fines de lucro: su autor no obtiene ingresos. Publicado en GitHub.", "Open-source (GPLv3), free, non-profit project: its author earns nothing. Published on GitHub.")),
       '<a class="danger-btn" href="' + LEGAL_REPO + '" target="_blank" rel="noopener noreferrer">' + L("Abrir", "Open") + "</a>") +
-    legalRow(L("Créditos", "Credits"), escapeHTML(LEGAL_AUTHOR),
+    legalRow(L("Créditos", "Credits"), escapeHTML(LEGAL_AUTHOR + L(", creador de la idea, del código fuente y del mantenimiento gratuito de los servidores; no del material audiovisual ni escrito que aquí aparece. Ver «Legal y no responsabilidad».", ", creator of the idea, the source code and the free upkeep of the servers; not of the audiovisual or written material shown here. See “Legal and disclaimer”.")),
       '<a class="danger-btn" href="' + LEGAL_AUTHOR_URL + '" target="_blank" rel="noopener noreferrer">github.com/r1h1</a>') +
     legalRow(L("Sitios de terceros", "Third-party sites"), escapeHTML(L("Catálogo, reproductores y tráileres que usa TatoCine.", "Catalog, players and trailers used by TatoCine.")),
       '<button type="button" class="danger-btn" data-act="legal-third" aria-expanded="false" aria-controls="legal-third">' + L("Ver", "View") + "</button>") +

@@ -13,7 +13,7 @@ const path = require("node:path");
 const os = require("node:os");
 const { chromium } = require("playwright-core");
 
-const ROOT = path.resolve(__dirname, "../..");
+const ROOT = process.env.E2E_ROOT ? path.resolve(process.env.E2E_ROOT) : path.resolve(__dirname, "../..");   // E2E_ROOT=dist/site prueba el paquete minificado
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml" };
 
 function findBrowser() {
@@ -52,7 +52,7 @@ async function main() {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...opts });
     if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(ctx);           // sin red: TMDB e imágenes simulados (ver mock-tmdb.js)
     await ctx.addInitScript(() => {
-      try { localStorage.setItem("tatoDisclaimerAccepted", "true"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { }   // sin aviso legal ni recorrido: no tapan las pruebas
+      try { localStorage.setItem("tatoDisclaimerAccepted", "true"); localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { }   // sin aviso legal ni recorrido: no tapan las pruebas
       window.__csp = [];
       document.addEventListener("securitypolicyviolation", (e) => window.__csp.push(e.violatedDirective + " " + String(e.blockedURI).slice(0, 60)));
     });
@@ -68,7 +68,9 @@ async function main() {
     await page.click('[data-profile-action="select"][data-profile-id="' + (pick || "main") + '"]');
     await page.waitForFunction(() => { const o = document.getElementById("tc-profile-overlay"); return !!o && document.body.classList.contains("app-ready") && !o.classList.contains("open"); }, null, { timeout: 15000 });   // (cambiar a Invitado recarga la página: durante la recarga el selector no existe un instante)
   }
+  const ONLY = process.env.ONLY ? new RegExp(process.env.ONLY, "i") : null;     // ONLY="Bienvenida" ejecuta solo las pruebas cuyo nombre coincide
   async function test(name, fn) {
+    if (ONLY && !ONLY.test(name)) return;
     const t0 = Date.now();
     const { ctx, page } = await fresh();
     try { await fn(page, ctx); const csp = await page.evaluate(() => window.__csp).catch(() => []); if (csp.length) throw new Error("violaciones de CSP: " + csp.join(" | ")); if (page.errors.length) throw new Error("errores de consola: " + page.errors.join(" | ")); results.push([name, true, Date.now() - t0]); console.log("✓", name, "(" + (Date.now() - t0) + " ms)"); }
@@ -307,7 +309,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 25,8 s (1,8 + 19 + 5)", true, 25800]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 26,8 s (1,8 + 15 + 10)", true, 26800]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -346,11 +348,11 @@ async function main() {
     ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
-  await test("portada: sin botón de volumen, 1,8 s para verse, 19 s de tráiler + 5 s de pausa y menú «Mi cine»", async (page) => {
+  await test("portada: sin botón de volumen, 1,8 s para verse, 15 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
     await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
-    eq(r.dwell, 25800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+    eq(r.dwell, 26800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 
   await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
@@ -521,17 +523,36 @@ async function main() {
     ok(await page.evaluate(() => [...document.querySelectorAll("#legal-body a")].every((a) => /noopener/.test(a.rel) && /noreferrer/.test(a.rel))), "enlace externo sin noopener noreferrer");
     ok(await page.locator("main .tc-legal-link").count() === 1 && await page.locator(".player-notice").count() === 1, "falta el pie legal o el aviso bajo el iframe");
   });
-  await test("Límite de uso de adultos: 12 h → descanso de 2 h y 10 h seguidas → 3 h (compartido entre pestañas)", async (page, ctx) => {
-    await enter(page);
-    await page.evaluate(() => tcAdultLimit.force("day")); await page.waitForTimeout(6500);
-    const a = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), kind: tcAdultLimit.state().kind, left: tcAdultLimit.state().lockedUntil - Date.now(), txt: document.getElementById("tc-adult-lock-sub").textContent }));
-    ok(a.open && a.kind === "day" && a.left > 1.9 * 3600000 && a.left <= 2 * 3600000, "descanso diario incorrecto: " + JSON.stringify(a));
-    ok(/2 horas/.test(a.txt), "el texto no menciona 2 horas: " + a.txt);
+  await test("Límite de uso de adultos: 10 h → descanso de 2 h → otras 10 h (compartido entre pestañas, guardado local) y Ajustes muestra cómo va", async (page, ctx) => {
+    await enter(page); await page.evaluate(() => showSettings()); await page.waitForTimeout(300);
+    ok(/de 10 h de uso/.test(await page.locator("#adult-usage-label").innerText()), "Ajustes no muestra el avance de uso: " + await page.locator("#adult-usage-label").innerText());
+    await page.evaluate(() => closeSettings());
+    await page.evaluate(() => tcAdultLimit.force()); await page.waitForTimeout(6500);
+    const a = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), left: tcAdultLimit.state().lockedUntil - Date.now(), txt: document.getElementById("tc-adult-lock-sub").textContent }));
+    ok(a.open && a.left > 1.9 * 3600000 && a.left <= 2 * 3600000, "el descanso debía ser de 2 h: " + JSON.stringify(a));
+    ok(/10 horas/.test(a.txt) && /2 horas/.test(a.txt), "el texto no menciona 10 y 2 horas: " + a.txt);
     const tab2 = await ctx.newPage(); await tab2.goto(url); await tab2.waitForTimeout(2500);
     ok(await tab2.evaluate(() => document.getElementById("tc-adult-lock").classList.contains("open")), "la segunda pestaña no muestra el descanso");
-    await page.evaluate(() => { localStorage.removeItem("tatoAdultUsageV1"); tcAdultLimit.force("run"); }); await page.waitForTimeout(6500);
-    const b = await page.evaluate(() => ({ kind: tcAdultLimit.state().kind, left: tcAdultLimit.state().lockedUntil - Date.now() }));
-    ok(b.kind === "run" && b.left > 2.9 * 3600000 && b.left <= 3 * 3600000, "descanso por uso seguido incorrecto: " + JSON.stringify(b));
+    await page.evaluate(() => { const s = tcAdultLimit.state(); s.lockedUntil = Date.now() - 1000; localStorage.setItem("tatoAdultUsageV2", JSON.stringify(s)); }); await page.waitForTimeout(6000);   // termina el descanso
+    const b = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), secs: tcAdultLimit.usage().secs, locked: tcAdultLimit.state().lockedUntil }));
+    ok(!b.open && b.locked === 0 && b.secs < 60, "tras el descanso debía empezar otro ciclo de 10 h desde cero: " + JSON.stringify(b));
+  });
+  await test("Límite de uso: el avance se acumula con la app visible y se GUARDA cada 30 min (no antes), no cuenta con la app oculta y se guarda al ocultarla", async (page) => {
+    await page.clock.install();
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open"); await page.clock.runFor(1500);
+    await page.click('[data-profile-action="select"]'); await page.clock.runFor(3000);
+    const t0 = await page.evaluate(() => tcAdultLimit.usage().secs);
+    await page.clock.runFor(29 * 60 * 1000);
+    let r = await page.evaluate(() => ({ guardado: tcAdultLimit.state().secs, enMemoria: tcAdultLimit.usage().secs }));
+    ok(r.guardado < 60, "se guardó antes de los 30 min: " + JSON.stringify(r)); ok(r.enMemoria - t0 > 1650 && r.enMemoria - t0 < 1800, "el avance en memoria debía ser ~29 min: " + JSON.stringify(r));
+    await page.clock.runFor(3 * 60 * 1000);
+    r = await page.evaluate(() => ({ guardado: tcAdultLimit.state().secs }));
+    ok(r.guardado > 1700 && r.guardado < 2100, "a los 30 min debía guardarse ~30 min de uso: " + JSON.stringify(r));
+    // con la app oculta no cuenta; al ocultarla se guarda lo pendiente
+    await page.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, get: () => true }); document.dispatchEvent(new Event("visibilitychange")); });
+    const hid = await page.evaluate(() => tcAdultLimit.state().secs); await page.clock.runFor(10 * 60 * 1000);
+    const hid2 = await page.evaluate(() => tcAdultLimit.state().secs);
+    ok(hid2 - hid < 30, "contó tiempo con la app oculta: " + hid + " → " + hid2);
   });
   await test("Tu mes en películas: sale una sola vez por mes y perfil, con los datos del mes anterior", async (page, ctx) => {
     await ctx.addInitScript(() => {
@@ -618,6 +639,144 @@ async function main() {
   });
 
 
+  await test("Bienvenida de usuario nuevo: 5 pasos → selector → aviso legal → no vuelve (flag en localStorage) y sin pedir catálogo mientras se lee", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__w")) { localStorage.setItem("__w", "1"); localStorage.removeItem("tatoDisclaimerAccepted"); localStorage.removeItem("tatoLegalAcceptedV2"); localStorage.removeItem("tatoTourDone"); } } catch (e) { } });
+    let calls = 0; page.on("request", (r) => { if (/api\.themoviedb\.org/.test(r.url())) calls++; });
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForTimeout(1500);
+    eq(await page.evaluate(() => getComputedStyle(document.getElementById("tc-welcome")).display), "flex", "la bienvenida no se muestra:");
+    eq(await page.evaluate(() => getComputedStyle(document.getElementById("tc-profile-overlay")).visibility), "hidden", "el selector no está tapado:");
+    eq(await page.evaluate(() => localStorage.getItem("tatoWelcomeSeenV1")), "0", "flag pendiente:"); eq(calls, 0, "llamadas a TMDB mientras se lee la bienvenida:");
+    eq(await page.locator('.tw-slide[data-i="0"] p, .tw-slide[data-i="0"] li').count(), 0, "el primer paso lleva más texto que el título:");
+    ok(await page.locator('.tw-slide[data-i="0"] .tw-logo img').count() === 1, "falta el logo real de la app en el primer paso");
+    const titles = [];
+    for (let i = 0; i < 5; i++) { titles.push(await page.locator(".tw-slide.on h2").innerText()); if (i < 4) await page.click('[data-tw="next"]'); }
+    eq(JSON.stringify(titles), JSON.stringify(["Bienvenido a TatoCine", "Elige o crea tu perfil", "Sin miedo: tus perfiles son tuyos", "Llévalos contigo", "Antes de empezar"]), "pasos:");
+    ok(/perfil/i.test(await page.locator('[data-tw="next"]').innerText()), "el último botón no lleva a elegir perfil");
+    await page.click('[data-tw="next"]'); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 8000 });
+    eq(await page.evaluate(() => getComputedStyle(document.getElementById("tc-welcome")).display), "none", "la bienvenida sigue visible:");
+    eq(await page.evaluate(() => getComputedStyle(document.getElementById("tc-profile-overlay")).visibility), "visible", "el selector sigue oculto:");
+    eq(await page.evaluate(() => localStorage.getItem("tatoWelcomeSeenV1")), "1", "flag al terminar:");
+    ok(!(await page.evaluate(() => document.getElementById("disclaimer-modal").classList.contains("open"))), "el aviso legal salió ANTES de elegir perfil");
+    await page.click('[data-profile-action="select"]');
+    await page.waitForFunction(() => document.getElementById("disclaimer-modal").classList.contains("open"), null, { timeout: 8000 });
+    await page.click('#disclaimer-modal [data-act="accept-disclaimer"]');
+    await page.waitForFunction(() => localStorage.getItem("tatoLegalAcceptedV2") === "true", null, { timeout: 5000 });
+    await page.reload({ waitUntil: "domcontentloaded" }); await page.waitForTimeout(1200);
+    eq(await page.evaluate(() => getComputedStyle(document.getElementById("tc-welcome")).display), "none", "la bienvenida volvió a salir:");
+    eq(await page.evaluate(() => document.getElementById("disclaimer-modal").classList.contains("open")), false, "el aviso legal volvió a salir:");
+  });
+  await test("Descargo legal obligatorio: sin pulsar «Aceptar y continuar» no hay forma de usar la app (Esc, X, cierre forzado, funciones, tabulador)", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__w")) { localStorage.setItem("__w", "1"); localStorage.removeItem("tatoDisclaimerAccepted"); localStorage.removeItem("tatoLegalAcceptedV2"); } } catch (e) { } });
+    await enter(page).catch(() => { });
+    await page.waitForFunction(() => document.getElementById("disclaimer-modal").classList.contains("open"), null, { timeout: 12000 });
+    const st = () => page.evaluate(() => ({ open: document.getElementById("disclaimer-modal").classList.contains("open"), inert: document.querySelectorAll("body > [data-gate-inert]").length, flag: localStorage.getItem("tatoLegalAcceptedV2"), x: getComputedStyle(document.querySelector("#disclaimer-modal .dc-x")).display, cerrar: getComputedStyle(document.querySelector("#disclaimer-modal .dc-close")).display, acept: getComputedStyle(document.querySelector("#disclaimer-modal .dc-accept")).display, trailer: document.body.classList.contains("hero-trailer-on") }));
+    let r = await st();
+    ok(r.open && r.inert >= 3 && r.flag === null, "estado inicial: " + JSON.stringify(r)); eq(r.x, "none", "la X se ve sin aceptar:"); eq(r.cerrar, "none", "«Cerrar» se ve sin aceptar:"); ok(r.acept !== "none", "falta el botón «Aceptar y continuar»");
+    eq((await page.locator("#disclaimer-modal .dc-accept").innerText()).trim(), "Aceptar y continuar", "texto del botón:");
+    ok(await page.locator("#disclaimer-modal .settings-content .modal-header").count() === 1, "el descargo no usa la estructura de Ajustes");
+    const geo = await page.evaluate(() => { const d = document.querySelector("#disclaimer-modal .settings-content"), st = document.querySelector("#settings-modal .settings-content"), a = d.getBoundingClientRect(), cs = getComputedStyle(d), ss = getComputedStyle(st); return { full: Math.round(a.width) === innerWidth && Math.round(a.height) === innerHeight, igual: cs.backgroundColor === ss.backgroundColor && cs.borderRadius === ss.borderRadius && getComputedStyle(document.getElementById("disclaimer-modal")).backgroundColor === getComputedStyle(document.getElementById("settings-modal")).backgroundColor }; });
+    ok(geo.full && geo.igual, "el descargo no es una ventana completa con el mismo fondo y bordes que Ajustes: " + JSON.stringify(geo));
+    ok(await page.locator("#dc-source a[href='https://github.com/r1h1/tatocine-streaming']").count() === 1, "falta el enlace a GitHub en el descargo");
+    await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+    await page.evaluate(() => { closeDisclaimer(); document.getElementById("disclaimer-modal").classList.remove("open"); document.getElementById("disclaimer-modal").style.display = "none"; });   // intento de cierre a la fuerza
+    await page.waitForTimeout(900); r = await st(); ok(r.open, "el descargo se pudo cerrar sin aceptar: " + JSON.stringify(r));
+    await page.evaluate(() => document.getElementById("disclaimer-modal").style.removeProperty("display"));
+    const blocked = await page.evaluate(() => { let opened = false; try { openPlayer(603, "movie", "Matrix"); openDetails(603, "movie"); performSearch("matrix"); showSettings(); } catch (e) { } return [document.getElementById("player-modal").classList.contains("open"), document.getElementById("details-modal").classList.contains("open"), document.getElementById("settings-modal").classList.contains("open")]; });
+    eq(JSON.stringify(blocked), "[false,false,false]", "se abrió contenido sin aceptar (reproductor, ficha, ajustes):");
+    const cl = await page.evaluate(() => { document.querySelector(".nav-item").focus(); return document.activeElement === document.querySelector(".nav-item"); }); ok(!cl, "el menú de fondo todavía se puede enfocar");
+    await page.click('#disclaimer-modal [data-act="accept-disclaimer"]'); await page.waitForTimeout(500); r = await st();
+    ok(!r.open && r.flag === "true" && r.inert === 0, "tras aceptar la app debería liberarse: " + JSON.stringify(r));
+    await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 });   // ya funciona
+    await page.evaluate(() => { closeDetails(); showDisclaimer(); }); await page.waitForTimeout(300);
+    r = await st(); ok(r.open && r.x !== "none" && r.cerrar !== "none" && r.acept === "none", "releer el descargo ya aceptado debe poder cerrarse: " + JSON.stringify(r));
+  });
+  await test("Descargo legal: sin «En pocas palabras», con scroll, dos botones compactos (Aceptar / No utilizar), «Cerrar» bien hecho al releerlo", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__w")) { localStorage.setItem("__w", "1"); localStorage.removeItem("tatoDisclaimerAccepted"); localStorage.removeItem("tatoLegalAcceptedV2"); } } catch (e) { } });
+    await enter(page).catch(() => { });
+    await page.waitForFunction(() => document.getElementById("disclaimer-modal").classList.contains("open"), null, { timeout: 12000 });
+    for (const vp of [{ width: 390, height: 780 }, { width: 280, height: 653 }, { width: 1280, height: 800 }]) {
+      await page.setViewportSize(vp); await page.waitForTimeout(250);
+      const r = await page.evaluate(() => {
+        const m = document.getElementById("disclaimer-modal"), sc = m.querySelector(".settings-content"), vis = (e) => { const b = e.getBoundingClientRect(), c = getComputedStyle(e); return c.display !== "none" && b.width > 0 ? b : null; };
+        const acc = vis(m.querySelector(".dc-accept")), dec = vis(m.querySelector(".dc-decline"));
+        sc.scrollTop = 0; sc.scrollTop = 400;
+        return { poco: /En pocas palabras|In short/.test(m.innerText), oy: getComputedStyle(sc).overflowY, canScroll: sc.scrollHeight > sc.clientHeight, top: sc.scrollTop, accH: acc && acc.height, decH: dec && dec.height, accIn: acc && acc.left >= 0 && acc.right <= innerWidth && acc.bottom <= innerHeight, decIn: dec && dec.left >= 0 && dec.right <= innerWidth && dec.bottom <= innerHeight, x: !!vis(m.querySelector(".dc-x")), cerrar: !!vis(m.querySelector(".dc-close")) };
+      });
+      const tag = " @" + vp.width + " " + JSON.stringify(r);
+      ok(!r.poco, "sigue «En pocas palabras»" + tag); ok(r.canScroll && r.top > 0, "el descargo no hace scroll" + tag); ok(r.accH && r.accH <= 56 && r.decH && r.decH <= 56, "botones gigantes o ausentes" + tag); ok(r.accIn && r.decIn, "botones fuera de pantalla" + tag); ok(!r.x && !r.cerrar, "X o Cerrar visibles sin aceptar" + tag);
+    }
+    eq((await page.locator("#disclaimer-modal .dc-decline").innerText()).trim(), "No utilizar", "texto del botón:");
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.click('#disclaimer-modal [data-act="accept-disclaimer"]'); await page.waitForTimeout(500);
+    await page.evaluate(() => { showDisclaimer(); }); await page.waitForTimeout(300);
+    const c = await page.evaluate(() => { const m = document.getElementById("disclaimer-modal"), b = m.querySelector(".dc-close").getBoundingClientRect(); return { h: b.height, w: b.width, dec: getComputedStyle(m.querySelector(".dc-decline")).display, poco: /En pocas palabras/.test(m.innerText) }; });
+    ok(c.h > 0 && c.h <= 56 && c.w <= 260 && c.dec === "none" && !c.poco, "«Cerrar» mal hecho: " + JSON.stringify(c));
+  });
+  await test("Formulario de perfil: Borrar, Cancelar y Guardar alineados en una sola fila y dentro de la pantalla; enlace legal de Ajustes centrado", async (page) => {
+    await enter(page);
+    for (const w of [390, 280, 820, 1280]) {
+      await page.setViewportSize({ width: w, height: 800 });
+      await page.evaluate(() => { openProfileCreateModal(); });
+      await page.evaluate(() => { const b = document.getElementById("tc-delete-profile-btn"); if (b) b.hidden = false; }); await page.waitForTimeout(250);
+      const r = await page.evaluate(() => [".tc-profile-delete-btn", ".tc-profile-cancel-btn", ".tc-profile-create-btn"].map((q) => { const b = document.querySelector("#tc-profile-create-overlay " + q).getBoundingClientRect(); return { t: Math.round(b.top), h: Math.round(b.height), l: Math.round(b.left), r: Math.round(b.right) }; }));
+      const tag = " @" + w + " " + JSON.stringify(r);
+      ok(r.every((b) => b.h >= 44 && b.h <= 52 && b.l >= 0 && b.r <= w), "botones fuera de pantalla o con altura desigual" + tag);
+      if (w >= 360) ok(new Set(r.map((b) => b.t)).size === 1, "botones desfasados (no están en la misma fila)" + tag);
+      await page.evaluate(() => { try { closeProfileCreateModal(); } catch (e) { document.getElementById("tc-profile-create-overlay").classList.remove("open"); } }); await page.waitForTimeout(200);
+    }
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.evaluate(() => showSettings()); await page.waitForTimeout(400);
+    const g = await page.evaluate(() => { const l = document.querySelector("#settings-modal .tc-legal-link").getBoundingClientRect(), s = document.querySelector("#settings-modal .settings-content").getBoundingClientRect(); return { dx: Math.abs((l.left + l.right) / 2 - (s.left + s.right) / 2) }; });
+    ok(g.dx <= 6, "el enlace legal de Ajustes no está centrado: " + JSON.stringify(g));
+  });
+  await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
+    await enter(page);
+    await page.evaluate(() => sessionStorage.setItem("__tcT", "1"));
+    await page.addInitScript(() => { try { if (!sessionStorage.getItem("__tcT")) { localStorage.removeItem("tatoDisclaimerAccepted"); localStorage.removeItem("tatoLegalAcceptedV2"); localStorage.removeItem("tatoTourDone"); } } catch (e) { } });   // (la prueba siembra esos flags en cada carga: tras el reset se quitan para ver un «dispositivo nuevo»)
+    await page.evaluate(async () => { document.cookie = "tc_prueba=1; path=/"; localStorage.setItem("tatoUnaCosa", "x"); sessionStorage.setItem("tatoOtra", "y"); await caches.open("tatocine-prueba"); await new Promise((res) => { const r = indexedDB.open("tcPrueba", 1); r.onsuccess = () => { r.result.close(); res(); }; r.onerror = res; }); });
+    await page.evaluate(() => showSettings()); await page.waitForTimeout(300);
+    ok(await page.locator('[data-act="reset-open"]').isVisible(), "no se ve «Restablecer a cero» en Ajustes");
+    await page.click('[data-act="reset-open"]'); await page.waitForSelector("#tc-reset-overlay.open");
+    await page.click('#tc-reset-overlay [data-act="reset-cancel"]'); await page.waitForTimeout(300);
+    eq(await page.evaluate(() => localStorage.getItem("tatoUnaCosa")), "x", "Cancelar borró datos:");
+    await page.click('[data-act="reset-open"]'); await page.waitForSelector("#tc-reset-overlay.open");
+    await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 20000 }), page.click('#tc-reset-overlay [data-act="reset-confirm"]')]);
+    await page.waitForTimeout(1500);
+    const r = await page.evaluate(async () => ({ cookie: document.cookie, ls: localStorage.getItem("tatoUnaCosa"), ss: sessionStorage.getItem("tatoOtra"), caches: (await caches.keys()).filter((k) => k === "tatocine-prueba").length, idb: (await indexedDB.databases()).filter((d) => d.name === "tcPrueba").length, nombre: JSON.parse(localStorage.getItem("tatoProfilesV1") || "[]")[0] && JSON.parse(localStorage.getItem("tatoProfilesV1"))[0].name, welcome: localStorage.getItem("tatoWelcomeSeenV1"), disclaimer: localStorage.getItem("tatoLegalAcceptedV2"), vista: getComputedStyle(document.getElementById("tc-welcome")).display }));
+    eq(r.cookie, "", "cookies tras restablecer:"); eq(r.ls, null, "localStorage:"); eq(r.ss, null, "sessionStorage:"); eq(r.caches, 0, "cachés:"); eq(r.idb, 0, "IndexedDB:");
+    eq(r.nombre, "Mi perfil", "perfil nuevo:"); eq(r.welcome, "0", "flag de bienvenida:"); eq(r.disclaimer, null, "aviso legal aceptado:"); eq(r.vista, "flex", "se ve como un dispositivo nuevo (bienvenida):");
+  });
+  await test("Bienvenida: «Saltar» y Esc la cierran y guardan el flag; un usuario con datos previos nunca la ve", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__w")) { localStorage.setItem("__w", "1"); localStorage.removeItem("tatoDisclaimerAccepted"); localStorage.removeItem("tatoLegalAcceptedV2"); localStorage.removeItem("tatoTourDone"); } } catch (e) { } });
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForTimeout(1200);
+    await page.keyboard.press("Escape"); await page.waitForSelector("#tc-profile-overlay.open");
+    eq(await page.evaluate(() => localStorage.getItem("tatoWelcomeSeenV1")), "1", "flag tras Esc:");
+    const p2 = await (await page.context().browser().newContext()).newPage();            // usuario con datos previos (perfiles guardados)
+    await p2.addInitScript(() => { try { if (!localStorage.getItem("__x")) { localStorage.setItem("__x", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Yo" }])); } } catch (e) { } });
+    await p2.goto(url, { waitUntil: "domcontentloaded" }); await p2.waitForTimeout(1200);
+    eq(await p2.evaluate(() => getComputedStyle(document.getElementById("tc-welcome")).display), "none", "un usuario existente vio la bienvenida:");
+    eq(await p2.evaluate(() => localStorage.getItem("tatoWelcomeSeenV1")), "1", "flag de usuario existente:");
+    await p2.context().close();
+  });
+  await test("Red: cruzar tarjetas con el ratón no pide fichas, quedarse sí (1), y no hay HEAD del manifiesto ni preconnect a YouTube", async (page) => {
+    const details = [], misc = []; page.on("request", (r) => { const u = new URL(r.url()); if (/themoviedb\.org\/3\/(movie|tv)\/\d+$/.test(u.origin + u.pathname)) details.push(u.pathname); if (r.method() === "HEAD") misc.push("HEAD " + u.pathname); });
+    await enter(page); await page.waitForTimeout(3500);
+    const cards = await page.locator(".catalog-row .card").all(); await page.waitForTimeout(500);
+    const base = details.length;
+    for (let i = 0; i < 10; i++) { await cards[i].hover(); await page.waitForTimeout(60); }
+    await page.mouse.move(5, 5); await page.waitForTimeout(600);
+    eq(details.length - base, 0, "fichas pedidas al cruzar 10 tarjetas rápido:");
+    await cards[3].hover(); await page.waitForTimeout(900);
+    eq(details.length - base, 1, "fichas pedidas al quedarse sobre una tarjeta:");
+    eq(misc.length, 0, "peticiones HEAD innecesarias: " + misc.join(","));
+    eq(await page.evaluate(() => !!document.querySelector('link[rel="preconnect"][href*="youtube"]')), false, "preconnect a YouTube:");
+  });
+  await test("El perfil principal que se llamaba «Yo» pasa a llamarse «Mi perfil» (los demás nombres no se tocan)", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__y")) { localStorage.setItem("__y", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Yo" }, { id: "p2", name: "Yo" }])); } } catch (e) { } });
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1200);
+    eq(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1")).map((p) => p.id + ":" + p.name).join(",")), "main:Mi perfil,guest:Invitado,p2:Yo", "nombres guardados:");
+    eq(await page.locator(".tc-profile-card-name").first().innerText(), "Mi perfil", "nombre en la tarjeta:");
+  });
   await test("Selector de perfiles: textos compactos y el perfil nuevo se llama «Mi perfil»", async (page) => {
     await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1200);
     eq(await page.locator("#tc-profile-title").innerText(), "Elige “Mi perfil”", "título:");
@@ -650,17 +809,57 @@ async function main() {
     const r = await page.evaluate(() => { const b = document.getElementById("player-fullscreen-btn"); return { txt: b.innerText.trim(), aria: b.getAttribute("aria-label"), svg: !!b.querySelector("svg"), w: Math.round(b.getBoundingClientRect().width) }; });
     eq(r.txt, "", "texto visible del botón:"); ok(r.svg && r.aria === "Pantalla completa" && r.w <= 56, "falta el icono, el aria-label o es demasiado ancho: " + JSON.stringify(r));
   });
-  await test("Mi cine: botón «Compartir tu mes en películas» al principio, sin pasar por Estadísticas", async (page) => {
-    await enter(page); await page.evaluate(() => switchView("list")); await page.waitForSelector("#rows-container .fav-share .mi-mes", { timeout: 8000 });
-    const order = await page.evaluate(() => { const a = document.querySelector("#rows-container .fav-share").getBoundingClientRect().top, b = document.querySelector("#rows-container .fav-toolbar").getBoundingClientRect().top; return a < b; });
-    ok(order, "el botón no está por encima de la barra de listas");
+  await test("Mi cine: «Comparte tus vistas» va en la barra, justo después de «+ Nueva lista», y abre «Tu mes en películas» sin pasar por Estadísticas", async (page) => {
+    await enter(page); await page.evaluate(() => switchView("list")); await page.waitForSelector("#rows-container .fav-toolbar .mi-mes", { timeout: 8000 });
+    const t = await page.evaluate(() => [...document.querySelectorAll("#rows-container .fav-toolbar > *")].filter((e) => e.textContent.trim()).map((e) => e.textContent.trim()));
+    const i = t.findIndex((x) => /Nueva lista/.test(x)); eq(t[i + 1], "Comparte tus vistas", "botón después de «+ Nueva lista»: " + JSON.stringify(t));
+    ok(await page.locator("#rows-container .fav-share").count() === 0, "sigue existiendo el bloque antiguo .fav-share");
     await page.click("#rows-container .mi-mes"); await page.waitForSelector("#tc-qr-overlay.open", { timeout: 5000 });
     eq(await page.locator("#tc-qr-title").innerText(), "Tu mes en películas", "ventana abierta:");
   });
   await test("Mi cine no ofrece «Compartir tu mes» al perfil Niño", async (page, ctx) => {
     await ctx.addInitScript(() => { try { if (!localStorage.getItem("__k")) { localStorage.setItem("__k", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Mi perfil" }, { id: "kid1", name: "Peque", kind: "kid" }])); } } catch (e) { } });
     await enter(page, "kid1"); await page.evaluate(() => { try { switchView("list"); } catch (e) { } }); await page.waitForTimeout(800);
-    eq(await page.locator(".fav-share").count(), 0, "botón visible para el niño:");
+    eq(await page.locator(".fav-toolbar .mi-mes").count(), 0, "botón visible para el niño:");
+  });
+
+  await test("Pantallas: plegable (280), teléfonos en vertical y horizontal, tableta, laptop y TV 4K: sin desbordes y con la X de cada ventana a la vista", async (page) => {
+    await enter(page);
+    for (const [w, h] of [[280, 653], [320, 568], [344, 882], [568, 320], [667, 375], [673, 841], [744, 1133], [800, 1280], [841, 673], [1280, 800], [820, 1180], [1024, 1366], [1366, 768], [3840, 2160]]) {
+      await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(400);
+      for (const [name, open, close, shut] of [["Ajustes", () => showSettings(), "#settings-modal .modal-close", () => closeSettings()], ["ficha", () => openDetails(603, "movie"), "#details-modal .details-close", () => closeDetails()], ["asistente", () => openWizard(), "#tc-wizard-overlay .tc-profile-create-close", () => closeOverlay("tc-wizard-overlay")], ["Legal", () => openLegalHub(), "#legal-modal .modal-close", () => closeLegalHub()]]) {
+        await page.evaluate(open); await page.waitForTimeout(name === "ficha" ? 900 : 350);
+        const r = await page.evaluate((sel) => { const q = document.querySelector(sel).getBoundingClientRect(); return { ok: q.left >= 0 && q.right <= innerWidth && q.top >= 0 && q.bottom <= innerHeight && q.width >= 40, x: document.documentElement.scrollWidth - innerWidth }; }, close);
+        ok(r.ok, w + "×" + h + ": la X de «" + name + "» queda fuera de pantalla o muy pequeña"); ok(r.x <= 1, w + "×" + h + ": desborde horizontal " + r.x + " px con «" + name + "» abierta");
+        await page.evaluate(shut); await page.waitForTimeout(150);
+      }
+      const nav = await page.evaluate(() => { const t = document.getElementById("top-bar"); return { h: Math.round(t.getBoundingClientRect().height), s: t.scrollWidth - t.clientWidth }; });
+      ok(nav.h <= 130 && nav.s <= 1, w + "×" + h + ": la barra superior se parte o desborda (" + nav.h + " px, +" + nav.s + ")");
+    }
+  });
+
+  await test("Plegables: en modo libro (bisagra vertical) los diálogos y el reproductor se quedan en un panel; en modo Flex el vídeo termina antes de la bisagra y los controles empiezan debajo", async (page) => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setDeviceMetricsOverride", { width: 1000, height: 700, deviceScaleFactor: 1, mobile: true, displayFeature: { orientation: "vertical", offset: 488, maskLength: 24 } });
+    await enter(page); await page.waitForTimeout(500);
+    ok(await page.evaluate(() => document.documentElement.classList.contains("fold-h")), "no se detectó el modo libro (fold-h)");
+    await page.evaluate(() => openWizard()); await page.waitForTimeout(500);
+    let r = await page.evaluate(() => document.querySelector("#tc-wizard-overlay .tc-profile-create-dialog").getBoundingClientRect().right);
+    ok(r <= 489, "el asistente cruza la bisagra (borde derecho " + Math.round(r) + " px, bisagra en 488)"); await page.evaluate(() => closeOverlay("tc-wizard-overlay"));
+    await page.evaluate(() => openPlayer(603, "movie", "Matrix")); await page.waitForTimeout(800);
+    r = await page.evaluate(() => document.querySelector("#player-modal .player-container").getBoundingClientRect().right); ok(r <= 489, "el vídeo cruza la bisagra del modo libro (" + Math.round(r) + " px)"); await page.evaluate(() => closePlayer());
+    await cdp.send("Emulation.setDeviceMetricsOverride", { width: 700, height: 1000, deviceScaleFactor: 1, mobile: true, displayFeature: { orientation: "horizontal", offset: 488, maskLength: 24 } }); await page.waitForTimeout(500);
+    ok(await page.evaluate(() => document.documentElement.classList.contains("fold-v")), "no se detectó el modo Flex (fold-v)");
+    await page.evaluate(() => openPlayer(603, "movie", "Matrix")); await page.waitForTimeout(900);
+    const f = await page.evaluate(() => ({ videoBottom: document.querySelector("#player-modal .player-container").getBoundingClientRect().bottom, controlsTop: document.querySelector("#player-modal .server-switcher").getBoundingClientRect().top }));
+    ok(f.videoBottom <= 489, "el vídeo cruza la bisagra horizontal (" + Math.round(f.videoBottom) + " px, bisagra en 488)"); ok(f.controlsTop >= 511, "los controles empiezan sobre la bisagra (" + Math.round(f.controlsTop) + " px, debe ser ≥ 512)");
+  });
+  await test("Navegadores viejos: con las clases no-flex-gap y no-focus-visible, el CSS empaquetado separa los elementos con márgenes y muestra el foco (solo aplica al paquete: E2E_ROOT=dist/site)", async (page) => {
+    if (!process.env.E2E_ROOT) return;
+    await enter(page); await page.setViewportSize({ width: 1280, height: 800 }); await page.waitForTimeout(400);
+    await page.evaluate(() => document.documentElement.classList.add("no-flex-gap", "no-focus-visible")); await page.waitForTimeout(200);
+    const r = await page.evaluate(() => { const a = document.querySelectorAll(".nav-links .nav-item"); const m = parseFloat(getComputedStyle(a[1]).marginLeft); const hasInset = [...document.styleSheets].some((s) => { try { return [...s.cssRules].some((x) => /\.modal\{[^}]*top:0/.test(x.cssText.replace(/\s+/g, ""))); } catch (e) { return false; } }); return { m, hasInset, sheets: document.styleSheets.length }; });
+    ok(r.m >= 2, "los enlaces del menú no se separan sin soporte de gap (margen " + r.m + ")");
   });
 
   for (const w of [320, 390, 768, 1024, 1366, 1920]) {

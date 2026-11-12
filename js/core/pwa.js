@@ -13,8 +13,7 @@
           link.href = URL.createObjectURL(blob);
         } catch (e) { }
       }
-      if (location.protocol === "file:") fallbackManifest();
-      else fetch("manifest.webmanifest", { method: "HEAD", cache: "no-store" }).then(function (r) { if (!r.ok) fallbackManifest(); }).catch(fallbackManifest);
+      if (location.protocol === "file:") fallbackManifest();          // (antes también se pedía el manifiesto con HEAD en cada carga: el <link rel="manifest"> ya lo descarga)
       // La limpieza de cachés obsoletas la hace el Service Worker en «activate» (sw.js) y conserva la caché de imágenes activa.
       if (!("serviceWorker" in navigator)) return;
       // En desarrollo (localhost / 127.0.0.1) no se usa Service Worker: así siempre se ve el último código.
@@ -51,7 +50,8 @@
             });
             reg.update();
             setInterval(function () { reg.update().catch(function () { }); }, 60 * 60 * 1000);                          // busca versiones nuevas cada hora
-            document.addEventListener("visibilitychange", function () { if (!document.hidden) reg.update().catch(function () { }); });
+            var lastSwCheck = Date.now();
+            document.addEventListener("visibilitychange", function () { if (!document.hidden && Date.now() - lastSwCheck > 30 * 60 * 1000) { lastSwCheck = Date.now(); reg.update().catch(function () { }); } });   // como mucho cada 30 min
           }).catch(function () { });
         });
         // El SW detectó que index.html cambió sin subir la versión y ya refrescó sus archivos: se ofrece recargar.

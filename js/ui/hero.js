@@ -207,6 +207,13 @@
     }
     /** Precarga la imagen (y los tráilers) del SIGUIENTE título para que el cambio sea instantáneo. */
     function heroWarmNext(m) {
+      // Solo si este título lleva ≥ 4 s a la vista y la portada se está viendo: si el usuario se va antes, no se pidió nada de más.
+      setTimeout(function () {
+        if (currentHeroMedia !== m || document.hidden || heroBlocked()) return;
+        heroWarmNextNow(m);
+      }, 4000);
+    }
+    function heroWarmNextNow(m) {
       try {
         var list = heroMoviesList || [], i = list.findIndex(function (x) { return x && x.id === m.id && x.type === m.type; });
         var nx = i > -1 && list.length > 1 ? list[i + 1] : null;                 // sin vuelta: en el último título no se precarga nada
@@ -221,7 +228,7 @@
 
       var request = ++heroRequestId, heroPainted = false, heroDetails = null;   // si los detalles llegan ANTES del cambio de texto (caché), se guardan y se pintan con él
       heroShownAt = Date.now();
-      heroPlan(HERO_DWELL);          // cada título dura 8 s; si tiene tráiler, hero-trailer.js lo amplía a 15 s
+      heroPlan(HERO_DWELL);          // cada título dura 10 s; si tiene tráiler, hero-trailer.js lo amplía a 15 s
       setHeroLoading(false);
 
       currentHeroMedia = m;
@@ -367,13 +374,13 @@
       heroBgLayers.forEach(function (l) { l.style.backgroundImage = "none"; });
     }
     function heroPreloadNext() {
-      if (heroMoviesList.length < 2) return;
+      if (heroMoviesList.length < 2 || heroBlocked()) return;                       // sin precargar si la portada no se está viendo
       var n = heroMoviesList[currentHeroIndex + 1];                                    // sin vuelta al primero
       if (n && n.bg) { var i = new Image(); i.src = n.bg.startsWith("http") ? n.bg : IMG_BG + n.bg; }   // la imagen ya está lista al llegar su turno
     }
     // Rotación de la portada: UN temporizador por título (no un intervalo global), así cada título dura lo mismo aunque
     // se salte con los puntos, se vuelva de otra pestaña o se espere al selector de perfiles: 8 s (sin tráiler) o 15 s (con tráiler).
-    var HERO_DWELL = 8000, heroShownAt = 0, heroCarouselOn = false;
+    var HERO_DWELL = 10000, heroShownAt = 0, heroCarouselOn = false;
     function heroBlocked() {
       var picker = document.getElementById("tc-profile-overlay");
       return document.hidden || isSearching || heroSectionIsEmpty() || (picker && picker.classList.contains("open")) || document.body.style.overflow === "hidden" ||

@@ -6,7 +6,7 @@
  *    abrir cualquier ventana su contenido se coloca arriba (aunque se cerrara a mitad de scroll), y al recargar no se restaura el scroll.
  */
 (function scrollLock() {
-  var SEL = ".modal.open, .tc-profile-create-overlay.open, .tc-kid-lock.open, #tc-profile-overlay.open";
+  var SEL = ".modal.open, .tc-profile-create-overlay.open, .tc-kid-lock.open, .tc-welcome.open, #tc-profile-overlay.open";
   var SCROLLERS = ".modal-content, .settings-content, .details-content, .actor-content, .modal-body, .tc-profile-create-dialog, .pf-dialog, .stats-wrap, .tc-profile-panel";
   var open = typeof WeakSet === "function" ? new WeakSet() : null;
   function top(el) { try { if (el.scrollTop) el.scrollTop = 0; } catch (e) { } }

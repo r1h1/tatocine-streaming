@@ -249,6 +249,6 @@ TC_H.h77 = function (event) { // click
 TC_H.h78 = function (event) { // click
   closeFilters()
 };
-TC_H.h79 = function (event) { // click
-  acceptDisclaimer()
+TC_H.h79 = function (event) { // click (ya no se usa: el descargo se acepta con su botón «Aceptar y continuar»)
+  closeDisclaimer()
 };

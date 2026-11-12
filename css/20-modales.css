@@ -98,7 +98,8 @@
   width: var(--btn-h) !important; min-width: var(--btn-h); height: var(--btn-h); min-height: var(--btn-h) !important; padding: 0;
 }
 .tc-wizard .wiz-actions > button { min-height: var(--btn-h) !important; }
-.tc-wizard .wiz-chip { padding: 0 18px; }
+.tc-wizard .wiz-chip { padding: 0 10px; }
+@media (max-width: 340px) { .tc-wizard .wiz-chips, .tc-wizard .wiz-chips.wiz-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-wizard .wiz-actions { margin-left: -12px; margin-right: -12px; padding-left: 12px; padding-right: 12px; } }   /* plegable cerrado (≈ 280 px): 2 columnas, sin recortes */
 
 /* Entradas de texto: 16 px como mínimo en pantallas táctiles (iOS hace zoom automático con menos) y altura cómoda */
 @media (pointer: coarse) {
@@ -142,7 +143,7 @@
 .tc-footer { padding: 28px max(20px, var(--sar)) calc(36px + var(--sab)) max(20px, var(--sal)); text-align: center; }
 .tc-legal-link { background: none; border: 0; color: rgba(255, 255, 255, .6); font: inherit; font-size: calc(13px * var(--ts, 1)); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 12px 8px; min-height: var(--btn-h); }
 .tc-legal-link:hover, .tc-legal-link:focus-visible { color: #fff; }
-.tc-modal-legal { text-align: center; padding: 8px 20px calc(28px + var(--sab)); }
+.tc-modal-legal { grid-column: 1 / -1; justify-self: stretch; width: 100%; box-sizing: border-box; text-align: center; padding: 8px 20px calc(28px + var(--sab)); }
 
 /* Descanso de adultos: por encima del contenido, pero el selector de perfiles (100000) queda sobre él para poder cambiar de perfil */
 #tc-adult-lock { z-index: 99992; }
@@ -163,7 +164,109 @@
 body.view-list #rows-container { padding-top: calc(env(safe-area-inset-top, 0px) + 96px); }
 @media (min-width: 913px) { body.view-list #rows-container { padding-top: calc(env(safe-area-inset-top, 0px) + 112px); } }
 
-/* Mi cine: botón «Compartir tu mes en películas» al principio */
-.fav-share { margin: 0 0 12px; }
-.fav-share .mi-mes { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: var(--btn-h); padding: 0 22px; font-size: calc(16px * var(--ts, 1)); }
-@media (max-width: 520px) { .fav-share .mi-mes { width: 100%; } }
+/* Mi cine: «Comparte tus vistas» es un botón más de la barra (después de «+ Nueva lista») */
+.fav-toolbar .mi-mes { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---------- Bienvenida (usuarios nuevos): MISMA estructura y estilo que las ventanas de la app (Ajustes): fondo sólido, cabecera con X, botones estándar, sin degradados ni animaciones ---------- */
+.tc-welcome { z-index: 100100; }
+html.tc-welcome-boot .tc-welcome, .tc-welcome.open { display: flex; }
+html.tc-welcome-boot .tc-profile-overlay { visibility: hidden; }          /* el selector queda tapado hasta cerrar la bienvenida (sin parpadeo) */
+.tc-welcome .settings-content { display: flex; flex-direction: column; min-height: 0; }
+.tc-welcome .tw-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 28px max(20px, var(--sar)) 20px max(20px, var(--sal)) !important; }
+.tw-slide { display: none; width: min(560px, 100%); margin: 0 auto; }
+.tw-slide.on { display: block; }
+.tw-slide > .tw-icon, .tw-slide > .tw-logo { margin: 0 0 18px; }
+.tw-icon { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16); }
+/* Logo real de la app con esqueleto de carga (el mismo brillo que el resto de la app) hasta que la imagen aparece */
+.tw-logo { display: block; width: 112px; height: 112px; border-radius: 26px; overflow: hidden; background: #1a1a1a; }
+.tw-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tw-slide h2 { margin: 0 0 10px; font-size: calc(clamp(24px, 5vw, 32px) * var(--ts, 1)); line-height: 1.2; letter-spacing: -.3px; font-weight: 700; }
+.tw-slide p { margin: 0; font-size: calc(16px * var(--ts, 1)); line-height: 1.55; color: rgba(255, 255, 255, .84); }
+.tw-slide ul { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.tw-slide li { position: relative; padding-left: 22px; font-size: calc(15px * var(--ts, 1)); line-height: 1.5; color: rgba(255, 255, 255, .78); }
+.tw-slide li::before { content: ""; position: absolute; left: 4px; top: .6em; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+.tw-foot { position: sticky; bottom: 0; z-index: 3; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px max(20px, var(--sar)) calc(12px + var(--sab)) max(20px, var(--sal)); background: #0a0a0a; border-top: 1px solid rgba(255, 255, 255, .08); }
+.tw-foot .tour-dots { margin: 0; }
+.tw-btns { display: flex; gap: 10px; margin-left: auto; }
+.tw-btns .hero-btn { flex: 0 0 auto; justify-content: center; min-height: var(--btn-h); padding: 0 24px; }
+@media (max-width: 480px) { .tw-foot { justify-content: center; } .tw-foot .tour-dots { order: -1; width: 100%; justify-content: center; } .tw-btns { width: 100%; } .tw-btns .hero-btn { flex: 1 1 0; } }
+@media (max-height: 480px) { .tw-icon, .tw-logo { display: none; } .tw-body { padding-top: 12px !important; } }
+
+/* ---------- Descargo legal obligatorio ---------- */
+#disclaimer-modal { z-index: 100050; }
+.dc-source { max-width: 760px; margin: 0 auto; padding: 0 max(20px, var(--sar)) 18px max(20px, var(--sal)); box-sizing: border-box; font-size: calc(14px * var(--ts, 1)); color: rgba(255, 255, 255, .8); text-align: center; }
+.dc-source a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.dc-foot { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: nowrap; gap: 10px; justify-content: center; padding: 12px max(20px, var(--sar)) calc(12px + var(--sab)) max(20px, var(--sal)); background: rgba(13, 13, 15, .97); border-top: 1px solid rgba(255, 255, 255, .12); }
+.dc-foot .hero-btn { flex: 0 1 240px; width: auto; min-width: 0; height: var(--btn-h); min-height: var(--btn-h); padding: 0 20px; margin: 0; justify-content: center; font-weight: 800; white-space: nowrap; }
+.dc-foot .hero-btn.secondary { flex: 0 1 180px; }
+@media (max-width: 420px) { .dc-foot { flex-direction: column; } .dc-foot .hero-btn, .dc-foot .hero-btn.secondary { flex: 0 0 var(--btn-h); width: 100%; } }
+#disclaimer-modal.is-pending .dc-x, #disclaimer-modal.is-pending .dc-close, #disclaimer-modal.is-accepted .dc-accept, #disclaimer-modal.is-accepted .dc-decline { display: none !important; }
+
+/* ---------- Restablecer a cero ---------- */
+#tc-reset-overlay { z-index: 100060; }
+.tc-reset-list { margin: 4px 0 10px; padding-left: 22px; display: grid; gap: 6px; color: rgba(255, 255, 255, .86); font-size: calc(15px * var(--ts, 1)); line-height: 1.45; }
+.tc-profile-create-btn.tc-danger { background: #fff; color: #000; border-color: #fff; }
+.tc-profile-create-btn.tc-danger:disabled { opacity: .6; }
+
+/* ---------- Crear / editar perfil: móvil, tableta y pantallas grandes ---------- */
+#tc-profile-create-overlay .pf-dialog { padding-bottom: 0; }
+/* Botones siempre a la vista (barra fija abajo con zona segura), no al final de un scroll largo */
+#tc-profile-create-overlay .pf-footer {
+  position: sticky; bottom: 0; z-index: 4; max-width: none;
+  margin: 20px calc(-1 * clamp(16px, 6vw, 96px)) 0; padding: 14px clamp(16px, 6vw, 96px) calc(14px + var(--sab));
+  background: linear-gradient(to top, #050505 74%, rgba(5, 5, 5, 0));
+}
+#tc-profile-create-overlay .pf-footer .pf-bar { display: flex; align-items: stretch; gap: 10px; max-width: 640px; margin: 0 auto; }
+#tc-profile-create-overlay .pf-footer .tc-profile-create-actions { display: flex; flex: 1 1 auto; min-width: 0; gap: 10px; margin: 0; flex-direction: row !important; flex-wrap: nowrap !important; }
+#tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn, #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { height: var(--btn-h); min-height: var(--btn-h); margin: 0; box-sizing: border-box; }
+#tc-profile-create-overlay .pf-footer .tc-profile-create-btn { flex: 1 1 0; min-width: 0; max-width: none; width: auto; }
+#tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 auto; width: auto !important; padding: 0 20px; }
+#tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 var(--btn-h); width: var(--btn-h); height: var(--btn-h); min-height: var(--btn-h); margin: 0; padding: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+#tc-profile-create-overlay .pf-footer .tc-profile-delete-btn[hidden] { display: none; }
+@media (max-width: 359px) {
+  #tc-profile-create-overlay .pf-footer .tc-profile-create-actions { flex-direction: column-reverse !important; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 var(--btn-h); width: 100% !important; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { flex: 0 0 var(--btn-h); }
+  #tc-profile-create-overlay .pf-footer .pf-bar { align-items: flex-end; }
+}
+/* Hora de dormir: las dos horas ocupan lo que necesitan (antes se cortaban «09:00 PI» en móviles) */
+.tc-bedtime-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.tc-bedtime-row .tc-profile-input { min-width: 0; width: 100%; }
+.tc-bedtime-on { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 12px; min-height: var(--btn-h); font-size: calc(16px * var(--ts, 1)); cursor: pointer; }
+.tc-bedtime-on input { width: 22px; height: 22px; accent-color: #fff; }
+@media (min-width: 640px) { .tc-bedtime-row { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; } .tc-bedtime-on { grid-column: auto; } }
+@media (max-width: 440px) { .tc-bedtime-row { grid-template-columns: 1fr; } .tc-bedtime-row > span { display: none; } }
+/* Pantallas grandes: avatares más cómodos y la columna derecha alineada con la izquierda */
+@media (min-width: 1024px) {
+  .pf-av-grid { grid-template-columns: repeat(5, 64px); gap: 12px; max-width: none; }
+  #tc-profile-create-overlay .pf-grid { align-items: start; }
+}
+.pf-two { gap: 12px; }
+@media (max-width: 440px) { .pf-two { grid-template-columns: 1fr; } .pf-av-grid { gap: 8px; } }
+
+/* ============================== Plegables (ver js/core/fold.js) ============================== */
+/* Modo libro (dos paneles lado a lado): diálogos, bienvenida, descargo y reproductor se quedan en el primer panel; la bisagra nunca cruza texto ni botones */
+html.fold-h .tc-profile-create-dialog, html.fold-h .tc-welcome .settings-content, html.fold-h #disclaimer-modal .settings-content, html.fold-h #disclaimer-modal .modal-content,
+html.fold-h #player-modal .modal-content, html.fold-h .tc-kid-lock-card, html.fold-h .tc-bed-card {
+  width: env(viewport-segment-width 0 0, 100vw) !important; max-width: env(viewport-segment-width 0 0, 100vw) !important; margin-left: 0 !important; margin-right: auto !important;
+}
+html.fold-h .tc-profile-create-overlay, html.fold-h #player-modal, html.fold-h #disclaimer-modal, html.fold-h .tc-welcome { justify-content: flex-start !important; }
+html.fold-h .tc-profile-create-overlay { padding-left: 0 !important; padding-right: 0 !important; }          /* el diálogo empieza en el borde del panel: el margen del overlay lo empujaba contra la bisagra */
+/* Modo «Flex» (bisagra horizontal): el vídeo llena el panel de arriba (fold.js ajusta su alto) y los controles quedan en el de abajo */
+html.fold-v #player-modal .modal-body { display: flex; flex-direction: column; }
+html.fold-v #player-modal .player-container { order: 1; }
+html.fold-v #player-modal .tv-controls, html.fold-v #player-modal .server-switcher, html.fold-v #player-modal .player-notice { order: 2; }
+html.fold-v .tc-profile-create-overlay { align-items: flex-start !important; }
+html.fold-v .tc-profile-create-dialog { max-height: env(viewport-segment-height 0 0, 100vh) !important; overflow-y: auto; }
+
+/* El descargo legal usa EXACTAMENTE la estructura y el estilo de Ajustes (ventana completa, cabecera con X, fondo sólido) */
+#disclaimer-modal { background: #0a0a0a; padding: 0; align-items: stretch; justify-content: stretch; }
+#disclaimer-modal .settings-content { max-width: none; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; overflow-y: auto !important; overflow-x: hidden !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; max-height: 100% !important; height: 100% !important; }
+#disclaimer-modal .settings-content > .modal-header { flex: 0 0 auto; position: sticky; top: 0; z-index: 2; }
+#disclaimer-modal .settings-content > .dc-foot { margin-top: auto; }
+#disclaimer-modal .modal-body { flex: 0 0 auto; overflow: visible !important; max-height: none !important; height: auto !important; max-width: 760px; width: 100%; margin: 0 auto; padding: 24px max(20px, var(--sar)) 24px max(20px, var(--sal)) !important; box-sizing: border-box; }
+#disclaimer-modal .modal-body > p { max-width: none; }
+/* Primer paso de la bienvenida: solo el logo y el título, centrados */
+.tc-welcome .tw-body { display: flex; flex-direction: column; }
+.tw-slide[data-i="0"].on { margin: auto; text-align: center; }
+.tw-slide[data-i="0"] .tw-logo { margin: 0 auto 20px; }

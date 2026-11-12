@@ -1,0 +1,1 @@
+const{execFileSync}=require("node:child_process"),path=require("node:path");try{process.stdout.write(execFileSync(process.execPath,[path.join(__dirname,"..","tools","gen-headers.js"),"--check"]).toString())}catch(e){process.stderr.write((e.stderr||e.stdout||e.message).toString());process.exit(1)}

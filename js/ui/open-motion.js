@@ -1,7 +1,7 @@
 /**
  * TatoCine · js/ui/open-motion.js
  * «La tarjeta se convierte en la ficha»: al tocar una tarjeta, la ficha se despliega desde el lugar y tamaño de esa tarjeta
- * (técnica FLIP con la Web Animations API: solo transform/opacity, se ejecuta en la GPU y dura 380 ms).
+ * (técnica FLIP con la Web Animations API: solo transform/opacity, se ejecuta en la GPU y dura 160 ms).
  * Se omite con «reducir movimiento», modo ligero, alto contraste o si el sistema lo pide.
  */
 var omLast = null;
@@ -26,7 +26,7 @@ decorate("openDetails", function (original) {
       el.animate([
         { transformOrigin: "top left", transform: "translate(" + dx + "px," + dy + "px) scale(" + sx + "," + sy + ")", opacity: .2 },
         { transformOrigin: "top left", transform: "none", opacity: 1 }
-      ], { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)" });
+      ], { duration: 160, easing: "cubic-bezier(.2,.8,.2,1)" });
     });
     return r;
   };
