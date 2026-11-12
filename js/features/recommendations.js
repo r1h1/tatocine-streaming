@@ -51,9 +51,9 @@
       var liked = (typeof likedSeeds === "function" ? likedSeeds() : []).filter(function (l) {
         return !seeds.concat(favSeeds).some(function (s) { return s.type === l.type && String(s.id) === String(l.id); });
       });
-      var allSeeds = seeds.concat(favSeeds, liked);
+      var allSeeds = seeds.concat(favSeeds, liked).slice(0, 3);          // máx. 3 semillas con /recommendations
       var genreParam = encodeURIComponent(topGenres.join("|"));
-      var pages = n >= 4 ? [1, 2] : [1];
+      var pages = [1];                                                     // 1 página de descubrimiento (antes 2 con mucho historial)
       var requests = [];
       pages.forEach(function (pg) {
         requests.push(fetchTMDB("/discover/movie", "&with_genres=" + genreParam + "&sort_by=popularity.desc&vote_count.gte=60&page=" + pg));
@@ -64,7 +64,7 @@
         requests.push(fetchTMDB("/" + (sd.type === "tv" ? "tv" : "movie") + "/" + sd.id + "/recommendations"));
       });
       var simOffset = requests.length;                                     // /similar de los 2 títulos más relevantes (segunda señal colaborativa)
-      seeds.slice(0, 2).forEach(function (sd) {
+      seeds.slice(0, 1).forEach(function (sd) {
         requests.push(fetchTMDB("/" + (sd.type === "tv" ? "tv" : "movie") + "/" + sd.id + "/similar"));
       });
       Promise.all(requests.map(function (p) { return p.catch(function () { return null; }); })).then(function (res) {
@@ -89,7 +89,7 @@
           var r = res[seedOffset + i];
           ((r && r.results) || []).forEach(function (x) { add(x, sd.type === "tv" ? "tv" : "movie", "seed", i); });
         });
-        seeds.slice(0, 2).forEach(function (sd, i) {
+        seeds.slice(0, 1).forEach(function (sd, i) {
           var r = res[simOffset + i];
           ((r && r.results) || []).forEach(function (x) { add(x, sd.type === "tv" ? "tv" : "movie", "similar"); });
         });

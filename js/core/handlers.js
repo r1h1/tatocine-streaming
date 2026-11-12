@@ -33,10 +33,10 @@ TC_H.h7 = function (event) { // click
   toggleMenu();
 };
 TC_H.h8d = function (event) { // click (menú de escritorio)
-  showDisclaimer()
+  openLegalHub()
 };
 TC_H.h8 = function (event) { // click
-  showDisclaimer();
+  openLegalHub();
   toggleMenu();
 };
 TC_H.h9 = function (event) { // click

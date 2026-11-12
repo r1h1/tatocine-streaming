@@ -1,0 +1,169 @@
+/**
+ * TatoCine · css/20-modales.css
+ * Capa FINAL de ventanas (modales): un solo estándar para la zona segura, el botón cerrar y el tamaño de los botones.
+ * Va después de todas las demás hojas a propósito: sustituye parches repartidos en 04/06/07/08/11/19 sin tocarlos.
+ *
+ *  · --sat / --sab / --sal / --sar: zona segura (muesca, barra de notificaciones, barra de gestos). En una PWA instalada
+ *    en pantalla táctil se garantiza un mínimo de 28 px arriba: si el sistema dibuja la app bajo la barra de estado y
+ *    no informa su altura (env() = 0), el contenido igual nunca queda debajo de ella. Con la barra reservada por el
+ *    sistema solo se ve un poco más de aire.
+ *  · Botones: todos los botones de las ventanas miden 48 px de alto (los de solo icono, 48 × 48), texto de 16 px.
+ */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --btn-h: 48px;
+  --modal-gap: 16px;
+}
+@media (display-mode: standalone) and (pointer: coarse), (display-mode: fullscreen) and (pointer: coarse), (display-mode: minimal-ui) and (pointer: coarse) {
+  :root { --sat: max(env(safe-area-inset-top, 0px), 28px); }
+}
+
+/* ---------- Ventanas a pantalla completa: cabecera y X bajo la barra de estado ---------- */
+.modal .modal-header {
+  padding-top: calc(var(--sat) + var(--modal-gap)) !important;
+  padding-left: max(20px, var(--sal)) !important;
+  padding-right: max(20px, var(--sar)) !important;
+  min-height: calc(var(--sat) + 76px) !important;
+}
+.modal .modal-header .modal-title { padding-right: calc(var(--btn-h) + 12px); }
+.modal .details-close,
+.modal .modal-close {
+  top: calc(var(--sat) + var(--modal-gap)) !important;
+  right: max(16px, var(--sar)) !important;
+  width: var(--btn-h) !important;
+  height: var(--btn-h) !important;
+  min-width: var(--btn-h);
+  font-size: calc(22px * var(--ts, 1)) !important;
+  z-index: 10000;
+}
+/* Reproductor: la X va dentro de la cabecera (junto a pantalla completa), no flotando */
+#player-modal .modal-header {
+  padding-top: calc(var(--sat) + 10px) !important;
+  min-height: calc(var(--sat) + 72px) !important;
+}
+#player-modal .modal-header .modal-title { padding-right: 0; }
+#player-modal .modal-close { position: relative !important; top: auto !important; right: auto !important; flex: 0 0 var(--btn-h) !important; }
+#player-modal .player-fullscreen-btn { width: var(--btn-h); height: var(--btn-h); min-height: var(--btn-h) !important; }
+/* Ficha de actor: el contenido empieza bajo la barra y la X se alcanza con el pulgar */
+.actor-content { padding-top: 0 !important; }
+.actor-header { padding-top: calc(var(--sat) + 72px) !important; }
+/* Ficha de título: la imagen llega hasta arriba, la X queda en zona segura */
+.details-content { padding-bottom: calc(var(--sab) + 24px); }
+
+/* ---------- Diálogos y hojas (asistente ¿Qué ver?, QR, Mi cine, listas, perfiles, instalar) ---------- */
+@media (max-width: 820px) {
+  :is(#tc-fav-overlay, #tc-list-overlay, #tc-qr-overlay, #tc-wizard-overlay, #tc-profile-create-overlay, #tc-install-overlay) .tc-profile-create-dialog > h3 {
+    padding-top: calc(var(--sat) + var(--modal-gap)) !important;
+    min-height: calc(var(--sat) + 76px) !important;
+    padding-right: calc(var(--btn-h) + 32px) !important;
+  }
+  :is(#tc-fav-overlay, #tc-list-overlay, #tc-qr-overlay, #tc-wizard-overlay, #tc-profile-create-overlay, #tc-install-overlay) .tc-profile-create-close {
+    top: calc(var(--sat) + var(--modal-gap)) !important;
+    right: max(16px, var(--sar)) !important;
+    width: var(--btn-h) !important;
+    height: var(--btn-h) !important;
+    font-size: calc(22px * var(--ts, 1)) !important;
+  }
+  :is(#tc-fav-overlay, #tc-list-overlay, #tc-qr-overlay, #tc-wizard-overlay, #tc-install-overlay) .tc-profile-create-dialog { padding-bottom: calc(var(--sab) + 28px) !important; }
+}
+#tc-profile-create-overlay .pf-dialog > h3 { padding-top: var(--sat); }
+#tc-profile-create-overlay .tc-profile-create-close { top: calc(var(--sat) + var(--modal-gap)); }
+/* La X de todos los diálogos mide lo mismo que los demás botones */
+.tc-profile-create-overlay .tc-profile-create-close { width: var(--btn-h); height: var(--btn-h); min-width: var(--btn-h); font-size: calc(22px * var(--ts, 1)); }
+
+/* Escritorio y tableta: las ventanas de asistente/QR/Mi cine aprovechan la pantalla (antes eran cajas de ~600 px) */
+@media (min-width: 821px) {
+  :is(#tc-wizard-overlay, #tc-qr-overlay) .tc-profile-create-dialog {
+    width: min(920px, 94vw);
+    max-height: min(92vh, 960px);
+    padding: clamp(24px, 4vh, 40px) clamp(24px, 4vw, 48px) !important;
+    overflow-y: auto;
+  }
+  :is(#tc-wizard-overlay, #tc-qr-overlay) .tc-profile-create-dialog > h3 { font-size: calc(30px * var(--ts, 1)); margin-bottom: 22px; }
+}
+
+/* ---------- Tamaño estándar de botones en ventanas ---------- */
+:is(.modal, .tc-profile-create-overlay) :is(.tc-profile-create-btn, .tc-profile-cancel-btn, .danger-btn, .hero-btn, .wiz-btn, .wiz-chip, .ua-btn, .cp-btn, .server-btn, .tv-select, .pf-kind, .tc-profile-kind button) {
+  min-height: var(--btn-h) !important;
+  font-size: calc(16px * var(--ts, 1));
+}
+:is(.modal, .tc-profile-create-overlay) :is(.tc-profile-create-btn, .tc-profile-cancel-btn, .danger-btn, .hero-btn, .wiz-btn, .ua-btn, .cp-btn) {
+  padding-top: 0; padding-bottom: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+:is(.modal, .tc-profile-create-overlay) :is(.wiz-btn.icon-only, .ua-btn.ua-icon, .share-card-btn) {
+  width: var(--btn-h) !important; min-width: var(--btn-h); height: var(--btn-h); min-height: var(--btn-h) !important; padding: 0;
+}
+.tc-wizard .wiz-actions > button { min-height: var(--btn-h) !important; }
+.tc-wizard .wiz-chip { padding: 0 18px; }
+
+/* Entradas de texto: 16 px como mínimo en pantallas táctiles (iOS hace zoom automático con menos) y altura cómoda */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), select, textarea { font-size: 16px !important; }
+  .tc-profile-input, .tc-qr-select { min-height: var(--btn-h); }
+}
+
+/* ---------- «Ver en base a tus gustos»: una sola recomendación, grande ---------- */
+.wiz-results.wiz-single { display: block; }
+.wiz-results.wiz-single .wiz-result {
+  display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden;
+  border-radius: 20px; max-width: 720px; margin: 0 auto;
+}
+.wiz-results.wiz-single .wiz-result > img {
+  width: 100%; height: auto; aspect-ratio: 16 / 9; max-height: 46vh; object-fit: cover; border-radius: 0;
+}
+.wiz-results.wiz-single .wiz-info { padding: 20px 22px 22px; gap: 8px; }
+.wiz-results.wiz-single .wiz-title { font-size: calc(26px * var(--ts, 1)); line-height: 1.2; white-space: normal; }
+.wiz-results.wiz-single .wiz-meta { font-size: calc(16px * var(--ts, 1)); }
+.wiz-results.wiz-single .wiz-reason { font-size: calc(17px * var(--ts, 1)); line-height: 1.5; }
+.wiz-results.wiz-single .wiz-btns { margin-top: 10px; gap: 10px; flex-wrap: nowrap; }
+.wiz-results.wiz-single .wiz-btn:not(.icon-only) { flex: 1 1 0; min-width: 0; }
+.wiz-results.wiz-single .wiz-btn.icon-only { flex: 0 0 var(--btn-h); }
+.tc-wizard .wiz-results.wiz-single + .wiz-actions { margin-top: 18px; }
+
+/* Reproductor: aviso de terceros debajo del iframe (nunca encima ni dentro) */
+.player-notice {
+  margin: 14px auto 0; max-width: 960px; padding: 12px 14px calc(12px + var(--sab));
+  font-size: calc(13px * var(--ts, 1)); line-height: 1.5; color: rgba(255, 255, 255, .72);
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .09); border-radius: 14px;
+}
+
+/* ---------- Legal: pantalla de opciones y pie legal ---------- */
+#legal-modal .settings-option .danger-btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: var(--btn-h); }
+.legal-third { padding: 8px 24px 28px; color: rgba(255, 255, 255, .78); font-size: calc(14px * var(--ts, 1)); line-height: 1.6; }
+.legal-third[hidden] { display: none; }
+.legal-group { margin: 14px 0; }
+.legal-group strong { display: block; color: #fff; margin-bottom: 4px; }
+.legal-group ul { margin: 0; padding-left: 20px; }
+.legal-third p { margin: 12px 0 0; }
+.tc-footer { padding: 28px max(20px, var(--sar)) calc(36px + var(--sab)) max(20px, var(--sal)); text-align: center; }
+.tc-legal-link { background: none; border: 0; color: rgba(255, 255, 255, .6); font: inherit; font-size: calc(13px * var(--ts, 1)); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 12px 8px; min-height: var(--btn-h); }
+.tc-legal-link:hover, .tc-legal-link:focus-visible { color: #fff; }
+.tc-modal-legal { text-align: center; padding: 8px 20px calc(28px + var(--sab)); }
+
+/* Descanso de adultos: por encima del contenido, pero el selector de perfiles (100000) queda sobre él para poder cambiar de perfil */
+#tc-adult-lock { z-index: 99992; }
+
+/* ---------- Avatares de perfil ---------- */
+.tc-profile-card-avatar .tc-av, .tc-profile-trigger-avatar .tc-av { width: 68%; height: 68%; color: #fff; }
+.tc-profile-card-avatar.has-av { background: #262626; }
+.pf-av-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 420px; }
+.pf-av { aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: #262626; border: 2px solid rgba(255, 255, 255, .12); color: #fff; cursor: pointer; padding: 0; min-width: 48px; transition: transform .15s, border-color .15s; }
+.pf-av:hover { transform: scale(1.06); }
+.pf-av:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.pf-av.active { border-color: #fff; background: #3a3a3a; box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
+.pf-av .tc-av { width: 70%; height: 70%; }
+.tc-profile-local { margin-top: 2px; opacity: .7; }
+@media (max-width: 380px) { .pf-av-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; } }
+
+/* ---------- «Mi cine» (sin portada): el contenido empieza DEBAJO de la barra superior en todos los dispositivos, PWA y zona segura incluidas ---------- */
+body.view-list #rows-container { padding-top: calc(env(safe-area-inset-top, 0px) + 96px); }
+@media (min-width: 913px) { body.view-list #rows-container { padding-top: calc(env(safe-area-inset-top, 0px) + 112px); } }
+
+/* Mi cine: botón «Compartir tu mes en películas» al principio */
+.fav-share { margin: 0 0 12px; }
+.fav-share .mi-mes { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: var(--btn-h); padding: 0 22px; font-size: calc(16px * var(--ts, 1)); }
+@media (max-width: 520px) { .fav-share .mi-mes { width: 100%; } }

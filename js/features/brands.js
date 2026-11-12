@@ -61,33 +61,27 @@
       tile.style.backgroundImage = "url('" + IMG_CARD + path + "')";
       tile.classList.add("has-bg");
     }
+    /** Imágenes de fondo de las plataformas: se guardan para siempre en el dispositivo (una vez por plataforma) y solo se piden las de las miniaturas
+     *  que se ven (o están a punto de verse al deslizar la fila): antes eran ~16 llamadas /discover al abrir y otra tanda cada semana. */
     function loadBrandImages(row) {
-      var stale = Date.now() - (brandBgStore.ts || 0) > 7 * 86400000;
-      var queue = [];
-      row.querySelectorAll(".brand-tile").forEach(function (tile) {
+      var saved = false;
+      function fetchOne(tile) {
+        var key = tile.getAttribute("data-key"), b = BRANDS.find(function (x) { return x.key === key; });
+        if (!b || tile.__bgBusy) return;
+        tile.__bgBusy = true;
+        fetchTMDB("/discover/movie", brandQuery(b, 1)).then(function (d) {
+          var r = ((d && d.results) || []).find(function (x) { return x.backdrop_path; });
+          if (r) { brandBgStore.m[b.key] = r.backdrop_path; brandBgStore.ts = Date.now(); applyBrandBg(tile, r.backdrop_path); clearTimeout(saved); saved = setTimeout(function () { safeStorageSet("tatoBrandBgV1", JSON.stringify(brandBgStore)); }, 400); }
+        }).catch(function () { tile.__bgBusy = false; });
+      }
+      var tiles = row.querySelectorAll(".brand-tile"), io = null;
+      if ("IntersectionObserver" in window) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); fetchOne(e.target); } }); }, { rootMargin: "120px" });
+      tiles.forEach(function (tile) {
         var key = tile.getAttribute("data-key");
         if (brandBgStore.m[key]) applyBrandBg(tile, brandBgStore.m[key]);
-        if (!brandBgStore.m[key] || stale) queue.push(tile);
+        else if (io) io.observe(tile);
+        else fetchOne(tile);
       });
-      var active = 0, index = 0, total = queue.length, finished = 0;
-      if (!total) return;
-      function next() {
-        while (active < 3 && index < total) {
-          (function (tile) {
-            active++;
-            var b = BRANDS.find(function (x) { return x.key === tile.getAttribute("data-key"); });
-            fetchTMDB("/discover/movie", brandQuery(b, 1)).then(function (d) {
-              var r = ((d && d.results) || []).find(function (x) { return x.backdrop_path; });
-              if (r) { brandBgStore.m[b.key] = r.backdrop_path; applyBrandBg(tile, r.backdrop_path); }
-            }).catch(function () { }).then(function () {
-              active--; finished++;
-              if (finished === total) { brandBgStore.ts = Date.now(); safeStorageSet("tatoBrandBgV1", JSON.stringify(brandBgStore)); }
-              next();
-            });
-          })(queue[index++]);
-        }
-      }
-      next();
     }
     function renderBrandRow() {
       if (isKidProfile()) return;

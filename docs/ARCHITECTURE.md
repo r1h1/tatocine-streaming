@@ -35,8 +35,8 @@ sw.js · manifest.webmanifest · icons/    PWA
 
 ## Interfaz: botones, carga y gestos
 
-- **Botones:** *primario* = blanco (acción principal: Ver, Crear, Entrar, Ver otras 3); *secundario* = translúcido con borde (Info, ¿Qué ver hoy?, favorito, Cancelar); *peligro* = rojo (Eliminar). Mismo alto por contexto (52 px escritorio / 46 px móvil en la portada) y al menos 44 px de zona táctil.
-- **Portada:** orden fijo `Ver · Info · ¿Qué ver hoy? · ♥`. En ≤ 814 px pasa a dos filas (`[Ver | Info]`, `[¿Qué ver hoy? | ♥]`) sin ocultar textos.
+- **Botones:** *primario* = blanco (acción principal: Ver, Crear, Entrar, Ver otras 3); *secundario* = translúcido con borde (Info, ¿Qué ver?, favorito, Cancelar); *peligro* = rojo (Eliminar). Mismo alto por contexto (52 px escritorio / 46 px móvil en la portada) y al menos 44 px de zona táctil.
+- **Portada:** orden fijo `Ver · Info · ¿Qué ver? · ♥`. En ≤ 814 px pasa a dos filas (`[Ver | Info]`, `[¿Qué ver? | ♥]`) sin ocultar textos.
 - **Carga:** todo lo que espera datos muestra un *skeleton* (`ui/skeletons.js`): filas, portada, episodios, resultados del asistente, ficha del actor y ficha del título. El pulso es solo de opacidad y se desactiva con «reducir movimiento» y en modo ligero.
 - **Scroll infinito:** catálogos (`views.js`), Inicio, búsqueda, plataformas y Favoritos (`features/infinite-feed.js`). Un solo `IntersectionObserver` sobre `#sentinel`; cada fuente implementa `next()`.
 - **Gestos (`ui/gestures.js`):** deslizar la portada cambia de título (táctil o ratón), deslizar hacia abajo cierra ventanas si están arriba del todo, deslizar desde el borde izquierdo cierra la ventana superior; en mando de TV, canal +/− cambia el título. Las flechas, `Enter` y Atrás los maneja `ui/tv-navigation.js`.
@@ -85,7 +85,7 @@ Globales: `tatoProfilesV1`, `tatoActiveProfileV1`, `tatoKidUsageV1`, `tatoBrandB
 ## Lista de verificación antes de publicar (manual)
 
 Perfil adulto en ESP y ENG · perfil Niño (solo Niños, búsqueda filtrada, límite de uso) · Inicio y Favoritos/listas ·
-«¿Qué ver hoy?» · ficha de serie (episodios) y de película (director) · búsqueda con sugerencias · reproductor y
+«¿Qué ver?» · ficha de serie (episodios) y de película (director) · búsqueda con sugerencias · reproductor y
 siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrecho (320 px), tableta, escritorio y modo TV
 (`?tv=1`).
 
@@ -139,3 +139,10 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 - Errores: `core/errors.js` (manejadores globales, registro, pantalla de error grave), `ui/skeletons.js` (`apiProblem`, `emptyOffline`, `renderRowError`), `ui/views.js` (`rowOrRetry`), `404.html`/`500.html` (precacheadas por `sw.js`). Tráiler: `HERO_DWELL_TRAILER` 31 s, `HT_START_MS` 1,8 s, sin botón de volumen.
 
 - Nuevos: `features/marathon.js` (cola infinita, decora `playNextSimilar`/`closePlayer`), `features/couple-picker.js` (fases pick0 → pass → pick1 → vote → result, sesión `tatoPairV2`), `discover-wizard.js` (`runWizardRandom`), `watch-tracking.js` (`countedItems`, `COUNT_SECS` 900), `recommendations.js` (coseno + bayesiana + MMR + exploración), `sw.js` v31 (IMG_CACHE y SWR en API), `tests/compat.test.js`.
+
+## 5.6 · Ventanas, caché y publicación
+- **`css/20-modales.css`** (última hoja de ventanas): variables `--sat/--sab/--sal/--sar` (zona segura), `--btn-h: 48px`. Toda ventana nueva debe usar `.modal` + `.modal-header` + `.modal-close` (o `.tc-profile-create-overlay` + `.tc-profile-create-close`) y heredará zona segura y tamaño. `css/21-fluidez.css`: reglas de rendimiento y modo `hz-low`.
+- **Service Worker:** CSS/JS = *Cache First* desde `tatocine-shell-<VERSION>` (se llena entera en `install`, index.html se pide una sola vez); `index.html` = red primero con respaldo offline y **autocuración** (si cambia sin cambiar la VERSION, refresca el shell y envía `SHELL_REFRESHED`); imágenes = caché primero (la caché activa NO se borra al abrir); API = *stale-while-revalidate* sin cachear errores. `VERSION` la calcula `tools/stamp.js` del contenido.
+- **Cola de TMDB** (`js/core/tmdb.js`): `fetchTMDB` mantiene su interfaz; por dentro `tmdbSchedule` (prioridades, máx. 6) y `tmdbGet` (reintentos acotados, 429 pausa la cola). Contadores en `TMDB_STATS` (diagnóstico).
+- **Orden de carga relevante:** `js/profiles/avatars.js` y `js/data/profile-backdrops.js` antes de `picker-open.js`/`profile-backdrop.js`; `js/core/rate-limit.js` en `<head>` sin `defer`; `legal-hub.js` y `adult-limit.js` después de `i18n.js`, `kids.js` y `parental.js`.
+- **Herramientas** (`tools/`, no se publican): `stamp.js` (versión + `build.json`), `package.js` (ZIP limpio), `gen-icons.py` (iconos).

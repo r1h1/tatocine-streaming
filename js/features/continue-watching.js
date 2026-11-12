@@ -29,7 +29,7 @@
         rating: media.rating,
         season: season || null,
         episode: episode || null,
-        episodeName: (currentTvEpisodes || []).find(function (item) { return Number(item.episode_number) === Number(episode); })?.name || "",
+        episodeName: (function () { var ep = (currentTvEpisodes || []).find(function (item) { return Number(item.episode_number) === Number(episode); }); return ep && ep.name || ""; })(),
         timestamp: Date.now(),
       };
       continueWatching = continueWatching.filter(function (m) {

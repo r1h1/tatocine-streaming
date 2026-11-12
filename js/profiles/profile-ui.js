@@ -12,7 +12,7 @@
       var p = getActiveProfile();
       var initial = document.getElementById("profile-button-avatar");
       var name = document.getElementById("profile-button-name");
-      if (initial && p) initial.textContent = getProfileInitial(p);
+      if (initial && p) initial.innerHTML = profileAvatarHTML(p, getProfileInitial(p));
       if (name && p) name.textContent = profileDisplayName(p);
       document.body.classList.toggle("kid-mode", !!p && p.kind === "kid");
       var trigger = document.querySelector(".tc-profile-trigger");
@@ -64,6 +64,8 @@
       profileFormRemovePin = false;
       setProfileFormKind(isEdit && profile ? profile.kind : "adult");
       setProfileFormLang(isEdit && profile ? profile.lang : "es");
+      renderAvatarGrid();
+      setProfileFormAvatar(isEdit && profile ? profile.avatar : "");
       var pinInput = document.getElementById("tc-new-profile-pin");
       var removeBtn = document.getElementById("tc-remove-pin-btn");
       var hasPin = isEdit && profileHasPin(profile);
@@ -179,14 +181,16 @@
         showToast("Debe existir al menos un perfil de adulto");
         return;
       }
-      var previous = { name: profile.name, kind: profile.kind, lang: profile.lang || "es", pin: profile.pin };
+      var previous = { name: profile.name, kind: profile.kind, lang: profile.lang || "es", pin: profile.pin, avatar: profile.avatar };
       profile.name = name;
+      if (profileFormAvatar) profile.avatar = profileFormAvatar; else delete profile.avatar;
       profile.kind = profileFormKind;
       profile.lang = profileFormLang;
       if (pinResult.value) profile.pin = makePin(pinResult.value);
       else if (profileFormRemovePin) delete profile.pin;
       if (!saveLocalProfiles()) {
         profile.name = previous.name; profile.kind = previous.kind; profile.lang = previous.lang;
+        if (previous.avatar) profile.avatar = previous.avatar; else delete profile.avatar;
         if (previous.pin) profile.pin = previous.pin; else delete profile.pin;
         showToast("No se pudieron guardar los cambios en este navegador");
         return;
@@ -213,7 +217,7 @@
         var editButton = p.guest ? "" : '<button type="button" class="tc-profile-edit-btn" data-profile-action="edit" data-profile-id="' + safeId + '" aria-label="Editar nombre de ' + safeName + '" title="Editar nombre"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>';
         return '<div class="tc-profile-card tc-profile-card-editable ' + (active ? "active" : "") + (blockedForKid ? " is-blocked" : "") + '">' +
           '<button type="button" class="tc-profile-select-btn" data-profile-action="select"' + (blockedForKid ? ' aria-disabled="true"' : "") + ' data-profile-id="' + safeId + '" aria-label="Seleccionar perfil ' + safeName + '">' +
-          '<span class="tc-profile-card-avatar" aria-hidden="true">' + escapeHTML(getProfileInitial(p)) + '</span>' +
+          '<span class="tc-profile-card-avatar' + (avatarDef(p.avatar) ? " has-av" : "") + '" aria-hidden="true">' + profileAvatarHTML(p, getProfileInitial(p)) + '</span>' +
           '<span class="tc-profile-card-name">' + safeName + '</span>' +
           '<span class="tc-profile-active-label">' + (active ? "Actual" : "Seleccionar") + (p.guest ? " · Sin historial" : "") + (p.kind === "kid" ? " · Niño" : "") + (p.lang === "en" && !p.guest ? " · ENG" : "") + (profileHasPin(p) ? " · PIN" : "") + '</span>' +
           '</button>' +
@@ -260,8 +264,6 @@
         grid.dataset.profileActionsBound = "true";
       }
 
-      var count = document.getElementById("tc-profile-count");
-      if (count) count.textContent = localProfiles.length + " de 6 perfiles locales";
       var create = document.getElementById("tc-create-profile-btn");
       if (create) create.disabled = localProfiles.length >= 6;
     }
@@ -333,6 +335,7 @@
       if (!pinResult.ok) return;
       var id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       var newProfile = { id: id, name: name, kind: profileFormKind, lang: profileFormLang, createdAt: Date.now() };
+      if (profileFormAvatar) newProfile.avatar = profileFormAvatar;
       if (pinResult.value) newProfile.pin = makePin(pinResult.value);
       localProfiles.push(newProfile);
       saveLocalProfiles();

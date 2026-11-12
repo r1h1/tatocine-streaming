@@ -204,7 +204,9 @@
       favTruncated = false;
       if (favFilter !== "all" && favFilter !== "general" && favFilter !== "watched" && favFilter !== "later" && !favListById(favFilter)) favFilter = "all";
       var chip = function (id, label, primary) { return '<button class="genre-chip ' + (primary ? "chip-primary " : "") + (favFilter === id ? "active" : "") + '" data-act="fav-filter" data-v="' + id + '">' + label + "</button>"; };
-      var toolbar = '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") + chip("later", L("Ver más tarde", "Watch later") + (laterList.length ? " (" + laterList.length + ")" : "")) +
+      // «Tu mes en películas»: botón al principio de Mi cine (imagen 9:16 + guardar/compartir) sin pasar por Estadísticas. Solo adultos con perfil propio.
+      var shareMonth = (isKidProfile() || isGuestProfile()) ? "" : '<div class="fav-share"><button type="button" class="genre-chip chip-primary mi-mes" data-act="open-wrapped"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg><span>' + L("Compartir tu mes en películas", "Share your month in movies") + "</span></button></div>";
+      var toolbar = shareMonth + '<div class="fav-toolbar">' + chip("all", "Todos", true) + chip("general", "General") + chip("watched", "Vistas") + chip("later", L("Ver más tarde", "Watch later") + (laterList.length ? " (" + laterList.length + ")" : "")) +
         '<button class="genre-chip" data-act="start-marathon">' + L("Maratón de películas", "Movie marathon") + '</button>' +
         '<span class="fav-toolbar-gap"></span>' +
         (favLists.length < 12 ? '<button class="genre-chip chip-primary" data-act="open-list" data-id="">+ Nueva lista</button>' : "") +

@@ -95,6 +95,7 @@
       width: 100%;
       max-width: 1100px;
       aspect-ratio: 16/9;
+      max-height: calc(100vh - 245px)   /* respaldo para navegadores sin dvh/svh */;
       max-height: calc(100dvh - 245px);
       min-height: 180px;
       background: #000;

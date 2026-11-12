@@ -209,7 +209,7 @@
     function heroWarmNext(m) {
       try {
         var list = heroMoviesList || [], i = list.findIndex(function (x) { return x && x.id === m.id && x.type === m.type; });
-        var nx = i > -1 && list.length > 1 ? list[(i + 1) % list.length] : null;
+        var nx = i > -1 && list.length > 1 ? list[i + 1] : null;                 // sin vuelta: en el último título no se precarga nada
         if (!nx) return;
         if (nx.bg) { var img = new Image(); img.decoding = "async"; img.src = nx.bg.startsWith("http") ? nx.bg : IMG_BG + nx.bg; }
         if (typeof htTrailerKeys === "function") htTrailerKeys(nx);
@@ -368,7 +368,7 @@
     }
     function heroPreloadNext() {
       if (heroMoviesList.length < 2) return;
-      var n = heroMoviesList[(currentHeroIndex + 1) % heroMoviesList.length];
+      var n = heroMoviesList[currentHeroIndex + 1];                                    // sin vuelta al primero
       if (n && n.bg) { var i = new Image(); i.src = n.bg.startsWith("http") ? n.bg : IMG_BG + n.bg; }   // la imagen ya está lista al llegar su turno
     }
     // Rotación de la portada: UN temporizador por título (no un intervalo global), así cada título dura lo mismo aunque
@@ -382,11 +382,13 @@
     function heroPlan(total) {
       clearTimeout(heroInterval);
       if (!heroCarouselOn) return;
+      if (currentHeroIndex >= heroMoviesList.length - 1) return;                        // el décimo del Top 10 se queda fijo (sin volver al primero) hasta que el usuario elija otro
       heroInterval = setTimeout(heroTick, Math.max(400, total - (Date.now() - heroShownAt)));
     }
     function heroTick() {
       if (heroBlocked()) { heroInterval = setTimeout(heroTick, 1000); return; }       // sin rotar (ni descargar) si no se está viendo
-      currentHeroIndex = (currentHeroIndex + 1) % heroMoviesList.length;
+      if (currentHeroIndex >= heroMoviesList.length - 1) return;                        // último título: no hay siguiente
+      currentHeroIndex = currentHeroIndex + 1;
       setHero(heroMoviesList[currentHeroIndex]);
       setTimeout(heroPreloadNext, 1500);
     }

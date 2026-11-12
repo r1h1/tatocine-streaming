@@ -20,6 +20,7 @@ function htWhyNot() {
   var forced = htMode === "on";
   htWhyNotify = false;
   if (htMode === "off") return L("Desactivado en Ajustes.", "Off in Settings.");
+  try { if (navigator.connection && navigator.connection.saveData) return L("Ahorro de datos activado en el dispositivo.", "Data saver is on."); } catch (e) { }
   var picker = document.getElementById("tc-profile-overlay");
   if (picker && picker.classList.contains("open")) return L("Hay que elegir perfil primero.", "Choose a profile first.");
   if (location.protocol === "file:") { htWhyNotify = true; return L("YouTube no permite reproducir desde un archivo local (file://). Abre TatoCine desde http://localhost o desde el sitio publicado.", "YouTube won't play from a local file (file://). Open TatoCine from http://localhost or the published site."); }
@@ -152,12 +153,13 @@ function htReveal(f, key, token, post) {
   soundOn();
   setTimeout(check, 1200);
   setTimeout(check, 3500);
-  // Último segundo: el sonido baja y el vídeo se PAUSA; justo después la portada pasa al siguiente título.
-  var untilPause = Math.max(0, heroShownAt + HERO_DWELL_TRAILER - 1000 - Date.now());
+  // A los 19 s de tráiler: el sonido baja, el vídeo se pausa y el iframe se destruye (no queda vídeo oculto descargando); 5 s después pasa al siguiente.
+  var untilPause = Math.max(0, heroShownAt + HT_START_MS + HT_VIEW_MS - 1000 - Date.now());
   htPauseTimer = setTimeout(function () {
     if (token !== htToken) return;
     ["40", "25", "10", "0"].forEach(function (v, k) { setTimeout(function () { if (token === htToken) try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [Number(v)] }), "https://www.youtube-nocookie.com"); } catch (e) { } }, k * 200); });
     setTimeout(function () { if (token === htToken) post("pauseVideo"); }, 850);
+    setTimeout(function () { if (token === htToken) htStop(); }, 1000);                 // destruye el iframe y los temporizadores del tráiler
   }, untilPause);
   var t0 = Date.now();
   htWatch = setInterval(function () {                                          // condiciones para seguir sonando
@@ -182,7 +184,8 @@ function htSchedule(m) {
     htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
   });
 }
-var HERO_DWELL_TRAILER = 31000;       // se ve desde 1,8 s; en el segundo 30 se pausa y a los 31 s pasa al siguiente (1 s de pausa) antes de pasar al siguiente
+/** Con tráiler: se ve desde HT_START_MS, suena HT_VIEW_MS (19 s), se detiene y se DESTRUYE el iframe, y tras HT_REST_MS (5 s) pasa al siguiente título. */
+var HT_VIEW_MS = 19000, HT_REST_MS = 5000, HERO_DWELL_TRAILER = HT_START_MS + HT_VIEW_MS + HT_REST_MS;
 decorate("setHero", function (original) { return function (m) { var r = original(m); htSchedule(m); return r; }; });
 decorate("openDetails", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });

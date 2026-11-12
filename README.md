@@ -12,7 +12,7 @@
 ## Características
 
 - **Inicio estilo streaming:** portada con carrusel, Continuar viendo, **Nuevos episodios**, Hecho para ti, Porque viste…, Tendencias, Top 10, colecciones y **Plataformas y estudios** (Netflix, Disney+, HBO Max, Prime Video, Marvel, Pixar, Ghibli…).
-- **«¿Qué ver hoy?»:** 4 preguntas (ambiente, tiempo —incluye «Más de 120 min»—, compañía, qué evitar) → **siempre 3** recomendaciones con el motivo de cada una (si tus respuestas dejan pocas opciones, se amplía la búsqueda y se avisa); puedes pedir otras 3, ver, abrir la ficha o guardar.
+- **«¿Qué ver?»:** 4 preguntas (ambiente, tiempo —incluye «Más de 120 min»—, compañía, qué evitar) → **siempre 3** recomendaciones con el motivo de cada una (si tus respuestas dejan pocas opciones, se amplía la búsqueda y se avisa); puedes pedir otras 3, ver, abrir la ficha o guardar.
 - **Ficha del título:** director (o creadores), reparto, tráiler, recomendados, compartir, favoritos y, en series, **temporadas y episodios** con imagen, duración y sinopsis en 1 columna (móvil/tableta), 2 (pantallas medianas) o 3 (grandes); tocas un episodio y se reproduce. El tráiler tiene un único botón de salir. **Marcar como vista** y valorar con 👍/👎 (afinan tus recomendaciones).
 - **Búsqueda inteligente:** sugerencias mientras escribes (títulos y personas), obras de un actor o director (también desde la ficha) y búsquedas recientes por perfil.
 - **Mi cine (antes «Favoritos») con listas** («Todos» y «+ Nueva lista» como botones primarios; abrir y cerrar una lista tocando su tarjeta de nuevo o con «Cerrar lista»; crear, editar con lápiz, borrar; al borrar una lista sus títulos pasan a *General*), sección **Vistas** y **Estadísticas** (tiempo visto, qué ves más, Top 3, ranking de perfiles).
@@ -32,7 +32,7 @@
 - **Fase 6 · Calidad:** CSP **estricta** (`script-src 'self'`: sin scripts en línea, sin `eval`, sin atributos `onclick`; los eventos van por `data-act`/`data-h`), **25 pruebas de navegador** (`cd tests/e2e && npm install && npm test`: selector sin parpadeo, CSP sin violaciones, navegación, scroll infinito, ficha/deshacer, paleta, perfil infantil, QR, copias, PIN y ausencia de desbordes de 320 a 1920 px) con medición de arranque (sin tareas largas) y revisión de accesibilidad con axe-core sin infracciones.
 - **Seguridad y accesibilidad:** política CSP en `index.html`, cabeceras (`nosniff`, `Referrer-Policy`, `Permissions-Policy`), valores validados antes de ir a atributos HTML y auditoría con axe-core sin infracciones en las pantallas principales. El selector de perfiles aparece al abrir una **pestaña nueva** (antes de ver nada, sin parpadeo); recargar con Ctrl+R **no** vuelve a pedirlo mientras sigas en esa pestaña. El menú muestra esqueletos mientras arranca. Protege tus perfiles de adulto con un **PIN**: es la barrera frente a los perfiles infantiles.
 - **Scroll infinito** en Inicio, Películas, Series, Anime y Niños (filas por género; Niños solo con contenido apto).
-- **Portada automática:** el **Top 10 de la semana** rota solo con fundido cruzado: **8 s** por título (**31 s** si tiene tráiler); en cada sección muestra su Top 10 de la semana e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver hoy? · ♥ (dos filas en móvil).
+- **Portada automática:** el **Top 10 de la semana** rota solo con fundido cruzado: **8 s** por título (con tráiler: se ve desde 1,8 s, suena **19 s**, el iframe se destruye y tras **5 s** pasa al siguiente); **el décimo del Top 10 se queda fijo** (no vuelve al primero ni precarga nada más hasta que elijas otro punto); en cada sección muestra su Top 10 de la semana e indicadores (tocar un punto salta a ese título). Botones del mismo tamaño: Ver · Info · ¿Qué ver? · ♥ (dos filas en móvil).
 - **Estadísticas y Ajustes** se reorganizan en cuadrículas en pantallas grandes (móvil y tableta sin cambios). Una lista de favoritos vacía muestra una portada automática acorde a su nombre.
 - **Racha:** días seguidos reproduciendo algo, con icono de fuego junto al perfil (contador local y discreto; no existe en perfiles Niño).
 - Fondos del selector de perfil en orden aleatorio; listas de favoritos como tarjetas verticales con el póster de su primer título y su cantidad (p. ej. «Terror (4)»), sin repetirse; cada cambio de pestaña empieza arriba.
@@ -45,7 +45,7 @@
 
 **Idioma por perfil:** ESP → interfaz y catálogo en español, servidor por defecto **ESP1**; ENG → todo en inglés, servidor por defecto **ENG1**. El siguiente episodio automático viene activado.
 
-**Perfil Niño:** solo ve la sección Niños (con su propio «¿Qué ver hoy?» limitado a contenido apto: ánimos Diversión, Adrenalina y Fantasía, verificado título por título), no administra perfiles y solo accede a contenido apto (US `G`, `TV-Y`, `TV-Y7`, `TV-G`, sin terror/suspenso/crimen/bélico ni términos explícitos), también en búsqueda, enlaces y reproductor. **Límite de uso:** 6 h 30 min (dos películas largas) y descanso obligatorio de 1 h (contador local compartido entre perfiles Niño, se reinicia cada día).
+**Perfil Niño:** solo ve la sección Niños (con su propio «¿Qué ver?» limitado a contenido apto: ánimos Diversión, Adrenalina y Fantasía, verificado título por título), no administra perfiles y solo accede a contenido apto (US `G`, `TV-Y`, `TV-Y7`, `TV-G`, sin terror/suspenso/crimen/bélico ni términos explícitos), también en búsqueda, enlaces y reproductor. **Límite de uso:** 6 h 30 min (dos películas largas) y descanso obligatorio de 1 h (contador local compartido entre perfiles Niño, se reinicia cada día).
 
 > El PIN y el límite son barreras locales para uso familiar, no seguridad fuerte: borrar los datos del sitio o cambiar la hora los reinicia.
 
@@ -89,6 +89,15 @@ Consigue **tu propia** clave v3 en [TMDB](https://developer.themoviedb.org/docs)
 
 **2. Probar en tu equipo:** abre `index.html` en el navegador (o con la extensión *Live Server* de VS Code; el proyecto trae su configuración). Para probar la instalación PWA hace falta HTTPS o `localhost` (Live Server sirve).
 
+**2 bis. Antes de publicar (importante):** el Service Worker sirve el CSS y el JS desde su caché versionada (la 2.ª visita no pide ni un archivo a la red), así que la versión debe cambiar cada vez que cambie algo. Se calcula sola del contenido:
+
+```bash
+node tools/stamp.js      # actualiza la VERSION de sw.js (y build.json)
+node tools/package.js    # crea dist/tatocine-<versión>.zip limpio: sin .git, tests, docs, tools ni node_modules
+```
+
+Sube **el mismo ZIP** a los cuatro despliegues (Netlify y Vercel): así son réplicas idénticas, y lo compruebas con `curl https://<dominio>/build.json` (la `version` debe coincidir). `node tests/sw-stamp.test.js` falla si olvidaste el paso 1. Si solo editas `index.html` y olvidas estampar, el Service Worker lo detecta, refresca sus archivos y ofrece «Actualizar», pero con cambios solo en CSS/JS **sí** hace falta estampar.
+
 **3. Subir a producción (HTTPS):** arrastra la carpeta (o un ZIP) a **Netlify Drop**, o conéctala por Git a **Netlify / Vercel / Render** (en Render: *Static Site*, sin *build command* y *Publish directory* `.`). Sube estos archivos juntos:
 
 ```text
@@ -105,6 +114,32 @@ Navegadores modernos; en Smart TV, Tizen 5.5+, webOS 5+ o Android TV/Fire TV act
 ## Qué no incluye (y por qué)
 
 Controles propios de audio/subtítulos/calidad/«saltar intro» (el video lo sirve un iframe de terceros), Watch Party y continuidad en vivo entre dispositivos (requieren servidor), búsqueda por lenguaje natural y cobros. TatoCine es gratuito.
+
+## Novedades 5.6 (rendimiento, ventanas, límites y legal)
+
+**Ventanas (modales) con un solo estándar** (`css/20-modales.css`, última hoja a propósito): cabecera y botón cerrar por debajo de la barra de notificaciones/muesca con `--sat` (zona segura; en una PWA instalada táctil hay un mínimo de 28 px aunque el sistema no informe la barra), X de **48 × 48 px**, **todos los botones de las ventanas miden 48 px** (texto 16 px), entradas de texto de **16 px mínimo** en táctil (iOS no hace zoom) y diálogos de escritorio más amplios. «Ver en base a tus gustos» (antes «Random») muestra **una sola recomendación grande**. **«Info» dentro de «Decidir en pareja»** ya no se traba: la ficha se abre por encima del diálogo (era una regresión de z-index).
+
+**Límite de uso para adultos** (`js/features/adult-limit.js`, valores **fijos**, no editables): **12 h de uso al día → descanso de 2 h**; **10 h seguidas → descanso de 3 h** (una pausa de 30 min o más reinicia «seguidas»). Cuenta solo con la app visible, se comparte entre pestañas y perfiles de adulto del dispositivo, avisa 15 min antes y muestra un contador real. Los perfiles Niño conservan su límite configurable. **Es local** (localStorage): borrar los datos del sitio o cambiar de navegador lo reinicia; es un recordatorio de descanso, no un sistema de identidad.
+
+**Legal** (`js/features/legal-hub.js`): el menú abre un hub con *Legal y no responsabilidad*, *Código fuente*, *Créditos* y *Sitios de terceros* (la lista sale de `SERVERS`, no se copia a mano). Pie «Aviso legal y descargo de responsabilidad» al final de cada vista y de las ventanas con scroll, y aviso de terceros **debajo** del iframe del reproductor.
+
+**Tu mes en películas** (`js/features/wrapped.js`): imagen 9:16 del mes con el contenido dentro de la zona segura de Instagram; al empezar un mes se ofrece el del mes recién terminado, **una vez por perfil y mes** (`tatoMonthlyWrappedShown_<perfil>`), solo adultos con actividad. Un título cuenta en el mes de su última reproducción (límite de los datos locales).
+
+**Textos y arranque:** el selector dice «Elige “Mi perfil”» y una sola línea (*Puedes editar y crear perfiles. Son locales: solo viven en este dispositivo.*); los perfiles nuevos se llaman «Mi perfil» (los que ya se llamaban «Yo» no cambian). **Toda pantalla y ventana empieza arriba**: al cambiar de vista o buscar la página vuelve al principio, al abrir cualquier ventana su contenido está arriba y al recargar no se restaura el scroll (`js/ui/scroll-lock.js`, `js/boot.js`). El botón de pantalla completa del reproductor es solo un icono. **Mi cine** tiene arriba el botón «Compartir tu mes en películas» (imagen 9:16, guardar/compartir) sin pasar por Estadísticas; no aparece en perfiles Niño ni Invitado.
+
+**Perfiles:** 10 avatares originales (`js/profiles/avatars.js`, sin personajes de franquicias), textos nuevos del selector y orden de Inicio: *Continuar viendo → Plataformas y estudios → Hecho para ti → resto*. Iconos de la app generados desde `icons/inspiration.jpeg` con `python3 tools/gen-icons.py` (Pillow).
+
+**Menos llamadas a TMDB:** fondos del selector desde un manifiesto local (`js/data/profile-backdrops.js`: **0** búsquedas en vez de 31); filas de abajo de Inicio solo al acercarse (10 llamadas sin hacer scroll, antes 15); cola de peticiones (máx. 6 a la vez, prioridad búsqueda > ficha > filas > precargas, nada de baja prioridad con la pestaña oculta); 429/5xx con 2 reintentos y espera creciente, 400/401/403/404 sin reintento; recomendaciones con menos semillas; calendario con 3 a la vez; **se corrigió el borrado de la caché de imágenes en cada arranque** (`js/core/pwa.js`).
+
+**Primera visita más ligera:** el Service Worker ya no vuelve a descargar lo que la página acaba de bajar (revalida con `no-cache`: el servidor responde 304). Medido con un servidor con ETag como Netlify: **2.327 KB → 1.467 KB (−37 %)** y 247 → 132 respuestas con cuerpo. En la segunda visita no se pide ningún CSS/JS a la red. Las miniaturas de plataformas se piden solo si se ven y se guardan para siempre en el dispositivo. Con la CPU 4× más lenta la app queda lista en < 1 s y el JavaScript de arranque suma ~100 ms: el cuello de botella no es la CPU sino la red. Opcional en Netlify: *Site settings → Build & deploy → Post processing → Asset optimization* (minificar JS/CSS), sin cambiar el código.
+
+**Fluidez:** `js/core/refresh-rate.js` mide la frecuencia real de pantalla (30/60/90/120/144 Hz), la expone (`window.TC_HZ`, `<html data-hz>`) y, si baja de 45 Hz, quita desenfoques y sombras grandes (`css/21-fluidez.css`). **Una web no puede forzar 120 Hz:** lo decide el navegador y la pantalla; aquí solo se evita el trabajo pesado por fotograma y se adapta a lo que haya. Diagnóstico técnico exportable en Ajustes (solo cifras, sin historial).
+
+**Compatibilidad:** piso declarado **Chromium 68** (LG webOS 5) sin transpilar; `tests/compat.test.js` verifica sintaxis y APIs, y se corrigió un `?.` real. Sin televisor físico **no se afirma** que funcione allí: falta probar en hardware.
+
+**Pruebas:** `node tests/*.test.js` y `TMDB_MOCK=1 node tests/e2e/run.js` (TMDB e imágenes simulados: sin red y determinista) o sin la variable para usar la API real.
+
+**Lo que NO se hizo, a propósito:** proxy de TMDB y coordinador de sesiones (requieren backend). **No hay contador de «usuarios conectados»**: sin servidor no se puede medir y no se muestra un número inventado. Con ~10 usuarios/día la app (archivos estáticos + TMDB con caché) sobra; cuando haya que medir de verdad, usa las analíticas de Netlify/Vercel (transferencia, peticiones) y el diagnóstico exportable. La clave de TMDB sigue siendo pública en `config.js` (es de solo lectura del catálogo): ocultarla exige un proxy.
 
 ## Aviso legal y licencia
 

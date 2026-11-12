@@ -19,7 +19,7 @@ Licencia: GNU GPL v3 o posterior (LICENSE)
 - Inicio con portada rotativa (Top 10 de la semana), filas por género, estrenos y plataformas.
 - Búsqueda, filtros, fichas con reparto, sagas, tráileres de YouTube y recomendados.
 - Mi cine: favoritos con listas, vistas, ver más tarde, calendario de estrenos y estadísticas.
-- «¿Qué ver?»: asistente, Random y Decidir en pareja (cada persona elige títulos y votan juntos).
+- «¿Qué ver?»: asistente, «Ver en base a tus gustos» y Decidir en pareja (cada persona elige títulos y votan juntos).
 - Perfiles (adulto, niño con límites de tiempo, invitado), copia de seguridad cifrada y traspaso por QR.
 - Accesibilidad: tamaños de texto, alto contraste, reducir movimiento, navegación por teclado y mando.
 

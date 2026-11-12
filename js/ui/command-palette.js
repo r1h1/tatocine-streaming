@@ -62,7 +62,7 @@ function cmdRun(i) {
   });
   registerCommand({ id: "go-kids", es: "Ir a Niños", en: "Go to Kids", keys: "ninos infantil", run: go("kids") });
   registerCommand({ id: "search", es: "Buscar películas y series", en: "Search movies and shows", keys: "buscar search encontrar", run: function () { window.scrollTo(0, 0); $searchInput.focus(); } });
-  registerCommand({ id: "wizard", es: "¿Qué ver hoy? (asistente)", en: "What to watch today? (assistant)", keys: "recomendar asistente que ver", run: function () { openWizard(); } });
+  registerCommand({ id: "wizard", es: "¿Qué ver? (asistente)", en: "What to watch? (assistant)", keys: "recomendar asistente que ver", run: function () { openWizard(); } });
   registerCommand({ id: "settings", es: "Abrir Ajustes", en: "Open Settings", keys: "ajustes configuracion settings", run: function () { showSettings(); } });
   registerCommand({ id: "stats", es: "Ver mis estadísticas", en: "View my statistics", keys: "estadisticas stats tiempo", adult: true, run: function () { openStats(); } });
   registerCommand({ id: "week", es: "Resumen semanal", en: "Weekly summary", keys: "resumen semanal padres uso", adult: true, run: function () { openWeeklySummary(); } });

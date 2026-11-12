@@ -6,6 +6,7 @@
  * queda oculta y el selector aparece primero, sin parpadeo de la portada.
  */
 (function () {
+  try { history.scrollRestoration = "manual"; } catch (e) { }      // recargar o volver a la página NO restaura el scroll de abajo: siempre se empieza arriba
   var root = document.documentElement, selected = "", active = "";
   try { selected = sessionStorage.getItem("tatoProfileSelectedForSessionV1") || ""; active = localStorage.getItem("tatoActiveProfileV1") || ""; } catch (e) { }
   var needsPicker = !selected || selected !== active;

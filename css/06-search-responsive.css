@@ -316,6 +316,7 @@
       }
 
       #player-modal .player-container {
+        max-height: calc(100vh - 245px)   /* respaldo para navegadores sin dvh/svh */;
         max-height: calc(100dvh - 245px);
         border-radius: 8px;
       }
@@ -452,6 +453,7 @@
       }
 
       #player-modal .player-container {
+        max-height: calc(100vh - 225px)   /* respaldo para navegadores sin dvh/svh */;
         max-height: calc(100dvh - 225px);
         min-height: 150px;
       }
@@ -503,6 +505,7 @@
 
       #player-modal .player-container {
         width: auto;
+        height: calc(100vh - 175px)   /* respaldo para navegadores sin dvh/svh */;
         height: calc(100dvh - 175px);
         max-height: none;
         aspect-ratio: 16/9;

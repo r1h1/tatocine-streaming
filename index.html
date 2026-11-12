@@ -57,12 +57,11 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/icon-48.png" />
   <link rel="preconnect" href="https://api.themoviedb.org" crossorigin />
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
   <link rel="preconnect" href="https://www.youtube.com" crossorigin />
   <link rel="dns-prefetch" href="https://image.tmdb.org" />
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFFFFF'/%3E%3Cpath d='M14 12l14 8-14 8z' fill='%23000000'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="css/01-base.css" />
   <link rel="stylesheet" href="css/02-hero.css" />
   <link rel="stylesheet" href="css/03-catalog.css" />
@@ -82,6 +81,8 @@
   <link rel="stylesheet" href="css/17-hero-actions.css" />
   <link rel="stylesheet" href="css/18-lists-skeletons.css" />
   <link rel="stylesheet" href="css/19-responsive.css" />
+  <link rel="stylesheet" href="css/20-modales.css" />
+  <link rel="stylesheet" href="css/21-fluidez.css" />
   <script type="application/ld+json" id="site-structured-data">
       {
         "@context": "https://schema.org",
@@ -311,7 +312,6 @@
               stroke-linejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
-            <span class="fullscreen-label">Pantalla completa</span>
           </button>
           <button class="modal-close" data-h="h23" aria-label="Cerrar reproductor">
             ✕
@@ -461,6 +461,33 @@
         <button class="modal-close" data-h="h32">✕</button>
       </div>
       <div class="modal-body" style="padding: 0">
+        <div class="settings-option" data-adult-only id="install-option" hidden>
+          <div>
+            <div class="label">Instalar TatoCine</div>
+            <div class="sub-label" id="install-sub">Añade TatoCine a tu dispositivo.</div>
+          </div>
+          <button class="danger-btn" data-h="h15">Instalar</button>
+        </div>
+        <div class="settings-option">
+          <div>
+            <div class="label">Copiar tus datos (QR)</div>
+            <div class="sub-label">Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" data-h="h45">Mostrar QR</button>
+            <button class="danger-btn" data-h="h46">Escanear</button>
+          </div>
+        </div>
+<div class="settings-option">
+          <div>
+            <div class="label">Copiar tus datos (JSON)</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" data-h="h43">Exportar</button>
+            <button class="danger-btn" data-h="h44">Importar</button>
+            <input type="file" id="backup-file" accept="application/json,.json" hidden />
+          </div>
+        </div>
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Continuar Viendo</div>
@@ -515,19 +542,22 @@
           </div>
           <button class="danger-btn" data-h="h37">Cambiar</button>
         </div>
-        <div class="settings-option" data-adult-only id="install-option" hidden>
-          <div>
-            <div class="label">Instalar app</div>
-            <div class="sub-label" id="install-sub">Añade TatoCine a tu dispositivo.</div>
-          </div>
-          <button class="danger-btn" data-h="h15">Instalar</button>
-        </div>
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Almacenamiento</div>
             <div class="sub-label" id="storage-summary">Calculando…</div>
           </div>
           <button class="danger-btn" data-h="h38">Liberar</button>
+        </div>
+        <div class="settings-option" data-adult-only>
+          <div>
+            <div class="label">Diagnóstico técnico</div>
+            <div class="sub-label">Solo cifras de red y rendimiento, sin tu historial ni tus datos.</div>
+          </div>
+          <div class="settings-actions">
+            <button class="danger-btn" type="button" data-act="diag-copy">Copiar</button>
+            <button class="danger-btn" type="button" data-act="diag-download">Descargar</button>
+          </div>
         </div>
                 <div class="settings-option a11y-option">
           <div>
@@ -540,26 +570,6 @@
             <button class="danger-btn" type="button" data-h="h40" aria-label="Texto más grande">A+</button>
             <button class="danger-btn" type="button" id="a11y-hc-btn" aria-pressed="false" data-h="h41">Alto contraste</button>
             <button class="danger-btn" type="button" id="a11y-rm-btn" aria-pressed="false" data-h="h42">Reducir movimiento</button>
-          </div>
-        </div>
-<div class="settings-option">
-          <div>
-            <div class="label">Copiar tus datos</div>
-          </div>
-          <div class="settings-actions">
-            <button class="danger-btn" data-h="h43">Exportar</button>
-            <button class="danger-btn" data-h="h44">Importar</button>
-            <input type="file" id="backup-file" accept="application/json,.json" hidden />
-          </div>
-        </div>
-        <div class="settings-option">
-          <div>
-            <div class="label">Copiar tus datos (QR)</div>
-            <div class="sub-label">Lleva favoritos, listas y vistos escaneando un QR. No incluye PIN ni claves.</div>
-          </div>
-          <div class="settings-actions">
-            <button class="danger-btn" data-h="h45">Mostrar QR</button>
-            <button class="danger-btn" data-h="h46">Escanear</button>
           </div>
         </div>
                 <div class="settings-option" data-adult-only>
@@ -601,14 +611,15 @@
       <div class="tc-profile-brand" aria-label="TatoCine">TatoCine</div>
       <div class="tc-profile-heading">
         <div>
-          <h2 id="tc-profile-title">¿Quién eres?</h2>
-          <p class="tc-profile-note" id="tc-profile-count">Elige tu perfil</p>
+          <h2 id="tc-profile-title">Elige “Mi perfil”</h2>
+          <p class="tc-profile-note" id="tc-profile-count">Puedes editar y crear perfiles. Son locales: solo viven en este dispositivo.</p>
         </div>
         <button class="tc-profile-close" type="button" data-h="h49" aria-label="Cerrar">×</button>
       </div>
       <div class="tc-profile-grid" id="tc-profile-grid"><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div><div class="tc-profile-skel" aria-hidden="true"><span></span><i></i></div></div>
     </section>
   </div>
+  <script src="js/profiles/avatars.js"></script>
   <script src="js/core/picker-open.js"></script>
 
   <!-- Modal independiente para crear perfiles locales -->
@@ -625,6 +636,10 @@
       <label class="tc-profile-create-label" for="tc-new-profile-name">Nombre</label>
       <input class="tc-profile-input" id="tc-new-profile-name" type="text" maxlength="24"
         placeholder="Escribe un nombre" autocomplete="off" data-hk="h52">
+          </div>
+          <div class="pf-field pf-avatars">
+      <span class="tc-profile-create-label" id="pf-avatar-label">Avatar</span>
+      <div class="pf-av-grid" id="pf-avatar-grid" role="radiogroup" aria-labelledby="pf-avatar-label"></div>
           </div>
           <div class="pf-field pf-choice">
       <div class="tc-profile-kind" role="radiogroup" aria-label="Tipo">
@@ -744,6 +759,16 @@
     </section>
   </div>
 
+  <!-- Descanso obligatorio de los perfiles de adulto (12 h al día o 10 h seguidas) -->
+  <div class="tc-kid-lock" id="tc-adult-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-adult-lock-title">
+    <section class="tc-profile-create-dialog tc-kid-lock-card">
+      <h3 id="tc-adult-lock-title">Hora de descansar</h3>
+      <p class="tc-profile-create-subtitle" id="tc-adult-lock-sub"></p>
+      <div class="tc-kid-lock-time" id="tc-adult-lock-time" aria-live="polite">00:00</div>
+      <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
+    </section>
+  </div>
+
   <!-- Hora de dormir (perfiles infantiles) -->
   <div class="tc-kid-lock" id="tc-bed-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-bed-lock-title">
     <section class="tc-bed-card">
@@ -842,6 +867,17 @@
           <div class="filter-options" id="filter-sort-options"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL LEGAL (hub: legal, código fuente, créditos, sitios de terceros) -->
+  <div class="modal" id="legal-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title">
+    <div class="settings-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="legal-title">Legal</h2>
+        <button class="modal-close" type="button" data-act="close-legal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 0" id="legal-body"></div>
     </div>
   </div>
 
@@ -963,6 +999,7 @@
   <script defer src="js/core/ui-utils.js"></script>
   <script defer src="js/ui/command-palette.js"></script>
   <script defer src="js/core/tmdb.js"></script>
+  <script defer src="js/data/profile-backdrops.js"></script>
   <script defer src="js/profiles/profile-backdrop.js"></script>
   <script defer src="js/features/analytics.js"></script>
   <script defer src="js/core/utils.js"></script>
@@ -1010,6 +1047,7 @@
   <script defer src="js/features/backup.js"></script>
   <script defer src="js/features/qr-transfer.js"></script>
   <script defer src="js/features/parental.js"></script>
+  <script defer src="js/features/adult-limit.js"></script>
   <script defer src="js/features/watch-later.js"></script>
   <script defer src="js/features/calendar.js"></script>
   <script defer src="js/features/release-alerts.js"></script>
@@ -1018,6 +1056,7 @@
   <script defer src="js/features/marathon.js"></script>
   <script defer src="js/ui/scroll-lock.js"></script>
   <script defer src="js/features/details-sagas.js"></script>
+  <script defer src="js/features/legal-hub.js"></script>
   <script defer src="js/ui/undo.js"></script>
   <script defer src="js/player/autoplay-next.js"></script>
   <script defer src="js/player/player-robust.js"></script>
@@ -1030,6 +1069,8 @@
   <script defer src="js/features/voice-search.js"></script>
   <script defer src="js/ui/onboarding.js"></script>
   <script defer src="js/core/performance.js"></script>
+  <script defer src="js/core/refresh-rate.js"></script>
+  <script defer src="js/core/diagnostics.js"></script>
   <script defer src="js/core/data-guard.js"></script>
   <script defer src="js/app.js"></script>
 </body>

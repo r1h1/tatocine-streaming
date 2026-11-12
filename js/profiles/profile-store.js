@@ -10,18 +10,17 @@
     function initializeLocalProfiles() {
       var stored = readLocalJSON(PROFILE_STORAGE_KEY, null);
       if (!Array.isArray(stored) || !stored.length) {
-        stored = [{ id: "main", name: "Yo", createdAt: Date.now() }];
+        stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
         safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(stored));
       }
       stored = stored.filter(function (p) { return p && p.id && p.name; });
-      if (!stored.length) stored = [{ id: "main", name: "Yo", createdAt: Date.now() }];
-      // Retira los antiguos emojis guardados como avatar sin borrar perfiles ni su actividad.
-      stored.forEach(function (p) { if (Object.prototype.hasOwnProperty.call(p, "avatar")) delete p.avatar; });
+      if (!stored.length) stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
+      // Avatares: se conservan solo los identificadores válidos («a1»…«a10»); los antiguos emojis se retiran sin borrar perfiles ni su actividad.
+      stored.forEach(function (p) { if (Object.prototype.hasOwnProperty.call(p, "avatar") && !/^a(10|[1-9])$/.test(String(p.avatar))) delete p.avatar; });
       // Tipo de perfil (adulto/niño) y PIN opcional; los perfiles antiguos pasan a "adulto" sin PIN.
       stored.forEach(function (p) {
         if (p.kind !== "kid") p.kind = "adult";
         if (p.lang !== "en") p.lang = "es";
-        if (p.name === "Mi perfil") p.name = "Yo";
         if (!p.pin || typeof p.pin.h !== "string" || typeof p.pin.s !== "string") delete p.pin;
       });
       // «Invitado» existe siempre (no se edita ni se elimina y no guarda nada). El orden es: Yo, Invitado y los demás.

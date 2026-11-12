@@ -1,0 +1,16 @@
+/**
+ * TatoCine · css/21-fluidez.css
+ * Fluidez. Reglas generales: animar solo transform y opacity, `will-change` únicamente en transiciones concretas, trabajo fuera de pantalla
+ * evitado con content-visibility (19-responsive.css) y detección de frecuencia (js/core/refresh-rate.js).
+ */
+/* Pantalla a menos de 45 Hz o ahorro de batería: sin desenfoques ni sombras grandes (lo más caro de pintar), mismo diseño. */
+html.hz-low .top-nav, html.hz-low .modal-close, html.hz-low .details-close, html.hz-low .rating-badge, html.hz-low .status-badge,
+html.hz-low .share-card-btn, html.hz-low .save-btn, html.hz-low .tc-fs-btn, html.hz-low .card-overlay, html.hz-low .hero-btn,
+html.hz-low .tc-profile-overlay, html.hz-low .mobile-menu, html.hz-low .toast, html.hz-low .modal-header {
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html.hz-low .card, html.hz-low .hero-btn, html.hz-low .tc-profile-card { box-shadow: none !important; }
+/* Desplazamiento táctil siempre con inercia y sin que el gesto arrastre la página que hay detrás */
+.row-scroll, .modal-content, .settings-content, .details-content, .actor-content { -webkit-overflow-scrolling: touch; }
+/* Los carruseles se desplazan en el compositor: sin pintar de nuevo las tarjetas de cada fila mientras se mueven */
+.row-scroll { contain: layout paint style; }

@@ -34,7 +34,7 @@ async function calendarCollect(force) {
       } catch (e) { }
     }
   }
-  await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+  await Promise.all([worker(), worker(), worker()]);                                  // 3 a la vez (antes 6): menos picos hacia TMDB
   items.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
   safeStorageSet(profileStorageKey(CAL_KEY), JSON.stringify({ ts: Date.now(), items: items }));
   return items;

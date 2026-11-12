@@ -86,7 +86,20 @@
         });
     }
 
+    /** Manifiesto local (js/data/profile-backdrops.js): sin ninguna petición a TMDB. Devuelve null si no existe o no es válido. */
+    function profileBackdropsFromManifest() {
+      try {
+        var m = typeof PROFILE_BACKDROP_MANIFEST !== "undefined" ? PROFILE_BACKDROP_MANIFEST : null;
+        if (!m || m.v !== 1 || !Array.isArray(m.items)) return null;
+        var list = m.items.filter(function (i) { return i && typeof i.backdrop_path === "string" && /^\/[A-Za-z0-9_\-]{1,80}\.jpg$/.test(i.backdrop_path); })
+          .map(function (i) { return { backdrop_path: i.backdrop_path, _tcProfileLabel: String(i.label || ""), _tcProfileType: i.type === "tv" ? "tv" : "movie" }; });
+        return list.length >= 6 ? shuffleInPlace(list) : null;
+      } catch (e) { return null; }
+    }
+
     function loadProfileBackdropCollection() {
+      var fromManifest = profileBackdropsFromManifest();
+      if (fromManifest) return Promise.resolve(fromManifest);                    // lo normal: cero peticiones
       var results = new Array(PROFILE_BACKDROP_FEATURED.length);
       var cursor = 0;
       var workerCount = Math.min(4, PROFILE_BACKDROP_FEATURED.length);

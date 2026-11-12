@@ -1,6 +1,6 @@
 /**
  * TatoCine · js/features/discover-wizard.js
- * «¿Qué ver hoy?»: cuatro preguntas (ambiente, tiempo, compañía, qué evitar) y tres recomendaciones
+ * «¿Qué ver?»: cuatro preguntas (ambiente, tiempo, compañía, qué evitar) y tres recomendaciones
  * con el motivo de cada una. Usa los filtros de `discover` de TMDB y los gustos locales del perfil.
  *
  * Responsabilidades (SRP):
@@ -163,7 +163,7 @@ function runWizard() {
   })();
 }
 
-/** «Random»: UNA recomendación al azar, parecida a tus gustos y a lo que viste hace poco, de estrenos recientes y sin repetir lo que ya viste. */
+/** «Ver en base a tus gustos»: UNA recomendación al azar, parecida a tus gustos y a lo que viste hace poco, de estrenos recientes y sin repetir lo que ya viste. */
 function wizardRandomPick() {
   var weights = {}, profile = getTasteProfile();
   profile.forEach(function (p) { weights[p.id] = p.score; });
@@ -226,9 +226,9 @@ function renderWizardResults(requestOk, reuse) {
       '</p><div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="back">' + L("Cambiar respuestas", "Change answers") + "</button></div>";
     return;
   }
-  body.innerHTML = (wizardRelaxed ? '<p class="wiz-note">' + L("Con tus respuestas había pocas opciones: ampliamos un poco la búsqueda para mostrarte 3.", "There were few matches for your answers, so we widened the search to show you 3.") + "</p>" : "") + '<div class="wiz-results">' + picks.map(function (m, i) {
+  body.innerHTML = (wizardRelaxed ? '<p class="wiz-note">' + L("Con tus respuestas había pocas opciones: ampliamos un poco la búsqueda para mostrarte 3.", "There were few matches for your answers, so we widened the search to show you 3.") + "</p>" : "") + '<div class="wiz-results' + (picks.length === 1 ? " wiz-single" : "") + '">' + picks.map(function (m, i) {
     var saved = isSaved(m);
-    return '<article class="wiz-result" data-i="' + i + '"><img loading="lazy" decoding="async" alt="" src="' + escapeHTML(IMG_CARD + m.bg) + '" data-fb="card">' +
+    return '<article class="wiz-result" data-i="' + i + '"><img loading="lazy" decoding="async" alt="" src="' + escapeHTML((picks.length === 1 ? IMG_BG : IMG_CARD) + m.bg) + '" data-fb="card">' +
       '<div class="wiz-info"><h4 class="wiz-title" data-i18n="skip">' + escapeHTML(m.title) + '</h4>' +
       '<div class="wiz-meta">' + (m.type === "tv" ? L("Serie", "Series") : L("Película", "Movie")) + (m.year ? " · " + m.year : "") + (m.rating ? " · ★ " + Number(m.rating).toFixed(1) : "") + "</div>" +
       '<p class="wiz-reason">' + escapeHTML(m._reason) + '</p>' +
@@ -255,7 +255,7 @@ function renderWizardForm() {
     '<p class="wiz-q">' + L("¿Cuánto tiempo tienes?", "How much time do you have?") + "</p>" + chips("time", WIZARD_OPTIONS.times, function (t) { return t === "120+" ? L("Más de 120 min", "Over 120 min") : t + " min"; }, function (t) { return t; }) +
     '<p class="wiz-q">' + L("¿Con quién vas a ver?", "Who are you watching with?") + "</p>" + chips("who", WIZARD_OPTIONS.who, wizardOptionLabel, function (o) { return o.k; }) +
     (kids ? "" : '<p class="wiz-q">' + L("¿Qué prefieres evitar?", "What would you rather avoid?") + "</p>" + chips("avoid", WIZARD_OPTIONS.avoid, wizardOptionLabel, function (o) { return o.k; }, true)) +
-    '<div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="go"' + (wizardState.mood ? "" : " disabled") + ">" + L("Mostrar recomendaciones", "Show recommendations") + '</button><button type="button" class="tc-profile-cancel-btn wiz-pair" data-act="wizard-random">' + DICE_ICO + '<span>Random</span></button><button type="button" class="tc-profile-cancel-btn wiz-pair" data-act="wizard-couple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>' + L("Decidir en pareja", "Decide as a couple") + "</span></button></div>";
+    '<div class="wiz-actions"><button type="button" class="tc-profile-create-btn" data-wiz="go"' + (wizardState.mood ? "" : " disabled") + ">" + L("Mostrar recomendaciones", "Show recommendations") + '</button><button type="button" class="tc-profile-cancel-btn wiz-pair" data-act="wizard-random">' + DICE_ICO + '<span>' + L("Ver en base a tus gustos", "Based on your taste") + '</span></button><button type="button" class="tc-profile-cancel-btn wiz-pair" data-act="wizard-couple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>' + L("Decidir en pareja", "Decide as a couple") + "</span></button></div>";
 }
 
 function openWizard() {
@@ -292,7 +292,7 @@ function closeWizard() { wizardRun++; closeOverlay("tc-wizard-overlay"); }
       toggleFavoriteMedia({ id: m.id, type: m.type, title: m.title, bg: m.bg, rating: m.rating, year: m.year }, function () { renderWizardResults(true, true); });
     }
   });
-  if (typeof i18nAdd === "function") i18nAdd({ "¿Qué ver hoy?": "What to watch today?", "Vistas": "Watched" });
+  if (typeof i18nAdd === "function") i18nAdd({ "¿Qué ver?": "What to watch?", "Ver en base a tus gustos": "Based on your taste", "Vistas": "Watched" });
 })();
 
 registerAction("wizard-random", runWizardRandom);

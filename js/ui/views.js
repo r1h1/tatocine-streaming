@@ -47,12 +47,12 @@
       if (v !== "list") { setHeroLoading(true); setTimeout(function () { setHeroLoading(false); }, 12000); }
       if (v === "list") {
         $heroSection.style.display = "none";
-        $rowsContainer.style.paddingTop = "110px";
+        document.body.classList.add("view-list");                          // el espaciado bajo la barra superior (con zona segura) lo da css/20-modales.css
         renderFavoritesView();
         return;
       }
       $heroSection.style.display = "flex";
-      $rowsContainer.style.paddingTop = "0px";
+      document.body.classList.remove("view-list");
       if (v === "home") loadHomeView();
       else if (v === "movies") {
         renderGenreFilters("movies");
@@ -378,6 +378,36 @@
         return fetchTMDB(path, query).then(function (d) { if (!d || !d.results || !d.results.length) return false; paint(d); return true; }).catch(function () { return false; });
       });
     }
+    /** Carga las filas de abajo de la portada solo cuando el final del contenido se acerca a la pantalla (IntersectionObserver; sin él, evento de scroll). */
+    var homeLazyIO = null, homeLazyScroll = null;
+    function lazyHomeRows(snapshot, tasks) {
+      var tail = document.getElementById("home-lazy-tail");
+      if (!tail) { tail = document.createElement("div"); tail.id = "home-lazy-tail"; tail.setAttribute("aria-hidden", "true"); tail.style.height = "1px"; $rowsContainer.insertAdjacentElement("afterend", tail); }
+      var queue = tasks.slice(), busy = false;
+      function valid() { return snapshot === catalogRequestId && currentView === "home"; }
+      function cleanup() {
+        if (homeLazyIO) { homeLazyIO.disconnect(); homeLazyIO = null; }
+        if (homeLazyScroll) { window.removeEventListener("scroll", homeLazyScroll); homeLazyScroll = null; }
+      }
+      function near() { return tail.getBoundingClientRect().top < window.innerHeight + 700; }
+      function check() {
+        if (!valid() || !queue.length) { cleanup(); return; }
+        if (busy || !near()) return;
+        busy = true;
+        Promise.resolve().then(queue.shift()).catch(function () { }).then(function () { busy = false; setTimeout(check, 200); });   // tras cargar una fila se vuelve a medir
+      }
+      cleanup();
+      if ("IntersectionObserver" in window) {
+        homeLazyIO = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) check(); }, { rootMargin: "0px 0px 700px 0px" });
+        homeLazyIO.observe(tail);
+      } else {
+        var wait = null;
+        homeLazyScroll = function () { if (!wait) wait = setTimeout(function () { wait = null; check(); }, 150); };
+        window.addEventListener("scroll", homeLazyScroll, { passive: true });
+      }
+      setTimeout(check, 50);
+    }
+
     function loadHomeView() {
       var snapshot = catalogRequestId;
       var upQ = "&region=" + (UI_EN ? "US" : "GT");
@@ -397,6 +427,7 @@
           $rowsContainer.innerHTML = "";
           var h = null;
           renderContinueRow();
+          renderBrandRow();                                       // orden: Continuar viendo → Plataformas y estudios → Hecho para ti (se inserta antes de la 1.ª fila del catálogo) → resto
           if (t.results && t.results.length) {
             var m = t.results.map(mapMovieResult);
             h = m[0];
@@ -407,7 +438,6 @@
           rowOrRetry("Próximos Estrenos", "/movie/upcoming", upQ, mapMovieResult, u);
           rowOrRetry("Películas Populares", "/movie/popular", "", mapMovieResult, p);
           rowOrRetry("Series Populares", "/tv/popular", "", mapTvResult, s);
-            renderBrandRow();
           if (h) setHero(h);
           heroTop10("home", snapshot);
           renderLoadMore(t.total_pages || 1);
@@ -416,37 +446,37 @@
           window.setTimeout(function () {
             if (snapshot === catalogRequestId && currentView === "home") loadPersonalizedHomeRow();
           }, 250);
-          window.setTimeout(function () {
-            IDLE(function () { if (snapshot === catalogRequestId && currentView === "home") loadTop10AndCollections(snapshot); });
-          }, 650);
-          window.setTimeout(function () {
-            if (snapshot !== catalogRequestId || currentView !== "home") return;
-            fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1")
-              .then(function (d) {
-                if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
-                var top = d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
-                renderRow("Películas mejor calificadas", top);
-              }).catch(function () {
-                if (snapshot !== catalogRequestId || currentView !== "home") return;
-                renderRowError("Películas mejor calificadas", function () {
-                  return fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Películas mejor calificadas", d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; }).catch(function () { return false; });
+          // Filas de abajo: solo se piden cuando el final del contenido se acerca a la pantalla (un scroll corto basta). Si el usuario se
+          // queda en la portada, no se hacen estas peticiones. Cada tarea comprueba la vista para no insertar resultados obsoletos.
+          lazyHomeRows(snapshot, [
+            function () { return loadTop10AndCollections(snapshot); },
+            function () {
+              return fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1")
+                .then(function (d) {
+                  if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
+                  var top = d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
+                  renderRow("Películas mejor calificadas", top);
+                }).catch(function () {
+                  if (snapshot !== catalogRequestId || currentView !== "home") return;
+                  renderRowError("Películas mejor calificadas", function () {
+                    return fetchTMDB("/discover/movie", "&sort_by=vote_average.desc&vote_count.gte=300&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Películas mejor calificadas", d.results.map(mapMovieResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; });
+                  });
                 });
-              });
-          }, 1250);
-          window.setTimeout(function () {
-            if (snapshot !== catalogRequestId || currentView !== "home") return;
-            fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1")
-              .then(function (d) {
-                if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
-                var top = d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
-                renderRow("Series mejor calificadas", top);
-              }).catch(function () {
-                if (snapshot !== catalogRequestId || currentView !== "home") return;
-                renderRowError("Series mejor calificadas", function () {
-                  return fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Series mejor calificadas", d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; }).catch(function () { return false; });
+            },
+            function () {
+              return fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1")
+                .then(function (d) {
+                  if (snapshot !== catalogRequestId || currentView !== "home" || !d.results || !d.results.length) return;
+                  var top = d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); });
+                  renderRow("Series mejor calificadas", top);
+                }).catch(function () {
+                  if (snapshot !== catalogRequestId || currentView !== "home") return;
+                  renderRowError("Series mejor calificadas", function () {
+                    return fetchTMDB("/discover/tv", "&sort_by=vote_average.desc&vote_count.gte=150&page=1").then(function (d) { if (!d || !d.results || !d.results.length) return false; renderRow("Series mejor calificadas", d.results.map(mapTvResult).sort(function (a, b) { return (b.rating || 0) - (a.rating || 0); })); return true; });
+                  });
                 });
-              });
-          }, 1750);
+            }
+          ]);
         })
         .catch(function () {
           if (snapshot !== catalogRequestId || currentView !== "home") return;

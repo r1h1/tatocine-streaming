@@ -6,7 +6,7 @@
    - API de TMDB: «stale-while-revalidate» como las plataformas grandes: si hay copia reciente (< 30 min) se usa tal cual; si es de hasta 6 h se muestra al instante
      y se actualiza en segundo plano; si es más vieja o no hay, red primero con la copia como respaldo sin conexión.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "v47";
+const VERSION = "5.6-14449f48";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
@@ -16,18 +16,29 @@ const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "js/c
 const MAX_API = 300;
 const API_MAX_AGE = 6 * 60 * 60 * 1000;
 
+/** Lista de archivos de la app: SHELL + los CSS/JS que enlaza index.html (se leen del propio HTML: no hay lista que mantener a mano). */
+function assetsFromHtml(html) {
+  const out = [], re = /(?:href|src)="((?:css|js)\/[^"]+)"/g;
+  let m;
+  while ((m = re.exec(html))) out.push(m[1]);
+  return out;
+}
+/** Guarda todos los archivos de la app en la caché versionada. index.html se pide UNA sola vez. `no-cache` = revalidar con el servidor: lo que la página ya descargó responde 304 (sin bajarlo otra vez) y lo que cambió se baja nuevo, así que nunca se guarda una copia vieja. */
+async function precacheShell(indexRes) {
+  const cache = await caches.open(SHELL_CACHE);
+  let html = "";
+  try {
+    const res = indexRes || await fetch("index.html", { cache: "no-cache" });
+    if (res && res.ok) { html = await res.clone().text(); await cache.put("index.html", res); }
+  } catch (e) { }
+  const list = SHELL.concat(assetsFromHtml(html)).filter((u, i, a) => u !== "index.html" && a.indexOf(u) === i);
+  await Promise.all(list.map((u) => fetch(u, { cache: "no-cache" }).then((r) => (r.ok ? cache.put(u, r) : null)).catch(() => null)));
+  return html;
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(SHELL_CACHE);
-    // Los CSS y JS se descubren leyendo index.html: no hay lista que mantener a mano.
-    let assets = [];
-    try {
-      const html = await (await fetch("index.html", { cache: "reload" })).text();
-      assets = [...html.matchAll(/(?:href|src)="((?:css|js)\/[^"]+)"/g)].map((m) => m[1]);
-    } catch (e) { }
-    await Promise.all(SHELL.concat(assets).map((u) => fetch(u, { cache: "reload" }).then((r) => (r.ok ? cache.put(u, r) : null)).catch(() => null)));
-    // La primera instalación se activa sola; una actualización espera el aviso «Actualizar» (mensaje SKIP_WAITING).
-  })());
+  // La primera instalación se activa sola; una actualización espera el aviso «Actualizar» (mensaje SKIP_WAITING).
+  event.waitUntil(precacheShell());
 });
 
 self.addEventListener("activate", (event) => {
@@ -55,6 +66,19 @@ function timeoutFetch(request, ms, preload) {
   });
 }
 
+/** Si index.html cambió y la VERSION no (alguien editó el HTML sin ejecutar tools/stamp.js), se refresca todo el shell y se avisa a la página. */
+async function healShell(indexRes) {
+  try {
+    const cache = await caches.open(SHELL_CACHE), old = await cache.match("index.html");
+    if (!old) { await cache.put("index.html", indexRes); return; }
+    const [a, b] = await Promise.all([old.clone().text(), indexRes.clone().text()]);
+    if (a === b) return;
+    await precacheShell(indexRes.clone());
+    const clients = await self.clients.matchAll({ type: "window" });
+    clients.forEach((c) => c.postMessage({ type: "SHELL_REFRESHED" }));
+  } catch (e) { }
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -64,7 +88,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith((async () => {
       try {
         const res = await timeoutFetch(req, 6000, event.preloadResponse);
-        if (res && res.ok) { const c = await caches.open(SHELL_CACHE); c.put("index.html", res.clone()); }
+        if (res && res.ok) { event.waitUntil(healShell(res.clone())); }
         if (res && res.status >= 500) { const e500 = await caches.match("500.html"); if (e500) return e500; }      // error del servidor: pantalla propia en vez de la del hosting
         return res;
       } catch (e) {
@@ -76,9 +100,17 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.origin === self.location.origin) {
-    // Código sin hash (despliegue desde la raíz): red primero para ver siempre la última versión, con la caché como respaldo sin conexión.
+    // CSS/JS: Cache First desde la caché VERSIONADA de este Service Worker (se llena entera al instalar). Cada despliegue cambia la VERSION
+    // (tools/stamp.js), así que no hay mezcla de versiones ni peticiones a la red en cada apertura. Si algo no estaba, red y se guarda.
     if (/\/(css|js)\//.test(url.pathname)) {
-      event.respondWith(timeoutFetch(req, 4000).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(SHELL_CACHE).then((c) => c.put(req, copy)); } return res; }).catch(() => caches.match(req)));
+      event.respondWith((async () => {
+        const cache = await caches.open(SHELL_CACHE);
+        const hit = await cache.match(req);
+        if (hit) return hit;
+        const res = await timeoutFetch(req, 8000);
+        if (res.ok) cache.put(req, res.clone());
+        return res;
+      })());
       return;
     }
     if (/\/(icons\/|assets\/|manifest\.webmanifest|offline\.html|config\.js)/.test(url.pathname)) {   // recursos estáticos (assets/ lleva hash en el nombre)

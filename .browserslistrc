@@ -1,7 +1,9 @@
-# Navegadores objetivo: de 2022 en adelante (sin transpilar: la app es JavaScript y CSS nativos)
-chrome >= 100
-edge >= 100
-firefox >= 100
-safari >= 15.4
-ios_saf >= 15.4
-android >= 100
+# Navegadores objetivo (sin transpilar: la app es JavaScript y CSS nativos).
+# Piso de compatibilidad: Chromium 68 (LG webOS 5 / 2020). Lo comprueba tests/compat.test.js (sintaxis y APIs), pero NO sustituye
+# una prueba en el televisor real: sin hardware, solo se puede afirmar que el código no usa nada posterior sin detección.
+chrome >= 68
+edge >= 79
+firefox >= 78
+safari >= 12
+ios_saf >= 12
+android >= 8

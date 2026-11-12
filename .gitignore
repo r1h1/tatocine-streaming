@@ -1,2 +1,5 @@
 .DS_Store
 Thumbs.db
+
+# ZIPs de producción generados por tools/package.js
+dist/

@@ -30,10 +30,11 @@ function findBrowser() {
   for (const p of ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/brave-browser"]) if (fs.existsSync(p)) return p;
   throw new Error("No encuentro un navegador. Define CHROME_PATH.");
 }
+const serverHits = {};
 function serve() {
   return new Promise((resolve) => {
     const srv = http.createServer((req, res) => {
-      let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
+      let p = decodeURIComponent(new URL(req.url, "http://x").pathname); serverHits[p] = (serverHits[p] || 0) + 1;
       if (p.endsWith("/")) p += "index.html";
       const file = path.join(ROOT, p);
       if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end("no"); }
@@ -49,6 +50,7 @@ async function main() {
   const browser = await chromium.launch({ executablePath: findBrowser(), args: ["--no-sandbox"] });
   async function fresh(opts) {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...opts });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(ctx);           // sin red: TMDB e imágenes simulados (ver mock-tmdb.js)
     await ctx.addInitScript(() => {
       try { localStorage.setItem("tatoDisclaimerAccepted", "true"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { }   // sin aviso legal ni recorrido: no tapan las pruebas
       window.__csp = [];
@@ -64,7 +66,7 @@ async function main() {
     await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
     await page.click('[data-profile-action="select"][data-profile-id="' + (pick || "main") + '"]');
-    await page.waitForFunction(() => document.body.classList.contains("app-ready") && !document.getElementById("tc-profile-overlay").classList.contains("open"), null, { timeout: 15000 });
+    await page.waitForFunction(() => { const o = document.getElementById("tc-profile-overlay"); return !!o && document.body.classList.contains("app-ready") && !o.classList.contains("open"); }, null, { timeout: 15000 });   // (cambiar a Invitado recarga la página: durante la recarga el selector no existe un instante)
   }
   async function test(name, fn) {
     const t0 = Date.now();
@@ -305,7 +307,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 31 s", true, 31000]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 8 s", false, 8000], ["con tráiler cada título dura 25,8 s (1,8 + 19 + 5)", true, 25800]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -344,11 +346,11 @@ async function main() {
     ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
-  await test("portada: sin botón de volumen, 1,8 s para verse, 31 s por título y menú «Mi cine»", async (page) => {
+  await test("portada: sin botón de volumen, 1,8 s para verse, 19 s de tráiler + 5 s de pausa y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
     await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
-    eq(r.dwell, 31000, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+    eq(r.dwell, 25800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 
   await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
@@ -456,6 +458,209 @@ async function main() {
     ok(cardMs < 12000, "la primera tarjeta tardó " + cardMs + " ms");
     ok(m.longMax < 600, "una tarea larga de " + m.longMax + " ms bloquea la página");
     ok(m.nodes < 6000, m.nodes + " nodos en el DOM");
+  });
+
+
+  // ---------- 5.6: modales, límites, ahorro de red, avatares, legal ----------
+  await test("«Info» en Decidir en pareja: la ficha queda por encima del diálogo y se puede cerrar (no se traba)", async (page) => {
+    await enter(page);
+    await page.evaluate(() => openCouplePicker()); await page.click('[data-cp="start"]');
+    for (let who = 0; who < 2; who++) {
+      for (const k of [0, 1]) { await page.fill("#cp-q", "matrix"); await page.waitForSelector(".cp-res", { timeout: 20000 }); await page.locator(".cp-res").nth(who === 0 ? k : k + 1).click(); }
+      await page.click('[data-cp="done"]'); if (who === 0) { await page.waitForSelector('[data-cp="go"]'); await page.click('[data-cp="go"]'); }
+    }
+    await page.waitForSelector("#cp-card", { timeout: 20000 });
+    await page.click('[data-cp="info"]');
+    await page.waitForSelector("#details-real-content", { state: "visible", timeout: 20000 });
+    const z = await page.evaluate(() => ({ d: +getComputedStyle(document.getElementById("details-modal")).zIndex, q: +getComputedStyle(document.getElementById("tc-qr-overlay")).zIndex }));
+    ok(z.d > z.q, "la ficha (z " + z.d + ") queda DETRÁS del diálogo de la pareja (z " + z.q + ")");
+    await page.click("#details-modal .details-close");
+    await page.waitForFunction(() => !document.getElementById("details-modal").classList.contains("open") && document.getElementById("tc-qr-overlay").inert === false, null, { timeout: 8000 });
+    await page.click('[data-cp="yes"]');                                                  // el diálogo vuelve a responder
+  });
+  await test("Selector de perfiles: abrirlo no hace ninguna búsqueda a TMDB (fondos desde el manifiesto)", async (page) => {
+    const searches = []; page.on("request", (r) => { if (/api\.themoviedb\.org\/3\/search/.test(r.url())) searches.push(r.url()); });
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(2500);
+    eq(searches.length, 0, "búsquedas al abrir el selector:");
+    ok(await page.evaluate(() => PROFILE_BACKDROP_MANIFEST.items.length >= 30), "el manifiesto de fondos no está completo");
+  });
+  await test("Inicio: sin hacer scroll solo carga lo de la primera pantalla y al bajar aparecen las demás filas", async (page) => {
+    let calls = 0; page.on("request", (r) => { if (/api\.themoviedb\.org/.test(r.url())) calls++; });
+    await enter(page); await page.waitForTimeout(4000);
+    const before = calls, titles = () => page.evaluate(() => [...document.querySelectorAll("#rows-container .row-title")].map((x) => x.textContent));
+    ok(!(await titles()).includes("Películas mejor calificadas"), "«Películas mejor calificadas» se cargó sin hacer scroll");
+    ok(before <= 18, "demasiadas llamadas antes de hacer scroll: " + before);   // 1.ª visita: incluye las miniaturas de plataformas visibles (después quedan guardadas)
+    for (let i = 0; i < 5; i++) { await page.mouse.wheel(0, 700); await page.waitForTimeout(1000); }
+    ok((await titles()).includes("Películas mejor calificadas"), "al bajar no aparecieron las filas de abajo");
+  });
+  await test("Top 10: el décimo título queda fijo, sin volver al primero ni hacer más llamadas", async (page) => {
+    await page.clock.install();
+    const calls = []; page.on("request", (r) => { if (/api\.themoviedb\.org/.test(r.url())) calls.push(r.url()); });
+    await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [] }) }));
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open"); await page.clock.runFor(1500);
+    await page.click('[data-profile-action="select"]'); await page.clock.runFor(4000);
+    const seen = []; let last = -1;
+    for (let k = 0; k < 110; k++) { await page.clock.runFor(1000); const i = await page.evaluate(() => currentHeroIndex); if (i !== last) { seen.push(i); last = i; } }
+    eq(JSON.stringify(seen), JSON.stringify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), "índices recorridos:");
+    const n = calls.length; await page.clock.runFor(120000);
+    eq(await page.evaluate(() => currentHeroIndex), 9, "volvió al primero tras el décimo:"); eq(calls.length, n, "llamadas a TMDB tras llegar al décimo:");
+  });
+  await test("Ajustes: Instalar TatoCine, Copiar tus datos (QR) y (JSON) van primero", async (page) => {
+    await enter(page); await page.evaluate(() => showSettings()); await page.waitForTimeout(400);
+    const labels = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option .label")].filter((e) => e.offsetParent).map((e) => e.textContent.trim()).slice(0, 3));
+    eq(JSON.stringify(labels), JSON.stringify(["Instalar TatoCine", "Copiar tus datos (QR)", "Copiar tus datos (JSON)"]), "primeras opciones:");
+  });
+  await test("Legal: hub con 4 opciones, sitios de terceros desde SERVERS y enlaces seguros", async (page) => {
+    await enter(page); await page.click('.nav-links [data-h="h8d"]'); await page.waitForSelector("#legal-modal.open");
+    eq(await page.locator("#legal-body .settings-option").count(), 4, "opciones del hub:");
+    await page.click('[data-act="legal-third"]');
+    const hosts = await page.evaluate(() => [...document.querySelectorAll("#legal-third li")].map((x) => x.textContent));
+    const servers = await page.evaluate(() => SERVERS.map((s) => new URL(s.url(1, "movie", 1, 1)).hostname));
+    for (const h of servers) ok(hosts.includes(h), "falta el sitio " + h + " en la lista de terceros");
+    ok(await page.evaluate(() => [...document.querySelectorAll("#legal-body a")].every((a) => /noopener/.test(a.rel) && /noreferrer/.test(a.rel))), "enlace externo sin noopener noreferrer");
+    ok(await page.locator("main .tc-legal-link").count() === 1 && await page.locator(".player-notice").count() === 1, "falta el pie legal o el aviso bajo el iframe");
+  });
+  await test("Límite de uso de adultos: 12 h → descanso de 2 h y 10 h seguidas → 3 h (compartido entre pestañas)", async (page, ctx) => {
+    await enter(page);
+    await page.evaluate(() => tcAdultLimit.force("day")); await page.waitForTimeout(6500);
+    const a = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), kind: tcAdultLimit.state().kind, left: tcAdultLimit.state().lockedUntil - Date.now(), txt: document.getElementById("tc-adult-lock-sub").textContent }));
+    ok(a.open && a.kind === "day" && a.left > 1.9 * 3600000 && a.left <= 2 * 3600000, "descanso diario incorrecto: " + JSON.stringify(a));
+    ok(/2 horas/.test(a.txt), "el texto no menciona 2 horas: " + a.txt);
+    const tab2 = await ctx.newPage(); await tab2.goto(url); await tab2.waitForTimeout(2500);
+    ok(await tab2.evaluate(() => document.getElementById("tc-adult-lock").classList.contains("open")), "la segunda pestaña no muestra el descanso");
+    await page.evaluate(() => { localStorage.removeItem("tatoAdultUsageV1"); tcAdultLimit.force("run"); }); await page.waitForTimeout(6500);
+    const b = await page.evaluate(() => ({ kind: tcAdultLimit.state().kind, left: tcAdultLimit.state().lockedUntil - Date.now() }));
+    ok(b.kind === "run" && b.left > 2.9 * 3600000 && b.left <= 3 * 3600000, "descanso por uso seguido incorrecto: " + JSON.stringify(b));
+  });
+  await test("Tu mes en películas: sale una sola vez por mes y perfil, con los datos del mes anterior", async (page, ctx) => {
+    await ctx.addInitScript(() => {
+      const prev = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15, 12).getTime();
+      const it = (id, t, secs, g) => ({ id, type: "movie", title: t, genreIds: g, secs, plays: 2, done: 1, lastPlayedAt: prev, bg: "/x.jpg", lang: "es" });
+      if (!localStorage.getItem("__s")) { localStorage.setItem("__s", "1"); const items = [it(603, "Matrix", 7800, [28, 878]), it(27205, "Origen", 6000, [28, 878])]; localStorage.setItem("tatoProfile_main_tatoLocalAnalyticsV1", JSON.stringify({ items })); localStorage.setItem("tatoLocalAnalyticsV1", JSON.stringify({ items })); }
+    });
+    await enter(page); await page.waitForTimeout(8500);
+    const r = await page.evaluate(() => ({ open: document.getElementById("tc-qr-overlay").classList.contains("open"), title: document.getElementById("tc-qr-title").textContent, mark: localStorage.getItem("tatoMonthlyWrappedShown_main"), share: !!document.querySelector('#tc-qr-overlay [data-w="share"]') }));
+    ok(r.open && r.title === "Tu mes en películas" && /^\d{4}-\d{2}$/.test(r.mark) && r.share, "el resumen mensual no apareció: " + JSON.stringify(r));
+    await page.evaluate(() => { closeQr(); monthlyWrappedCheck(); }); await page.waitForTimeout(700);
+    ok(!(await page.evaluate(() => document.getElementById("tc-qr-overlay").classList.contains("open"))), "volvió a salir el mismo mes");
+  });
+  await test("Zona segura de la PWA: con 47 px de barra de estado, la X del reproductor, la ficha y Ajustes quedan debajo", async (page) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const cdp = await page.context().newCDPSession(page); await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 47, bottom: 34, left: 0, right: 0 } });
+    await enter(page); await page.waitForTimeout(800);
+    for (const [name, open, sel, close] of [["Ajustes", () => showSettings(), "#settings-modal .modal-close", () => closeSettings()], ["ficha", () => openDetails(603, "movie"), "#details-modal .details-close", () => closeDetails()], ["reproductor", () => openPlayer(603, "movie", "Matrix"), "#player-modal .modal-close", () => closePlayer()]]) {
+      await page.evaluate(open); await page.waitForTimeout(900);
+      const r = await page.evaluate((sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return { top: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height) }; }, sel);
+      ok(r.top >= 47, "la X de " + name + " queda en la barra de estado (top " + r.top + ")"); ok(r.w >= 44 && r.h >= 44, "la X de " + name + " mide " + r.w + "×" + r.h);
+      await page.evaluate(close); await page.waitForTimeout(300);
+    }
+  });
+  await test("«Mi cine»: el primer botón queda por debajo de la barra superior (móvil con zona segura y escritorio)", async (page) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const cdp = await page.context().newCDPSession(page); await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 47, bottom: 34, left: 0, right: 0 } });
+    await enter(page); await page.evaluate(() => switchView("list")); await page.waitForTimeout(1000);
+    for (const [name, size] of [["móvil", { width: 390, height: 844 }], ["escritorio", { width: 1280, height: 800 }]]) {
+      await page.setViewportSize(size); await page.waitForTimeout(400);
+      const r = await page.evaluate(() => ({ nav: document.getElementById("top-bar").getBoundingClientRect().bottom, first: document.querySelector("#rows-container .fav-toolbar .genre-chip").getBoundingClientRect().top }));
+      ok(r.first >= r.nav, name + ": «Todos» (top " + Math.round(r.first) + ") queda bajo la barra (termina en " + Math.round(r.nav) + ")");
+    }
+  });
+  await test("Botones de las ventanas: todos miden 48 px (ajustes, ficha, asistente)", async (page) => {
+    await page.setViewportSize({ width: 390, height: 844 }); await enter(page);
+    const heights = async (sel) => page.evaluate((sel) => [...new Set([...document.querySelectorAll(sel + " button, " + sel + " .hero-btn, " + sel + " a.danger-btn")].filter((b) => b.offsetParent && b.getBoundingClientRect().height > 20 && !b.classList.contains("modal-close") && !b.classList.contains("details-close") && !b.classList.contains("tc-link-btn") && !b.classList.contains("tc-legal-link")).map((b) => Math.round(b.getBoundingClientRect().height)))], sel);
+    await page.evaluate(() => showSettings()); await page.waitForTimeout(500);
+    for (const h of await heights("#settings-modal")) ok(h >= 47 && h <= 50, "botón de Ajustes de " + h + " px");
+    await page.evaluate(() => closeSettings()); await page.evaluate(() => openWizard()); await page.waitForTimeout(500);
+    for (const h of await heights("#tc-wizard-overlay")) ok(h >= 47 && h <= 50, "botón del asistente de " + h + " px");
+  });
+  await test("«Ver en base a tus gustos»: una sola recomendación, grande, y la etiqueta «¿Qué ver?» es la misma en todos lados", async (page) => {
+    await page.setViewportSize({ width: 390, height: 844 }); await enter(page);
+    eq(await page.locator(".hero-wizard-label").first().innerText(), "¿Qué ver?", "etiqueta del inicio:");
+    await page.evaluate(() => openWizard()); await page.waitForTimeout(400);
+    eq(await page.locator("#tc-wizard-title").innerText(), "¿Qué ver?", "título del asistente:");
+    ok((await page.locator('[data-act="wizard-random"]').innerText()).includes("Ver en base a tus gustos"), "el botón no dice «Ver en base a tus gustos»");
+    await page.click('[data-act="wizard-random"]'); await page.waitForSelector('[data-wiz="play"]', { timeout: 25000 });
+    const r = await page.evaluate(() => { const e = document.querySelector("#tc-wizard-overlay .wiz-result").getBoundingClientRect(); return { w: e.width, h: e.height }; });
+    ok(r.h >= 380, "el resultado sigue pequeño: " + Math.round(r.h) + " px de alto");
+  });
+  await test("Avatares: se elige uno al editar el perfil, se guarda y se muestra en las tarjetas (los emojis antiguos se descartan)", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__s")) { localStorage.setItem("__s", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Yo", avatar: "🦊" }])); } } catch (e) { } });
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1500);
+    ok(!(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1")).some((p) => p.avatar))), "el emoji antiguo no se descartó");
+    await page.click('[data-profile-action="edit"]'); await page.click('.pf-av[data-av="a5"]'); await page.click("#tc-create-profile-btn"); await page.waitForTimeout(800);
+    eq(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1")).find((p) => p.id === "main").avatar), "a5", "avatar guardado:");
+    ok(await page.evaluate(() => !!document.querySelector(".tc-profile-card .tc-profile-card-avatar .tc-av")), "la tarjeta no muestra el avatar");
+    eq(await page.evaluate(() => TC_AVATARS.length), 10, "cantidad de avatares:");
+  });
+  await test("TMDB: 429 se reintenta, 404 no, y nunca hay más de 6 peticiones a la vez (la búsqueda pasa antes que las precargas)", async (page) => {
+    await enter(page); await page.waitForTimeout(1500);
+    let inflight = 0, maxIn = 0; const calls = {}, order = [];
+    await page.context().route("**/api.themoviedb.org/3/**", async (r) => {
+      const k = new URL(r.request().url()).pathname; calls[k] = (calls[k] || 0) + 1;
+      if (/zzz429/.test(k)) return r.fulfill({ status: calls[k] <= 2 ? 429 : 200, contentType: "application/json", body: JSON.stringify({ results: [] }) });
+      if (/zzz404/.test(k)) return r.fulfill({ status: 404, contentType: "application/json", body: "{}" });
+      inflight++; maxIn = Math.max(maxIn, inflight); order.push(k); await new Promise((x) => setTimeout(x, 100)); inflight--;
+      r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: [], id: 1 }) });
+    });
+    const out = await page.evaluate(async () => ({ a: await fetchTMDB("/zzz429").then(() => "ok", (e) => "falló " + e.status), b: await fetchTMDB("/zzz404").then(() => "ok", (e) => "falló " + e.status) }));
+    eq(out.a, "ok", "429 tras reintentos:"); eq(calls["/3/zzz429"], 3, "intentos del 429:"); eq(out.b, "falló 404", "404:"); eq(calls["/3/zzz404"], 1, "intentos del 404:");
+    order.length = 0; maxIn = 0;
+    await page.evaluate(() => { const arr = []; for (let i = 0; i < 12; i++) arr.push(fetchTMDB("/movie/" + (900 + i) + "/similar")); for (let i = 0; i < 8; i++) arr.push(fetchTMDB("/trending/movie/day", "&page=" + (i + 2))); arr.push(fetchTMDB("/search/multi", "&query=prioridad")); return Promise.all(arr); });
+    ok(maxIn <= 6, "hubo " + maxIn + " peticiones a la vez"); ok(order.findIndex((k) => /search/.test(k)) <= 7, "la búsqueda del usuario no se adelantó a las precargas");
+  });
+  await test("Service Worker: la segunda visita no pide ningún CSS/JS a la red (caché versionada) y conserva la caché de imágenes", async (page) => {
+    const netHits = () => Object.keys(serverHits).filter((k) => /^\/(css|js)\//.test(k));
+    await page.goto(url + "?sw=1", { waitUntil: "load" }); await page.waitForFunction(async () => { const r = await navigator.serviceWorker.getRegistration(); return !!(r && r.active); }, null, { timeout: 15000 }); await page.waitForTimeout(3000);
+    for (const k of Object.keys(serverHits)) delete serverHits[k]; await page.reload({ waitUntil: "load" }); await page.waitForTimeout(2500);
+    eq(netHits().length, 0, "CSS/JS pedidos a la red en la 2.ª visita: " + netHits().slice(0, 3).join(","));
+    ok(await page.evaluate(async () => (await caches.keys()).some((k) => k.startsWith("tatocine-img"))), "la caché de imágenes no existe tras recargar");
+  });
+
+
+  await test("Selector de perfiles: textos compactos y el perfil nuevo se llama «Mi perfil»", async (page) => {
+    await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1200);
+    eq(await page.locator("#tc-profile-title").innerText(), "Elige “Mi perfil”", "título:");
+    eq(await page.locator("#tc-profile-count").innerText(), "Puedes editar y crear perfiles. Son locales: solo viven en este dispositivo.", "subtítulo:");
+    eq(await page.locator("#tc-profile-overlay .tc-profile-note").count(), 1, "líneas de texto bajo el título:");
+    eq(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1"))[0].name), "Mi perfil", "nombre del perfil nuevo:");
+    eq(await page.locator(".tc-profile-card-name").first().innerText(), "Mi perfil", "nombre en la tarjeta:");
+  });
+  await test("Todas las pantallas y ventanas empiezan arriba (cambiar de vista, buscar, abrir ventanas y recargar)", async (page) => {
+    await enter(page); await page.waitForTimeout(1500);
+    await page.evaluate(() => window.scrollTo(0, 1500)); await page.waitForTimeout(300);
+    ok(await page.evaluate(() => window.scrollY) > 500, "no se pudo bajar la página para la prueba");
+    await page.evaluate(() => switchView("series")); await page.waitForTimeout(500);
+    eq(await page.evaluate(() => Math.round(window.scrollY)), 0, "scroll tras cambiar de vista:");
+    await page.evaluate(() => window.scrollTo(0, 1200)); await page.waitForTimeout(300);
+    await page.evaluate(() => performSearch("matrix")); await page.waitForTimeout(500);
+    eq(await page.evaluate(() => Math.round(window.scrollY)), 0, "scroll tras buscar:");
+    // ventanas: se deja el contenido a mitad, se cierra y al reabrir debe estar arriba
+    await page.evaluate(() => { showSettings(); });
+    await page.waitForTimeout(400); await page.evaluate(() => { document.querySelector("#settings-modal .settings-content").scrollTop = 600; document.querySelector("#settings-modal .modal-body").scrollTop = 600; document.querySelector("#settings-modal").scrollTop = 600; });
+    await page.evaluate(() => closeSettings()); await page.waitForTimeout(200); await page.evaluate(() => showSettings()); await page.waitForTimeout(400);
+    eq(await page.evaluate(() => document.querySelector("#settings-modal .settings-content").scrollTop + document.querySelector("#settings-modal .modal-body").scrollTop + document.querySelector("#settings-modal").scrollTop), 0, "scroll de Ajustes al reabrir:");
+    await page.evaluate(() => closeSettings());
+    // recargar estando abajo: empieza arriba
+    await page.evaluate(() => window.scrollTo(0, 1400)); await page.reload({ waitUntil: "domcontentloaded" }); await page.waitForFunction(() => document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await page.waitForTimeout(800);
+    eq(await page.evaluate(() => Math.round(window.scrollY)), 0, "scroll tras recargar:");
+  });
+  await test("Reproductor: el botón de pantalla completa es solo un icono (sin texto)", async (page) => {
+    await enter(page); await page.evaluate(() => openPlayer(603, "movie", "Matrix")); await page.waitForTimeout(600);
+    const r = await page.evaluate(() => { const b = document.getElementById("player-fullscreen-btn"); return { txt: b.innerText.trim(), aria: b.getAttribute("aria-label"), svg: !!b.querySelector("svg"), w: Math.round(b.getBoundingClientRect().width) }; });
+    eq(r.txt, "", "texto visible del botón:"); ok(r.svg && r.aria === "Pantalla completa" && r.w <= 56, "falta el icono, el aria-label o es demasiado ancho: " + JSON.stringify(r));
+  });
+  await test("Mi cine: botón «Compartir tu mes en películas» al principio, sin pasar por Estadísticas", async (page) => {
+    await enter(page); await page.evaluate(() => switchView("list")); await page.waitForSelector("#rows-container .fav-share .mi-mes", { timeout: 8000 });
+    const order = await page.evaluate(() => { const a = document.querySelector("#rows-container .fav-share").getBoundingClientRect().top, b = document.querySelector("#rows-container .fav-toolbar").getBoundingClientRect().top; return a < b; });
+    ok(order, "el botón no está por encima de la barra de listas");
+    await page.click("#rows-container .mi-mes"); await page.waitForSelector("#tc-qr-overlay.open", { timeout: 5000 });
+    eq(await page.locator("#tc-qr-title").innerText(), "Tu mes en películas", "ventana abierta:");
+  });
+  await test("Mi cine no ofrece «Compartir tu mes» al perfil Niño", async (page, ctx) => {
+    await ctx.addInitScript(() => { try { if (!localStorage.getItem("__k")) { localStorage.setItem("__k", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Mi perfil" }, { id: "kid1", name: "Peque", kind: "kid" }])); } } catch (e) { } });
+    await enter(page, "kid1"); await page.evaluate(() => { try { switchView("list"); } catch (e) { } }); await page.waitForTimeout(800);
+    eq(await page.locator(".fav-share").count(), 0, "botón visible para el niño:");
   });
 
   for (const w of [320, 390, 768, 1024, 1366, 1920]) {

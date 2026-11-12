@@ -18,7 +18,9 @@ if (document.documentElement.classList.contains("tc-picker-boot")) {
       var card = document.createElement("div"), btn = document.createElement("div"), av = document.createElement("span"), nm = document.createElement("span"), lb = document.createElement("span");
       card.className = "tc-profile-card tc-profile-card-editable tc-profile-early" + (isActive ? " active" : "");
       btn.className = "tc-profile-select-btn";
-      av.className = "tc-profile-card-avatar"; av.textContent = Array.from(name)[0] ? Array.from(name)[0].toLocaleUpperCase("es") : "U";
+      av.className = "tc-profile-card-avatar";
+      if (typeof avatarSvg === "function" && !guest && avatarSvg(p.avatar)) { av.classList.add("has-av"); av.innerHTML = avatarSvg(p.avatar); }       // svg propio (js/profiles/avatars.js), sin datos externos
+      else av.textContent = Array.from(name)[0] ? Array.from(name)[0].toLocaleUpperCase("es") : "U";
       nm.className = "tc-profile-card-name"; nm.textContent = name;
       lb.className = "tc-profile-active-label";
       lb.textContent = (isActive ? "Actual" : "Seleccionar") + (guest ? " · Sin historial" : "") + (p.kind === "kid" ? " · Niño" : "") + (p.lang === "en" && !guest ? " · ENG" : "") + (p.pin && p.pin.h ? " · PIN" : "");

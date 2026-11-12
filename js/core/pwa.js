@@ -15,12 +15,7 @@
       }
       if (location.protocol === "file:") fallbackManifest();
       else fetch("manifest.webmanifest", { method: "HEAD", cache: "no-store" }).then(function (r) { if (!r.ok) fallbackManifest(); }).catch(fallbackManifest);
-      // Limpia cachés de imágenes de versiones anteriores (ya no se usan).
-      try {
-        if (window.caches) window.caches.keys().then(function (names) {
-          names.forEach(function (n) { if (/^tatocine-img/.test(n)) window.caches.delete(n); });
-        });
-      } catch (e) { }
+      // La limpieza de cachés obsoletas la hace el Service Worker en «activate» (sw.js) y conserva la caché de imágenes activa.
       if (!("serviceWorker" in navigator)) return;
       // En desarrollo (localhost / 127.0.0.1) no se usa Service Worker: así siempre se ve el último código.
       // Para probarlo allí: abre la app una vez con ?sw=1 (y ?sw=0 para volver a desactivarlo).
@@ -58,6 +53,10 @@
             setInterval(function () { reg.update().catch(function () { }); }, 60 * 60 * 1000);                          // busca versiones nuevas cada hora
             document.addEventListener("visibilitychange", function () { if (!document.hidden) reg.update().catch(function () { }); });
           }).catch(function () { });
+        });
+        // El SW detectó que index.html cambió sin subir la versión y ya refrescó sus archivos: se ofrece recargar.
+        navigator.serviceWorker.addEventListener("message", function (e) {
+          if (e.data && e.data.type === "SHELL_REFRESHED") showToastAction(L("Hay una versión nueva de TatoCine", "A new version of TatoCine is available"), L("Actualizar", "Update"), function () { location.reload(); });
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
           if (refreshing || !wantReload) return;                                                                      // la primera instalación toma el control sin recargar
