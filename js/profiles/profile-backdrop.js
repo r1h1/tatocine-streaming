@@ -258,6 +258,7 @@
         profileBackdropIndex = normalizedIndex;
         profileBackdropNextIndex = (normalizedIndex + 1) % total;
         profileBackdropHasVisibleImage = true;
+        try { localStorage.setItem("tatoSplashBgV1", item.backdrop_path); } catch (e2) { }       // la pantalla de carga de la próxima vez empieza con esta misma imagen
         profileBackdropLoading = false;
 
         // Prepara el próximo fondo antes de que llegue el siguiente intervalo.
@@ -307,6 +308,10 @@
         .then(function (items) {
           profileBackdropItems = items;
           profileBackdropNextIndex = items.length ? Math.floor(Math.random() * items.length) : 0;
+          try {                                                                               // arranca con la imagen de la pantalla de carga: el paso de una a otra es continuo
+            var seedPath = localStorage.getItem("tatoSplashBgV1");
+            if (seedPath) for (var si = 0; si < items.length; si++) if (items[si] && items[si].backdrop_path === seedPath) { profileBackdropNextIndex = si; break; }
+          } catch (e3) { }
           profileBackdropFetchPending = false;
           if (profileBackdropItems.length) {
             console.info("TatoCine: fondos del selector listos en el orden solicitado (" + profileBackdropItems.length + "/" + PROFILE_BACKDROP_FEATURED.length + ").");

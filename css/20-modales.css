@@ -223,13 +223,6 @@ html.tc-welcome-boot .tc-profile-overlay { visibility: hidden; }          /* el 
 #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 auto; width: auto !important; padding: 0 20px; }
 #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 auto; width: auto; height: var(--btn-h); min-height: var(--btn-h); margin: 0; padding: 0 18px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 50px; white-space: nowrap; }
 #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn[hidden] { display: none; }
-@media (max-width: 359px) {
-  #tc-profile-create-overlay .pf-footer .tc-profile-create-actions { flex-direction: column-reverse !important; }
-  #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 var(--btn-h); width: 100% !important; }
-  #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { flex: 0 0 var(--btn-h); }
-  #tc-profile-create-overlay .pf-footer .pf-bar { flex-direction: column-reverse; align-items: stretch; }
-  #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 var(--btn-h); width: 100%; }
-}
 /* Hora de dormir: las dos horas ocupan lo que necesitan (antes se cortaban «09:00 PI» en móviles) */
 .tc-bedtime-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
 .tc-bedtime-row .tc-profile-input { min-width: 0; width: 100%; }
@@ -342,3 +335,13 @@ button, input, select, textarea { font-family: inherit; }
 
 /* Contraste: el botón «Mostrar recomendaciones» deshabilitado se sigue leyendo (≥ 4.5:1) */
 .tc-profile-create-btn:disabled, .tc-profile-create-dialog .tc-profile-create-btn:disabled { opacity: .72; }
+
+/* ---------- Formulario de perfil en móvil/tableta estrecha: «Guardar» a todo el ancho arriba; abajo Borrar y Cancelar ---------- */
+@media (max-width: 640px) {
+  #tc-profile-create-overlay .pf-footer .pf-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: stretch; max-width: none; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-create-actions { display: contents; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { grid-column: 1 / -1; grid-row: 1; width: 100%; max-width: none; flex: none; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { grid-column: 1; grid-row: 2; width: 100%; flex: none; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { grid-column: 1 / -1; grid-row: 2; width: 100% !important; flex: none; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn:not([hidden]) ~ .tc-profile-create-actions .tc-profile-cancel-btn { grid-column: 2; }
+}

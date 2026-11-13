@@ -11,18 +11,24 @@
   <style>
     html.tc-picker-boot body { background: #000; }
     html.tc-picker-boot body > *:not(#tc-profile-overlay):not(#tc-splash):not(script):not(style):not(link) { visibility: hidden !important; }
-    #tc-splash { position: fixed; inset: 0; z-index: 100200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #000 radial-gradient(ellipse at 50% 42%, #1c1c1c 0, #000 62%); color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; transition: opacity .4s ease, visibility .4s; }
+    #tc-splash { position: fixed; inset: 0; z-index: 100200; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; transition: opacity .7s ease, visibility .7s; }
     #tc-splash.out { opacity: 0; visibility: hidden; pointer-events: none; }
-    .tc-splash-logo { position: relative; width: 96px; height: 96px; border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 18px 50px rgba(0,0,0,.7); animation: tcSplashIn .6s cubic-bezier(.2,.8,.2,1) both; }
+    .tc-splash-bg { position: absolute; inset: 0; background-position: center 35%; background-size: cover; background-repeat: no-repeat; opacity: 0; transform: scale(1.015); transition: opacity 1.15s ease-in-out; }
+    .tc-splash-bg.on { opacity: 1; }
+    #tc-splash::before { content: ""; position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse at 50% 45%, rgba(255,255,255,.07) 0, rgba(0,0,0,0) 55%), linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.66) 48%, rgba(0,0,0,.78) 100%), linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.28) 48%, rgba(0,0,0,.86) 100%); }
+    .tc-splash-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .tc-splash-logo { position: relative; width: 104px; height: 104px; border-radius: 26px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.16), 0 0 70px rgba(255,255,255,.14), 0 22px 60px rgba(0,0,0,.75); animation: tcSplashLogo 1.1s cubic-bezier(.16,.84,.3,1) both; }
     .tc-splash-logo img { display: block; width: 100%; height: 100%; }
-    .tc-splash-logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.28) 50%, transparent 70%); transform: translateX(-120%); animation: tcSplashShine 1.8s ease-in-out .5s infinite; }
-    .tc-splash-name { font-size: 26px; font-weight: 800; letter-spacing: -.3px; animation: tcSplashIn .6s cubic-bezier(.2,.8,.2,1) .12s both; }
-    .tc-splash-bar { width: 132px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.16); overflow: hidden; animation: tcSplashIn .6s ease .2s both; }
+    .tc-splash-logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,.3) 50%, transparent 68%); transform: translateX(-130%); animation: tcSplashShine 1.7s ease-in-out .7s infinite; }
+    .tc-splash-name { color: #fff; -webkit-text-fill-color: #fff; font-size: 34px; font-weight: 800; letter-spacing: -.5px; line-height: 1.2; animation: tcSplashName 1.1s cubic-bezier(.16,.84,.3,1) .25s both; }
+    .tc-splash-bar { position: absolute; z-index: 2; left: 50%; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); width: 132px; margin-left: -66px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.18); overflow: hidden; animation: tcSplashFade .8s ease .5s both; }
     .tc-splash-bar i { display: block; width: 40%; height: 100%; border-radius: 3px; background: #fff; animation: tcSplashBar 1.2s ease-in-out infinite; }
-    @keyframes tcSplashIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
-    @keyframes tcSplashShine { to { transform: translateX(120%); } }
+    @keyframes tcSplashLogo { 0% { opacity: 0; transform: scale(.55); filter: blur(8px); } 60% { opacity: 1; filter: blur(0); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes tcSplashName { 0% { opacity: 0; letter-spacing: 10px; transform: translateY(8px); } 100% { opacity: 1; letter-spacing: -.5px; transform: none; } }
+    @keyframes tcSplashFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes tcSplashShine { to { transform: translateX(130%); } }
     @keyframes tcSplashBar { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
-    @media (prefers-reduced-motion: reduce) { .tc-splash-logo, .tc-splash-name, .tc-splash-bar, .tc-splash-logo::after, .tc-splash-bar i { animation: none; } .tc-splash-bar i { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .tc-splash-logo, .tc-splash-name, .tc-splash-bar, .tc-splash-logo::after, .tc-splash-bar i { animation: none; } .tc-splash-bar i { width: 100%; } .tc-splash-bg { transition: none; } }
   </style>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
   <title>TatoCine Streaming Gratis</title>
@@ -92,7 +98,7 @@
   <link rel="stylesheet" href="css/17-hero-actions.css?v=f8cc9a2f" />
   <link rel="stylesheet" href="css/18-lists-skeletons.css?v=31bc1894" />
   <link rel="stylesheet" href="css/19-responsive.css?v=509dfb1a" />
-  <link rel="stylesheet" href="css/20-modales.css?v=7384f468" />
+  <link rel="stylesheet" href="css/20-modales.css?v=5d16aef0" />
   <link rel="stylesheet" href="css/21-fluidez.css?v=26c3d841" />
   <script type="application/ld+json" id="site-structured-data">
 {
@@ -156,8 +162,8 @@
 </head>
 
 <body>
-  <div id="tc-splash" role="status" aria-label="Cargando TatoCine"><div class="tc-splash-logo"><img src="icons/icon-192.png" width="96" height="96" alt="" decoding="async" fetchpriority="high"></div><div class="tc-splash-name">TatoCine</div><div class="tc-splash-bar" aria-hidden="true"><i></i></div></div>
-  <script src="js/ui/splash.js?v=8bd2ab5b"></script>
+  <div id="tc-splash" role="status" aria-label="Cargando TatoCine"><div class="tc-splash-bg" id="tc-splash-bg"></div><div class="tc-splash-center"><div class="tc-splash-logo"><img src="icons/icon-192.png" width="104" height="104" alt="" decoding="async" fetchpriority="high"></div><div class="tc-splash-name">TatoCine</div></div><div class="tc-splash-bar" aria-hidden="true"><i></i></div></div>
+  <script src="js/ui/splash.js?v=56094254"></script>
   <div class="mobile-menu" id="mobile-menu">
     <button class="close-btn" data-h="h1">✕</button>
     <button class="nav-item active" data-view="home" data-adult-only data-h="h2">
@@ -1131,7 +1137,7 @@
   <script defer src="js/ui/command-palette.js?v=3e7e6fbd"></script>
   <script defer src="js/core/tmdb.js?v=a9bd7bc7"></script>
   <script defer src="js/data/profile-backdrops.js?v=3d962c01"></script>
-  <script defer src="js/profiles/profile-backdrop.js?v=c6b872b5"></script>
+  <script defer src="js/profiles/profile-backdrop.js?v=a633e8a9"></script>
   <script defer src="js/features/analytics.js?v=074c73a2"></script>
   <script defer src="js/core/utils.js?v=9e293ff2"></script>
   <script defer src="js/ui/skeletons.js?v=b92c41e7"></script>

@@ -734,10 +734,11 @@ async function main() {
       await page.setViewportSize({ width: w, height: 800 });
       await page.evaluate(() => { openProfileCreateModal(); });
       await page.evaluate(() => { const b = document.getElementById("tc-delete-profile-btn"); if (b) b.hidden = false; }); await page.waitForTimeout(250);
-      const r = await page.evaluate(() => [".tc-profile-delete-btn", ".tc-profile-cancel-btn", ".tc-profile-create-btn"].map((q) => { const b = document.querySelector("#tc-profile-create-overlay " + q).getBoundingClientRect(); return { t: Math.round(b.top), h: Math.round(b.height), l: Math.round(b.left), r: Math.round(b.right) }; }));
+      const r = await page.evaluate(() => [".tc-profile-delete-btn", ".tc-profile-cancel-btn", ".tc-profile-create-btn"].map((q) => { const b = document.querySelector("#tc-profile-create-overlay " + q).getBoundingClientRect(); return { t: Math.round(b.top), h: Math.round(b.height), l: Math.round(b.left), r: Math.round(b.right), w: Math.round(b.width) }; }));
       const tag = " @" + w + " " + JSON.stringify(r);
       ok(r.every((b) => b.h >= 44 && b.h <= 52 && b.l >= 0 && b.r <= w), "botones fuera de pantalla o con altura desigual" + tag);
-      if (w >= 360) ok(new Set(r.map((b) => b.t)).size === 1, "botones desfasados (no están en la misma fila)" + tag);
+      if (w > 640) ok(new Set(r.map((b) => b.t)).size === 1, "botones desfasados (no están en la misma fila)" + tag);
+      else ok(r[2].w >= w - 48 && r[2].t < r[0].t && r[0].t === r[1].t && r[0].l < r[1].l, "en móvil «Guardar» debe ocupar todo el ancho arriba, y Borrar + Cancelar abajo" + tag + JSON.stringify(r));
       await page.evaluate(() => { try { closeProfileCreateModal(); } catch (e) { document.getElementById("tc-profile-create-overlay").classList.remove("open"); } }); await page.waitForTimeout(200);
     }
     await page.setViewportSize({ width: 1280, height: 800 });
