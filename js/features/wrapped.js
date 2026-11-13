@@ -20,7 +20,7 @@ function wrapLabel(y, m) {
 function wrappedData(y, m) {
   var now = new Date(); if (y == null) { y = now.getFullYear(); m = now.getMonth(); }
   var start = new Date(y, m, 1).getTime(), end = new Date(y, m + 1, 1).getTime();
-  var items = countedItems(localAnalytics.items || []).filter(function (x) { var t = x.lastPlayedAt || 0; return t >= start && t < end; });   // solo títulos con 15 min o más (o terminados)
+  var items = countedItems(localAnalytics.items || []).filter(function (x) { var t = x.lastPlayedAt || 0; return t >= start && t < end; });   // solo títulos con 5 min o más (o terminados)
   var secs = items.reduce(function (s, x) { return s + (x.secs || 0); }, 0);
   var top = items.slice().sort(function (a, b) { return (b.secs || 0) - (a.secs || 0) || (b.plays || 0) - (a.plays || 0) || (b.done || 0) - (a.done || 0); }).slice(0, 3);
   // Géneros del MES: se calcula con la misma fórmula de gustos pero solo sobre los títulos del mes.
@@ -106,7 +106,7 @@ function openWrapped(y, m, opts) {
   var otherLabel = isCurrent ? L("Ver el mes anterior", "See last month") : L("Ver este mes", "See this month");
   function toggleHandler() { if (isCurrent) { var pm = wrapPrevMonth(); openWrapped(pm[0], pm[1]); } else openWrapped(); }
   if (!d.titles) {
-    qrBody().innerHTML = emptyStateHTML("none", d.label, L("Aún no hay actividad en este mes. Reproduce algunos títulos (15 min o más) y vuelve para ver tu resumen.", "No activity this month yet. Watch a few titles (15 min or more) and come back to see your summary."), "", "") +
+    qrBody().innerHTML = emptyStateHTML("none", d.label, L("Aún no hay actividad en este mes. Reproduce algunos títulos (5 min o más) y vuelve para ver tu resumen.", "No activity this month yet. Watch a few titles (5 min or more) and come back to see your summary."), "", "") +
       '<div class="tc-profile-create-actions"><button type="button" class="tc-profile-cancel-btn" data-w="toggle">' + otherLabel + "</button></div>";
     qrBody().querySelector('[data-w="toggle"]').onclick = toggleHandler;
     return;

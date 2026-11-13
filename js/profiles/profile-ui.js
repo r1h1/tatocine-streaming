@@ -60,10 +60,10 @@
       if (title) title.textContent = isEdit ? "Editar perfil" : "Agregar perfil";
       if (subtitle) { subtitle.textContent = ""; subtitle.hidden = true; }
       if (button) { var lbl = button.querySelector(".btn-label"); if (lbl) lbl.textContent = isEdit ? "Guardar" : "Crear"; button.disabled = false; }
-      if (input) { input.value = isEdit && profile ? profile.name : ""; input.disabled = false; }
+      if (input) { input.value = isEdit && profile ? profileDisplayName(profile) : ""; input.disabled = false; }
       profileFormRemovePin = false;
       setProfileFormKind(isEdit && profile ? profile.kind : "adult");
-      setProfileFormLang(isEdit && profile ? profile.lang : "es");
+      setProfileFormLang(isEdit && profile ? profile.lang : deviceLang());
       renderAvatarGrid();
       setProfileFormAvatar(isEdit && profile ? profile.avatar : "");
       var pinInput = document.getElementById("tc-new-profile-pin");
@@ -208,7 +208,7 @@
     /** «Elige “Mi perfil”» solo mientras exista ese perfil; si se le cambió el nombre, el título es «Elige un perfil». */
     function updateProfilePickerTitle() {
       var t = document.getElementById("tc-profile-title"); if (!t) return;
-      var hasDefault = localProfiles.some(function (p) { return !p.guest && p.name === "Mi perfil"; });
+      var hasDefault = localProfiles.some(function (p) { return !p.guest && (p.name === "Mi perfil" || p.name === "My profile"); });
       t.textContent = hasDefault ? L("Elige “Mi perfil”", "Choose “My profile”") : L("Elige un perfil", "Choose a profile");
     }
     function renderProfilesPanel() {

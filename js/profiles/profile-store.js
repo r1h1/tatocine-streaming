@@ -7,14 +7,21 @@
     const PROFILE_STORAGE_KEY = "tatoProfilesV1";
     const ACTIVE_PROFILE_STORAGE_KEY = "tatoActiveProfileV1";
     const PROFILE_SESSION_STORAGE_KEY = "tatoProfileSelectedForSessionV1";
+    /** Idioma del dispositivo: español si el primer idioma preferido es español; cualquier otro idioma → inglés. Se usa para los perfiles NUEVOS (y el Invitado). */
+    function deviceLang() {
+      try {
+        var list = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || navigator.userLanguage || "es"]);
+        return /^es\b|^es[-_]/i.test(String(list[0] || "es")) ? "es" : "en";
+      } catch (e) { return "es"; }
+    }
     function initializeLocalProfiles() {
       var stored = readLocalJSON(PROFILE_STORAGE_KEY, null);
       if (!Array.isArray(stored) || !stored.length) {
-        stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
+        stored = [{ id: "main", name: "Mi perfil", lang: deviceLang(), createdAt: Date.now() }];
         safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(stored));
       }
       stored = stored.filter(function (p) { return p && p.id && p.name; });
-      if (!stored.length) stored = [{ id: "main", name: "Mi perfil", createdAt: Date.now() }];
+      if (!stored.length) stored = [{ id: "main", name: "Mi perfil", lang: deviceLang(), createdAt: Date.now() }];
       // Avatares: se conservan solo los identificadores válidos («a1»…«a10»); los antiguos emojis se retiran sin borrar perfiles ni su actividad.
       stored.forEach(function (p) { if (Object.prototype.hasOwnProperty.call(p, "avatar") && !/^a(10|[1-9])$/.test(String(p.avatar))) delete p.avatar; });
       // Tipo de perfil (adulto/niño) y PIN opcional; los perfiles antiguos pasan a "adulto" sin PIN.
@@ -29,7 +36,7 @@
       guest.name = "Invitado";
       guest.kind = "adult";
       guest.guest = true;
-      guest.lang = "es";                                  // Invitado siempre en español
+      guest.lang = deviceLang();                          // Invitado: el idioma del dispositivo
       delete guest.pin;
       var others = stored.filter(function (p) { return p.id !== "guest"; }).slice(0, 5);   // 6 en total contando al Invitado
       stored = others.slice(0, 1).concat([guest], others.slice(1));
@@ -89,7 +96,13 @@
     function isGuestProfile() { var p = getActiveProfile(); return !!p && !!p.guest; }
     /** Solo un perfil adulto (no Niño ni Invitado) administra perfiles. */
     function canManageProfiles() { var p = getActiveProfile(); return !!p && p.kind !== "kid" && !p.guest; }
-    function profileDisplayName(p) { return p ? p.name : ""; }
+    /** Nombre mostrado: «Invitado» y el «Mi perfil» por defecto siguen el idioma de la app; un nombre que el usuario escribió se respeta tal cual. */
+    function profileDisplayName(p) {
+      if (!p) return "";
+      if (p.guest) return typeof L === "function" ? L("Invitado", "Guest") : p.name;
+      if ((p.name === "Mi perfil" || p.name === "My profile") && typeof L === "function") return L("Mi perfil", "My profile");
+      return p.name;
+    }
     function isKidProfile() { var p = getActiveProfile(); return !!p && p.kind === "kid"; }
     function adultProfileCount(excludeId) {
       return localProfiles.filter(function (p) { return p.id !== excludeId && p.kind !== "kid" && !p.guest; }).length;

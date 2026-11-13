@@ -49,11 +49,11 @@ async function main() {
   const { srv, url } = await serve();
   const browser = await chromium.launch({ executablePath: findBrowser(), args: ["--no-sandbox"] });
   async function fresh(opts) {
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...opts });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES", ...opts });
     if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(ctx);           // sin red: TMDB e imágenes simulados (ver mock-tmdb.js)
     await ctx.addInitScript(() => {
       try { localStorage.setItem("tatoDisclaimerAccepted", "true"); localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { }   // sin aviso legal ni recorrido: no tapan las pruebas
-      window.__csp = [];
+      window.__csp = []; if (typeof window.__TC_SPLASH_MS !== "number") window.__TC_SPLASH_MS = 0;   // el splash dura 3 s en producción; en las pruebas se omite salvo la suya
       document.addEventListener("securitypolicyviolation", (e) => window.__csp.push(e.violatedDirective + " " + String(e.blockedURI).slice(0, 60)));
     });
     const page = await ctx.newPage();
@@ -96,7 +96,7 @@ async function main() {
   await test("recargar (Ctrl+R) conserva el perfil elegido y no vuelve a pedirlo; una pestaña nueva sí", async (page, ctx) => {
     await enter(page);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
     eq(await page.evaluate(() => document.getElementById("tc-profile-overlay").classList.contains("open")), false, "el selector reapareció al recargar:");
     eq(await page.evaluate(() => document.documentElement.classList.contains("tc-picker-boot")), false, "la portada se ocultó al recargar:");
     const tab2 = await ctx.newPage();
@@ -178,7 +178,7 @@ async function main() {
   await test("perfil infantil: Ajustes solo con copia y QR, sin acceso a la web de adultos", async (page) => {
     await enter(page);
     await page.evaluate(() => { localProfiles.push({ id: "kidtest", name: "Peque", kind: "kid", lang: "es", createdAt: Date.now() }); saveLocalProfiles(); safeStorageSet(ACTIVE_PROFILE_STORAGE_KEY, "kidtest"); reloadApp(); });
-    await page.waitForFunction(() => document.body.classList.contains("kid-mode") && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    await page.waitForFunction(() => !!document.body && document.body.classList.contains("kid-mode") && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
     await page.evaluate(() => showSettings());
     const rows = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option")].filter((e) => getComputedStyle(e).display !== "none").map((e) => e.querySelector(".label").textContent.trim()));
     ok(rows.join("|").includes("Copiar tus datos") && rows.join("|").includes("QR") && rows.length <= 4, "filas visibles para el niño: " + rows.join(", "));
@@ -230,7 +230,7 @@ async function main() {
     });
     eq(r.v, 2); ok(r.it >= 150000 && r.good && !r.bad && r.wait, JSON.stringify(r));
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.classList.contains("app-ready"));
+    await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"));
     ok(await page.evaluate(() => pinGuardWait("pintest") > 25000), "el bloqueo no persistió");
   });
 
@@ -289,7 +289,7 @@ async function main() {
     await page.evaluate(() => openCouplePicker());
     await page.waitForSelector('[data-cp="resume"]');
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.classList.contains("app-ready"));
+    await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"));
     await page.waitForSelector(".toast-action", { timeout: 10000 });
     await page.click(".toast-action");
     await page.waitForSelector("#cp-card");
@@ -327,7 +327,7 @@ async function main() {
     await page.waitForFunction(() => heroMoviesList.length === 10, null, { timeout: 20000 });
   });
 
-  await test("2 títulos empezados activan «Hecho para ti»; «Vistas» lista lo terminado; estadísticas ignoran lo de menos de 15 min; existe «Maratón de películas»", async (page) => {
+  await test("2 títulos empezados activan «Hecho para ti»; «Vistas» lista lo terminado; estadísticas ignoran lo de menos de 5 min; existe «Maratón de películas»", async (page) => {
     await enter(page);
     await page.evaluate(() => {
       const now = Date.now();
@@ -339,7 +339,7 @@ async function main() {
       saveLocalAnalytics(); switchView("home");
     });
     await page.waitForFunction(() => [...document.querySelectorAll(".row-title")].some((e) => e.textContent === "Hecho para ti"), null, { timeout: 25000 });
-    eq(await page.evaluate(() => countedItems(localAnalytics.items).length), 2, "títulos que cuentan (≥ 15 min o terminados):");
+    eq(await page.evaluate(() => countedItems(localAnalytics.items).length), 2, "títulos que cuentan (≥ 5 min o terminados):");
     await page.evaluate(() => switchView("list"));
     await page.waitForSelector('[data-v="watched"]');
     ok(await page.locator('[data-act="start-marathon"]').isVisible(), "falta el botón Maratón de películas");
@@ -772,14 +772,19 @@ async function main() {
     }
   });
   await test("Splash de carga, título «Elige un perfil» si ya no existe «Mi perfil», descripción con «ver más», pie legal dentro del scroll (no fijo) y actor por encima de la ficha en Decidir en pareja", async (page) => {
-    await page.goto(url, { waitUntil: "commit" }); await page.waitForTimeout(350);
+    await page.addInitScript(() => { window.__TC_SPLASH_MS = 3000; });
+    const t0 = Date.now(); await page.goto(url, { waitUntil: "commit" }); await page.waitForTimeout(350);
     ok(await page.evaluate(() => !!document.getElementById("tc-splash") && getComputedStyle(document.getElementById("tc-splash")).opacity !== "0"), "no se ve el splash de carga");
-    await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1600);
-    ok(await page.evaluate(() => !document.getElementById("tc-splash")), "el splash no se retiró");
+    await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    await page.waitForTimeout(1500);
+    ok(await page.evaluate(() => { const e = document.getElementById("tc-splash"); return !!e && !e.classList.contains("out"); }), "el splash se retiró antes de los 3 s (a los " + (Date.now() - t0) + " ms)");
+    await page.waitForFunction(() => { const e = document.getElementById("tc-splash"); return !e || e.classList.contains("out"); }, null, { timeout: 5000 });
+    const dur = Date.now() - t0; ok(dur >= 2900 && dur <= 4600, "el splash debía durar 3 s: " + dur + " ms");
+    await page.waitForFunction(() => !document.getElementById("tc-splash"), null, { timeout: 4000 });
     eq(await page.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige “Mi perfil”", "título con el perfil por defecto:");
     await page.evaluate(() => { localProfiles[0].name = "Dani"; renderProfilesPanel(); });
     eq(await page.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige un perfil", "título tras renombrar:");
-    await page.click('[data-profile-action="select"]'); await page.waitForFunction(() => document.body.classList.contains("app-ready"));
+    await page.click('[data-profile-action="select"]'); await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"));
     await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 });
     await page.evaluate(() => setOverview("Una historia larga ".repeat(30)));
     const o = await page.evaluate(() => { const e = document.getElementById("details-overview"); return { n: e.textContent.length, btn: e.querySelector(".details-more").textContent }; });
@@ -792,6 +797,45 @@ async function main() {
     await page.evaluate(() => { closeActor(); document.body.classList.add("cp-details"); openDetails(603, "movie"); }); await page.waitForTimeout(600);
     const z = await page.evaluate(() => { openActor(6193); return [+getComputedStyle(document.getElementById("details-modal")).zIndex, +getComputedStyle(document.getElementById("actor-modal")).zIndex]; });
     ok(z[1] > z[0], "en Decidir en pareja el actor queda debajo de la ficha: " + JSON.stringify(z));
+  });
+  await test("Idioma del dispositivo: un navegador en inglés abre la app (perfil nuevo e Invitado) en inglés; en español, en español; los perfiles guardados no cambian", async (page, ctx) => {
+    for (const [loc, title, guest, langExp] of [["en-US", "Choose “My profile”", "Guest", "en"], ["es-MX", "Elige “Mi perfil”", "Invitado", "es"], ["fr-FR", "Choose “My profile”", "Guest", "en"]]) {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: loc });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoWelcomeSeenV1", "1"); } catch (e) { } });
+      const p2 = await c2.newPage(); await p2.goto(url, { waitUntil: "domcontentloaded" }); await p2.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p2.waitForTimeout(1200);
+      const r = await p2.evaluate(() => ({ title: document.getElementById("tc-profile-title").textContent, names: [...document.querySelectorAll(".tc-profile-card-name")].map((e) => e.textContent.trim()), lang: document.documentElement.lang, p: JSON.parse(localStorage.getItem("tatoProfilesV1")).map((x) => x.lang) }));
+      eq(r.title, title, "título del selector con " + loc + ":"); ok(r.names.includes(guest), "Invitado con " + loc + ": " + JSON.stringify(r.names)); eq(r.p[0], langExp, "idioma del perfil nuevo con " + loc + ":");
+      await c2.close();
+    }
+    const c3 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c3);
+    await c3.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoWelcomeSeenV1", "1"); if (!localStorage.getItem("__s")) { localStorage.setItem("__s", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Dani", kind: "adult", lang: "es", createdAt: 1 }])); localStorage.setItem("tatoActiveProfileV1", "main"); } } catch (e) { } });
+    const p3 = await c3.newPage(); await p3.goto(url, { waitUntil: "domcontentloaded" }); await p3.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p3.waitForTimeout(1000);
+    eq(await p3.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige un perfil", "un perfil guardado en español no cambia por el idioma del dispositivo:");
+    await c3.close();
+  });
+  await test("Inglés completo: con un perfil en inglés ningún texto de la app queda en español (selector, Ajustes, ficha, asistente, perfil, descargo, avisos)", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 900 }, locale: "en-US" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+    await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await p.waitForTimeout(600);
+    const SP = () => { const out = new Set(), sp = /[áéíóúñ¿¡]|\b(de|del|la|el|los|las|tu|tus|para|con|sin|una|que|por|al|más|todo|esta|puedes|hasta|desde|cuando|solo)\b/i, ignore = /Película \d+|Sinopsis de prueba|Serie|Tendencia|Actor \d|Prueba|Comedia|Misterio|Estrenada|Filmografía|Biografía de prueba|ESP · Español|Ciudad/;
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.textContent.trim(), e = n.parentElement; if (t.length < 2 || !e || /SCRIPT|STYLE/.test(e.tagName)) continue; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || r.width < 1 || r.height < 1) continue; if (sp.test(t) && !ignore.test(t)) out.add(t.slice(0, 80)); }
+      document.querySelectorAll("[title],[aria-label],[placeholder]").forEach((e) => { if (!e.offsetParent && getComputedStyle(e).position !== "fixed") return; ["title", "aria-label", "placeholder"].forEach((a) => { const t = e.getAttribute(a); if (t && sp.test(t) && !ignore.test(t)) out.add("@" + a + ": " + t.slice(0, 70)); }); }); return [...out]; };
+    const bad = {}; const run = async (name, fn) => { await p.evaluate(fn); await p.waitForTimeout(600); const r = await p.evaluate(SP); if (r.length) bad[name] = r; };
+    await run("inicio", () => 0); await run("ajustes", () => showSettings()); await p.evaluate(() => closeSettings());
+    await run("ficha", () => openDetails(603, "movie")); await p.evaluate(() => closeDetails(true));
+    await run("asistente", () => openWizard()); await p.evaluate(() => closeWizard());
+    await run("pareja", () => openCouplePicker()); await p.evaluate(() => closeQr());
+    await run("perfil-niño", () => { openProfileCreateModal(); setProfileFormKind("kid"); }); await p.evaluate(() => closeProfileCreateModal());
+    await run("descargo", () => showDisclaimer()); await p.evaluate(() => closeDisclaimer());
+    await run("reinicio", () => openOverlay("tc-reset-overlay")); await p.evaluate(() => closeOverlay("tc-reset-overlay"));
+    await run("aviso-descanso", () => tcAdultLimit.forceWarn()); await p.waitForTimeout(5800); const w2 = await p.evaluate(SP); if (w2.length) bad.avisoDescanso = w2; await p.evaluate(() => closeOverlay("tc-adult-warn"));
+    await run("bloqueo", () => tcAdultLimit.force()); await p.waitForTimeout(5800); const w3 = await p.evaluate(SP); if (w3.length) bad.bloqueo = w3;
+    ok(Object.keys(bad).length === 0, "textos sin traducir: " + JSON.stringify(bad));
+    await c2.close();
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);
@@ -865,7 +909,7 @@ async function main() {
     eq(await page.evaluate(() => document.querySelector("#settings-modal .settings-content").scrollTop + document.querySelector("#settings-modal .modal-body").scrollTop + document.querySelector("#settings-modal").scrollTop), 0, "scroll de Ajustes al reabrir:");
     await page.evaluate(() => closeSettings());
     // recargar estando abajo: empieza arriba
-    await page.evaluate(() => window.scrollTo(0, 1400)); await page.reload({ waitUntil: "domcontentloaded" }); await page.waitForFunction(() => document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await page.waitForTimeout(800);
+    await page.evaluate(() => window.scrollTo(0, 1400)); await page.reload({ waitUntil: "domcontentloaded" }); await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await page.waitForTimeout(800);
     eq(await page.evaluate(() => Math.round(window.scrollY)), 0, "scroll tras recargar:");
   });
   await test("Reproductor: el botón de pantalla completa es solo un icono (sin texto)", async (page) => {

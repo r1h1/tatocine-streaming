@@ -1,13 +1,15 @@
 /* TatoCine - Service Worker
    - Instalación: guarda TODO el shell (HTML, CSS, JS, iconos y página sin conexión) leyendo index.html: funciona sin internet desde la primera vez.
    - Actualización: una versión nueva espera a que pulses «Actualizar» (no cambia el código a mitad de una película).
-   - Shell (HTML, manifest, iconos): red primero con respaldo offline.
+   - index.html: se sirve DESDE LA CACHÉ del dispositivo al instante y se revalida en segundo plano como máximo cada 3 h (antes: una petición al servidor en cada apertura).
+     Los CSS/JS llevan ?v=<hash> y son inmutables, así que un cambio en el HTML se ve en la visita siguiente y las versiones nuevas del código llegan con el aviso «Actualizar».
+   - Resto del shell (manifest, iconos, offline): caché primero.
    - Imágenes de TMDB: caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 1200.
    - API de TMDB: caché AGRESIVA por tipo de dato (el trabajo lo hace el dispositivo, no el servidor). «Stale-while-revalidate»: con copia reciente se usa tal cual;
      con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
      conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-9fb5cba3";
+const VERSION = "5.6-8eb23422";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
@@ -31,12 +33,18 @@ function assetsFromHtml(html) {
   return out;
 }
 /** Guarda todos los archivos de la app en la caché versionada. index.html se pide UNA sola vez. `no-cache` = revalidar con el servidor: lo que la página ya descargó responde 304 (sin bajarlo otra vez) y lo que cambió se baja nuevo, así que nunca se guarda una copia vieja. */
+const NAV_RECHECK_MS = 3 * 3600 * 1000;
+/** Guarda index.html con la hora de la última revisión (sin cabeceras de compresión: el cuerpo ya viene descomprimido). */
+async function putIndex(cache, res) {
+  const h = new Headers(res.headers); h.delete("content-encoding"); h.delete("content-length"); h.set("x-tc-checked-at", String(Date.now()));
+  await cache.put("index.html", new Response(await res.clone().blob(), { status: 200, headers: h }));
+}
 async function precacheShell(indexRes) {
   const cache = await caches.open(SHELL_CACHE);
   let html = "";
   try {
     const res = indexRes || await fetch("index.html", { cache: "no-cache" });
-    if (res && res.ok) { html = await res.clone().text(); await cache.put("index.html", res); }
+    if (res && res.ok) { html = await res.clone().text(); await putIndex(cache, res); }
   } catch (e) { }
   const list = SHELL.concat(assetsFromHtml(html)).filter((u, i, a) => u !== "index.html" && a.indexOf(u) === i);
   await Promise.all(list.map((u) => fetch(u, { cache: "no-cache" }).then((r) => (r.ok ? cache.put(u, r) : null)).catch(() => null)));
@@ -54,7 +62,7 @@ self.addEventListener("activate", (event) => {
       const keep = [SHELL_CACHE, API_CACHE, IMG_CACHE];
       const names = await caches.keys();
       await Promise.all(names.filter((n) => n.startsWith("tatocine-") && !keep.includes(n)).map((n) => caches.delete(n)));
-      if (self.registration.navigationPreload) { try { await self.registration.navigationPreload.enable(); } catch (e) { } }
+      if (self.registration.navigationPreload) { try { await self.registration.navigationPreload.disable(); } catch (e) { } }   // sin precarga de navegación: era una petición extra por apertura
       await self.clients.claim();
     })()
   );
@@ -77,9 +85,9 @@ function timeoutFetch(request, ms, preload) {
 async function healShell(indexRes) {
   try {
     const cache = await caches.open(SHELL_CACHE), old = await cache.match("index.html");
-    if (!old) { await cache.put("index.html", indexRes); return; }
+    if (!old) { await putIndex(cache, indexRes); return; }
     const [a, b] = await Promise.all([old.clone().text(), indexRes.clone().text()]);
-    if (a === b) return;
+    if (a === b) { await putIndex(cache, indexRes.clone()); return; }          // igual: solo se anota que ya se revisó
     await precacheShell(indexRes.clone());
     const clients = await self.clients.matchAll({ type: "window" });
     clients.forEach((c) => c.postMessage({ type: "SHELL_REFRESHED" }));
@@ -92,7 +100,16 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
 
   if (req.mode === "navigate" && url.origin === self.location.origin) {
+    const isApp = /^\/(index\.html)?$/.test(url.pathname);
     event.respondWith((async () => {
+      if (isApp) {                                                                     // la app: desde la caché del dispositivo, revisión en segundo plano cada 3 h
+        const cache = await caches.open(SHELL_CACHE), hit = await cache.match("index.html");
+        if (hit) {
+          const age = Date.now() - Number(hit.headers.get("x-tc-checked-at") || 0);
+          if (age >= NAV_RECHECK_MS) event.waitUntil((async () => { try { const r = await fetch("index.html", { cache: "no-cache" }); if (r && r.ok) await healShell(r); } catch (e) { } })());
+          return hit;
+        }
+      }
       try {
         const res = await timeoutFetch(req, 6000, event.preloadResponse);
         if (res && res.ok) { event.waitUntil(healShell(res.clone())); }

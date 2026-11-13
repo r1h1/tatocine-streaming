@@ -345,3 +345,9 @@ button, input, select, textarea { font-family: inherit; }
   #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { grid-column: 1 / -1; grid-row: 2; width: 100% !important; flex: none; }
   #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn:not([hidden]) ~ .tc-profile-create-actions .tc-profile-cancel-btn { grid-column: 2; }
 }
+
+/* ---------- Crear / editar perfil: nunca se desplaza hacia los lados (como Ajustes y el selector) ---------- */
+#tc-profile-create-overlay { --pf-px: clamp(16px, 6vw, 96px); overflow-x: hidden; }
+#tc-profile-create-overlay .pf-dialog, #tc-profile-create-overlay .tc-profile-create-dialog { overflow-x: hidden !important; overscroll-behavior-x: none; touch-action: pan-y; box-sizing: border-box; max-width: 100%; }
+#tc-profile-create-overlay .pf-dialog { padding-left: max(var(--pf-px), var(--sal)); padding-right: max(var(--pf-px), var(--sar)); }
+#tc-profile-create-overlay .pf-footer { margin-left: calc(-1 * max(var(--pf-px), var(--sal))); margin-right: calc(-1 * max(var(--pf-px), var(--sar))); padding-left: max(var(--pf-px), var(--sal)); padding-right: max(var(--pf-px), var(--sar)); box-sizing: border-box; }

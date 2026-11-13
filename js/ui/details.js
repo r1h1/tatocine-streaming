@@ -351,7 +351,7 @@ function openDetails(id, type) {
                 );
               meta.push(
                 new Date(d.birthday).getFullYear() +
-                (age ? " (" + age + " años)" : ""),
+                (age ? " (" + age + L(" años)", " years old)") : ""),
               );
             }
             if (d.deathday)

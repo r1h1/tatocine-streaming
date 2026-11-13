@@ -21,7 +21,7 @@ const SECURITY = [
   ["X-Frame-Options", "SAMEORIGIN"], ["Strict-Transport-Security", "max-age=31536000; includeSubDomains"],
   ["Content-Security-Policy", CSP], ["Cross-Origin-Opener-Policy", "same-origin-allow-popups"]
 ];
-const NOCACHE = "no-cache", IMMUTABLE = "public, max-age=31536000, immutable", SHORT = "public, max-age=3600", WEEK = "public, max-age=604800";
+const NOCACHE = "no-cache", IMMUTABLE = "public, max-age=31536000, immutable", SHORT = "public, max-age=3600", WEEK = "public, max-age=2592000";
 // { p: ruta Netlify, v: ruta Vercel, h: cabeceras }
 const RULES = [
   { p: "/*", v: "/(.*)", h: SECURITY },
