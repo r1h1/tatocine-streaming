@@ -317,6 +317,7 @@
         "autoplay; fullscreen; picture-in-picture; encrypted-media",
       );
       f.setAttribute("referrerpolicy", "origin");
+      f.setAttribute("allowfullscreen", ""); f.allowFullscreen = true; f.setAttribute("webkitallowfullscreen", ""); f.style.border = "0";
       f.onload = function () {
         l.style.display = "none";
       };

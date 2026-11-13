@@ -508,10 +508,10 @@ async function main() {
     const n = calls.length; await page.clock.runFor(120000);
     eq(await page.evaluate(() => currentHeroIndex), 9, "volvió al primero tras el décimo:"); eq(calls.length, n, "llamadas a TMDB tras llegar al décimo:");
   });
-  await test("Ajustes: Instalar TatoCine, Copiar tus datos (QR) y (JSON) van primero", async (page) => {
+  await test("Ajustes: Tu tiempo de hoy arriba de todo y después Instalar TatoCine, Copiar tus datos (QR) y (JSON)", async (page) => {
     await enter(page); await page.evaluate(() => showSettings()); await page.waitForTimeout(400);
-    const labels = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option .label")].filter((e) => e.offsetParent).map((e) => e.textContent.trim()).slice(0, 3));
-    eq(JSON.stringify(labels), JSON.stringify(["Instalar TatoCine", "Copiar tus datos (QR)", "Copiar tus datos (JSON)"]), "primeras opciones:");
+    const labels = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option .label")].filter((e) => e.offsetParent).map((e) => e.textContent.trim()).slice(0, 4));
+    eq(JSON.stringify(labels), JSON.stringify(["Tu tiempo de hoy", "Instalar TatoCine", "Copiar tus datos (QR)", "Copiar tus datos (JSON)"]), "primeras opciones:");
   });
   await test("Legal: hub con 4 opciones, sitios de terceros desde SERVERS y enlaces seguros", async (page) => {
     await enter(page); await page.click('.nav-links [data-h="h8d"]'); await page.waitForSelector("#legal-modal.open");
@@ -523,19 +523,32 @@ async function main() {
     ok(await page.evaluate(() => [...document.querySelectorAll("#legal-body a")].every((a) => /noopener/.test(a.rel) && /noreferrer/.test(a.rel))), "enlace externo sin noopener noreferrer");
     ok(await page.locator("main .tc-legal-link").count() === 1 && await page.locator(".player-notice").count() === 1, "falta el pie legal o el aviso bajo el iframe");
   });
-  await test("Límite de uso de adultos: 10 h → descanso de 2 h → otras 10 h (compartido entre pestañas, guardado local) y Ajustes muestra cómo va", async (page, ctx) => {
+  await test("Límite de uso de adultos: contador diario arriba de Ajustes, aviso a 20 min, descanso de 1 h tras 5 h seguidas, límite de 10 h al día (compartido entre pestañas)", async (page, ctx) => {
     await enter(page); await page.evaluate(() => showSettings()); await page.waitForTimeout(300);
-    ok(/de 10 h de uso/.test(await page.locator("#adult-usage-label").innerText()), "Ajustes no muestra el avance de uso: " + await page.locator("#adult-usage-label").innerText());
+    const first = await page.evaluate(() => { const o = document.querySelector("#settings-modal .modal-body .settings-option"); return { id: o.id, label: o.querySelector(".label").textContent.trim() }; });
+    eq(first.label, "Tu tiempo de hoy", "la primera fila de Ajustes debe ser el contador:");
+    ok(/de 10 h · descanso de 1 h tras 5 h seguidas/.test(await page.locator("#adult-usage-label").innerText()), "Ajustes no muestra el avance de uso: " + await page.locator("#adult-usage-label").innerText());
     await page.evaluate(() => closeSettings());
+    await page.evaluate(() => tcAdultLimit.forceWarn()); await page.waitForTimeout(6500);
+    const w = await page.evaluate(() => ({ open: document.getElementById("tc-adult-warn").classList.contains("open"), t: document.getElementById("tc-adult-warn-title").textContent }));
+    ok(w.open && /minutos/.test(w.t), "debía avisar con una ventana 20 min antes del descanso: " + JSON.stringify(w));
+    await page.click('#tc-adult-warn [data-act="adult-warn-ok"]'); await page.waitForTimeout(200);
+    ok(!(await page.evaluate(() => document.getElementById("tc-adult-warn").classList.contains("open"))), "la ventana de aviso no se cerró");
     await page.evaluate(() => tcAdultLimit.force()); await page.waitForTimeout(6500);
-    const a = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), left: tcAdultLimit.state().lockedUntil - Date.now(), txt: document.getElementById("tc-adult-lock-sub").textContent }));
-    ok(a.open && a.left > 1.9 * 3600000 && a.left <= 2 * 3600000, "el descanso debía ser de 2 h: " + JSON.stringify(a));
-    ok(/10 horas/.test(a.txt) && /2 horas/.test(a.txt), "el texto no menciona 10 y 2 horas: " + a.txt);
+    const a = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), left: tcAdultLimit.state().lockedUntil - Date.now(), kind: tcAdultLimit.state().lockKind, txt: document.getElementById("tc-adult-lock-sub").textContent }));
+    ok(a.open && a.kind === "rest" && a.left > 0.9 * 3600000 && a.left <= 3600000, "el descanso debía ser de 1 h: " + JSON.stringify(a));
+    ok(/5 horas/.test(a.txt) && /1 hora/.test(a.txt), "el texto no menciona 5 horas y 1 hora: " + a.txt);
     const tab2 = await ctx.newPage(); await tab2.goto(url); await tab2.waitForTimeout(2500);
     ok(await tab2.evaluate(() => document.getElementById("tc-adult-lock").classList.contains("open")), "la segunda pestaña no muestra el descanso");
     await page.evaluate(() => { const s = tcAdultLimit.state(); s.lockedUntil = Date.now() - 1000; localStorage.setItem("tatoAdultUsageV2", JSON.stringify(s)); }); await page.waitForTimeout(6000);   // termina el descanso
-    const b = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), secs: tcAdultLimit.usage().secs, locked: tcAdultLimit.state().lockedUntil }));
-    ok(!b.open && b.locked === 0 && b.secs < 60, "tras el descanso debía empezar otro ciclo de 10 h desde cero: " + JSON.stringify(b));
+    const b = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), streak: tcAdultLimit.usage().streak, locked: tcAdultLimit.state().lockedUntil, secs: tcAdultLimit.usage().secs }));
+    ok(!b.open && b.locked === 0 && b.streak < 60 && b.secs >= 4.9 * 3600, "tras el descanso la racha vuelve a cero pero el total del día se conserva: " + JSON.stringify(b));
+    await page.evaluate(() => tcAdultLimit.forceDay()); await page.waitForTimeout(6500);
+    const d = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), kind: tcAdultLimit.state().lockKind, left: tcAdultLimit.state().lockedUntil - Date.now() }));
+    ok(d.open && d.kind === "day" && d.left > 0 && d.left <= 24 * 3600000, "al llegar a 10 h debía bloquear hasta la medianoche: " + JSON.stringify(d));
+    await page.evaluate(() => { const s = tcAdultLimit.state(); s.day = "2000-1-1"; localStorage.setItem("tatoAdultUsageV2", JSON.stringify(s)); }); await page.waitForTimeout(6000);   // día nuevo
+    const n = await page.evaluate(() => ({ open: document.getElementById("tc-adult-lock").classList.contains("open"), secs: tcAdultLimit.usage().secs }));
+    ok(!n.open && n.secs < 60, "con un día nuevo el contador debía volver a cero: " + JSON.stringify(n));
   });
   await test("Límite de uso: el avance se acumula con la app visible y se GUARDA cada 30 min (no antes), no cuenta con la app oculta y se guarda al ocultarla", async (page) => {
     await page.clock.install();

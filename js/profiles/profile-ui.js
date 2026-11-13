@@ -73,7 +73,7 @@
       if (removeBtn) removeBtn.hidden = !hasPin;
       var delBtn = document.getElementById("tc-delete-profile-btn");
       if (delBtn) {
-        var canDelete = isEdit && profile && localProfiles.length > 1 && (profile.kind === "kid" || adultProfileCount(profile.id) > 0);
+        var canDelete = isEdit && profile && !profile.guest;
         delBtn.hidden = !canDelete;
       }
     }

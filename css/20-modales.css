@@ -221,13 +221,14 @@ html.tc-welcome-boot .tc-profile-overlay { visibility: hidden; }          /* el 
 #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn, #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { height: var(--btn-h); min-height: var(--btn-h); margin: 0; box-sizing: border-box; }
 #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { flex: 1 1 0; min-width: 0; max-width: none; width: auto; }
 #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 auto; width: auto !important; padding: 0 20px; }
-#tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 var(--btn-h); width: var(--btn-h); height: var(--btn-h); min-height: var(--btn-h); margin: 0; padding: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+#tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 auto; width: auto; height: var(--btn-h); min-height: var(--btn-h); margin: 0; padding: 0 18px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 50px; white-space: nowrap; }
 #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn[hidden] { display: none; }
 @media (max-width: 359px) {
   #tc-profile-create-overlay .pf-footer .tc-profile-create-actions { flex-direction: column-reverse !important; }
   #tc-profile-create-overlay .pf-footer .tc-profile-cancel-btn { flex: 0 0 var(--btn-h); width: 100% !important; }
   #tc-profile-create-overlay .pf-footer .tc-profile-create-btn { flex: 0 0 var(--btn-h); }
-  #tc-profile-create-overlay .pf-footer .pf-bar { align-items: flex-end; }
+  #tc-profile-create-overlay .pf-footer .pf-bar { flex-direction: column-reverse; align-items: stretch; }
+  #tc-profile-create-overlay .pf-footer .tc-profile-delete-btn { flex: 0 0 var(--btn-h); width: 100%; }
 }
 /* Hora de dormir: las dos horas ocupan lo que necesitan (antes se cortaban «09:00 PI» en móviles) */
 .tc-bedtime-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
@@ -270,3 +271,10 @@ html.fold-v .tc-profile-create-dialog { max-height: env(viewport-segment-height 
 .tc-welcome .tw-body { display: flex; flex-direction: column; }
 .tw-slide[data-i="0"].on { margin: auto; text-align: center; }
 .tw-slide[data-i="0"] .tw-logo { margin: 0 auto 20px; }
+
+/* Ficha: la imagen ocupa como mucho la mitad de la pantalla */
+#details-modal .details-backdrop { aspect-ratio: auto !important; height: 50vh !important; max-height: 50vh !important; min-height: 160px; }
+@supports (height: 1dvh) { #details-modal .details-backdrop { height: 50dvh !important; max-height: 50dvh !important; } }
+/* Reproductor: aviso plano, sin tarjeta */
+.player-notice { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 10px max(16px, var(--sal)) calc(12px + var(--sab)) max(16px, var(--sar)) !important; text-align: center; }
+#tc-adult-warn { z-index: 100040; }

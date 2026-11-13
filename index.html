@@ -80,7 +80,7 @@
   <link rel="stylesheet" href="css/17-hero-actions.css?v=f8cc9a2f" />
   <link rel="stylesheet" href="css/18-lists-skeletons.css?v=31bc1894" />
   <link rel="stylesheet" href="css/19-responsive.css?v=531e8e1e" />
-  <link rel="stylesheet" href="css/20-modales.css?v=71b5b4cd" />
+  <link rel="stylesheet" href="css/20-modales.css?v=5ccc7609" />
   <link rel="stylesheet" href="css/21-fluidez.css?v=26c3d841" />
   <script type="application/ld+json" id="site-structured-data">
 {
@@ -490,6 +490,12 @@
         <button class="modal-close" data-h="h32">✕</button>
       </div>
       <div class="modal-body" style="padding: 0">
+        <div class="settings-option" data-adult-only id="usage-today">
+          <div>
+            <div class="label">Tu tiempo de hoy</div>
+            <div class="sub-label" id="adult-usage-label">0 min de 10 h · descanso de 1 h tras 5 h seguidas</div>
+          </div>
+        </div>
         <div class="settings-option" data-adult-only id="install-option" hidden>
           <div>
             <div class="label">Instalar TatoCine</div>
@@ -588,11 +594,6 @@
             <button class="danger-btn" type="button" data-act="diag-download">Descargar</button>
           </div>
         </div>
-        <div class="settings-option" data-adult-only>
-          <div>
-            <div class="label">Tiempo de uso</div>
-            <div class="sub-label" id="adult-usage-label">Al llegar a 10 h de uso hay un descanso de 2 h.</div>
-          </div>
         </div>
         <div class="settings-option" data-adult-only>
           <div>
@@ -772,7 +773,7 @@
       </div>
       <div class="pf-footer"><div class="pf-bar">
       <button class="tc-profile-delete-btn" id="tc-delete-profile-btn" type="button"
-        data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg></button>
+        data-h="h59" title="Eliminar perfil" aria-label="Eliminar perfil" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5"/></svg><span>Borrar</span></button>
       <div class="tc-profile-create-actions">
         <button class="tc-profile-cancel-btn" type="button" data-h="h51"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cancelar</span></button>
         <button class="tc-profile-create-btn" id="tc-create-profile-btn" type="button"
@@ -846,13 +847,24 @@
     </section>
   </div>
 
-  <!-- Descanso obligatorio de los perfiles de adulto (10 h de uso → 2 h de descanso, por dispositivo) -->
+  <!-- Descanso obligatorio de los perfiles de adulto (5 h seguidas → 1 h de descanso; 10 h al día, por dispositivo) -->
   <div class="tc-kid-lock" id="tc-adult-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-adult-lock-title">
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-adult-lock-title">Hora de descansar</h3>
       <p class="tc-profile-create-subtitle" id="tc-adult-lock-sub"></p>
       <div class="tc-kid-lock-time" id="tc-adult-lock-time" aria-live="polite">00:00</div>
       <button class="tc-profile-create-btn" type="button" data-h="h18">Cambiar de perfil</button>
+    </section>
+  </div>
+
+  <!-- Aviso: faltan 20 min para el descanso -->
+  <div class="tc-profile-create-overlay" id="tc-adult-warn" role="alertdialog" aria-modal="true" aria-labelledby="tc-adult-warn-title" aria-hidden="true">
+    <section class="tc-profile-create-dialog">
+      <h3 id="tc-adult-warn-title">Descanso en 20 minutos</h3>
+      <p class="tc-profile-create-subtitle" id="tc-adult-warn-sub"></p>
+      <div class="tc-profile-create-actions">
+        <button class="tc-profile-create-btn" type="button" data-act="adult-warn-ok">Entendido</button>
+      </div>
     </section>
   </div>
 
@@ -1088,7 +1100,7 @@
 
 
     <script defer src="config.js"></script>
-  <script defer src="js/core/config.js?v=6f1cc99f"></script>
+  <script defer src="js/core/config.js?v=5a079cf6"></script>
   <script defer src="js/core/storage.js?v=ad784e87"></script>
   <script defer src="js/core/extend.js?v=6cfcf5d1"></script>
   <script defer src="js/core/actions.js?v=7d8d4bcc"></script>
@@ -1098,7 +1110,7 @@
   <script defer src="js/core/errors.js?v=302fb3d7"></script>
   <script defer src="js/core/input-guard.js?v=35f2f82b"></script>
   <script defer src="js/profiles/profile-store.js?v=9a0bb1ea"></script>
-  <script defer src="js/profiles/profile-ui.js?v=6a3bfd20"></script>
+  <script defer src="js/profiles/profile-ui.js?v=451c8c9e"></script>
   <script defer src="js/profiles/pin-strong.js?v=2762f95c"></script>
   <script defer src="js/core/state.js?v=16580616"></script>
   <script defer src="js/core/ui-utils.js?v=ba78508e"></script>
@@ -1121,7 +1133,7 @@
   <script defer src="js/features/search.js?v=948de9ee"></script>
   <script defer src="js/ui/views.js?v=8f7127df"></script>
   <script defer src="js/ui/settings.js?v=f3730fae"></script>
-  <script defer src="js/player/player.js?v=46fa18dd"></script>
+  <script defer src="js/player/player.js?v=23e3f9b9"></script>
   <script defer src="js/core/events.js?v=1541830a"></script>
   <script defer src="js/ui/keyboard.js?v=4ccc7320"></script>
   <script defer src="js/features/kids.js?v=7bde180d"></script>
@@ -1152,7 +1164,7 @@
   <script defer src="js/features/backup.js?v=1de9889c"></script>
   <script defer src="js/features/qr-transfer.js?v=b427eadb"></script>
   <script defer src="js/features/parental.js?v=2bf5cf31"></script>
-  <script defer src="js/features/adult-limit.js?v=028105ba"></script>
+  <script defer src="js/features/adult-limit.js?v=1a4bc7b5"></script>
   <script defer src="js/features/watch-later.js?v=198c8fc6"></script>
   <script defer src="js/features/calendar.js?v=6ac3cb5c"></script>
   <script defer src="js/features/release-alerts.js?v=e0add2ac"></script>
@@ -1161,7 +1173,7 @@
   <script defer src="js/features/marathon.js?v=e578025f"></script>
   <script defer src="js/ui/scroll-lock.js?v=096cf86f"></script>
   <script defer src="js/features/details-sagas.js?v=60b13281"></script>
-  <script defer src="js/features/legal-hub.js?v=2b940532"></script>
+  <script defer src="js/features/legal-hub.js?v=4b84104d"></script>
   <script defer src="js/ui/welcome.js?v=f38add2e"></script>
   <script defer src="js/ui/legal-gate.js?v=efc26162"></script>
   <script defer src="js/features/reset.js?v=4df5738f"></script>
