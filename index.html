@@ -79,8 +79,8 @@
   <link rel="stylesheet" href="css/16-accessibility.css?v=9145d554" />
   <link rel="stylesheet" href="css/17-hero-actions.css?v=f8cc9a2f" />
   <link rel="stylesheet" href="css/18-lists-skeletons.css?v=31bc1894" />
-  <link rel="stylesheet" href="css/19-responsive.css?v=531e8e1e" />
-  <link rel="stylesheet" href="css/20-modales.css?v=5ccc7609" />
+  <link rel="stylesheet" href="css/19-responsive.css?v=509dfb1a" />
+  <link rel="stylesheet" href="css/20-modales.css?v=2e5f632e" />
   <link rel="stylesheet" href="css/21-fluidez.css?v=26c3d841" />
   <script type="application/ld+json" id="site-structured-data">
 {
@@ -493,7 +493,7 @@
         <div class="settings-option" data-adult-only id="usage-today">
           <div>
             <div class="label">Tu tiempo de hoy</div>
-            <div class="sub-label" id="adult-usage-label">0 min de 10 h · descanso de 1 h tras 5 h seguidas</div>
+            <div class="sub-label" id="adult-usage-label">0 min de 10 h · descanso de 2 h al superar las 10 h de uso</div>
           </div>
         </div>
         <div class="settings-option" data-adult-only id="install-option" hidden>
@@ -594,7 +594,6 @@
             <button class="danger-btn" type="button" data-act="diag-download">Descargar</button>
           </div>
         </div>
-        </div>
         <div class="settings-option" data-adult-only>
           <div>
             <div class="label">Restablecer a cero</div>
@@ -654,8 +653,9 @@
       </div>
       <div class="modal-body tw-body">
         <section class="tw-slide on" data-i="0">
-          <span class="tw-logo skel" aria-hidden="true"><img src="icons/icon-192.png" width="112" height="112" alt="" decoding="async" fetchpriority="high"></span>
+          <span class="tw-logo skel" aria-hidden="true"><img src="icons/icon-192.png" width="72" height="72" alt="" decoding="async" fetchpriority="high"></span>
         <h2 id="tc-welcome-title">Bienvenido a TatoCine</h2>
+        <p>Gracias por confiar en TatoCine, te invitamos a aprender a usar el aplicativo dando Siguiente para terminar de configurar.</p>
         </section>
         <section class="tw-slide" data-i="1">
           <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></span>
@@ -847,7 +847,7 @@
     </section>
   </div>
 
-  <!-- Descanso obligatorio de los perfiles de adulto (5 h seguidas → 1 h de descanso; 10 h al día, por dispositivo) -->
+  <!-- Descanso obligatorio de los perfiles de adulto (10 h de uso → 2 h de descanso, por dispositivo) -->
   <div class="tc-kid-lock" id="tc-adult-lock" role="alertdialog" aria-modal="true" aria-labelledby="tc-adult-lock-title">
     <section class="tc-profile-create-dialog tc-kid-lock-card">
       <h3 id="tc-adult-lock-title">Hora de descansar</h3>
@@ -1128,7 +1128,7 @@
   <script defer src="js/ui/cards.js?v=b2d3a26c"></script>
   <script defer src="js/ui/hero.js?v=3747afe6"></script>
   <script defer src="js/core/seo.js?v=f9d19c94"></script>
-  <script defer src="js/ui/details.js?v=f2c98d26"></script>
+  <script defer src="js/ui/details.js?v=aad30e0f"></script>
   <script defer src="js/ui/filters.js?v=9d82f692"></script>
   <script defer src="js/features/search.js?v=948de9ee"></script>
   <script defer src="js/ui/views.js?v=8f7127df"></script>
@@ -1164,7 +1164,7 @@
   <script defer src="js/features/backup.js?v=1de9889c"></script>
   <script defer src="js/features/qr-transfer.js?v=b427eadb"></script>
   <script defer src="js/features/parental.js?v=2bf5cf31"></script>
-  <script defer src="js/features/adult-limit.js?v=1a4bc7b5"></script>
+  <script defer src="js/features/adult-limit.js?v=5c22cf8e"></script>
   <script defer src="js/features/watch-later.js?v=198c8fc6"></script>
   <script defer src="js/features/calendar.js?v=6ac3cb5c"></script>
   <script defer src="js/features/release-alerts.js?v=e0add2ac"></script>
@@ -1174,7 +1174,7 @@
   <script defer src="js/ui/scroll-lock.js?v=096cf86f"></script>
   <script defer src="js/features/details-sagas.js?v=60b13281"></script>
   <script defer src="js/features/legal-hub.js?v=4b84104d"></script>
-  <script defer src="js/ui/welcome.js?v=f38add2e"></script>
+  <script defer src="js/ui/welcome.js?v=9107907e"></script>
   <script defer src="js/ui/legal-gate.js?v=efc26162"></script>
   <script defer src="js/features/reset.js?v=4df5738f"></script>
   <script defer src="js/ui/undo.js?v=e1f06a78"></script>

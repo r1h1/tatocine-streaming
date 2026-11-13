@@ -9,6 +9,7 @@ window.tcWelcomeOpen = false;
 if (typeof i18nAdd === "function") i18nAdd({
   "Atrás": "Back", "Siguiente": "Next", "Elegir mi perfil": "Choose my profile",
   "Bienvenido a TatoCine": "Welcome to TatoCine",
+  "Gracias por confiar en TatoCine, te invitamos a aprender a usar el aplicativo dando Siguiente para terminar de configurar.": "Thank you for trusting TatoCine. We invite you to learn how to use the app by tapping Next to finish setting up.",
   "Películas, series y anime en un solo lugar. Busca, guarda tus favoritos y retoma justo donde lo dejaste. No necesitas cuenta ni correo.": "Movies, series and anime in one place. Search, save your favorites and pick up right where you left off. No account or email needed.",
   "Catálogo e imágenes de TMDB.": "Catalog and images from TMDB.",
   "Los videos los sirven reproductores de terceros (más detalles en Legal).": "Videos are served by third-party players (more details in Legal).",

@@ -5,7 +5,10 @@
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
     var detailsMedia = null;
-    function openDetails(id, type) {
+    /** Recorta a n caracteres (corta en palabra y agrega «…»). */
+function clipText(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); if (t.length <= n) return t; var c = t.slice(0, n - 1), i = c.lastIndexOf(" "); return (i > n * 0.6 ? c.slice(0, i) : c).replace(/[\s,;:.\-–—]+$/, "") + "…"; }
+
+function openDetails(id, type) {
       id = Number(id);
       if (!Number.isSafeInteger(id) || id <= 0 || (type !== "movie" && type !== "tv")) {
         showToast("No se pudieron identificar los detalles de este título");
@@ -107,7 +110,7 @@
             return '<span class="details-genre">' + escapeHTML(g) + "</span>";
           })
           .join("");
-        $("details-overview").textContent = overview;
+        $("details-overview").textContent = clipText(overview, 150);
         if (cast.length > 0) {
           $("details-cast-container").style.display = "block";
           $("details-cast").innerHTML = cast
