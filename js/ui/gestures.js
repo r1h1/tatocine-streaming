@@ -21,7 +21,7 @@ var SHEETS = {
   "settings-modal": [".modal-body", function () { closeSettings(); }],
   "stats-modal": [".modal-body", function () { closeStats(); }],
   "filters-modal": [".modal-body", function () { closeFilters(); }],
-  "actor-modal": [".actor-bio", function () { closeActor(); }],
+  "actor-modal": [".actor-scroll", function () { closeActor(); }],
   "tc-wizard-overlay": [".tc-profile-create-dialog", function () { closeWizard(); }],
   "tc-qr-overlay": [".tc-profile-create-dialog", function () { closeQr(); }],
   "tc-fav-overlay": [".tc-profile-create-dialog", function () { closeFavPicker(); }],

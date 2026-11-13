@@ -205,9 +205,16 @@
       updateProfileTrigger();
       showToast("Perfil actualizado");
     }
+    /** «Elige “Mi perfil”» solo mientras exista ese perfil; si se le cambió el nombre, el título es «Elige un perfil». */
+    function updateProfilePickerTitle() {
+      var t = document.getElementById("tc-profile-title"); if (!t) return;
+      var hasDefault = localProfiles.some(function (p) { return !p.guest && p.name === "Mi perfil"; });
+      t.textContent = hasDefault ? L("Elige “Mi perfil”", "Choose “My profile”") : L("Elige un perfil", "Choose a profile");
+    }
     function renderProfilesPanel() {
       var grid = document.getElementById("tc-profile-grid");
       if (!grid) return;
+      updateProfilePickerTitle();
 
       var cards = localProfiles.map(function (p) {
         var active = p.id === activeProfileId;
@@ -273,6 +280,7 @@
       return h;
     }
     function showProfiles(isStartup) {
+      updateProfilePickerTitle();
       var gridEl = document.getElementById("tc-profile-grid");
       if (gridEl) gridEl.innerHTML = profileSkeletonCards(Math.min(Math.max(localProfiles.length, 2), 6));
       setTimeout(renderProfilesPanel, 280);

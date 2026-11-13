@@ -11,9 +11,16 @@
   var open = typeof WeakSet === "function" ? new WeakSet() : null;
   function top(el) { try { if (el.scrollTop) el.scrollTop = 0; } catch (e) { } }
   function resetScroll(modal) { top(modal); var list = modal.querySelectorAll(SCROLLERS); for (var i = 0; i < list.length; i++) top(list[i]); }
+  var lockY = null;
   function update() {
     var now = document.querySelectorAll(SEL);
-    document.documentElement.classList.toggle("modal-lock", now.length > 0);
+    var locked = now.length > 0, was = document.documentElement.classList.contains("modal-lock");
+    if (locked && !was) lockY = window.pageYOffset || 0;                                    // la portada queda donde estaba al abrir una ventana…
+    document.documentElement.classList.toggle("modal-lock", locked);
+    if (!locked && was && lockY !== null) {                                                  // …y al cerrarla vuelve EXACTAMENTE ahí (aunque el gesto la haya movido)
+      var y = lockY; lockY = null;
+      if (Math.abs((window.pageYOffset || 0) - y) > 2) { try { window.scrollTo({ top: y, left: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, y); } }
+    }
     if (!open) return;
     for (var i = 0; i < now.length; i++) if (!open.has(now[i])) resetScroll(now[i]);          // se acaba de abrir: contenido desde arriba
     open = new WeakSet(Array.prototype.slice.call(now));
@@ -23,7 +30,7 @@
     update();
   }
   /** Página al principio, sin animación aunque el CSS tenga scroll suave. */
-  window.tcScrollTop = function () { try { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, 0); } };
+  window.tcScrollTop = function () { lockY = null; try { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, 0); } };
   if (typeof decorate === "function") {
     ["switchView", "performSearch"].forEach(function (name) { try { decorate(name, function (original) { return function () { window.tcScrollTop(); return original.apply(this, arguments); }; }); } catch (e) { } });
   }

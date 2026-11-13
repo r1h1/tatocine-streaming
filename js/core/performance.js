@@ -9,7 +9,8 @@
     try { LITE_PREF = localStorage.getItem("tatoLiteMode") || "auto"; } catch (e) { }
     var netInfo = navigator.connection || {};
     var slowNet = !!netInfo.saveData || /(^|-)(2g|3g)$/.test(netInfo.effectiveType || "");
-    var lowDevice = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+    var lowDevice = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
+      (navigator.deviceMemory && navigator.deviceMemory <= 4 && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4 && /Android|Mobile/i.test(navigator.userAgent || ""));      // gama baja: poca memoria o pocos núcleos (móviles de 4 GB y 4 núcleos incluidos)
     var LITE_FX = LITE_PREF === "on" || (LITE_PREF === "auto" && (IS_TV || slowNet || lowDevice));
     var LITE_DATA = LITE_PREF === "on" || (LITE_PREF === "auto" && slowNet);
     if (LITE_FX) document.body.classList.add("lite");

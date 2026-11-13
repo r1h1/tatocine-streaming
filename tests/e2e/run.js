@@ -309,7 +309,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 26,8 s (1,8 + 15 + 10)", true, 26800]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 29,8 s (1,8 + 18 + 10)", true, 29800]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -348,11 +348,11 @@ async function main() {
     ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
-  await test("portada: sin botón de volumen, 1,8 s para verse, 15 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
+  await test("portada: sin botón de volumen, 1,8 s para verse, 18 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
     await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
-    eq(r.dwell, 26800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+    eq(r.dwell, 29800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 
   await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
@@ -769,6 +769,28 @@ async function main() {
       ok(hs.length >= 6 && new Set(hs).size === 1, "campos de distinta altura @" + w + ": " + JSON.stringify(hs));
       await page.evaluate(() => closeProfileCreateModal()); await page.waitForTimeout(150);
     }
+  });
+  await test("Splash de carga, título «Elige un perfil» si ya no existe «Mi perfil», descripción con «ver más», pie legal dentro del scroll (no fijo) y actor por encima de la ficha en Decidir en pareja", async (page) => {
+    await page.goto(url, { waitUntil: "commit" }); await page.waitForTimeout(350);
+    ok(await page.evaluate(() => !!document.getElementById("tc-splash") && getComputedStyle(document.getElementById("tc-splash")).opacity !== "0"), "no se ve el splash de carga");
+    await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1600);
+    ok(await page.evaluate(() => !document.getElementById("tc-splash")), "el splash no se retiró");
+    eq(await page.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige “Mi perfil”", "título con el perfil por defecto:");
+    await page.evaluate(() => { localProfiles[0].name = "Dani"; renderProfilesPanel(); });
+    eq(await page.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige un perfil", "título tras renombrar:");
+    await page.click('[data-profile-action="select"]'); await page.waitForFunction(() => document.body.classList.contains("app-ready"));
+    await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 });
+    await page.evaluate(() => setOverview("Una historia larga ".repeat(30)));
+    const o = await page.evaluate(() => { const e = document.getElementById("details-overview"); return { n: e.textContent.length, btn: e.querySelector(".details-more").textContent }; });
+    ok(o.n <= 150 + 12 && o.btn === "ver más", "descripción compacta: " + JSON.stringify(o));
+    await page.click(".details-more");
+    ok(await page.evaluate(() => document.getElementById("details-overview").textContent.length > 400), "«ver más» no expandió la descripción");
+    ok(await page.evaluate(() => !!document.querySelector("#details-scroll > .tc-modal-legal") && !document.querySelector("#details-modal .details-content > .tc-modal-legal")), "el aviso legal de la ficha sigue fijo");
+    await page.evaluate(() => { closeDetails(true); openActor(6193); }); await page.waitForTimeout(700);
+    ok(await page.evaluate(() => !!document.querySelector("#actor-scroll > .tc-modal-legal") && !document.querySelector("#actor-modal .actor-content > .tc-modal-legal")), "el aviso legal del actor sigue fijo");
+    await page.evaluate(() => { closeActor(); document.body.classList.add("cp-details"); openDetails(603, "movie"); }); await page.waitForTimeout(600);
+    const z = await page.evaluate(() => { openActor(6193); return [+getComputedStyle(document.getElementById("details-modal")).zIndex, +getComputedStyle(document.getElementById("actor-modal")).zIndex]; });
+    ok(z[1] > z[0], "en Decidir en pareja el actor queda debajo de la ficha: " + JSON.stringify(z));
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);

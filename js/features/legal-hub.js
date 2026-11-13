@@ -11,7 +11,7 @@ if (typeof i18nAdd === "function") i18nAdd({
   "Aviso legal y descargo de responsabilidad": "Legal notice and disclaimer",
   "Código fuente": "Source code", "Créditos": "Credits", "Sitios de terceros": "Third-party sites",
   "Copiar tus datos (JSON)": "Copy your data (JSON)", "Copiar tus datos (QR)": "Copy your data (QR)",
-  "Elige “Mi perfil”": "Choose “My profile”", "Mi perfil": "My profile",
+  "Elige “Mi perfil”": "Choose “My profile”", "Elige un perfil": "Choose a profile", "Mi perfil": "My profile",
   "Puedes editar y crear perfiles. Son locales: solo viven en este dispositivo.": "You can edit and create profiles. They are local: they only live on this device.", "Avatar": "Avatar"
 });
 
@@ -77,7 +77,7 @@ function legalFooterHTML(cls) {
 (function mountLegalExtras() {
   var main = document.querySelector("main.main-content");
   if (main && !main.querySelector(".tc-footer")) main.insertAdjacentHTML("beforeend", '<footer class="tc-footer">' + legalFooterHTML("tc-footer-in") + "</footer>");
-  [["#settings-modal .modal-body", "beforeend"], ["#details-modal .details-content", "beforeend"], ["#actor-modal .actor-content", "beforeend"], ["#stats-modal .modal-body", "beforeend"]].forEach(function (p) {
+  [["#settings-modal .modal-body", "beforeend"], ["#details-scroll", "beforeend"], ["#actor-scroll", "beforeend"], ["#stats-modal .modal-body", "beforeend"]].forEach(function (p) {
     var el = document.querySelector(p[0]);
     if (el && !el.querySelector(".tc-modal-legal")) el.insertAdjacentHTML(p[1], legalFooterHTML("tc-modal-legal"));
   });

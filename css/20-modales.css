@@ -315,3 +315,30 @@ html.fold-v .tc-profile-create-dialog { max-height: env(viewport-segment-height 
 #tc-profile-create-overlay input[type="number"] { -moz-appearance: textfield; }
 .tc-bedtime-row { align-items: center; }
 .tc-bedtime-row .tc-profile-input { width: 100% !important; flex: none !important; }
+
+/* ---------- Ficha: «ver más» al final de la descripción compacta ---------- */
+.details-more { display: inline; padding: 0; margin: 0; border: 0; background: none; color: #fff; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 0; -webkit-tap-highlight-color: transparent; }
+.details-more:hover, .details-more:focus-visible { color: #cfcfcf; }
+
+/* ---------- Biografía del actor: todo (cabecera aparte, bio + pie legal) en UN scroll, el pie legal ya no queda fijo abajo ---------- */
+.actor-content .actor-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.actor-content .actor-scroll .actor-bio { flex: none !important; overflow: visible !important; max-height: none !important; }
+#details-scroll > .tc-modal-legal, .actor-scroll > .tc-modal-legal { padding-top: 20px; }
+
+/* «Decidir en pareja»: si desde la ficha (Info) se abre un actor, su ventana va por ENCIMA de la ficha */
+body.cp-details #actor-modal { z-index: 100030; }
+
+/* ---------- Botones y letras homologados en toda la app: misma tipografía, tamaño, peso y altura ---------- */
+button, input, select, textarea { font-family: inherit; }
+:is(.modal, .tc-profile-create-overlay) :is(.tc-profile-create-btn, .tc-profile-cancel-btn, .tc-profile-delete-btn, .danger-btn, .hero-btn, .wiz-btn, .cp-btn, .ua-btn, .server-btn) {
+  font-family: inherit; font-size: calc(16px * var(--ts, 1)); font-weight: 700; line-height: 1.15; letter-spacing: 0;
+}
+.cp-btn { min-height: var(--btn-h); padding: 0 14px; }
+.cp-actions { gap: 10px; }
+.cp-actions .cp-btn { flex: 1 1 calc(50% - 5px); min-width: 0; }
+.cp-actions .cp-btn.primary { flex-basis: 100%; }
+.cp-win + .cp-actions, .cp-card + .cp-actions { margin-top: 14px; }
+.tour-title { font-family: inherit; }
+
+/* Contraste: el botón «Mostrar recomendaciones» deshabilitado se sigue leyendo (≥ 4.5:1) */
+.tc-profile-create-btn:disabled, .tc-profile-create-dialog .tc-profile-create-btn:disabled { opacity: .72; }

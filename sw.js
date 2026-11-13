@@ -3,18 +3,25 @@
    - Actualización: una versión nueva espera a que pulses «Actualizar» (no cambia el código a mitad de una película).
    - Shell (HTML, manifest, iconos): red primero con respaldo offline.
    - Imágenes de TMDB: caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 1200.
-   - API de TMDB: «stale-while-revalidate» como las plataformas grandes: si hay copia reciente (< 30 min) se usa tal cual; si es de hasta 6 h se muestra al instante
-     y se actualiza en segundo plano; si es más vieja o no hay, red primero con la copia como respaldo sin conexión.
+   - API de TMDB: caché AGRESIVA por tipo de dato (el trabajo lo hace el dispositivo, no el servidor). «Stale-while-revalidate»: con copia reciente se usa tal cual;
+     con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
+     conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-59fa740d";
+const VERSION = "5.6-aa35f4f6";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
 const MAX_IMG = 1200;
-const API_FRESH = 30 * 60 * 1000;
 const SHELL = ["./", "index.html", "offline.html", "404.html", "500.html", "js/core/error-page.js", "manifest.webmanifest", "config.js", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-192.png", "icons/apple-touch-icon.png", "js/vendor/qrcode.js", "js/vendor/jsQR.js"];
 const MAX_API = 800;
-const API_MAX_AGE = 24 * 60 * 60 * 1000;
+const H = 3600 * 1000;
+/** Cuánto se considera «fresca» y hasta cuándo se puede mostrar (mientras se actualiza detrás) cada tipo de dato de TMDB. */
+function apiTier(u) {
+  const p = u.pathname;
+  if (/\/(trending|discover|now_playing|upcoming|popular|top_rated|on_the_air|airing_today)\b/.test(p)) return { fresh: 2 * H, max: 48 * H };
+  if (/\/search\//.test(p)) return { fresh: 6 * H, max: 72 * H };
+  return { fresh: 24 * H, max: 14 * 24 * H };
+}
 
 /** Lista de archivos de la app: SHELL + los CSS/JS que enlaza index.html (se leen del propio HTML: no hay lista que mantener a mano). */
 function assetsFromHtml(html) {
@@ -148,10 +155,11 @@ self.addEventListener("fetch", (event) => {
         }
         return res;
       };
-      if (hit && age < API_FRESH) return hit;                                          // reciente: instantáneo
-      if (hit && age < API_MAX_AGE) { event.waitUntil(refresh().catch(() => null)); return hit; }   // algo viejo: se muestra ya y se actualiza detrás
+      const tier = apiTier(url);
+      if (hit && age < tier.fresh) return hit;                                         // reciente: instantáneo, cero peticiones
+      if (hit && age < tier.max) { event.waitUntil(refresh().catch(() => null)); return hit; }       // algo viejo: se muestra ya y se actualiza detrás
       try { return await refresh(); }
-      catch (e) { if (hit && age < API_MAX_AGE * 4) return hit; throw e; }
+      catch (e) { if (hit && age < tier.max * 4) return hit; throw e; }
     })());
   }
 });

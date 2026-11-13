@@ -8,6 +8,20 @@
     /** Recorta a n caracteres (corta en palabra y agrega «…»). */
 function clipText(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); if (t.length <= n) return t; var c = t.slice(0, n - 1), i = c.lastIndexOf(" "); return (i > n * 0.6 ? c.slice(0, i) : c).replace(/[\s,;:.\-–—]+$/, "") + "…"; }
 
+/** Descripción compacta (150 caracteres) con «ver más» al final para expandirla completa (y «ver menos» para volver a comprimirla). */
+function setOverview(full) {
+  var el = $("details-overview"); if (!el) return;
+  full = String(full || "").replace(/\s+/g, " ").trim();
+  el.textContent = "";
+  var short = clipText(full, 150);
+  if (short === full) { el.textContent = full; return; }
+  var txt = document.createElement("span"), btn = document.createElement("button"), open = false;
+  btn.type = "button"; btn.className = "details-more";
+  function paint() { txt.textContent = open ? full + " " : short + " "; btn.textContent = open ? L("ver menos", "show less") : L("ver más", "show more"); btn.setAttribute("aria-expanded", open ? "true" : "false"); }
+  btn.addEventListener("click", function () { open = !open; paint(); });
+  el.appendChild(txt); el.appendChild(btn); paint();
+}
+
 function openDetails(id, type) {
       id = Number(id);
       if (!Number.isSafeInteger(id) || id <= 0 || (type !== "movie" && type !== "tv")) {
@@ -110,7 +124,7 @@ function openDetails(id, type) {
             return '<span class="details-genre">' + escapeHTML(g) + "</span>";
           })
           .join("");
-        $("details-overview").textContent = clipText(overview, 150);
+        setOverview(overview);
         if (cast.length > 0) {
           $("details-cast-container").style.display = "block";
           $("details-cast").innerHTML = cast

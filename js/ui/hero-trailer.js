@@ -209,8 +209,8 @@ function htSchedule(m) {
     htTimer = setTimeout(function () { if (token === htToken && htAllowed() && currentHeroMedia === m) htPlay(keys, 0, token); }, Math.max(0, HT_PRELOAD_MS - (Date.now() - heroShownAt)));
   });
 }
-/** Con tráiler: se ve desde HT_START_MS, suena HT_VIEW_MS (15 s), se detiene y se DESTRUYE el iframe, y tras HT_REST_MS (10 s) pasa al siguiente título. */
-var HT_VIEW_MS = 15000, HT_REST_MS = 10000, HERO_DWELL_TRAILER = HT_START_MS + HT_VIEW_MS + HT_REST_MS;
+/** Con tráiler: se ve desde HT_START_MS, suena HT_VIEW_MS (18 s), se detiene y se DESTRUYE el iframe, y tras HT_REST_MS (10 s) pasa al siguiente título. */
+var HT_VIEW_MS = 18000, HT_REST_MS = 10000, HERO_DWELL_TRAILER = HT_START_MS + HT_VIEW_MS + HT_REST_MS;
 decorate("setHero", function (original) { return function (m) { var r = original(m); htSchedule(m); return r; }; });
 decorate("openDetails", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });
 decorate("openPlayer", function (original) { return function () { htStop(); return original.apply(this, arguments); }; });

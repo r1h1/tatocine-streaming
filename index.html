@@ -10,7 +10,19 @@
   <script src="js/core/rate-limit.js?v=65a8b733"></script>
   <style>
     html.tc-picker-boot body { background: #000; }
-    html.tc-picker-boot body > *:not(#tc-profile-overlay):not(script):not(style):not(link) { visibility: hidden !important; }
+    html.tc-picker-boot body > *:not(#tc-profile-overlay):not(#tc-splash):not(script):not(style):not(link) { visibility: hidden !important; }
+    #tc-splash { position: fixed; inset: 0; z-index: 100200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #000 radial-gradient(ellipse at 50% 42%, #1c1c1c 0, #000 62%); color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; transition: opacity .4s ease, visibility .4s; }
+    #tc-splash.out { opacity: 0; visibility: hidden; pointer-events: none; }
+    .tc-splash-logo { position: relative; width: 96px; height: 96px; border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 18px 50px rgba(0,0,0,.7); animation: tcSplashIn .6s cubic-bezier(.2,.8,.2,1) both; }
+    .tc-splash-logo img { display: block; width: 100%; height: 100%; }
+    .tc-splash-logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.28) 50%, transparent 70%); transform: translateX(-120%); animation: tcSplashShine 1.8s ease-in-out .5s infinite; }
+    .tc-splash-name { font-size: 26px; font-weight: 800; letter-spacing: -.3px; animation: tcSplashIn .6s cubic-bezier(.2,.8,.2,1) .12s both; }
+    .tc-splash-bar { width: 132px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.16); overflow: hidden; animation: tcSplashIn .6s ease .2s both; }
+    .tc-splash-bar i { display: block; width: 40%; height: 100%; border-radius: 3px; background: #fff; animation: tcSplashBar 1.2s ease-in-out infinite; }
+    @keyframes tcSplashIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+    @keyframes tcSplashShine { to { transform: translateX(120%); } }
+    @keyframes tcSplashBar { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+    @media (prefers-reduced-motion: reduce) { .tc-splash-logo, .tc-splash-name, .tc-splash-bar, .tc-splash-logo::after, .tc-splash-bar i { animation: none; } .tc-splash-bar i { width: 100%; } }
   </style>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
   <title>TatoCine Streaming Gratis</title>
@@ -80,7 +92,7 @@
   <link rel="stylesheet" href="css/17-hero-actions.css?v=f8cc9a2f" />
   <link rel="stylesheet" href="css/18-lists-skeletons.css?v=31bc1894" />
   <link rel="stylesheet" href="css/19-responsive.css?v=509dfb1a" />
-  <link rel="stylesheet" href="css/20-modales.css?v=2e5f632e" />
+  <link rel="stylesheet" href="css/20-modales.css?v=7384f468" />
   <link rel="stylesheet" href="css/21-fluidez.css?v=26c3d841" />
   <script type="application/ld+json" id="site-structured-data">
 {
@@ -144,6 +156,8 @@
 </head>
 
 <body>
+  <div id="tc-splash" role="status" aria-label="Cargando TatoCine"><div class="tc-splash-logo"><img src="icons/icon-192.png" width="96" height="96" alt="" decoding="async" fetchpriority="high"></div><div class="tc-splash-name">TatoCine</div><div class="tc-splash-bar" aria-hidden="true"><i></i></div></div>
+  <script src="js/ui/splash.js?v=8bd2ab5b"></script>
   <div class="mobile-menu" id="mobile-menu">
     <button class="close-btn" data-h="h1">✕</button>
     <button class="nav-item active" data-view="home" data-adult-only data-h="h2">
@@ -478,7 +492,7 @@
           <div class="actor-meta" id="actor-meta"></div>
         </div>
       </div>
-      <div class="actor-bio" id="actor-bio"></div>
+      <div class="actor-scroll" id="actor-scroll"><div class="actor-bio" id="actor-bio"></div></div>
     </div>
   </div>
 
@@ -655,7 +669,7 @@
         <section class="tw-slide on" data-i="0">
           <span class="tw-logo skel" aria-hidden="true"><img src="icons/icon-192.png" width="72" height="72" alt="" decoding="async" fetchpriority="high"></span>
         <h2 id="tc-welcome-title">Bienvenido a TatoCine</h2>
-        <p>Gracias por confiar en TatoCine, te invitamos a aprender a usar el aplicativo dando Siguiente para terminar de configurar.</p>
+        <p>Gracias por confiar en TatoCine, te invitamos a aprender a usar el aplicativo dando «Siguiente» para terminar de configurar y conocer cómo utilizar el servicio gratuito.</p>
         </section>
         <section class="tw-slide" data-i="1">
           <span class="tw-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></span>
@@ -1110,7 +1124,7 @@
   <script defer src="js/core/errors.js?v=302fb3d7"></script>
   <script defer src="js/core/input-guard.js?v=35f2f82b"></script>
   <script defer src="js/profiles/profile-store.js?v=9a0bb1ea"></script>
-  <script defer src="js/profiles/profile-ui.js?v=451c8c9e"></script>
+  <script defer src="js/profiles/profile-ui.js?v=f32fef64"></script>
   <script defer src="js/profiles/pin-strong.js?v=2762f95c"></script>
   <script defer src="js/core/state.js?v=16580616"></script>
   <script defer src="js/core/ui-utils.js?v=ba78508e"></script>
@@ -1126,9 +1140,9 @@
   <script defer src="js/player/servers.js?v=d8b06821"></script>
   <script defer src="js/features/share.js?v=ea471e80"></script>
   <script defer src="js/ui/cards.js?v=b2d3a26c"></script>
-  <script defer src="js/ui/hero.js?v=3747afe6"></script>
+  <script defer src="js/ui/hero.js?v=466cec81"></script>
   <script defer src="js/core/seo.js?v=f9d19c94"></script>
-  <script defer src="js/ui/details.js?v=aad30e0f"></script>
+  <script defer src="js/ui/details.js?v=707a7161"></script>
   <script defer src="js/ui/filters.js?v=9d82f692"></script>
   <script defer src="js/features/search.js?v=948de9ee"></script>
   <script defer src="js/ui/views.js?v=8f7127df"></script>
@@ -1171,24 +1185,24 @@
   <script defer src="js/features/wrapped.js?v=7ff5ab9b"></script>
   <script defer src="js/features/couple-picker.js?v=4c2adbf5"></script>
   <script defer src="js/features/marathon.js?v=e578025f"></script>
-  <script defer src="js/ui/scroll-lock.js?v=096cf86f"></script>
+  <script defer src="js/ui/scroll-lock.js?v=d98945af"></script>
   <script defer src="js/features/details-sagas.js?v=60b13281"></script>
-  <script defer src="js/features/legal-hub.js?v=4b84104d"></script>
+  <script defer src="js/features/legal-hub.js?v=b1f96e80"></script>
   <script defer src="js/ui/welcome.js?v=9107907e"></script>
   <script defer src="js/ui/legal-gate.js?v=efc26162"></script>
   <script defer src="js/features/reset.js?v=4df5738f"></script>
   <script defer src="js/ui/undo.js?v=e1f06a78"></script>
   <script defer src="js/player/autoplay-next.js?v=c5e3e271"></script>
   <script defer src="js/player/player-robust.js?v=b2220bb0"></script>
-  <script defer src="js/ui/gestures.js?v=65bbabd8"></script>
-  <script defer src="js/ui/hero-trailer.js?v=97683a61"></script>
+  <script defer src="js/ui/gestures.js?v=98ce574e"></script>
+  <script defer src="js/ui/hero-trailer.js?v=19e7aad3"></script>
   <script defer src="js/ui/dynamic-color.js?v=53cfe7c2"></script>
   <script defer src="js/ui/open-motion.js?v=7e4329b4"></script>
   <script defer src="js/ui/a11y.js?v=e48fed4f"></script>
   <script defer src="js/ui/accessibility-prefs.js?v=c7be7d46"></script>
   <script defer src="js/features/voice-search.js?v=de25b00e"></script>
   <script defer src="js/ui/onboarding.js?v=b228fc35"></script>
-  <script defer src="js/core/performance.js?v=40da4139"></script>
+  <script defer src="js/core/performance.js?v=453b5b09"></script>
   <script defer src="js/core/refresh-rate.js?v=eafff583"></script>
   <script defer src="js/core/diagnostics.js?v=4f9d2b3b"></script>
   <script defer src="js/core/data-guard.js?v=e7f88fce"></script>

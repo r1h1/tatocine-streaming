@@ -228,7 +228,7 @@
 
       var request = ++heroRequestId, heroPainted = false, heroDetails = null;   // si los detalles llegan ANTES del cambio de texto (caché), se guardan y se pintan con él
       heroShownAt = Date.now();
-      heroPlan(HERO_DWELL);          // cada título dura 10 s; si tiene tráiler, hero-trailer.js lo amplía a 15 s
+      heroPlan(HERO_DWELL);          // cada título dura 10 s; si tiene tráiler, hero-trailer.js lo amplía a 18 s
       setHeroLoading(false);
 
       currentHeroMedia = m;
@@ -379,7 +379,7 @@
       if (n && n.bg) { var i = new Image(); i.src = n.bg.startsWith("http") ? n.bg : IMG_BG + n.bg; }   // la imagen ya está lista al llegar su turno
     }
     // Rotación de la portada: UN temporizador por título (no un intervalo global), así cada título dura lo mismo aunque
-    // se salte con los puntos, se vuelva de otra pestaña o se espere al selector de perfiles: 8 s (sin tráiler) o 15 s (con tráiler).
+    // se salte con los puntos, se vuelva de otra pestaña o se espere al selector de perfiles: 10 s (sin tráiler) o 1,8 + 18 + 10 s (con tráiler).
     var HERO_DWELL = 10000, heroShownAt = 0, heroCarouselOn = false;
     function heroBlocked() {
       var picker = document.getElementById("tc-profile-overlay");
