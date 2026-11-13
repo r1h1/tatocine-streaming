@@ -1,7 +1,7 @@
 /** Pruebas del saneado de copias de seguridad: `node tests/backup-sanitize.test.js` (sin dependencias). */
 const assert = require("node:assert");
 const B = require("../js/features/backup-sanitize.js");
-const SERVERS = ["ESP1", "ESP2", "ESP3", "ENG1"];
+const SERVERS = ["ESP1", "ESP2", "ESP3", "ESP4", "ESP5", "ENG1"];
 const clean = (data) => B.sanitizeBackupData(data, SERVERS);
 const j = JSON.stringify;
 let n = 0;

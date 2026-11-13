@@ -54,7 +54,9 @@ function respond(urlStr) {
   if (multi) { const a = list("movie", p + page, "Tendencia", 10), b = list("tv", p + page + "t", "Serie en tendencia", 10); const r = []; for (let i = 0; i < 10; i++) { r.push(a[i]); r.push(b[i]); } return { page, total_pages: 5, results: r }; }
   return { page, total_pages: 8, total_results: 160, results: list(kind, p + "|" + u.searchParams.get("with_genres") + "|" + u.searchParams.get("sort_by") + "|" + page, kind === "tv" ? "Serie" : "Película", 20) };
 }
+const delayMs = () => Number(process.env.TMDB_MOCK_DELAY || 0);   // ms de latencia simulada (con jitter) para medir saltos de diseño con red «real»
+const wait = () => (delayMs() ? new Promise((res) => setTimeout(res, delayMs() * (0.4 + Math.random()))) : null);
 exports.install = async function (ctx) {
-  await ctx.route("**/api.themoviedb.org/3/**", (r) => r.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify(respond(r.request().url())) }));
-  await ctx.route("**/image.tmdb.org/**", (r) => r.fulfill({ status: 200, contentType: "image/png", headers: { "access-control-allow-origin": "*" }, body: PNG }));
+  await ctx.route("**/api.themoviedb.org/3/**", async (r) => { await wait(); return r.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify(respond(r.request().url())) }); });
+  await ctx.route("**/image.tmdb.org/**", async (r) => { await wait(); return r.fulfill({ status: 200, contentType: "image/png", headers: { "access-control-allow-origin": "*" }, body: PNG }); });
 };

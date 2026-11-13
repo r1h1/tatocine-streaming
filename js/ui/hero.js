@@ -223,6 +223,8 @@
         fetchTMDB((nx.type === "tv" ? "/tv/" : "/movie/") + nx.id, nx.type === "tv" ? "&append_to_response=content_ratings" : "&append_to_response=release_dates").catch(function () { });
       } catch (e) { }
     }
+    /** Muestra el texto de la portada (estaba oculto con visibility para que el diseño no «salte» mientras llegan título, descripción y etiquetas). */
+    function heroReady() { document.body.classList.add("hero-ready"); }
     function setHero(m) {
       if (!m) return;
 
@@ -264,6 +266,7 @@
 
         renderHeroMeta(m, heroDetails);
         heroPainted = true;
+        if (heroDetails) heroReady();                       // texto y etiquetas ya completos: se muestra todo de una vez (sin saltos)
 
         if (m.isUpcoming) {
           $heroPlayBtn.disabled = true;
@@ -310,10 +313,10 @@
             return;
 
           heroDetails = data;
-          if (heroPainted) renderHeroMeta(m, data);
+          if (heroPainted) { renderHeroMeta(m, data); heroReady(); }
         })
         .catch(function () {
-          if (request === heroRequestId) renderHeroMeta(m, null);
+          if (request === heroRequestId) { renderHeroMeta(m, null); if (heroPainted) heroReady(); }
         });
     }
     /** Indicadores del carrusel (uno por título del Top 10); tocar uno salta a ese título. */
@@ -444,3 +447,5 @@
 
       openDetails(mediaId, mediaType);
     }
+// Seguro: si la portada no llega (sin red o error de TMDB), a los 3 s se muestra lo que haya (nunca queda oculta).
+setTimeout(function () { document.body.classList.add("hero-ready"); }, 3000);

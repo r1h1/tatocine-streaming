@@ -18,10 +18,10 @@ const CSP = meta[1].trim() + "; frame-ancestors 'self'; upgrade-insecure-request
 const SECURITY = [
   ["X-Content-Type-Options", "nosniff"], ["Referrer-Policy", "strict-origin-when-cross-origin"],
   ["Permissions-Policy", "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()"],
-  ["X-Frame-Options", "SAMEORIGIN"], ["Strict-Transport-Security", "max-age=31536000; includeSubDomains"],
+  ["X-Frame-Options", "SAMEORIGIN"], ["Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"],
   ["Content-Security-Policy", CSP], ["Cross-Origin-Opener-Policy", "same-origin-allow-popups"]
 ];
-const NOCACHE = "no-cache", IMMUTABLE = "public, max-age=31536000, immutable", SHORT = "public, max-age=3600", WEEK = "public, max-age=2592000";
+const NOCACHE = "no-cache", IMMUTABLE = "public, max-age=31536000, immutable", SHORT = "public, max-age=3600";
 // { p: ruta Netlify, v: ruta Vercel, h: cabeceras }
 const RULES = [
   { p: "/*", v: "/(.*)", h: SECURITY },
@@ -34,7 +34,7 @@ const RULES = [
   { p: "/offline.html", v: "/offline.html", h: [["Cache-Control", NOCACHE]] },
   { p: "/css/*", v: "/css/(.*)", h: [["Cache-Control", IMMUTABLE]] },
   { p: "/js/*", v: "/js/(.*)", h: [["Cache-Control", IMMUTABLE]] },
-  { p: "/icons/*", v: "/icons/(.*)", h: [["Cache-Control", WEEK]] },
+  { p: "/icons/*", v: "/icons/(.*)", h: [["Cache-Control", IMMUTABLE]] },
   { p: "/robots.txt", v: "/robots.txt", h: [["Cache-Control", SHORT]] },
   { p: "/sitemap.xml", v: "/sitemap.xml", h: [["Cache-Control", SHORT]] },
   { p: "/llms.txt", v: "/llms.txt", h: [["Cache-Control", SHORT]] },

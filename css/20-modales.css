@@ -351,3 +351,14 @@ button, input, select, textarea { font-family: inherit; }
 #tc-profile-create-overlay .pf-dialog, #tc-profile-create-overlay .tc-profile-create-dialog { overflow-x: hidden !important; overscroll-behavior-x: none; touch-action: pan-y; box-sizing: border-box; max-width: 100%; }
 #tc-profile-create-overlay .pf-dialog { padding-left: max(var(--pf-px), var(--sal)); padding-right: max(var(--pf-px), var(--sar)); }
 #tc-profile-create-overlay .pf-footer { margin-left: calc(-1 * max(var(--pf-px), var(--sal))); margin-right: calc(-1 * max(var(--pf-px), var(--sar))); padding-left: max(var(--pf-px), var(--sal)); padding-right: max(var(--pf-px), var(--sar)); box-sizing: border-box; }
+
+/* ---------- Sin saltos de diseño (CLS): el texto de la portada no se muestra hasta tener datos reales ---------- */
+body:not(.hero-ready) #hero-content > .hero-title, body:not(.hero-ready) #hero-content > .hero-year, body:not(.hero-ready) #hero-content > .hero-meta,
+body:not(.hero-ready) #hero-content > .hero-desc, body:not(.hero-ready) #hero-content > .hero-actions, body:not(.hero-ready) #hero-content > .search-wrap, body:not(.hero-ready) #hero-content > .back-home-btn { visibility: hidden; }
+
+/* Portada: el renglón de etiquetas (nota, duración, edad, tipo) conserva su alto aunque aún esté vacío (no empuja el texto al llegar los datos) */
+#hero-section:not(.empty-search) .hero-meta:empty { display: flex; min-height: 30px; visibility: hidden; }
+/* El pie legal no se ve hasta que la portada tiene contenido (antes quedaba arriba y las filas lo empujaban: salto de diseño) */
+body:not(.hero-ready) .tc-footer { visibility: hidden; }
+.personalized-row.is-slot .row-scroll { overflow: hidden; }
+body:not(.hero-ready) #hero-content { visibility: hidden; }

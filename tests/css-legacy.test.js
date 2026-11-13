@@ -21,5 +21,8 @@ t("grid sin gap legacy", ".g{display:grid;gap:8px}", [".g{display:grid;gap:8px}"
 t("media", "@media (max-width:600px){.a{inset:0}}", ["@media (max-width:600px){.a{top:0;right:0;bottom:0;left:0}}"]);
 t("data uri con ;", ".a{background:url(\"data:image/svg+xml;utf8,<svg/>\") no-repeat;padding:min(1px,2px)}", ["data:image/svg+xml;utf8,<svg/>", "padding:1px"]);
 t("var intacta", ".a{width:var(--w);margin:0 auto}", [".a{width:var(--w);margin:0 auto}"]);
+t("prefijo backdrop-filter", ".a{backdrop-filter:blur(8px)}", ["-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)"]);
+t("prefijo ya presente", ".a{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}", [".a{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}"]);
+t("prefijo user-select y sticky", ".a{user-select:none;position:sticky}", ["-webkit-user-select:none;user-select:none", "position:-webkit-sticky;position:sticky"]);
 if (bad.length) { console.error("✗ css-legacy:\n  " + bad.join("\n  ")); process.exit(1); }
-console.log("✓ css-legacy: respaldos correctos (inset, min/max/clamp, env, :is, :focus-visible, gap)");
+console.log("✓ css-legacy: respaldos correctos (inset, min/max/clamp, env, :is, :focus-visible, gap, prefijos WebKit)");

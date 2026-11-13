@@ -1,0 +1,17 @@
+/**
+ * TatoCine · css/23-safe-areas.css
+ * Isla dinámica (iPhone 14 Pro+), notch y recortes de cámara (Android, plegables, iPad): ningún botón, texto ni campo queda debajo de la zona recortada, en vertical ni en
+ * horizontal (con el teléfono acostado la isla/notch queda a un lado). Requiere `viewport-fit=cover` (ya está en index.html); `env(safe-area-inset-*)` vale 0 donde no hay recorte,
+ * así que en pantallas normales esto no cambia nada. Las ventanas a pantalla completa y la barra superior ya usan las zonas seguras (css/11, css/14, css/20); aquí se cubre el resto:
+ * la página de fondo (portada, filas, pie), el menú móvil y el contenido lateral de las ventanas a pantalla completa. Probado con tests/e2e/run.js (Emulation.setSafeAreaInsetsOverride).
+ */
+body { box-sizing: border-box; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.mobile-menu { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); box-sizing: border-box; }
+.mobile-menu .close-btn { right: max(20px, env(safe-area-inset-right)); }
+/* Ventanas a pantalla completa: el contenido nunca entra en la zona lateral recortada; la X y los títulos mantienen su margen */
+.modal > .settings-content, .modal > .details-content, .modal > .actor-content, .modal > .modal-content { padding-left: env(safe-area-inset-left) !important; padding-right: env(safe-area-inset-right) !important; box-sizing: border-box !important; }
+.modal > .settings-content .modal-header, .modal > .details-content .modal-header, .modal > .actor-content .modal-header, .modal > .modal-content .modal-header { padding-left: 20px !important; padding-right: 20px !important; }
+.toast-container { bottom: calc(24px + env(safe-area-inset-bottom)); right: calc(24px + env(safe-area-inset-right)); }
+@media (max-width: 600px) { .toast-container { left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); bottom: calc(16px + env(safe-area-inset-bottom)); } }
+/* Diálogos centrados (asistente, QR, listas, instalar…): se centran dentro de la zona segura, no debajo de la isla */
+.tc-profile-create-overlay { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); box-sizing: border-box; }

@@ -21,7 +21,10 @@ const CSS_TOO_NEW = [[/:has\(/, ":has() (Firefox 121, 2023)"], [/@container\b/, 
  * Hoy el código cumple; esta prueba evita que se rompa sin avisar. Se permite una línea con «// compat:ok» (p. ej. si se detecta antes la función). */
 const JS_C68 = [[/[A-Za-z_\])]\?\.[A-Za-z_\[(]/, "optional chaining (Chromium 80)"], [/\?\?(?!=)/, "nullish coalescing (Chromium 80)"], [/\?\?=|\|\|=|&&=/, "asignación lógica (Chromium 85)"], [/\.replaceAll\(/, "replaceAll (Chromium 85)"],
   [/Object\.fromEntries/, "Object.fromEntries (Chromium 73)"], [/\.flatMap\(|\.flat\(/, "flat/flatMap (Chromium 69)"], [/Promise\.allSettled/, "Promise.allSettled (Chromium 76)"], [/(?<!clients)\.matchAll\(/, "String.matchAll (Chromium 73)"],
-  [/structuredClone|\.randomUUID\(|\.replaceChildren\(|\.hasOwn\(|findLast\(|AbortSignal\.timeout/, "API de Chromium 90+"]];
+  [/structuredClone|\.randomUUID\(|\.replaceChildren\(|\.hasOwn\(|findLast\(|AbortSignal\.timeout/, "API de Chromium 90+"],
+  [/\(\?<[=!]/, "lookbehind en una expresión regular (Safari/Apple TV < 16.4: error de sintaxis que rompe TODO el script)"], [/queueMicrotask\(/, "queueMicrotask (Chromium 71)"], [/\.arrayBuffer\(\)|(?<![\w.])blob\.text\(\)/, "Blob.arrayBuffer()/text() (Chromium 76, Safari 14)"],
+  [/Intl\.(RelativeTimeFormat|ListFormat)|dateStyle\s*:/, "Intl.RelativeTimeFormat/ListFormat/dateStyle (Chromium 71–76, Safari 14)"], [/\.toggleAttribute\(/, "toggleAttribute (Chromium 69)"], [/new ResizeObserver/, "ResizeObserver sin detección (Safari 13.1)"],
+  [/\bglobalThis\b/, "globalThis (Chromium 71, Safari 12.1) sin typeof"]];
 for (const file of walk(ROOT, ".js")) {
   if (file.includes(path.join("js", "vendor")) || path.basename(file) === "config.js") continue;
   const src = fs.readFileSync(file, "utf8"), rel = path.relative(ROOT, file);

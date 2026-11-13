@@ -4,6 +4,17 @@
  * Script clásico (sin módulos): comparte el ámbito global con el resto de js/ para que los
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
+    /** Avance (2–91 %) de un título que se dejó a medias en este perfil; 0 si no hay. Lo usan las tarjetas y la ficha («Reanudar»). */
+    function resumePct(id, type) {
+      try {
+        var list = typeof continueWatching !== "undefined" ? continueWatching : [];
+        for (var k = 0; k < list.length; k++) {
+          var m = list[k];
+          if (m && String(m.id) === String(id) && m.type === (type === "tv" ? "tv" : "movie")) return m.pct > 1 && m.pct < 92 ? Math.round(m.pct) : 0;
+        }
+      } catch (e) { }
+      return 0;
+    }
     function getCardHTML(i) {
       var s = isSaved(i);
       var cid = Number(i.id) || 0, ctype = i.type === "tv" ? "tv" : "movie";      // nunca se interpolan valores sin validar en los atributos
@@ -31,6 +42,7 @@
           escapeHTML(getStatusText(i.status).toUpperCase()) +
           "</div>"
           : "";
+      var rp = resumePct(cid, ctype), resumeBar = rp ? '<div class="continue-progress" aria-hidden="true"><span style="width:' + rp + '%"></span></div>' : "";
       var at = ' data-id="' + cid + '" data-type="' + ctype + '"', stt = ' data-title="' + escapeHTML(i.title) + '"';
       return (
         '<div class="card ' + upcomingClass + '" tabindex="0" role="group" aria-label="' + escapeHTML(i.title) + '" data-act="open-details" data-hover="prefetch"' + at + '>' +
@@ -38,6 +50,7 @@
         ratingBadge +
         statusBadge +
         upcomingBadge +
+        resumeBar +
         topRankBadge +
         '<button class="share-card-btn" data-act="share-card"' + at + stt + ' title="Compartir" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
         '<button class="save-btn ' + (s ? "saved" : "") + '" title="Favoritos" aria-label="Favoritos" data-act="toggle-save"' + at + stt + ' data-bg="' + escapeHTML(i.bg || "") + '" data-rating="' + (Number(i.rating) || 0) + '" data-year="' + escapeHTML(String(i.year || "")) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="' + (s ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>' +

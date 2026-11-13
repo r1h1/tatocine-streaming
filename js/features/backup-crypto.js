@@ -5,7 +5,7 @@
  * La contraseña nunca se guarda ni sale del dispositivo. Lógica pura (probada en Node con WebCrypto).
  */
 var BKC_ITER = 250000, BKC_MIN_PASS = 6;
-var BKC_crypto = typeof globalThis !== "undefined" && globalThis.crypto ? globalThis.crypto : window.crypto;
+var BKC_crypto = typeof globalThis !== "undefined" && globalThis.crypto ? globalThis.crypto : window.crypto; // compat:ok (se detecta antes con typeof)
 function bkcB64(bytes) { var s = ""; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
 function bkcUnb64(str) { var b = atob(str), o = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) o[i] = b.charCodeAt(i); return o; }
 async function bkcKey(password, salt, iter) {

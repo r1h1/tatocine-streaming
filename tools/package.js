@@ -42,8 +42,8 @@ const sizeOf = (rels, key, dst) => rels.forEach((r) => { dst[key] += Buffer.byte
 // 3) CSS y JS
 const cssFiles = all("css", ".css"), jsFiles = all("js", ".js").filter((r) => !r.startsWith("js/vendor/"));
 sizeOf(cssFiles, "css", before); sizeOf(jsFiles.concat(["sw.js"]), "js", before);
-cssFiles.forEach((r) => { let c = legacyCss(rd(r)); if (es) c = es.transformSync(c, { loader: "css", minify: true, target: "chrome68", legalComments: "none" }).code; wr(r, c); });
-const minJs = (code) => (es ? es.transformSync(code, { loader: "js", minify: true, target: "chrome68", legalComments: "none" }).code : code);
+cssFiles.forEach((r) => { let c = legacyCss(rd(r)); if (es) c = es.transformSync(c, { loader: "css", minify: true, target: ["chrome68", "safari12"], legalComments: "none" }).code; wr(r, c); });
+const minJs = (code) => (es ? es.transformSync(code, { loader: "js", minify: true, target: ["chrome68", "safari12"], legalComments: "none" }).code : code);
 jsFiles.forEach((r) => wr(r, minJs(rd(r))));
 
 const hashOf = (rel) => sha(fs.readFileSync(path.join(SITE, rel)));
@@ -89,7 +89,7 @@ function htmlMin(h) {
   const keep = [];
   h = h.replace(/<(script|style|pre|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi, (m) => {
     if (/^<script[^>]*application\/ld\+json/i.test(m)) m = m.replace(/(<script[^>]*>)([\s\S]*?)(<\/script>)/i, (x, a, j, c) => { try { return a + JSON.stringify(JSON.parse(j)) + c; } catch (e) { return x; } });
-    else if (/^<style/i.test(m) && es) m = m.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/i, (x, a, c, z) => a + es.transformSync(legacyCss(c), { loader: "css", minify: true, target: "chrome68" }).code + z);
+    else if (/^<style/i.test(m) && es) m = m.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/i, (x, a, c, z) => a + es.transformSync(legacyCss(c), { loader: "css", minify: true, target: ["chrome68", "safari12"] }).code + z);
     keep.push(m); return "\u0000K" + (keep.length - 1) + "\u0000";
   });
   h = h.replace(/<!--[\s\S]*?-->/g, "").replace(/style="([^"]*)"/g, (m, s) => 'style="' + s.replace(/\s+/g, " ").trim() + '"');

@@ -205,6 +205,11 @@ function openDetails(id, type) {
         // Una sola regla de disponibilidad para el modal: estado Released o fecha anterior al día local.
         var isAvailable = !isUpcoming(releaseDate, data.status, type);
 
+        var resumeInfo = (function () {                    // título a medias en este perfil: el botón principal ofrece «Reanudar» (y abre justo ese episodio)
+          var pct = typeof resumePct === "function" ? resumePct(id, type) : 0; if (!pct) return null;
+          var m = (typeof continueWatching !== "undefined" ? continueWatching : []).filter(function (x) { return String(x.id) === String(id) && x.type === (type === "tv" ? "tv" : "movie"); })[0] || {};
+          return { pct: pct, season: type === "tv" ? m.season : null, episode: type === "tv" ? m.episode : null };
+        })();
         if (playBtn) {
           playBtn.disabled = !isAvailable;
           playBtn.setAttribute("aria-disabled", String(!isAvailable));
@@ -215,12 +220,12 @@ function openDetails(id, type) {
             : "Este contenido todavía no está disponible";
           playBtn.innerHTML =
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' +
-            (isAvailable ? "Ver" : "Próximamente");
+            (isAvailable ? (resumeInfo ? L("Reanudar", "Resume") + (resumeInfo.pct ? " · " + resumeInfo.pct + " %" : "") + (resumeInfo.season ? " · T" + resumeInfo.season + " E" + resumeInfo.episode : "") : "Ver") : "Próximamente");
           playBtn.onclick = function () {
             if (!isAvailable) return;
             closeDetails(true);
             var bgUrl = data.backdrop_path || data.poster_path || null;
-            openPlayer(id, type, title, null, null, bgUrl);
+            openPlayer(id, type, title, resumeInfo && resumeInfo.season ? resumeInfo.season : null, resumeInfo && resumeInfo.episode ? resumeInfo.episode : null, bgUrl);
           };
         }
 

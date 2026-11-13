@@ -30,6 +30,11 @@
     }
     if (wf === "0") root.classList.add("tc-welcome-boot");
   } catch (e) { }
+  // El fondo de la pantalla de carga (la última imagen que mostró el selector) se pide YA, desde la cabecera, en vez de esperar a que corra splash.js.
+  try {
+    var sb = localStorage.getItem("tatoSplashBgV1");
+    if (sb && /^\/[A-Za-z0-9_-]+\.jpg$/.test(sb)) { var pl = document.createElement("link"); pl.rel = "preload"; pl.as = "image"; pl.href = "https://image.tmdb.org/t/p/w780" + sb; pl.setAttribute("fetchpriority", "high"); document.head.appendChild(pl); }
+  } catch (e) { }
   var needsPicker = !selected || selected !== active;
   window.__tcSkipPicker = !needsPicker;
   if (needsPicker) { root.classList.add("tc-picker-boot"); setTimeout(function () { root.classList.remove("tc-picker-boot"); }, 8000); }

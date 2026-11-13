@@ -1,0 +1,27 @@
+/**
+ * TatoCine · css/22-legacy-browsers.css
+ * Respaldo de `aspect-ratio` (Chromium < 88: televisores y Fire TV de 2019–2020, webOS 5, Tizen 5.5, Android TV/Google TV con WebView 70–85; Safari < 15: iPhone/iPad antiguos
+ * y navegadores de Apple TV). Todo va dentro de `@supports not (aspect-ratio: 1 / 1) {
+  /* ::before con padding-top en % (el % es sobre el ANCHO DEL PROPIO ELEMENTO, también si tiene max-width o margen automático): da el alto 16:9 */
+  .player-container::before, #player-modal .player-container::before, .details-trailer::before { content: ""; display: block; padding-top: 56.25%; }
+  .player-container, #player-modal .player-container, .details-trailer.active { height: auto !important; min-height: 0 !important; max-height: none !important; }
+  .player-container:fullscreen, .player-container:-webkit-full-screen { height: 100% !important; }
+  .player-container:fullscreen::before, .player-container:-webkit-full-screen::before { display: none; }
+  .player-container iframe, #player-modal .player-container iframe, .details-trailer iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+  /* Tarjetas de las filas (ancho fijo en --card-w) y de las cuadrículas (16:9) y esqueletos del mismo tamaño */
+  .row-scroll .card, .skeleton-card { height: 0; padding-top: calc(var(--card-w, 260px) * 0.5625); }
+  .grid-container .card { height: auto; }
+  .grid-container .card::before { content: ""; display: block; padding-top: 56.25%; }
+  .row-scroll .card img, .grid-container .card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  /* Decidir en pareja (16:10), miniaturas de episodios, esqueletos y portadas de listas */
+  .cp-card::before { content: ""; display: block; padding-top: 62.5%; }
+  .cp-card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .ep-thumb::before, .skel-thumb::before { content: ""; display: block; padding-top: 56.25%; }
+  .ep-thumb img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .list-card::before { content: ""; display: block; padding-top: 150%; }
+  /* Avatares cuadrados del formulario de perfil: el pseudo-elemento da el alto = ancho dentro de la rejilla */
+  .pf-av::before { content: ""; display: block; padding-top: 100%; grid-area: 1 / 1; }
+  .pf-av > * { grid-area: 1 / 1; }
+  /* Estado vacío de la portada (cuadrado de 34 vw, máx. 390 px) */
+  .hero-empty-state { height: 34vw; max-height: 390px; }
+}

@@ -2,34 +2,35 @@
 
 > Interfaz web (frontend) de código abierto para explorar el catálogo de TMDB: películas, series y anime. No aloja, almacena ni distribuye contenido audiovisual; solo muestra datos e imágenes de TMDB (themoviedb.org) y funciona como PWA. Licencia GPLv3.
 
-Sitio: https://tatocine.netlify.app/
-Código: https://github.com/r1h1/tatocine-streaming
-Licencia: GNU GPL v3 o posterior (LICENSE)
+TatoCine es una aplicación estática (HTML, CSS y JavaScript nativos, sin servidor ni cuentas) que consulta la API pública de TMDB desde el navegador. Perfiles, favoritos, estadísticas y recomendaciones se guardan solo en el dispositivo del usuario (localStorage) y no se envían a ningún servidor. Idiomas: español (latino) e inglés, según el idioma del dispositivo. Funciona en celular, tableta, plegable, computadora y televisor (Fire TV, Android TV, Tizen, webOS y cualquier navegador Chromium) y se instala como PWA.
 
-## Qué es
-- Una aplicación estática (HTML, CSS y JavaScript nativos, sin servidor ni cuentas) que consulta la API pública de TMDB desde el navegador.
-- Perfiles, favoritos, estadísticas y recomendaciones se guardan solo en el dispositivo del usuario (localStorage); no se envían a ningún servidor.
-- Idiomas: español (latino) e inglés. Funciona en celular, tableta (iPad, Samsung, Xiaomi, Lenovo, Fire), plegable (Galaxy Fold/Flip, Pixel Fold), computadora y televisor (Fire TV, Android TV, Tizen, webOS y cualquier navegador Chromium); se instala como PWA y abre sin conexión.
+No es un servicio de streaming ni de descargas: no aloja películas, no ofrece descargas y no es afiliado a TMDB («This product uses the TMDB API but is not endorsed or certified by TMDB»). Los reproductores que se incrustan son de terceros y TatoCine no los controla.
 
-## Primer uso y legal
-- Bienvenida de 5 pasos para usuarios nuevos, selector de perfiles y aviso legal obligatorio («Aceptar y continuar»).
-- Proyecto de código abierto (GPLv3), gratuito y sin fines de lucro; su autor no obtiene ingresos. No aloja, almacena ni distribuye contenido y no ofrece descargas: solo muestra datos de TMDB e incrusta reproductores operados por terceros, que no controla.
-- Ajustes → «Restablecer a cero» borra todo lo guardado en el dispositivo.
+## Sitio y código
 
-## Qué NO es
-- No es un servicio de streaming ni de descargas, no aloja películas y no enlaza a descargas de terceros.
-- No es afiliado a TMDB: «This product uses the TMDB API but is not endorsed or certified by TMDB».
+- [TatoCine (sitio)](https://tatocine.netlify.app/): la aplicación web.
+- [Código fuente en GitHub](https://github.com/r1h1/tatocine-streaming): repositorio público, licencia GPLv3.
+- [Licencia GPLv3](https://github.com/r1h1/tatocine-streaming/blob/main/LICENSE): términos de uso, copia y modificación.
+
+## Documentación
+
+- [README](https://github.com/r1h1/tatocine-streaming/blob/main/README.md): funciones, privacidad, límites de uso, publicación y compatibilidad.
+- [Arquitectura](https://github.com/r1h1/tatocine-streaming/blob/main/docs/ARCHITECTURE.md): capas de CSS y JS, Service Worker, caché y pruebas.
 
 ## Funciones principales
+
 - Inicio con portada rotativa (Top 10 de la semana), filas por género, estrenos y plataformas.
-- Búsqueda, filtros, fichas con reparto, sagas, tráileres de YouTube y recomendados.
-- Mi cine: favoritos con listas, vistas, ver más tarde, calendario de estrenos y estadísticas.
-- «¿Qué ver?»: asistente, «Ver en base a tus gustos» y Decidir en pareja (cada persona elige títulos y votan juntos).
+- Búsqueda, filtros y fichas con reparto, sagas, tráileres de YouTube y recomendados.
+- Mi cine: favoritos con listas, vistas, ver más tarde, calendario de estrenos y estadísticas; «Reanudar» con el avance de cada título.
+- «¿Qué ver?»: asistente, «Ver en base a tus gustos», recomendaciones por perfil («Porque viste…») y Decidir en pareja.
 - Perfiles (adulto, niño con límites de tiempo, invitado), copia de seguridad cifrada y traspaso por QR.
 - Accesibilidad: tamaños de texto, alto contraste, reducir movimiento, navegación por teclado y mando.
 
 ## Para desarrolladores
-- Sin build: `css/` y `js/` por capas; ver docs/ARCHITECTURE.md y README.md.
-- Pruebas: `node tests/*.test.js` y `tests/e2e/run.js` (Playwright).
-- Navegadores: Chromium ≥ 68 (televisores incluidos), Firefox ≥ 78, Safari ≥ 12. El código fuente es moderno; `node tools/package.js` genera el paquete de producción con respaldos para Chromium viejo.
-- Publicación: `node tools/gen-headers.js && node tools/stamp.js && node tools/package.js` (cabeceras de Netlify/Vercel desde una sola fuente, versionado de caché por hash y ZIP limpio).
+
+- [Pruebas y publicación](https://github.com/r1h1/tatocine-streaming/blob/main/README.md): `node tests/*.test.js`, `tests/e2e/run.js` (Playwright) y `node tools/package.js` para el paquete de producción.
+- [Mapa del sitio](https://tatocine.netlify.app/sitemap.xml): páginas indexables.
+
+## Optional
+
+- [Política de rastreo (robots.txt)](https://tatocine.netlify.app/robots.txt): reglas para rastreadores.

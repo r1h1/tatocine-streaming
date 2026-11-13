@@ -427,6 +427,7 @@
           $rowsContainer.innerHTML = "";
           var h = null;
           renderContinueRow();
+          if (typeof reservePersonalSlot === "function") reservePersonalSlot();   // hueco de «Hecho para ti» (sin saltos)
           renderBrandRow();                                       // orden: Continuar viendo → Plataformas y estudios → Hecho para ti (se inserta antes de la 1.ª fila del catálogo) → resto
           if (t.results && t.results.length) {
             var m = t.results.map(mapMovieResult);

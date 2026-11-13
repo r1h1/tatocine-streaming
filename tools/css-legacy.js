@@ -9,6 +9,7 @@
  *   · :is(a, b) …                → selectores expandidos             (Chromium 88)
  *   · :focus-visible             → regla gemela con :focus bajo html.no-focus-visible (la clase la pone js/boot.js)       (Chromium 86)
  *   · display:flex + gap         → márgenes entre hijos bajo html.no-flex-gap (la clase la pone js/boot.js)               (Chromium 84)
+ *   · Prefijos de Safari / Apple TV / iOS: -webkit-backdrop-filter, -webkit-user-select, -webkit-appearance, position:-webkit-sticky (Safari ≤ 17 / ≤ 12)
  * No hace nada que un navegador moderno note. Límites: gap con flex-wrap se aproxima con margen derecho/inferior; aspect-ratio no tiene respaldo genérico.
  */
 function splitTop(str, sep) {
@@ -75,6 +76,10 @@ function transformBody(body) {
     if (k < 0) { out.push(d); continue; }
     const prop = d.slice(0, k).trim(), raw = d.slice(k + 1).trim(), important = /!important\s*$/.test(raw), val = raw.replace(/\s*!important\s*$/, ""), imp = important ? " !important" : "";
     if (prop.startsWith("--")) { out.push(d); continue; }
+    // Prefijos de WebKit (Safari, iOS y los navegadores de Apple TV): el respaldo va justo antes de la declaración estándar, así que esta la pisa donde ya existe.
+    const pre = { "backdrop-filter": "-webkit-backdrop-filter", "user-select": "-webkit-user-select", "appearance": "-webkit-appearance" }[prop];
+    if (pre && !decls.some((x) => x.startsWith(pre + ":") || x.startsWith(pre + " :"))) out.push(pre + ":" + val + imp);
+    if (prop === "position" && val === "sticky" && !out.includes("position:-webkit-sticky" + imp)) out.push("position:-webkit-sticky" + imp);
     if (prop === "inset") { const lh = boxToLonghands(val, important); if (lh) { out.push(...lh); continue; } }
     if (/(?<![-\w])(min|max|clamp|env)\(/.test(val)) {
       const fb = legacyValue(val);

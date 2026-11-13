@@ -31,13 +31,14 @@ function findBrowser() {
   throw new Error("No encuentro un navegador. Define CHROME_PATH.");
 }
 const serverHits = {};
-function serve() {
+function serve(rootDir) {
+  const R = rootDir || ROOT;
   return new Promise((resolve) => {
     const srv = http.createServer((req, res) => {
       let p = decodeURIComponent(new URL(req.url, "http://x").pathname); serverHits[p] = (serverHits[p] || 0) + 1;
       if (p.endsWith("/")) p += "index.html";
-      const file = path.join(ROOT, p);
-      if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end("no"); }
+      const file = path.join(R, p);
+      if (!file.startsWith(R) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end("no"); }
       res.writeHead(200, { "Content-Type": MIME[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store" });
       fs.createReadStream(file).pipe(res);
     }).listen(0, "127.0.0.1", () => resolve({ srv, url: "http://127.0.0.1:" + srv.address().port + "/" }));
@@ -836,6 +837,118 @@ async function main() {
     await run("bloqueo", () => tcAdultLimit.force()); await p.waitForTimeout(5800); const w3 = await p.evaluate(SP); if (w3.length) bad.bloqueo = w3;
     ok(Object.keys(bad).length === 0, "textos sin traducir: " + JSON.stringify(bad));
     await c2.close();
+  });
+  await test("Reanudar: las tarjetas de un título a medias muestran su barra de avance y la ficha ofrece «Reanudar · N %» (con el episodio si es serie); la portada no muestra texto hasta tener datos", async (page) => {
+    await enter(page);
+    ok(await page.evaluate(() => document.body.classList.contains("hero-ready")), "la portada sigue oculta");
+    const r = await page.evaluate(() => {
+      continueWatching = [{ id: 603, type: "movie", title: "Película 603", bg: "/a.jpg", pct: 40, timestamp: Date.now() }, { id: 1396, type: "tv", title: "Serie", bg: "/b.jpg", season: 2, episode: 3, pct: 55, timestamp: Date.now() }];
+      const h = (id, type) => getCardHTML({ id, type, title: "T", bg: "/x.jpg" });
+      return { with: /continue-progress/.test(h(603, "movie")) && /width:40%/.test(h(603, "movie")), without: /continue-progress/.test(h(1, "movie")), done: resumePct(603, "movie") };
+    });
+    ok(r.with && !r.without && r.done === 40, "barra de avance en tarjetas: " + JSON.stringify(r));
+    await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 }); await page.waitForTimeout(300);
+    const t = (await page.locator("#details-play-btn").innerText()).trim();
+    ok(/Reanudar · 40 %/.test(t), "el botón de la ficha debía decir «Reanudar · 40 %»: " + t);
+    await page.evaluate(() => closeDetails(true));
+    await page.evaluate(() => openDetails(1396, "tv")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 }); await page.waitForTimeout(300);
+    ok(/Reanudar · 55 % · T2 E3/.test((await page.locator("#details-play-btn").innerText()).trim()), "serie: «Reanudar · 55 % · T2 E3»");
+  });
+  await test("Sin saltos de diseño (CLS): con red lenta simulada y un perfil con historial, la portada y las filas no se mueven al cargar (≤ 0,05 en móvil)", async (page, ctx) => {
+    process.env.TMDB_MOCK_DELAY = "600";
+    try {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 412, height: 823 }, deviceScaleFactor: 1.75, isMobile: true, hasTouch: true, locale: "es-ES" });
+      await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => {
+        window.__TC_SPLASH_MS = 0; window.__cls = 0;
+        new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true });
+        try {
+          localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); const now = Date.now();
+          localStorage.setItem("tatoProfile_main_tatoLocalAnalyticsV1", JSON.stringify({ items: [{ id: 603, type: "movie", title: "A", genreIds: [28, 18], secs: 5000, plays: 2, done: 1, lastPlayedAt: now - 86400000, lang: "en" }, { id: 604, type: "movie", title: "B", genreIds: [28, 53], secs: 3000, plays: 1, done: 0, lastPlayedAt: now - 3600000, lang: "en" }] }));
+          localStorage.setItem("tatoProfile_main_tatoContinue", JSON.stringify([{ id: 604, type: "movie", title: "B", bg: "/b.jpg", pct: 40, timestamp: now }]));
+        } catch (e) { }
+      });
+      const p = await c2.newPage(); await p.goto(url, { waitUntil: "load" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+      await p.waitForFunction(() => document.querySelector(".personalized-row:not(.is-slot) .card"), null, { timeout: 20000 }); await p.waitForTimeout(2500);
+      const r = await p.evaluate(() => ({ cls: window.__cls, rows: [...document.querySelectorAll(".catalog-row,.continue-row")].map((e) => (e.querySelector(".row-title") || {}).textContent).join(" | ") }));
+      ok(r.cls <= 0.05, "salto de diseño acumulado " + r.cls.toFixed(3) + " (> 0,05): " + r.rows);
+      ok(/Continuar Viendo \| Hecho para ti \| Tendencias/.test(r.rows), "orden de filas inesperado: " + r.rows);
+      await c2.close();
+    } finally { delete process.env.TMDB_MOCK_DELAY; }
+  });
+  await test("Servidores: los 6 (ESP1–ESP5 en español latino + ENG1) tienen URL https válida por ID de TMDB (película y serie), no se repiten y cada botón del reproductor carga su iframe con allowfullscreen", async (page) => {
+    await enter(page);
+    const info = await page.evaluate(() => SERVERS.map((s) => ({ name: s.name, movie: s.url(550, "movie"), tv: s.url(1399, "tv", 2, 5) })));
+    eq(info.map((x) => x.name).join(","), "ESP1,ESP2,ESP3,ESP4,ESP5,ENG1", "servidores y orden:");
+    const hosts = new Set();
+    for (const x of info) {
+      for (const u of [x.movie, x.tv]) { const w = new URL(u); eq(w.protocol, "https:", x.name + " debe ser https:"); ok(w.pathname.includes("550") || w.pathname.includes("1399"), x.name + " no lleva el ID de TMDB: " + u); }
+      ok(/\/1399\/2\/5/.test(x.tv), x.name + " debe llevar temporada 2 episodio 5: " + x.tv); hosts.add(new URL(x.movie).hostname);
+    }
+    eq(hosts.size, 6, "dominios distintos:");
+    ok(info.find((x) => x.name === "ESP4").movie.startsWith("https://videoapi.la/e/movie/550") && info.find((x) => x.name === "ESP5").movie === "https://facilitoplay.com/e/pelicula/550" && info.find((x) => x.name === "ESP5").tv === "https://facilitoplay.com/e/serie/1399/2/5", "patrones de VideoAPI / FacilitoPlay");
+    await page.evaluate(() => openPlayer(550, "movie", "Fight Club")); await page.waitForSelector("#server-switcher .server-btn", { timeout: 8000 });
+    const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim()));
+    ok(info.every((x) => names.some((n) => n.includes(x.name))), "faltan botones de servidor: " + JSON.stringify(names));
+    for (const x of info) {
+      await page.evaluate((n) => { [...document.querySelectorAll("#server-switcher .server-btn")].find((b) => b.textContent.includes(n)).click(); }, x.name); await page.waitForTimeout(250);
+      const f = await page.evaluate(() => { const i = document.querySelector("#player-view iframe"); return i ? { src: i.src, fs: i.allowFullscreen, allow: i.getAttribute("allow") } : null; });
+      ok(f && f.src === x.movie && f.fs && /fullscreen/.test(f.allow), x.name + ": iframe incorrecto " + JSON.stringify(f));
+    }
+    await page.evaluate(() => closePlayer());
+  });
+  await test("Navegadores viejos SIN aspect-ratio (Chromium < 88, TV 2019–2020, Safari < 15, Apple TV): reproductor 16:9, tarjetas 16:9 y avatares cuadrados con el bloque de respaldo", async (page, ctx) => {
+    const tmp = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "tc-legacy-"));
+    for (const f of fs.readdirSync(ROOT)) { if (["node_modules", ".git", "tests", "docs", "tools", "dist"].includes(f)) continue; fs.cpSync(path.join(ROOT, f), path.join(tmp, f), { recursive: true }); }
+    for (const f of fs.readdirSync(path.join(tmp, "css"))) { const q = path.join(tmp, "css", f); fs.writeFileSync(q, fs.readFileSync(q, "utf8").replace(/aspect-ratio\s*:/g, "x-aspect-ratio:").replace(/@supports not \(aspect-ratio: 1 \/ 1\)/g, "@supports not (x-aspect-ratio: 1 / 1)")); }
+    const { srv: s2, url: u2 } = await serve(tmp);
+    try {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+      const p = await c2.newPage(); await p.goto(u2, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+      await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await p.waitForTimeout(800);
+      ok(await p.evaluate(() => !CSS.supports("x-aspect-ratio", "1")), "la simulación no desactivó aspect-ratio");
+      const card = await p.evaluate(() => { const c = document.querySelector(".row-scroll .card"); const b = c.getBoundingClientRect(); return { w: b.width, h: b.height }; });
+      ok(card.h > 0 && Math.abs(card.h - (card.w * 9) / 16) <= 6, "tarjeta sin aspect-ratio: " + JSON.stringify(card));
+      await p.evaluate(() => openPlayer(550, "movie", "Fight Club")); await p.waitForSelector("#player-view iframe", { timeout: 8000 }); await p.waitForTimeout(400);
+      const pl = await p.evaluate(() => { const c = document.querySelector("#player-modal .player-container").getBoundingClientRect(), f = document.querySelector("#player-view iframe").getBoundingClientRect(); return { w: c.width, h: c.height, fw: f.width, fh: f.height }; });
+      ok(pl.h > 150 && Math.abs(pl.h - (pl.w * 9) / 16) <= 6 && Math.abs(pl.fh - pl.h) <= 4 && Math.abs(pl.fw - pl.w) <= 4, "reproductor sin aspect-ratio debía ser 16:9 con el iframe llenándolo: " + JSON.stringify(pl));
+      await p.evaluate(() => closePlayer());
+      await p.evaluate(() => { openProfileCreateModal(); }); await p.waitForTimeout(400);
+      const av = await p.evaluate(() => { const a = [...document.querySelectorAll("#tc-profile-create-overlay .pf-av")].map((e) => e.getBoundingClientRect()); return { n: a.length, ok: a.every((r) => r.width > 20 && Math.abs(r.width - r.height) <= 3) }; });
+      ok(av.n >= 10 && av.ok, "avatares no cuadrados sin aspect-ratio: " + JSON.stringify(av));
+      await c2.close();
+    } finally { s2.close(); fs.rmSync(tmp, { recursive: true, force: true }); }
+  });
+  await test("Isla dinámica / notch / recortes de cámara (iPhone 14 Pro, Android con agujero): portada, barra superior, Ajustes, reproductor y diálogos quedan dentro de la zona segura en vertical y en horizontal (isla a la izquierda y a la derecha)", async (page, ctx) => {
+    for (const [name, vp, ins] of [["vertical", { width: 393, height: 852 }, { top: 59, bottom: 34, left: 0, right: 0 }], ["isla a la izquierda", { width: 852, height: 393 }, { top: 0, bottom: 21, left: 59, right: 0 }], ["isla a la derecha", { width: 852, height: 393 }, { top: 0, bottom: 21, left: 0, right: 59 }]]) {
+      const c2 = await ctx.browser().newContext({ viewport: vp, isMobile: true, hasTouch: true, deviceScaleFactor: 3, locale: "es-ES" });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+      const p = await c2.newPage(); const cdp = await c2.newCDPSession(p); await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: ins });
+      await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+      await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await p.waitForTimeout(700);
+      const inside = (sel, tag) => p.evaluate(([sel, ins]) => {
+        const e = [...document.querySelectorAll(sel)].find((x) => { const r = x.getBoundingClientRect(); return r.width > 8 && getComputedStyle(x).visibility !== "hidden"; });
+        if (!e) return tag + ": no se encontró " + sel; const r = e.getBoundingClientRect(), vw = innerWidth;
+        return r.left >= ins.left - 1 && r.right <= vw - ins.right + 1 && r.top >= ins.top - 1 ? "" : sel + " [" + Math.round(r.left) + "," + Math.round(r.top) + "," + Math.round(r.right) + "] fuera de la zona segura";
+      }, [sel, ins]);
+      const bad = [];
+      for (const sel of ["#hero-play-btn", "#search-input", ".top-nav .profile-trigger, .top-nav .tc-profile-trigger, .top-nav button"]) { const r = await inside(sel, name); if (r) bad.push(r); }
+      await p.evaluate(() => showSettings()); await p.waitForTimeout(500);
+      for (const sel of ["#settings-modal .modal-close", "#settings-modal .settings-option .danger-btn"]) { const r = await inside(sel, name); if (r) bad.push(r); }
+      await p.evaluate(() => closeSettings());
+      await p.evaluate(() => openPlayer(550, "movie", "F")); await p.waitForSelector("#server-switcher .server-btn"); await p.waitForTimeout(400);
+      for (const sel of ["#server-switcher .server-btn", "#player-modal .modal-close"]) { const r = await inside(sel, name); if (r) bad.push(r); }
+      const rightmost = await p.evaluate((ins) => [...document.querySelectorAll("#server-switcher .server-btn")].every((b) => b.getBoundingClientRect().right <= innerWidth - ins.right + 1 && b.getBoundingClientRect().left >= ins.left - 1), ins);
+      if (!rightmost) bad.push("botones de servidor fuera de la zona segura");
+      await p.evaluate(() => closePlayer());
+      await p.evaluate(() => openWizard()); await p.waitForTimeout(500);
+      const r2 = await inside("#tc-wizard-overlay .tc-profile-create-close", name); if (r2) bad.push(r2);
+      ok(bad.length === 0, name + ": " + bad.join(" | "));
+      await c2.close();
+    }
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);

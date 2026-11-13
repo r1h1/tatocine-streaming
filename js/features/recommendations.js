@@ -5,8 +5,25 @@
  * manejadores inline y las funciones de otras capas sigan funcionando. Orden de carga: ver index.html.
  */
     // ---- Recomendaciones locales: se activan con 2 títulos empezados (aunque no se terminen) y mejoran con cada uno más ----
+    var personalSlot = null;
+    /** Reserva (con tarjetas «esqueleto» del mismo tamaño) el lugar de «Hecho para ti» ANTES de que lleguen los datos: así, al llegar, la fila ocupa su hueco y no empuja
+     *  hacia abajo las filas que ya se ven (era el mayor salto de diseño de la portada). Solo si el perfil tiene historial suficiente para que la fila vaya a existir. */
+    function reservePersonalSlot() {
+      personalSlot = null;
+      try {
+        if (isKidProfile() || engagedTitles().length < 2 || !getTasteProfile().length) return;
+        var row = document.createElement("div");
+        row.className = "row catalog-row personalized-row is-slot";
+        row.setAttribute("aria-hidden", "true");
+        row.innerHTML = '<div class="row-header"><h2 class="row-title">&nbsp;</h2></div><div class="row-scroll">' + (typeof skeletonCards === "function" ? skeletonCards(8) : "") + "</div>";
+        $rowsContainer.insertBefore(row, $rowsContainer.querySelector(".catalog-row") || null);
+        personalSlot = row;
+      } catch (e) { personalSlot = null; }
+    }
+    function releasePersonalSlot() { if (personalSlot && personalSlot.parentNode) personalSlot.parentNode.removeChild(personalSlot); personalSlot = null; }
     function insertPersonalRow(title, picks, anchor, className) {
-      var row = document.createElement("div");
+      var row = (!anchor && personalSlot && personalSlot.parentNode) ? personalSlot : document.createElement("div");   // «Hecho para ti» ocupa el hueco reservado
+      if (row === personalSlot) { row.removeAttribute("aria-hidden"); personalSlot = null; }
       row.className = "row catalog-row personalized-row " + (className || "");
       row.innerHTML =
         '<div class="row-header"><h2 class="row-title">' + escapeHTML(title) + '</h2></div><button class="row-nav prev" data-act="row-scroll" data-dir="-1" aria-label="Anterior">‹</button><button class="row-nav next" data-act="row-scroll" data-dir="1" aria-label="Siguiente">›</button><div class="row-scroll">' +
@@ -16,13 +33,13 @@
       return row;
     }
     function loadPersonalizedHomeRow() {
-      if (isKidProfile()) return;
+      if (isKidProfile()) { releasePersonalSlot(); return; }
       var items = localAnalytics.items || [];
       var done = engagedTitles();
       var n = done.length;
-      if (n < 2) return;                                   // mínimo 2 títulos vistos (terminados o con ≥ 2 min de reproducción)
+      if (n < 2) { releasePersonalSlot(); return; }                                   // mínimo 2 títulos vistos (terminados o con ≥ 2 min de reproducción)
       var profile = getTasteProfile();
-      if (!profile.length) return;
+      if (!profile.length) { releasePersonalSlot(); return; }
       var snapshot = catalogRequestId;
       var now = Date.now();
       var weights = {};
@@ -144,11 +161,19 @@
         rest.filter(function (m0) { return !(m0._genres || []).some(function (id) { return topSet[id]; }); })
           .sort(function (a0, b0) { return b0._tasteScore - a0._tasteScore; }).slice(0, exploreN)
           .forEach(function (m0) { used[m0.type + ":" + m0.id] = true; picks.push(m0); });
-        if (!picks.length) return;
+        if (!picks.length) { releasePersonalSlot(); return; }
         var main = insertPersonalRow("Hecho para ti", picks, null, "");
         // "Porque viste X": recomendaciones directas del título finalizado más relevante.
-        var because = scored.filter(function (m) { return m._seeds.includes(0) && !used[m.type + ":" + m.id]; }).slice(0, 16);
-        if (because.length >= 6 && seeds[0]) insertPersonalRow("Porque viste " + seeds[0].title, because, main, "because-row");
+        // Hasta dos filas por perfil: «Porque viste X» (título más relevante y el siguiente), «Porque guardaste X» o «Porque te gustó X»; sin repetir títulos entre filas.
+        var shown = {}; Object.keys(used).forEach(function (k) { shown[k] = true; });
+        var rowsNow = $rowsContainer.querySelectorAll(".catalog-row"), anchorRow = rowsNow.length > 4 ? rowsNow[3] : rowsNow[rowsNow.length - 1] || main;   // «Porque viste…» va debajo de lo que se ve al abrir (no empuja nada visible)
+        allSeeds.slice(0, 2).forEach(function (sd, i) {
+          var rowItems = scored.filter(function (m) { return m._seeds.includes(i) && !shown[m.type + ":" + m.id]; }).slice(0, 16);
+          if (rowItems.length < 6 || !sd || !sd.title) return;
+          rowItems.forEach(function (m) { shown[m.type + ":" + m.id] = true; });
+          var prefix = i < seeds.length ? L("Porque viste ", "Because you watched ") : sd.fav ? L("Porque guardaste ", "Because you saved ") : L("Porque te gustó ", "Because you liked ");
+          anchorRow = insertPersonalRow(prefix + sd.title, rowItems, anchorRow, "because-row");
+        });
       }).catch(function () { });
     };
     function recencyOf(it, half) {
