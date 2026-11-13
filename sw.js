@@ -9,7 +9,7 @@
      con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
      conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-8eb23422";
+const VERSION = "5.6-d6be5406";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";

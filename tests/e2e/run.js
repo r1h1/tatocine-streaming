@@ -772,14 +772,14 @@ async function main() {
     }
   });
   await test("Splash de carga, título «Elige un perfil» si ya no existe «Mi perfil», descripción con «ver más», pie legal dentro del scroll (no fijo) y actor por encima de la ficha en Decidir en pareja", async (page) => {
-    await page.addInitScript(() => { window.__TC_SPLASH_MS = 3000; });
+    await page.addInitScript(() => { window.__TC_SPLASH_MS = 1500; });
     const t0 = Date.now(); await page.goto(url, { waitUntil: "commit" }); await page.waitForTimeout(350);
     ok(await page.evaluate(() => !!document.getElementById("tc-splash") && getComputedStyle(document.getElementById("tc-splash")).opacity !== "0"), "no se ve el splash de carga");
     await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
-    await page.waitForTimeout(1500);
-    ok(await page.evaluate(() => { const e = document.getElementById("tc-splash"); return !!e && !e.classList.contains("out"); }), "el splash se retiró antes de los 3 s (a los " + (Date.now() - t0) + " ms)");
+    await page.waitForTimeout(500);
+    ok(await page.evaluate(() => { const e = document.getElementById("tc-splash"); return !!e && !e.classList.contains("out"); }), "el splash se retiró antes de 1,5 s (a los " + (Date.now() - t0) + " ms)");
     await page.waitForFunction(() => { const e = document.getElementById("tc-splash"); return !e || e.classList.contains("out"); }, null, { timeout: 5000 });
-    const dur = Date.now() - t0; ok(dur >= 2900 && dur <= 4600, "el splash debía durar 3 s: " + dur + " ms");
+    const dur = Date.now() - t0; ok(dur >= 1400 && dur <= 3200, "el splash debía durar 1,5 s: " + dur + " ms");
     await page.waitForFunction(() => !document.getElementById("tc-splash"), null, { timeout: 4000 });
     eq(await page.evaluate(() => document.getElementById("tc-profile-title").textContent), "Elige “Mi perfil”", "título con el perfil por defecto:");
     await page.evaluate(() => { localProfiles[0].name = "Dani"; renderProfilesPanel(); });
