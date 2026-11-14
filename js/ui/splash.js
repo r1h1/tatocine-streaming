@@ -11,7 +11,8 @@
     var seed = localStorage.getItem("tatoSplashBgV1");
     if (seed && /^\/[A-Za-z0-9_-]+\.jpg$/.test(seed)) {
       var url = "https://image.tmdb.org/t/p/w780" + seed, bg = document.getElementById("tc-splash-bg"), im = new Image();
-      im.onload = function () { if (bg && !done) { bg.style.backgroundImage = "url(\"" + url + "\")"; bg.classList.add("on"); } };
+      if (bg && !document.documentElement.style.getPropertyValue("--tc-seed-bg")) bg.style.backgroundImage = "url(\"" + url + "\")";   // respaldo si boot.js no dejó la variable CSS
+      im.onload = function () { if (bg && !done) bg.classList.add("on"); };                 // la imagen aparece con un fundido corto sobre el fondo local: sin destello negro
       im.src = url;
     }
   } catch (e) { }

@@ -9,6 +9,24 @@
     if (!Array.isArray(favLists)) favLists = [];
     favLists = favLists.filter(function (l) { return l && l.id && l.name; });
     var favFilter = "all", favPickerMedia = null, favPickerAfter = null, editingListId = null;
+    // Vista de «Mi cine» (como «Mi lista» de Netflix o la lista de seguimiento de Disney+): tipo (todo / películas / series) y orden, recordados por perfil.
+    var favPrefs = (function () {
+      var v = readLocalJSON(profileStorageKey("tatoFavView"), null) || {};
+      return { type: ["all", "movie", "tv"].indexOf(v.type) > -1 ? v.type : "all", sort: ["recent", "az", "rating", "year"].indexOf(v.sort) > -1 ? v.sort : "recent" };
+    })();
+    function saveFavPrefs() { safeStorageSet(profileStorageKey("tatoFavView"), JSON.stringify(favPrefs)); }
+    /** Aplica el filtro de tipo y el orden elegidos a una lista de títulos (sin tocar la original). «Recientes» = lo último que se agregó va primero. */
+    function favApplyView(items) {
+      var a = (items || []).filter(function (m) { return favPrefs.type === "all" || (favPrefs.type === "tv" ? m.type === "tv" : m.type !== "tv"); });
+      if (favPrefs.sort === "recent") return a.slice().reverse();
+      var lang = typeof UI_EN !== "undefined" && UI_EN ? "en" : "es";
+      return a.slice().sort(function (x, y) {
+        if (favPrefs.sort === "az") return String(x.title || "").localeCompare(String(y.title || ""), lang, { sensitivity: "base" });
+        if (favPrefs.sort === "rating") return (Number(y.rating) || 0) - (Number(x.rating) || 0);
+        return (parseInt(y.year, 10) || 0) - (parseInt(x.year, 10) || 0);
+      });
+    }
+    function favNoMatch() { return '<p class="fav-empty">' + L("Ningún título coincide con este filtro.", "No titles match this filter.") + "</p>"; }
     function saveFavLists() { return safeStorageSet(profileStorageKey("tatoFavLists"), JSON.stringify(favLists)); }
     function saveMyList() { return safeStorageSet(profileStorageKey("tatoList"), JSON.stringify(myList)); }
     function favListById(id) { return favLists.find(function (l) { return l.id === id; }) || null; }
@@ -131,12 +149,13 @@
     function setFavFilter(id) {
       favLimit = FAV_PAGE; favFilter = id; renderFavoritesView(); }
     function favSection(title, listId, editable) {
-      var items = myList.filter(function (m) { return (m.list || null) === (listId || null); });
+      var items = myList.filter(function (m) { return (m.list || null) === (listId || null); }), shown = favApplyView(items);
       var head = '<div class="row-header"><h2 class="row-title"' + (listId ? ' data-i18n="skip"' : "") + '>' + escapeHTML(title) + ' <span class="fav-count">(' + items.length + ')</span></h2>' +
         (listId && favFilter === listId ? '<button type="button" class="fav-close-btn" data-act="fav-filter" data-v="all" aria-label="Cerrar lista" title="Cerrar lista"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Cerrar lista</span></button>' : "") +
         (editable ? '<button type="button" class="fav-edit-btn" title="Editar lista" aria-label="Editar lista" data-act="open-list" data-id="' + escapeHTML(listId) + '"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>' : "") + "</div>";
       if (!items.length) return '<section class="fav-section">' + head + '<p class="fav-empty">Esta lista aún no tiene títulos. Usa el corazón en cualquier título y elige esta lista.</p></section>';
-      return '<section class="fav-section">' + head + '<div class="grid-container">' + items.slice(0, favLimit).map(getCardHTML).join("") + "</div></section>" + (items.length > favLimit ? markFavTruncated() : "");
+      if (!shown.length) return '<section class="fav-section">' + head + favNoMatch() + "</section>";
+      return '<section class="fav-section">' + head + '<div class="grid-container">' + shown.slice(0, favLimit).map(getCardHTML).join("") + "</div></section>" + (shown.length > favLimit ? markFavTruncated() : "");
     }
     var FAV_PAGE = 36, favLimit = FAV_PAGE, favTruncated = false;
     var PENCIL_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
@@ -222,7 +241,26 @@
       else if (favFilter === "later") body = laterSection();
       else if (favFilter === "general") body = favSection("General", null, false);
       else body = favSection(favListById(favFilter).name, favFilter, false);
-      $rowsContainer.innerHTML = '<h1 class="sr-only">' + L("Mi cine", "My Cinema") + "</h1>" + toolbar + cards + body;
+      var nm = myList.filter(function (m) { return m.type !== "tv"; }).length, ns = myList.length - nm;
+      var plural = function (n, one, many) { return n + " " + (n === 1 ? one : many); };
+      var parts = [];
+      if (myList.length) { parts.push(UI_EN ? plural(myList.length, "title", "titles") : plural(myList.length, "título", "títulos")); if (nm) parts.push(UI_EN ? plural(nm, "movie", "movies") : plural(nm, "película", "películas")); if (ns) parts.push(plural(ns, "series", "series")); }
+      if (favLists.length) parts.push(UI_EN ? plural(favLists.length, "list", "lists") : plural(favLists.length, "lista", "listas"));
+      var head = '<header class="fav-head"><h1 class="fav-title">' + L("Mi cine", "My Cinema") + "</h1>" + (parts.length ? '<p class="fav-summary">' + escapeHTML(parts.join(" · ")) + "</p>" : "") + "</header>";
+      var seg = function (act, cur, opts) { return '<div class="fav-seg" role="group">' + opts.map(function (o) { return '<button type="button" class="fav-seg-btn' + (cur === o[0] ? " active" : "") + '" data-act="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div>"; };
+      var hasAny = myList.length || laterList.length || (typeof watchedList === "function" && watchedList().length);
+      var controls = hasAny && (favFilter === "all" || favFilter === "general" || favFilter === "watched" || favFilter === "later" || favListById(favFilter))
+        ? '<div class="fav-controls" aria-label="' + L("Filtrar y ordenar", "Filter and sort") + '">' +
+          seg("fav-type", favPrefs.type, [["all", L("Todo", "All")], ["movie", L("Películas", "Movies")], ["tv", L("Series", "Series")]]) +
+          seg("fav-sort", favPrefs.sort, [["recent", L("Recientes", "Recent")], ["az", "A–Z"], ["rating", L("Mejor valoradas", "Top rated")], ["year", L("Más nuevas", "Newest")]]) + "</div>" : "";
+      $rowsContainer.innerHTML = head + toolbar + controls + cards + body;
+      // «Seguir viendo» arriba de todo (lo que dejaste a medias, con su barra de avance), solo en la vista principal
+      if (favFilter === "all" && !isKidProfile() && typeof renderContinueRow === "function") {
+        var lastBefore = $rowsContainer.lastElementChild;
+        renderContinueRow();
+        var cr = $rowsContainer.lastElementChild, anchor = $rowsContainer.querySelector(".fav-controls") || $rowsContainer.querySelector(".fav-toolbar");
+        if (cr && cr !== lastBefore && cr.classList.contains("continue-row") && anchor) anchor.parentNode.insertBefore(cr, anchor.nextSibling);
+      }
       $rowsContainer.querySelectorAll(".list-card").forEach(function (el) {
         var l = favListById(el.getAttribute("data-list"));
         if (!l) return;
@@ -282,3 +320,5 @@ registerAction("fav-filter", function (el) { setFavFilter(el.dataset.v || "all")
 registerAction("fav-toggle", function (el) { var id = el.dataset.id; setFavFilter(favFilter === id ? "all" : id); });
 registerAction("open-list", function (el) { openListModal(el.dataset.id || undefined); });
 registerAction("open-stats", function () { openStats(); });
+registerAction("fav-type", function (el) { favPrefs.type = el.dataset.v || "all"; saveFavPrefs(); favLimit = FAV_PAGE; renderFavoritesView(); });
+registerAction("fav-sort", function (el) { favPrefs.sort = el.dataset.v || "recent"; saveFavPrefs(); favLimit = FAV_PAGE; renderFavoritesView(); });

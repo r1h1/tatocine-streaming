@@ -310,7 +310,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 29,8 s (1,8 + 18 + 10)", true, 29800]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 26,8 s (1,8 + 15 + 10)", true, 26800]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -349,11 +349,11 @@ async function main() {
     ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
-  await test("portada: sin botón de volumen, 1,8 s para verse, 18 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
+  await test("portada: sin botón de volumen, 1,8 s para verse, 15 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
     await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
-    eq(r.dwell, 29800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+    eq(r.dwell, 26800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 
   await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
@@ -822,11 +822,13 @@ async function main() {
     await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
     const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
     await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await p.waitForTimeout(600);
-    const SP = () => { const out = new Set(), sp = /[áéíóúñ¿¡]|\b(de|del|la|el|los|las|tu|tus|para|con|sin|una|que|por|al|más|todo|esta|puedes|hasta|desde|cuando|solo)\b/i, ignore = /Película \d+|Sinopsis de prueba|Serie|Tendencia|Actor \d|Prueba|Comedia|Misterio|Estrenada|Filmografía|Biografía de prueba|ESP · Español|Ciudad/;
+    const SP = () => { const out = new Set(), sp = /[áéíóúñ¿¡]|\b(de|del|la|el|los|las|tu|tus|para|con|sin|una|que|por|al|más|todo|esta|puedes|hasta|desde|cuando|solo|recomendar|contenido|borrar|eliminar|preferidos|servidor|reproducir|películas|favoritos|restablecer|activar|desactivar|tamaño|mostrar|copiar|ajustes|perfil|inicio|niños|cambiar|menú|cerrar|actualización|cambios|actualizar|ahora|disponible)\b/i, ignore = /Película \d+|Sinopsis de prueba|Serie|Tendencia|Actor \d|Prueba|Comedia|Misterio|Estrenada|Filmografía|Biografía de prueba|ESP · Español|Ciudad/;
       const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.textContent.trim(), e = n.parentElement; if (t.length < 2 || !e || /SCRIPT|STYLE/.test(e.tagName)) continue; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || r.width < 1 || r.height < 1) continue; if (sp.test(t) && !ignore.test(t)) out.add(t.slice(0, 80)); }
       document.querySelectorAll("[title],[aria-label],[placeholder]").forEach((e) => { if (!e.offsetParent && getComputedStyle(e).position !== "fixed") return; ["title", "aria-label", "placeholder"].forEach((a) => { const t = e.getAttribute(a); if (t && sp.test(t) && !ignore.test(t)) out.add("@" + a + ": " + t.slice(0, 70)); }); }); return [...out]; };
     const bad = {}; const run = async (name, fn) => { await p.evaluate(fn); await p.waitForTimeout(600); const r = await p.evaluate(SP); if (r.length) bad[name] = r; };
     await run("inicio", () => 0); await run("ajustes", () => showSettings()); await p.evaluate(() => closeSettings());
+    await run("mi-cine", () => { myList.push({ id: 11, type: "movie", title: "Zeta", bg: "/a.jpg", rating: 9, year: 2001 }); switchView("list"); }); await p.evaluate(() => switchView("home"));
+    await run("actualizacion", () => tcShowUpdate(() => 0)); await p.evaluate(() => { var o = document.getElementById("tc-update-overlay"); o.classList.remove("open"); tcUpdateOpen = false; document.body.style.overflow = ""; });
     await run("ficha", () => openDetails(603, "movie")); await p.evaluate(() => closeDetails(true));
     await run("asistente", () => openWizard()); await p.evaluate(() => closeWizard());
     await run("pareja", () => openCouplePicker()); await p.evaluate(() => closeQr());
@@ -949,6 +951,88 @@ async function main() {
       ok(bad.length === 0, name + ": " + bad.join(" | "));
       await c2.close();
     }
+  });
+  await test("Actualización obligatoria: ventana «¡Actualización disponible!» con «Cambios:» (5), sin ✕, que no se cierra con Esc, Tab ni tocando fuera, y con el botón «Actualizar ahora»", async (page) => {
+    await enter(page);
+    await page.evaluate(() => { window.__upd = 0; tcShowUpdate(() => { window.__upd++; }); });
+    await page.waitForSelector("#tc-update-overlay.open", { timeout: 3000 });
+    const r = await page.evaluate(() => ({ title: document.getElementById("tc-update-title").textContent, sub: document.querySelector(".tc-update-sub").textContent, n: document.querySelectorAll("#tc-update-list li").length, btn: document.getElementById("tc-update-go").textContent, closeBtns: document.querySelectorAll("#tc-update-overlay .tc-profile-create-close, #tc-update-overlay [data-act*='cancel'], #tc-update-overlay [data-act*='close']").length, z: +getComputedStyle(document.getElementById("tc-update-overlay")).zIndex }));
+    eq(r.title, "¡Actualización disponible!", "título:"); eq(r.sub, "Cambios:", "subtítulo:"); eq(r.n, 5, "cambios listados:"); eq(r.btn, "Actualizar ahora", "botón:"); eq(r.closeBtns, 0, "botones de cerrar:"); ok(r.z >= 100300, "debe ir por encima de todo: " + r.z);
+    await page.keyboard.press("Escape"); await page.keyboard.press("Tab"); await page.mouse.click(5, 5); await page.waitForTimeout(250);
+    ok(await page.evaluate(() => document.getElementById("tc-update-overlay").classList.contains("open") && document.activeElement === document.getElementById("tc-update-go")), "la ventana se cerró o perdió el foco");
+    await page.click("#tc-update-go"); await page.waitForTimeout(200);
+    const a = await page.evaluate(() => ({ upd: window.__upd, dis: document.getElementById("tc-update-go").disabled, txt: document.getElementById("tc-update-go").textContent }));
+    ok(a.upd === 1 && a.dis && /Actualizando/.test(a.txt), "el botón no aplicó la actualización: " + JSON.stringify(a));
+  });
+  await test("Menú hamburguesa: panel lateral con iconos, opciones de 52 px, Perfil y Ajustes, y se cierra tocando fuera", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+    await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    await p.click(".hamburger-btn"); await p.waitForTimeout(450);
+    const m = await p.evaluate(() => { const items = [...document.querySelectorAll("#mobile-menu .nav-item")].filter((e) => e.offsetParent); return { open: document.getElementById("mobile-menu").classList.contains("open"), w: document.querySelector(".mm-panel").getBoundingClientRect().width, n: items.length, icons: items.every((e) => e.querySelector("svg")), hs: items.map((e) => Math.round(e.getBoundingClientRect().height)), lock: document.documentElement.classList.contains("menu-lock"), txt: items.map((e) => e.textContent.trim()) }; });
+    ok(m.open && m.w <= 341 && m.n === 9 && m.icons && m.hs.every((h) => h >= 48) && m.lock, "panel del menú: " + JSON.stringify(m));
+    ok(["Cambiar de perfil", "Ajustes"].every((t) => m.txt.includes(t)), "faltan accesos: " + m.txt.join(","));
+    await p.mouse.click(380, 420); await p.waitForTimeout(450);
+    ok(!(await p.evaluate(() => document.getElementById("mobile-menu").classList.contains("open"))), "tocar fuera no cerró el menú");
+    await p.click(".hamburger-btn"); await p.waitForTimeout(350); await p.click('#mobile-menu [data-act="menu-settings"]'); await p.waitForTimeout(400);
+    ok(await p.evaluate(() => document.getElementById("settings-modal").classList.contains("open") && !document.getElementById("mobile-menu").classList.contains("open")), "«Ajustes» del menú no abrió Ajustes");
+    await c2.close();
+  });
+  await test("Detalles menores: botón «Tráiler» con su icono, racha solo con fuego y número, «Restablecer a cero» al final de Ajustes y géneros en inglés", async (page, ctx) => {
+    await enter(page);
+    const t = await page.evaluate(() => ({ lbl: document.querySelector("#details-trailer-btn span").textContent.trim(), svg: !!document.querySelector("#details-trailer-btn svg rect") }));
+    ok(t.lbl === "Tráiler" && t.svg, "botón del tráiler: " + JSON.stringify(t));
+    await page.evaluate(() => { streakData = { last: streakDayKey(new Date()), count: 7, best: 7 }; renderStreak(); });
+    eq(await page.evaluate(() => document.getElementById("streak-count").textContent), "7", "la racha debe mostrar solo el número:");
+    await page.evaluate(() => showSettings()); await page.waitForTimeout(300);
+    const last = await page.evaluate(() => { const l = [...document.querySelectorAll("#settings-modal .settings-option .label")].filter((e) => e.offsetParent); return l[l.length - 1].textContent.trim(); });
+    eq(last, "Restablecer a cero", "última opción de Ajustes:");
+    await page.evaluate(() => closeSettings());
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 900 }, locale: "en-US" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+    await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    const en = await p.evaluate(() => { localAnalytics.items = [{ id: 1, type: "movie", title: "A", genreIds: [28, 878], secs: 5000, plays: 2, done: 1, lastPlayedAt: Date.now(), lang: "en" }, { id: 2, type: "movie", title: "B", genreIds: [28], secs: 4000, plays: 1, done: 1, lastPlayedAt: Date.now(), lang: "en" }]; updateLocalAnalyticsUI(); showSettings(); return { names: getTasteProfile().map((x) => x.name), label: [...document.querySelectorAll("#settings-modal .label")].map((e) => e.textContent.trim()).filter((t) => /Recommend|Recomendar/.test(t)), sum: document.getElementById("local-analytics-summary").textContent }; });
+    ok(en.names.includes("Action") && en.names.includes("Science Fiction") && !en.names.includes("Acción"), "géneros sin traducir: " + JSON.stringify(en.names));
+    ok(en.label[0] === "Recommendations" && /Top genres: Action/.test(en.sum) && !/Géneros|títulos/.test(en.sum), "Ajustes en inglés: " + JSON.stringify(en));
+    await c2.close();
+  });
+  await test("Mi cine: cabecera con resumen, filtro por tipo, orden (se recuerdan) y «Continuar viendo» arriba con su barra de avance", async (page) => {
+    await enter(page);
+    await page.evaluate(() => {
+      [["movie", 11, "Zeta", 9, 2001], ["tv", 12, "Alfa", 7, 2020], ["movie", 13, "Beta", 8.5, 1999], ["tv", 14, "Omega", 6, 2023]].forEach((a) => myList.push({ id: a[1], type: a[0], title: a[2], bg: "/a.jpg", rating: a[3], year: a[4] })); saveMyList();
+      continueWatching = [{ id: 604, type: "movie", title: "En curso", bg: "/b.jpg", pct: 35, timestamp: Date.now() }]; switchView("list");
+    });
+    await page.waitForSelector(".fav-summary"); await page.waitForTimeout(300);
+    const titles = () => page.evaluate(() => [...document.querySelectorAll(".fav-section .card")].map((c) => c.getAttribute("aria-label")).join(","));
+    eq(await page.locator(".fav-summary").innerText(), "4 títulos · 2 películas · 2 series", "resumen:");
+    eq(await titles(), "Omega,Beta,Alfa,Zeta", "orden «Recientes» (lo último primero):");
+    ok(await page.evaluate(() => { const o = [...document.querySelectorAll("#rows-container > *")].map((e) => e.className.split(" ")[0]); return o.indexOf("row") > -1 && o.indexOf("row") < o.indexOf("fav-section") && !!document.querySelector(".continue-row .continue-progress"); }), "«Continuar viendo» no está arriba o no tiene barra de avance");
+    await page.click('[data-act="fav-sort"][data-v="az"]'); await page.waitForTimeout(250); eq(await titles(), "Alfa,Beta,Omega,Zeta", "orden A–Z:");
+    await page.click('[data-act="fav-sort"][data-v="rating"]'); await page.waitForTimeout(250); eq(await titles(), "Zeta,Beta,Alfa,Omega", "orden por valoración:");
+    await page.click('[data-act="fav-sort"][data-v="year"]'); await page.waitForTimeout(250); eq(await titles(), "Omega,Alfa,Zeta,Beta", "orden por año:");
+    await page.click('[data-act="fav-type"][data-v="tv"]'); await page.waitForTimeout(250); eq(await titles(), "Omega,Alfa", "solo series:");
+    await page.click('[data-act="fav-type"][data-v="movie"]'); await page.waitForTimeout(250); eq(await titles(), "Zeta,Beta", "solo películas:");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    eq(await page.evaluate(() => JSON.stringify(favPrefs)), JSON.stringify({ type: "movie", sort: "year" }), "la vista se recuerda por perfil:");
+  });
+  await test("Pantalla de carga → selector sin destello negro: la imagen guardada es el fondo inmediato de las dos y el selector nunca queda en negro", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 1500; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoSplashBgV1", "/seed1.jpg"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    const r = await p.evaluate(() => { const v = document.documentElement.style.getPropertyValue("--tc-seed-bg"), pk = getComputedStyle(document.querySelector(".tc-profile-backdrop")).backgroundImage, sp = document.getElementById("tc-splash"); return { v, pk, tr: sp ? getComputedStyle(document.getElementById("tc-splash-bg")).transitionDuration : "" }; });
+    ok(/seed1\.jpg/.test(r.v) && /seed1\.jpg/.test(r.pk) && parseFloat(r.tr) > 0, "fondos del splash/selector: " + JSON.stringify(r));
+    const c3 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c3);
+    await c3.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); } catch (e) { } });
+    const p3 = await c3.newPage(); await p3.goto(url, { waitUntil: "domcontentloaded" }); await p3.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    ok(/splash\.jpg/.test(await p3.evaluate(() => getComputedStyle(document.querySelector(".tc-profile-backdrop")).backgroundImage)), "sin imagen guardada, el selector debe usar el fondo local y no negro");
+    await c2.close(); await c3.close();
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);

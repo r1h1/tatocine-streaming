@@ -177,7 +177,8 @@
       if (!el) return;
       var done = engagedTitles().length;
       var names = getTasteProfile().slice(0, 3).map(function (x) { return x.name; });
-      el.textContent = getDistinctPlayedCount() + " títulos reproducidos · " + done + " finalizados. " +
-        (done < 2 ? "Mira 2 títulos (aunque no los termines) para activar «Hecho para ti». " : (names.length ? "Géneros principales: " + names.join(", ") + ". " : "")) +
-        "Los datos permanecen en este dispositivo.";
+      var played = getDistinctPlayedCount();
+      el.textContent = L(played + " títulos reproducidos · " + done + " finalizados. ", played + " titles played · " + done + " finished. ") +
+        (done < 2 ? L("Mira 2 títulos (aunque no los termines) para activar «Hecho para ti». ", "Watch 2 titles (even if you don't finish them) to unlock “Made for you”. ") : (names.length ? L("Géneros principales: ", "Top genres: ") + names.join(", ") + ". " : "")) +
+        L("Los datos permanecen en este dispositivo.", "Your data stays on this device.");
     };

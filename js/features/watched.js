@@ -95,7 +95,9 @@ function watchedSection() {
   var items = watchedList();
   var head = '<div class="row-header"><h2 class="row-title">Ya vistas <span class="fav-count">' + items.length + "</span></h2></div>";
   if (!items.length) return '<section class="fav-section">' + head + '<p class="fav-empty">' + L("Aún no hay títulos vistos. Se agregan solos al terminar un título, o márcalos desde su ficha.", "No watched titles yet. They are added automatically when you finish one, or mark them from their page.") + "</p></section>";
-  return '<section class="fav-section">' + head + '<div class="grid-container">' + items.map(getCardHTML).join("") + "</div></section>";
+  var shown = typeof favApplyView === "function" ? favApplyView(items) : items;
+  if (!shown.length) return '<section class="fav-section">' + head + favNoMatch() + "</section>";
+  return '<section class="fav-section">' + head + '<div class="grid-container">' + shown.map(getCardHTML).join("") + "</div></section>";
 }
 
 // ---- Botones de la ficha: «Marcar como vista» y me gusta / no me gusta ----

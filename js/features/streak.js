@@ -32,7 +32,7 @@ function renderStreak() {
   var n = isKidProfile() ? 0 : currentStreak();
   pill.hidden = n < 1;
   if (n < 1) return;
-  $("streak-count").textContent = L("Racha: ", "Streak: ") + n;
+  $("streak-count").textContent = String(n);                                       // solo el número: el icono de fuego ya lo dice todo (el texto accesible va en title/aria-label)
   var label = n === 1 ? L("Racha: 1 día seguido viendo algo", "Streak: 1 day in a row watching something") : L("Racha: " + n + " días seguidos viendo algo", "Streak: " + n + " days in a row watching something");
   pill.title = label;
   pill.setAttribute("aria-label", label);

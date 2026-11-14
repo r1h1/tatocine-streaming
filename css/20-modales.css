@@ -362,3 +362,32 @@ body:not(.hero-ready) #hero-content > .hero-desc, body:not(.hero-ready) #hero-co
 body:not(.hero-ready) .tc-footer { visibility: hidden; }
 .personalized-row.is-slot .row-scroll { overflow: hidden; }
 body:not(.hero-ready) #hero-content { visibility: hidden; }
+
+/* ---------- Mi cine: cabecera con resumen, filtro de tipo y orden (como «Mi lista» de Netflix / lista de seguimiento de Disney+) ---------- */
+.fav-head { margin: 0 0 14px; }
+.fav-title { margin: 0; font-size: calc(clamp(26px, 4vw, 38px) * var(--ts, 1)); font-weight: 800; letter-spacing: -.4px; line-height: 1.15; }
+.fav-summary { margin: 6px 0 0; font-size: calc(14px * var(--ts, 1)); color: rgba(255, 255, 255, .72); }
+.fav-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 0 0 18px; }
+.fav-seg { display: inline-flex; max-width: 100%; overflow-x: auto; border: 1px solid rgba(255, 255, 255, .18); border-radius: 999px; background: rgba(255, 255, 255, .05); padding: 3px; scrollbar-width: none; }
+.fav-seg::-webkit-scrollbar { display: none; }
+.fav-seg-btn { flex: 0 0 auto; min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, .86); font: inherit; font-size: calc(13.5px * var(--ts, 1)); font-weight: 650; white-space: nowrap; cursor: pointer; }
+.fav-seg-btn:hover { background: rgba(255, 255, 255, .12); }
+.fav-seg-btn.active { background: #fff; color: #000; }
+.fav-seg-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ---------- Selector de perfiles: nunca negro bajo la imagen (pantalla de carga → selector sin destello) ----------
+   Fondo inmediato = la última imagen del selector (la misma que muestra la pantalla de carga; variable --tc-seed-bg de js/boot.js) o el fondo local; las capas de TMDB se funden encima. */
+.tc-profile-backdrop { background-color: #050505; background-image: var(--tc-seed-bg, url("../icons/splash.jpg")); background-position: center 35%; background-size: cover; background-repeat: no-repeat; }
+@media (max-width: 600px) { .tc-profile-backdrop { background-position: center center; } #tc-splash .tc-splash-bg { background-position: center center; } }
+
+/* ---------- Actualización obligatoria (sin ✕, por encima de todo) ---------- */
+#tc-update-overlay { z-index: 100300; }
+.tc-update { text-align: center; max-width: 440px; }
+.tc-update-ico { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; margin-bottom: 8px; border-radius: 50%; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); }
+.tc-update h3 { margin: 6px 0 4px; font-size: calc(22px * var(--ts, 1)); }
+.tc-update-sub { margin: 6px 0 8px; text-align: left; font-weight: 800; color: #fff; }
+.tc-update-list { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 10px; text-align: left; }
+.tc-update-list li { position: relative; padding-left: 22px; font-size: calc(14.5px * var(--ts, 1)); line-height: 1.45; color: rgba(255, 255, 255, .88); }
+.tc-update-list li::before { content: ""; position: absolute; left: 4px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+.tc-update .tc-profile-create-actions { margin-top: 4px; }
+.tc-update .tc-profile-create-btn { width: 100%; flex: 1 1 auto; }

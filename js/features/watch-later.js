@@ -56,7 +56,9 @@ registerAction("go-later", function () { switchView("list"); setFavFilter("later
 function laterSection() {
   var head = '<div class="row-header"><h2 class="row-title">' + L("Ver más tarde", "Watch later") + ' <span class="fav-count">' + laterList.length + "</span></h2></div>";
   if (!laterList.length) return '<section class="fav-section">' + head + emptyStateHTML("later", L("Nada guardado para después", "Nothing saved for later"), L("En la ficha de cualquier título pulsa «Ver más tarde» para dejarlo en esta lista.", "On any title's page tap “Watch later” to keep it in this list."), L("Explorar películas", "Explore movies"), "go-movies") + "</section>";
-  return '<section class="fav-section">' + head + '<div class="grid-container">' + laterList.map(getCardHTML).join("") + "</div></section>";
+  var shown = typeof favApplyView === "function" ? favApplyView(laterList) : laterList;
+  if (!shown.length) return '<section class="fav-section">' + head + favNoMatch() + "</section>";
+  return '<section class="fav-section">' + head + '<div class="grid-container">' + shown.map(getCardHTML).join("") + "</div></section>";
 }
 registerCommand({ id: "later", es: "Ver más tarde", en: "Watch later", keys: "mas tarde pendientes lista", adult: false, run: function () { switchView(isKidProfile() ? "kids" : "list"); if (!isKidProfile()) setFavFilter("later"); } });
 if (typeof i18nAdd === "function") i18nAdd({ "Ver más tarde": "Watch later", "En Ver más tarde": "In Watch later", "Calendario": "Calendar" });

@@ -197,7 +197,7 @@ function openDetails(id, type) {
               '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe><a class="details-trailer-external" href="' +
               watchUrl +
               '" target="_blank" rel="noopener noreferrer">Abrir en YouTube</a><button class="details-trailer-close" type="button" data-act="close-trailer" aria-label="Cerrar tráiler">✕</button>';
-            trailerBtn.querySelector("span").textContent = "Ocultar Tráiler";
+            trailerBtn.querySelector("span").textContent = L("Tráiler", "Trailer"); trailerBtn.classList.add("is-on"); trailerBtn.setAttribute("aria-pressed", "true");
           };
         } else trailerBtn.style.display = "none";
         var playBtn = $("details-play-btn");
@@ -296,7 +296,7 @@ function openDetails(id, type) {
       var btn = $("details-trailer-btn");
       if (btn) {
         var label = btn.querySelector("span");
-        if (label) label.textContent = "Ver Tráiler";
+        if (label) label.textContent = L("Tráiler", "Trailer"); btn.classList.remove("is-on"); btn.setAttribute("aria-pressed", "false");
       }
     }
     function closeDetails(fromPlay) {

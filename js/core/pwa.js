@@ -39,7 +39,7 @@
         // La versión nueva espera: se instala en segundo plano y se activa cuando el usuario pulsa «Actualizar» (no a mitad de una película).
         function offerUpdate(reg) {
           if (!reg.waiting || !navigator.serviceWorker.controller) return;
-          showToastAction(L("Hay una versión nueva de TatoCine", "A new version of TatoCine is available"), L("Actualizar", "Update"), function () { wantReload = true; reg.waiting.postMessage({ type: "SKIP_WAITING" }); }, 30000);
+          tcShowUpdate(function () { wantReload = true; reg.waiting.postMessage({ type: "SKIP_WAITING" }); });          // ventana obligatoria (js/ui/update-modal.js)
         }
         window.addEventListener("load", function () {
           navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
@@ -56,7 +56,7 @@
         });
         // El SW detectó que index.html cambió sin subir la versión y ya refrescó sus archivos: se ofrece recargar.
         navigator.serviceWorker.addEventListener("message", function (e) {
-          if (e.data && e.data.type === "SHELL_REFRESHED") showToastAction(L("Hay una versión nueva de TatoCine", "A new version of TatoCine is available"), L("Actualizar", "Update"), function () { location.reload(); });
+          if (e.data && e.data.type === "SHELL_REFRESHED") tcShowUpdate(function () { location.reload(); });
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
           if (refreshing || !wantReload) return;                                                                      // la primera instalación toma el control sin recargar

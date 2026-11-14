@@ -5,6 +5,11 @@
  */
 if (typeof i18nAdd === "function") i18nAdd({
   "Tu tiempo de hoy": "Your time today",
+  "Recomendar contenido": "Recommendations", "Borrar historial": "Clear history", "Eliminar favoritos": "Remove favorites",
+  "Tus preferidos se calculan localmente en este navegador.": "Your picks are calculated locally in this browser.",
+  "Borrar preferidos": "Clear preferences",
+  "Cerrar menú": "Close menu", "Menú": "Menu",
+  "Tráiler": "Trailer", "Comparte tus vistas": "Share your views",
   "Tráiler en portada": "Hero trailer",
   "Avisos de estrenos": "Release alerts",
   "Resumen semanal": "Weekly summary",

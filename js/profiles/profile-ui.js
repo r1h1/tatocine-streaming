@@ -16,7 +16,7 @@
       if (name && p) name.textContent = profileDisplayName(p);
       document.body.classList.toggle("kid-mode", !!p && p.kind === "kid");
       var trigger = document.querySelector(".tc-profile-trigger");
-      if (trigger && p) trigger.setAttribute("aria-label", "Perfil actual: " + p.name + ". Cambiar perfil");
+      if (trigger && p) trigger.setAttribute("aria-label", "Perfil actual: " + profileDisplayName(p) + ". Cambiar perfil");
       if (trigger && p) trigger.setAttribute("title", profileDisplayName(p));
     }
     var profileFormKind = "adult", profileFormRemovePin = false;
