@@ -6,6 +6,7 @@
  */
 var omLast = null;
 function motionOk() {
+  return false;                                           // la app ya no anima nada (css/25-no-motion.css): la ficha aparece de golpe
   var b = document.body;
   return !(b.classList.contains("rm") || b.classList.contains("lite") || b.classList.contains("hc") || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches));
 }

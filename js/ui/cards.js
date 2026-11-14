@@ -84,19 +84,19 @@
       var r = b.closest(".row"),
         s = r.querySelector(".row-scroll"),
         a = s.clientWidth * 0.85;
-      s.scrollBy({ left: a * d, behavior: "smooth" });
+      s.scrollBy({ left: a * d, behavior: "auto" });
     }
     function scrollCast(b, d) {
       var w = b.closest(".cast-wrapper"),
         s = w.querySelector(".details-cast"),
         a = s.clientWidth * 0.85;
-      s.scrollBy({ left: a * d, behavior: "smooth" });
+      s.scrollBy({ left: a * d, behavior: "auto" });
     }
     function scrollSimilar(b, d) {
       var w = b.closest(".cast-wrapper"),
         s = w.querySelector(".details-cast"),
         a = s.clientWidth * 0.85;
-      s.scrollBy({ left: a * d, behavior: "smooth" });
+      s.scrollBy({ left: a * d, behavior: "auto" });
     }
 
 /* Acciones de las tarjetas (ver core/actions.js). Los datos viajan en atributos data-*, ya escapados. */

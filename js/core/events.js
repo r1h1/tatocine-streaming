@@ -74,7 +74,7 @@
           var scroller = pickKeyboardScroller();
           if (scroller) {
             e.preventDefault();
-            scroller.scrollBy({ left: (e.key === "ArrowRight" ? 1 : -1) * scroller.clientWidth * 0.85, behavior: "smooth" });
+            scroller.scrollBy({ left: (e.key === "ArrowRight" ? 1 : -1) * scroller.clientWidth * 0.85, behavior: "auto" });
           }
           return;
         }

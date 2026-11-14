@@ -310,7 +310,7 @@ async function main() {
     const t = await page.evaluate(() => window.__chg);
     return t.slice(1).map((x, i) => x - t[i]);
   }
-  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 26,8 s (1,8 + 15 + 10)", true, 26800]]) {
+  for (const [name, withTrailer, expected] of [["sin tráiler cada título dura 10 s", false, 10000], ["con tráiler cada título dura 27,8 s (1,8 + 20 + 6)", true, 27800]]) {
     await test("portada: " + name, async (page, ctx) => {
       await ctx.addInitScript(() => { try { localStorage.setItem("tatoHeroTrailer", "on"); } catch (e) { } });
       await page.route("**/api.themoviedb.org/3/**/videos**", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ results: withTrailer ? [{ site: "YouTube", key: "PhgY8cOJiQA", type: "Trailer", official: true, iso_639_1: "es" }] : [] }) }));
@@ -349,11 +349,11 @@ async function main() {
     ok((await page.locator("#rows-container .card").first().getAttribute("aria-label")).includes("Rush"), "Rush no aparece en Vistas");
   });
 
-  await test("portada: sin botón de volumen, 1,8 s para verse, 15 s de tráiler + 10 s de pausa y menú «Mi cine»", async (page) => {
+  await test("portada: sin botón de volumen, 1,8 s para verse, 20 s de tráiler + 6 s de pausa y menú «Mi cine»", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => ({ dwell: HERO_DWELL_TRAILER, start: HT_START_MS, btn: !!document.getElementById("hero-sound-btn"), nav: [...document.querySelectorAll(".nav-item")].some((b) => b.textContent.trim() === "Mi cine") }));
     await page.waitForFunction(() => /\d+ ?(h|min)/.test(document.getElementById("hero-meta").innerText), null, { timeout: 10000 });   // duración, edad y tipo se quedan fijos en la portada
-    eq(r.dwell, 26800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
+    eq(r.dwell, 27800, "duración con tráiler:"); eq(r.start, 1800, "el tráiler se ve a:"); eq(r.btn, false, "botón de volumen:"); eq(r.nav, true, "falta «Mi cine» en el menú:");
   });
 
   await test("una fila que falla muestra «Reintentar» solo para ella y el resto de la portada sigue", async (page) => {
@@ -964,18 +964,25 @@ async function main() {
     const a = await page.evaluate(() => ({ upd: window.__upd, dis: document.getElementById("tc-update-go").disabled, txt: document.getElementById("tc-update-go").textContent }));
     ok(a.upd === 1 && a.dis && /Actualizando/.test(a.txt), "el botón no aplicó la actualización: " + JSON.stringify(a));
   });
-  await test("Menú hamburguesa: panel lateral con iconos, opciones de 52 px, Perfil y Ajustes, y se cierra tocando fuera", async (page, ctx) => {
+  await test("Menú hamburguesa con la MISMA interfaz que Ajustes (cabecera «Menú» + ✕ de 48 px, filas settings-option de 64 px con icono de trazo 2 y flecha), Perfil y Ajustes, y bloqueo de scroll", async (page, ctx) => {
     const c2 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: "es-ES" });
     if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
     await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
     const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
     await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
     await p.click(".hamburger-btn"); await p.waitForTimeout(450);
-    const m = await p.evaluate(() => { const items = [...document.querySelectorAll("#mobile-menu .nav-item")].filter((e) => e.offsetParent); return { open: document.getElementById("mobile-menu").classList.contains("open"), w: document.querySelector(".mm-panel").getBoundingClientRect().width, n: items.length, icons: items.every((e) => e.querySelector("svg")), hs: items.map((e) => Math.round(e.getBoundingClientRect().height)), lock: document.documentElement.classList.contains("menu-lock"), txt: items.map((e) => e.textContent.trim()) }; });
-    ok(m.open && m.w <= 341 && m.n === 9 && m.icons && m.hs.every((h) => h >= 48) && m.lock, "panel del menú: " + JSON.stringify(m));
-    ok(["Cambiar de perfil", "Ajustes"].every((t) => m.txt.includes(t)), "faltan accesos: " + m.txt.join(","));
-    await p.mouse.click(380, 420); await p.waitForTimeout(450);
-    ok(!(await p.evaluate(() => document.getElementById("mobile-menu").classList.contains("open"))), "tocar fuera no cerró el menú");
+    const sty = (sel) => p.evaluate((sel) => { const e = document.querySelector(sel), c = getComputedStyle(e), r = e.getBoundingClientRect(); return { h: Math.round(r.height), w: Math.round(r.width), fs: c.fontSize, fw: c.fontWeight, bg: c.backgroundColor, bd: c.borderTopWidth + "/" + c.borderRadius, pad: c.paddingLeft + "/" + c.paddingRight, bb: c.borderBottom }; }, sel);
+    const m = await p.evaluate(() => { const items = [...document.querySelectorAll("#mobile-menu .nav-item")].filter((e) => e.offsetParent); return { open: document.getElementById("mobile-menu").classList.contains("open"), n: items.length, icons: items.every((e) => e.querySelector("svg[stroke-width='2']") && !e.querySelector(".mm-chev")), hs: items.map((e) => Math.round(e.getBoundingClientRect().height)), lock: document.documentElement.classList.contains("menu-lock"), txt: items.map((e) => e.textContent.trim()), title: document.querySelector("#mobile-menu .modal-title").textContent }; });
+    ok(m.open && m.n === 9 && m.icons && m.hs.every((h) => h >= 60) && m.lock && m.title === "Menú", "menú: " + JSON.stringify(m));
+    eq(m.txt.join(","), "Inicio,Películas,Anime,Series,Niños,Mi cine,Perfiles,Ajustes,Legal", "orden de las opciones del menú:");
+    await p.evaluate(() => { toggleMenu(); showSettings(); }); await p.waitForTimeout(400);
+    const set = { head: await sty("#settings-modal .modal-header"), title: await sty("#settings-modal .modal-title"), close: await sty("#settings-modal .modal-close"), label: await sty("#settings-modal .settings-option .label"), row: await sty("#settings-modal .settings-option") };
+    await p.evaluate(() => { closeSettings(); toggleMenu(); }); await p.waitForTimeout(400);
+    const mn = { head: await sty("#mobile-menu .modal-header"), title: await sty("#mobile-menu .modal-title"), close: await sty("#mobile-menu .modal-close"), label: await sty("#mobile-menu .nav-item:not(.active) .label"), row: await sty("#mobile-menu .nav-item:not(.active)") };
+    for (const k of ["head", "title", "close", "label"]) { const strip = (o) => { const c = Object.assign({}, o); if (k === "title" || k === "label") delete c.w; return JSON.stringify(c); }; eq(strip(mn[k]), strip(set[k]), "«" + k + "» del menú debe verse igual que en Ajustes:"); }
+    ok(mn.row.pad === set.row.pad && mn.row.bb === set.row.bb && mn.row.w === set.row.w, "las filas del menú no coinciden con las de Ajustes: " + JSON.stringify([mn.row, set.row]));
+    await p.click('#mobile-menu .modal-close'); await p.waitForTimeout(400);
+    ok(!(await p.evaluate(() => document.getElementById("mobile-menu").classList.contains("open") || document.documentElement.classList.contains("menu-lock"))), "la ✕ no cerró el menú");
     await p.click(".hamburger-btn"); await p.waitForTimeout(350); await p.click('#mobile-menu [data-act="menu-settings"]'); await p.waitForTimeout(400);
     ok(await p.evaluate(() => document.getElementById("settings-modal").classList.contains("open") && !document.getElementById("mobile-menu").classList.contains("open")), "«Ajustes» del menú no abrió Ajustes");
     await c2.close();
@@ -1026,13 +1033,71 @@ async function main() {
     await c2.addInitScript(() => { window.__TC_SPLASH_MS = 1500; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoSplashBgV1", "/seed1.jpg"); } catch (e) { } });
     const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
     const r = await p.evaluate(() => { const v = document.documentElement.style.getPropertyValue("--tc-seed-bg"), pk = getComputedStyle(document.querySelector(".tc-profile-backdrop")).backgroundImage, sp = document.getElementById("tc-splash"); return { v, pk, tr: sp ? getComputedStyle(document.getElementById("tc-splash-bg")).transitionDuration : "" }; });
-    ok(/seed1\.jpg/.test(r.v) && /seed1\.jpg/.test(r.pk) && parseFloat(r.tr) > 0, "fondos del splash/selector: " + JSON.stringify(r));
+    ok(/seed1\.jpg/.test(r.v) && /seed1\.jpg/.test(r.pk) && parseFloat(r.tr) === 0, "fondos del splash/selector: " + JSON.stringify(r));
     const c3 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, locale: "es-ES" });
     if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c3);
     await c3.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); } catch (e) { } });
     const p3 = await c3.newPage(); await p3.goto(url, { waitUntil: "domcontentloaded" }); await p3.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
     ok(/splash\.jpg/.test(await p3.evaluate(() => getComputedStyle(document.querySelector(".tc-profile-backdrop")).backgroundImage)), "sin imagen guardada, el selector debe usar el fondo local y no negro");
     await c2.close(); await c3.close();
+  });
+  await test("Actualización REAL: al llegar una versión nueva del Service Worker aparece la ventana obligatoria (no el aviso pequeño) y «Actualizar ahora» activa la versión nueva", async (page, ctx) => {
+    const tmp = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "tc-upd-"));
+    for (const f of fs.readdirSync(ROOT)) { if (["node_modules", ".git", "tests", "docs", "tools", "dist"].includes(f)) continue; fs.cpSync(path.join(ROOT, f), path.join(tmp, f), { recursive: true }); }
+    const { srv: s2, url: u2 } = await serve(tmp);
+    try {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+      const p = await c2.newPage(); await p.goto(u2 + "?sw=1", { waitUntil: "domcontentloaded" });
+      await p.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 20000 });
+      ok(!(await p.evaluate(() => document.getElementById("tc-update-overlay").classList.contains("open"))), "la ventana de actualización no debía salir en la primera instalación");
+      const swp = path.join(tmp, "sw.js"), src = fs.readFileSync(swp, "utf8"), vm = src.match(/VERSION\s*=\s*"([^"]+)"/);
+      fs.writeFileSync(swp, src.replace(vm[0], vm[0].replace(vm[1], "9.9-prueba")));
+      await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+      await p.waitForSelector("#tc-update-overlay.open", { timeout: 20000 });
+      const r = await p.evaluate(() => ({ n: document.querySelectorAll("#tc-update-list li").length, toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|") }));
+      ok(r.n === 5 && !/versión nueva|new version/i.test(r.toast), "ventana sin 5 cambios o salió también el aviso pequeño: " + JSON.stringify(r));
+      await p.click("#tc-update-go");
+      await p.waitForFunction(async () => (await caches.keys()).some((k) => k.indexOf("9.9-prueba") > -1), null, { timeout: 20000 });
+      await p.waitForFunction(() => !!document.body && !document.getElementById("tc-update-overlay").classList.contains("open"), null, { timeout: 20000 });
+      await c2.close();
+    } finally { s2.close(); fs.rmSync(tmp, { recursive: true, force: true }); }
+  });
+  await test("Sin animaciones, sin tirón negro en el splash (imagen guardada completa desde el primer cuadro) y menú que no queda bajo el notch", async (page, ctx) => {
+    await enter(page);
+    const mo = await page.evaluate(() => { const els = [".card", ".hero-content", "#settings-modal", ".top-nav", ".hero-btn"].map((q) => document.querySelector(q)).filter(Boolean); return els.map((e) => { const c = getComputedStyle(e); return parseFloat(c.transitionDuration) + "/" + (parseFloat(c.animationDuration) < 0.001 ? 0 : 1); }); });
+    ok(mo.every((x) => x === "0/0"), "quedan transiciones o animaciones: " + JSON.stringify(mo));
+    ok(await page.evaluate(() => motionOk() === false), "la ficha todavía se anima (open-motion)");
+    // splash: imagen guardada completa → ya está en la primera pintura
+    const seed = "data:image/jpeg;base64," + fs.readFileSync(path.join(ROOT, "icons/og-image.jpg")).toString("base64");
+    const c2 = await ctx.browser().newContext({ viewport: { width: 390, height: 844 }, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript((d) => { window.__TC_SPLASH_MS = 1500; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoSplashBgV1", "/seed1.jpg"); localStorage.setItem("tatoSplashBgDataV1", JSON.stringify({ p: "/seed1.jpg", d: d })); } catch (e) { } }, seed);
+    const p2 = await c2.newPage(); await p2.goto(url, { waitUntil: "commit" }); await p2.waitForSelector("#tc-splash-bg", { state: "attached" });
+    const first = await p2.evaluate(() => ({ cls: document.documentElement.classList.contains("tc-seed-data"), bg: getComputedStyle(document.getElementById("tc-splash-bg")).backgroundImage.slice(0, 26), op: getComputedStyle(document.getElementById("tc-splash-bg")).opacity }));
+    ok(first.cls && /data:image\/jpeg/.test(first.bg) && first.op === "1", "el splash no tiene la imagen en el primer cuadro: " + JSON.stringify(first));
+    await p2.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    ok(/data:image\/jpeg/.test(await p2.evaluate(() => getComputedStyle(document.querySelector(".tc-profile-backdrop")).backgroundImage)), "el selector no arranca con la imagen guardada");
+    await c2.close();
+    // notch: con 59 px de zona segura arriba, la ✕ del menú queda igual de abajo que la de Ajustes (estándar de las ventanas)
+    const c3 = await ctx.browser().newContext({ viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c3);
+    await c3.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p3 = await c3.newPage(); const cdp = await c3.newCDPSession(p3); await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 59, bottom: 34, left: 0, right: 0 } });
+    await p3.goto(url, { waitUntil: "domcontentloaded" }); await p3.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p3.click('[data-profile-action="select"]');
+    await p3.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    const top = async (sel) => p3.evaluate((sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return Math.round(r.top); }, sel);
+    await p3.evaluate(() => showSettings()); await p3.waitForTimeout(300); const ts = await top("#settings-modal .modal-close"); await p3.evaluate(() => closeSettings());
+    await p3.evaluate(() => toggleMenu()); await p3.waitForTimeout(300); const tm = await top("#mobile-menu .modal-close"), tt = await top("#mobile-menu .modal-title");
+    ok(tm === ts && tm >= 59, "la ✕ del menú (" + tm + ") debe estar a la misma altura que la de Ajustes (" + ts + ") y bajo el notch (59)");
+    ok(tt >= 59, "el título del menú queda bajo el notch: " + tt);
+    await c3.close();
+  });
+  await test("Lazy loading completo: toda imagen de las pantallas principales lleva loading y decoding (las 4 primeras de cada fila cercana se piden ya, el resto perezosas)", async (page) => {
+    await enter(page); await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 }); await page.waitForTimeout(500);
+    const r = await page.evaluate(() => { const imgs = [...document.querySelectorAll("img")].filter((i) => !i.closest("#tc-splash") && !i.closest(".tc-welcome") && !i.closest(".top-nav") && i.getAttribute("src") !== ""); return { n: imgs.length, sin: imgs.filter((i) => !i.getAttribute("loading")).map((i) => i.className || i.alt || i.src.slice(-30)).slice(0, 8), sinDec: imgs.filter((i) => !i.getAttribute("decoding")).map((i) => i.className || i.src.slice(-30)).slice(0, 8), lazy: imgs.filter((i) => i.getAttribute("loading") === "lazy").length, eager: imgs.filter((i) => i.getAttribute("loading") === "eager").length }; });
+    ok(r.n > 10 && r.sin.length === 0 && r.sinDec.length === 0 && r.lazy > r.eager && r.eager <= 16, "imágenes sin lazy/decoding: " + JSON.stringify(r));
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);

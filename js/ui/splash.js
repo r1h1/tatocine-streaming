@@ -7,13 +7,12 @@
 (function () {
   var el = document.getElementById("tc-splash"); if (!el) return;
   var done = false, timer = null;
-  try {                                                                                    // fondo: la imagen con la que terminó el selector la última vez (si existe)
+  try {                                                                                    // fondo: si boot.js dejó la imagen COMPLETA guardada, ya se ve desde el primer cuadro; si solo hay la ruta, aparece al cargar
     var seed = localStorage.getItem("tatoSplashBgV1");
-    if (seed && /^\/[A-Za-z0-9_-]+\.jpg$/.test(seed)) {
-      var url = "https://image.tmdb.org/t/p/w780" + seed, bg = document.getElementById("tc-splash-bg"), im = new Image();
-      if (bg && !document.documentElement.style.getPropertyValue("--tc-seed-bg")) bg.style.backgroundImage = "url(\"" + url + "\")";   // respaldo si boot.js no dejó la variable CSS
-      im.onload = function () { if (bg && !done) bg.classList.add("on"); };                 // la imagen aparece con un fundido corto sobre el fondo local: sin destello negro
-      im.src = url;
+    if (seed && /^\/[A-Za-z0-9_-]+\.jpg$/.test(seed) && !document.documentElement.classList.contains("tc-seed-data")) {
+      var bg = document.getElementById("tc-splash-bg"), im = new Image();
+      im.onload = function () { if (bg && !done) bg.classList.add("on"); };
+      im.src = "https://image.tmdb.org/t/p/w780" + seed;
     }
   } catch (e) { }
   function hide() {

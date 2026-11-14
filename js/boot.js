@@ -30,10 +30,19 @@
     }
     if (wf === "0") root.classList.add("tc-welcome-boot");
   } catch (e) { }
-  // El fondo de la pantalla de carga (la última imagen que mostró el selector) se pide YA, desde la cabecera, en vez de esperar a que corra splash.js.
+  // Fondo de la pantalla de carga y del selector: la última imagen que mostró el selector. Se guarda COMPLETA en el dispositivo (data URL, tatoSplashBgDataV1), así ya está
+  // en el primer cuadro que se pinta: ni tirón negro ni imagen que «aparece» después. Si solo hay la ruta (primera vez tras actualizar), se pide a TMDB con precarga.
   try {
-    var sb = localStorage.getItem("tatoSplashBgV1");
-    if (sb && /^\/[A-Za-z0-9_-]+\.jpg$/.test(sb)) { root.style.setProperty("--tc-seed-bg", 'url("https://image.tmdb.org/t/p/w780' + sb + '")'); var pl = document.createElement("link"); pl.rel = "preload"; pl.as = "image"; pl.href = "https://image.tmdb.org/t/p/w780" + sb; pl.setAttribute("fetchpriority", "high"); document.head.appendChild(pl); }
+    var sb = localStorage.getItem("tatoSplashBgV1"), sd = null;
+    if (sb && /^\/[A-Za-z0-9_-]+\.jpg$/.test(sb)) {
+      try { sd = JSON.parse(localStorage.getItem("tatoSplashBgDataV1") || "null"); } catch (e5) { sd = null; }
+      if (sd && sd.p === sb && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(sd.d || "")) {
+        root.style.setProperty("--tc-seed-bg", 'url("' + sd.d + '")'); root.classList.add("tc-seed-data");
+      } else {
+        root.style.setProperty("--tc-seed-bg", 'url("https://image.tmdb.org/t/p/w780' + sb + '")');
+        var pl = document.createElement("link"); pl.rel = "preload"; pl.as = "image"; pl.href = "https://image.tmdb.org/t/p/w780" + sb; pl.setAttribute("fetchpriority", "high"); document.head.appendChild(pl);
+      }
+    }
   } catch (e) { }
   var needsPicker = !selected || selected !== active;
   window.__tcSkipPicker = !needsPicker;

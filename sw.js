@@ -4,12 +4,12 @@
    - index.html: se sirve DESDE LA CACHÉ del dispositivo al instante y se revalida en segundo plano como máximo cada 3 h (antes: una petición al servidor en cada apertura).
      Los CSS/JS llevan ?v=<hash> y son inmutables, así que un cambio en el HTML se ve en la visita siguiente y las versiones nuevas del código llegan con el aviso «Actualizar».
    - Resto del shell (manifest, iconos, offline): caché primero.
-   - Imágenes de TMDB: caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 1200.
+   - Imágenes de TMDB (reenviando el Accept del navegador para recibir WebP, más liviano): caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 1200.
    - API de TMDB: caché AGRESIVA por tipo de dato (el trabajo lo hace el dispositivo, no el servidor). «Stale-while-revalidate»: con copia reciente se usa tal cual;
      con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
      conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-0576e361";
+const VERSION = "5.6-1dce5932";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
@@ -149,7 +149,9 @@ self.addEventListener("fetch", (event) => {
       const hit = await cache.match(req.url);
       if (hit) return hit;
       try {
-        const res = await fetch(new Request(req.url, { mode: "cors", credentials: "omit" }));    // CORS: la copia no es «opaca» (las opacas pesan 7 MB de cuota cada una)
+        // CORS: la copia no es «opaca» (las opacas pesan 7 MB de cuota cada una). Se reenvía el Accept del navegador: el CDN de TMDB responde WebP (≈ 30–50 % menos bytes) solo si el
+        // Accept lo anuncia; con el Accept por defecto de fetch() llegaba JPEG.
+        const res = await fetch(new Request(req.url, { mode: "cors", credentials: "omit", headers: { Accept: req.headers.get("accept") || "image/webp,image/*,*/*;q=0.8" } }));
         if (res.ok) { cache.put(req.url, res.clone()).then(() => trim(IMG_CACHE, MAX_IMG)); }
         return res;
       } catch (e) { return fetch(req); }

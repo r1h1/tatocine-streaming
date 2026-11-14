@@ -53,7 +53,7 @@
       });
       if (!best) return false;
       best.focus({ preventScroll: true });
-      try { best.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" }); } catch (e) { best.scrollIntoView(); }
+      try { best.scrollIntoView({ block: "center", inline: "center", behavior: "auto" }); } catch (e) { best.scrollIntoView(); }
       return true;
     }
     window.addEventListener("keydown", function (e) {

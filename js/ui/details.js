@@ -161,7 +161,7 @@ function openDetails(id, type) {
                 (type === "tv" ? "tv" : "movie") +
                 '"><img class="similar-poster" alt="" src="' +
                 sBg +
-                '" loading="lazy" data-fb="poster"/><div class="similar-title">' +
+                '" loading="lazy" decoding="async" data-fb="poster"/><div class="similar-title">' +
                 sTitle +
                 "</div></div>"
               );

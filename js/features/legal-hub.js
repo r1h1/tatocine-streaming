@@ -67,7 +67,7 @@ registerAction("open-disclaimer", function () { showDisclaimer(); });
 registerAction("legal-third", function (el) {
   var box = $("legal-third"), open = box.hidden; box.hidden = !open;
   if (el) el.setAttribute("aria-expanded", String(open));
-  if (open) box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (open) box.scrollIntoView({ block: "nearest", behavior: "auto" });
 });
 
 /* ---------- Pie legal: al final de cada vista y de las ventanas con scroll (nunca fijo ni sobre controles) ---------- */

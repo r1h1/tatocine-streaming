@@ -1,0 +1,7 @@
+/**
+ * TatoCine · css/25-no-motion.css
+ * SIN animaciones en toda la app (más fluido, sobre todo en equipos modestos y TV): ninguna transición, fundido, desplazamiento animado ni brillo de esqueleto.
+ * Misma técnica que «Reducir movimiento» (duración ~0 en lugar de quitar la animación, así los eventos de fin de animación siguen disparándose). Va al final del
+ * paquete para ganar a todo lo demás. El JS tampoco anima: js/ui/open-motion.js desactivado y los desplazamientos son instantáneos.
+ */
+*, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; transition-delay: 0s !important; scroll-behavior: auto !important; }

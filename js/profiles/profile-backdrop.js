@@ -258,7 +258,8 @@
         profileBackdropIndex = normalizedIndex;
         profileBackdropNextIndex = (normalizedIndex + 1) % total;
         profileBackdropHasVisibleImage = true;
-        try { localStorage.setItem("tatoSplashBgV1", item.backdrop_path); } catch (e2) { }       // la pantalla de carga de la próxima vez empieza con esta misma imagen
+        try { localStorage.setItem("tatoSplashBgV1", item.backdrop_path); } catch (e2) { }
+        tcStoreSplashSeed(item.backdrop_path, item._tcBackdropUrl || IMG_BG + item.backdrop_path);       // la pantalla de carga de la próxima vez empieza con esta misma imagen
         profileBackdropLoading = false;
 
         // Prepara el próximo fondo antes de que llegue el siguiente intervalo.
@@ -335,4 +336,20 @@
           scheduleNextProfileBackdrop();
         }
       });
+    }
+
+    /** Guarda la imagen COMPLETA (data URL, ≤ 160 KB) de la que se está mostrando, para que la pantalla de carga y el selector la tengan en el primer cuadro la próxima vez.
+     *  Sale de la caché de imágenes del Service Worker (sin red nueva) y solo se reescribe si cambió. */
+    function tcStoreSplashSeed(path, url) {
+      try {
+        var cur = JSON.parse(localStorage.getItem("tatoSplashBgDataV1") || "null");
+        if (cur && cur.p === path) return;
+        if (!window.fetch || !window.FileReader) return;
+        fetch(url, { mode: "cors", credentials: "omit", headers: { Accept: "image/jpeg,image/*;q=0.8" } }).then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) {
+          if (!b || b.size > 160 * 1024 || !/^image\/jpeg/.test(b.type)) return;
+          var fr = new FileReader();
+          fr.onload = function () { try { if (localStorage.getItem("tatoSplashBgV1") === path) localStorage.setItem("tatoSplashBgDataV1", JSON.stringify({ p: path, d: String(fr.result) })); } catch (e) { } };
+          fr.readAsDataURL(b);
+        }).catch(function () { });
+      } catch (e) { }
     }

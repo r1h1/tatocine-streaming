@@ -7,17 +7,17 @@
 var TC_RELEASE_NOTES = {
   es: [
     "Mi cine renovado: resumen, filtro por tipo, orden y «Continuar viendo» con barra de avance.",
-    "Nuevo menú lateral con iconos y accesos rápidos a tu perfil y a Ajustes.",
-    "Pantalla de carga sin destellos y portada más estable al abrir.",
-    "Dos servidores más en español latino (ESP4 y ESP5) y tráiler de 15 segundos.",
-    "Compatibilidad con TV de 2019, Apple TV e isla dinámica, e inglés completo."
+    "Menú con el mismo diseño que Ajustes: Perfiles, Ajustes y Legal a un toque.",
+    "App sin animaciones, más fluida, y pantalla de carga sin destellos ni tirones negros.",
+    "Imágenes más livianas (WebP) con carga perezosa completa: gasta menos datos.",
+    "Dos servidores más en español latino (ESP4 y ESP5), tráiler de 20 segundos y compatibilidad con TV, Apple TV e isla dinámica."
   ],
   en: [
     "Redesigned My Cinema: summary, type filter, sorting and a Continue Watching row with progress bars.",
-    "New side menu with icons and quick access to your profile and Settings.",
-    "Loading screen without flashes and a steadier home page when you open the app.",
-    "Two more Latin-American Spanish servers (ESP4 and ESP5) and a 15-second trailer.",
-    "Support for 2019 TVs, Apple TV and the Dynamic Island, plus fully translated English."
+    "Menu with the same design as Settings: Profiles, Settings and Legal one tap away.",
+    "No animations for a smoother app, and a loading screen without flashes or black jumps.",
+    "Lighter images (WebP) with full lazy loading: uses less data.",
+    "Two more Latin-American Spanish servers (ESP4 and ESP5), a 20-second trailer and support for TVs, Apple TV and the Dynamic Island."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;
