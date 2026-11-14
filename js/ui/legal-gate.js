@@ -38,7 +38,7 @@ function legalReady() {
 /** Todo lo que NO es el descargo queda inerte (sin foco, sin clics, oculto a lectores de pantalla) mientras no se acepte. */
 function legalInert(on) {
   Array.prototype.forEach.call(document.body.children, function (el) {
-    if (el === legalModal() || /^(SCRIPT|LINK|STYLE|NOSCRIPT)$/.test(el.tagName) || el.id === "toast-container") return;
+    if (el === legalModal() || /^(SCRIPT|LINK|STYLE|NOSCRIPT)$/.test(el.tagName) || el.id === "toast-container" || el.id === "tc-update-overlay") return;   // la actualización obligatoria va por encima del aviso legal y debe poder pulsarse
     if (on) { el.setAttribute("inert", ""); el.setAttribute("aria-hidden", "true"); el.setAttribute("data-gate-inert", "1"); }
     else if (el.getAttribute("data-gate-inert")) { el.removeAttribute("inert"); el.removeAttribute("aria-hidden"); el.removeAttribute("data-gate-inert"); }
   });

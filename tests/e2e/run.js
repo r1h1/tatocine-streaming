@@ -1184,6 +1184,18 @@ async function main() {
       await c2.close();
     }
   });
+  await test("Actualización obligatoria sobre el aviso legal: si el aviso legal está abierto (web sin aceptar), «Actualizar ahora» se puede pulsar (no queda inerte)", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.route("**/build.json*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ version: "9.9-nueva", fp: "deadbeef" }) }));
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); localStorage.removeItem("tatoLegalAcceptedV2"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+    await p.waitForSelector("#disclaimer-modal.open", { timeout: 10000 });
+    await p.waitForSelector("#tc-update-overlay.open", { timeout: 12000 });
+    ok(await p.evaluate(() => !document.getElementById("tc-update-overlay").hasAttribute("inert") && document.elementFromPoint(innerWidth / 2, document.getElementById("tc-update-go").getBoundingClientRect().top + 10) === document.getElementById("tc-update-go")), "el botón de actualizar está inerte o tapado por otra capa");
+    const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go", { timeout: 5000 }); await nav;
+    await c2.close();
+  });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);
     await page.evaluate(() => sessionStorage.setItem("__tcT", "1"));
