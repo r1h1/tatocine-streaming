@@ -109,7 +109,7 @@ siteList("css").concat(siteList("js"), siteList("icons"), ROOT_FILES.filter((f) 
 const VERSION = "5.6-" + vh.digest("hex").slice(0, 8);
 let swSrc = rd("sw.js"); if (!/^const VERSION = ".*";$/m.test(swSrc)) { console.error("✗ sw.js no tiene la línea const VERSION"); process.exit(1); }
 wr("sw.js", minJs(swSrc.replace(/^const VERSION = ".*";$/m, 'const VERSION = "' + VERSION + '";')));
-wr("build.json", JSON.stringify({ version: VERSION }) + "\n");
+wr("build.json", JSON.stringify({ version: VERSION, fp: require("./fp.js").fingerprint(rd("index.html")) }) + "\n");
 htmlFiles.forEach((r) => { after.html += Buffer.byteLength(rd(r)); }); siteList("css").forEach((r) => { after.css += fs.statSync(path.join(SITE, r)).size; }); siteList("js").filter((r) => !r.startsWith("js/vendor/")).forEach((r) => { after.js += fs.statSync(path.join(SITE, r)).size; }); after.js += Buffer.byteLength(rd("sw.js"));
 
 // 5) ZIP y verificación

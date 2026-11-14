@@ -60,6 +60,7 @@ if (require.main === module) {
     if (diskIndex !== want.index) bad.push("index.html no tiene los ?v= al día");
     if (diskQr !== want.qr) bad.push("qr-transfer.js no tiene el ?v= de las librerías al día");
     if (cur !== want.version) bad.push("sw.js tiene VERSION " + cur + " y el contenido pide " + want.version);
+    try { const bj = JSON.parse(read("build.json").toString("utf8")); if (bj.fp !== require("./fp.js").fingerprint(want.index)) bad.push("build.json tiene una huella (fp) distinta a la de index.html"); } catch (e) { bad.push("build.json no se puede leer"); }
     if (bad.length) { console.error("✗ " + bad.join("; ") + ". Ejecuta: node tools/stamp.js"); process.exit(1); }
     console.log("✓ versiones al día (" + cur + ")"); process.exit(0);
   }
@@ -67,7 +68,7 @@ if (require.main === module) {
   const after = plan();                                                     // el hash de qr-transfer cambió: se recalcula todo
   if (diskIndex !== after.index) fs.writeFileSync(path.join(ROOT, "index.html"), after.index);
   const final = plan();
-  fs.writeFileSync(path.join(ROOT, "build.json"), JSON.stringify({ version: final.version }) + "\n");
+  fs.writeFileSync(path.join(ROOT, "build.json"), JSON.stringify({ version: final.version, fp: require("./fp.js").fingerprint(final.index) }) + "\n");
   if (cur === final.version) { console.log("ya estaba al día: " + cur); process.exit(0); }
   fs.writeFileSync(swPath, sw.replace(/^const VERSION = ".*";$/m, 'const VERSION = "' + final.version + '";'));
   console.log("versión: " + cur + " → " + final.version);

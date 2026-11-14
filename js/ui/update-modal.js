@@ -3,6 +3,9 @@
  * Ventana de ACTUALIZACIÓN OBLIGATORIA (reemplaza al aviso pequeño). Sale cuando el Service Worker ya descargó una versión nueva: «¡Actualización disponible!», «Cambios:» con los
  * 5 más importantes y un único botón «Actualizar ahora». No tiene ✕, no se cierra con Esc, ni tocando fuera, ni con Tab: así todos terminan en la versión nueva.
  * Cada versión nueva: actualiza TC_RELEASE_NOTES (5 cambios que valgan la pena mencionar). Si el botón no logra activar la versión nueva en 8 s, recarga la página.
+ * SIEMPRE que haya una versión nueva y no se haya actualizado, la ventana vuelve a salir en cada apertura (aunque se cierre la app o la pestaña sin actualizar): además del aviso del
+ * Service Worker, la página compara su HUELLA (los ?v= de su index.html) con la de build.json (siempre sin caché) al abrir, al volver a la app y cada hora. La huella la calcula
+ * tools/fp.js al estampar/empaquetar; aquí se calcula con el mismo algoritmo.
  */
 var TC_RELEASE_NOTES = {
   es: [
@@ -51,3 +54,52 @@ registerAction("update-now", function () {
   try { tcUpdateApply(); } catch (e) { location.reload(); }
   setTimeout(function () { location.reload(); }, 8000);                            // seguro: si la versión nueva no tomó el control, se recarga igual
 });
+
+/** Huella de la versión que se está ejecutando (mismo algoritmo que tools/fp.js: FNV-1a de «archivo:hash» de los <link>/<script> con ?v=, en orden). */
+function tcRunningFp() {
+  var parts = [], els = document.querySelectorAll('link[href*="?v="], script[src*="?v="]');
+  for (var i = 0; i < els.length; i++) {
+    var m = /^((?:css|js)\/[^?"]+)\?v=([0-9a-f]+)$/.exec(els[i].getAttribute("href") || els[i].getAttribute("src") || "");
+    if (m && m[1].indexOf("js/vendor/") !== 0) parts.push(m[1] + ":" + m[2]);
+  }
+  var str = parts.join(","), h = 0x811c9dc5;
+  for (var k = 0; k < str.length; k++) { h ^= str.charCodeAt(k); h = Math.imul(h, 0x01000193) >>> 0; }
+  return ("00000000" + h.toString(16)).slice(-8);
+}
+var tcRunFp = tcRunningFp(), tcLastVersionCheck = 0;
+/** Pregunta (sin caché) cuál es la última versión publicada; si no es la que se está ejecutando, muestra la ventana obligatoria. Sin red no hace nada. */
+function tcCheckForUpdate(force) {
+  if (tcUpdateOpen || !window.fetch || (!force && Date.now() - tcLastVersionCheck < 5 * 60 * 1000)) return;
+  tcLastVersionCheck = Date.now();
+  fetch("build.json?_=" + Date.now(), { cache: "no-store", credentials: "omit" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (d && typeof d.fp === "string" && /^[0-9a-f]{8}$/.test(d.fp) && d.fp !== tcRunFp) tcShowUpdate(tcForceUpdate);
+  }).catch(function () { });
+}
+/** Aplica la versión nueva: activa la que espera; si no hay, la busca; si tampoco, borra el Service Worker y las cachés de la app y recarga desde la red. */
+function tcForceUpdate() {
+  var done = false;
+  function hard() {
+    if (done) return; done = true;
+    var regs = navigator.serviceWorker && navigator.serviceWorker.getRegistrations ? navigator.serviceWorker.getRegistrations() : Promise.resolve([]);
+    regs.then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }).catch(function () { })
+      .then(function () { return window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return /^tatocine-(shell|api)/.test(k); }).map(function (k) { return caches.delete(k); })); }) : null; }).catch(function () { })
+      .then(function () { location.reload(); });
+  }
+  if (!("serviceWorker" in navigator)) return hard();
+  navigator.serviceWorker.addEventListener("controllerchange", function () { if (!done) { done = true; location.reload(); } });
+  navigator.serviceWorker.getRegistration().then(function (reg) {
+    if (!reg) return hard();
+    function activate(w) { w.postMessage({ type: "SKIP_WAITING" }); }
+    if (reg.waiting) return activate(reg.waiting);
+    return reg.update().then(function () {
+      if (reg.waiting) return activate(reg.waiting);
+      var w = reg.installing;
+      if (w) { w.addEventListener("statechange", function () { if (w.state === "installed" && reg.waiting) activate(reg.waiting); else if (w.state === "redundant") hard(); }); return; }
+      hard();
+    });
+  }).catch(hard);
+  setTimeout(hard, 7000);
+}
+window.addEventListener("load", function () { setTimeout(function () { tcCheckForUpdate(true); }, 1500); });                         // al abrir la app
+document.addEventListener("visibilitychange", function () { if (!document.hidden) tcCheckForUpdate(false); });                       // al volver a ella (como mucho cada 5 min)
+setInterval(function () { tcCheckForUpdate(false); }, 60 * 60 * 1000);                                                              // y cada hora con la app abierta

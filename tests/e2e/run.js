@@ -1164,6 +1164,26 @@ async function main() {
     ok(await page.evaluate(() => document.getElementById("actor-bio").textContent.length > 200), "«ver más» no expandió la biografía");
     await page.evaluate(() => closeActor());
   });
+  await test("Actualización SIEMPRE obligatoria: con la versión al día no sale; si hay una versión publicada distinta, la ventana sale en CADA apertura (también tras cerrar sin actualizar) y «Actualizar ahora» recarga", async (page, ctx) => {
+    // 1) al día: la huella de la página coincide con la de build.json y no sale nada
+    const bj = await (await fetch(url + "build.json")).json();
+    await enter(page); await page.waitForTimeout(2600);
+    const fpRun = await page.evaluate(() => tcRunningFp());
+    eq(fpRun, bj.fp, "la huella que calcula la página debe ser la de build.json:");
+    ok(!(await page.evaluate(() => document.getElementById("tc-update-overlay").classList.contains("open"))), "salió la ventana de actualización con la versión al día");
+    // 2) hay una versión nueva publicada: sale en cada apertura nueva (contextos distintos = cerrar y volver a abrir, sin tocar nada)
+    for (let apertura = 1; apertura <= 3; apertura++) {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.route("**/build.json*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ version: "9.9-nueva", fp: "deadbeef" }) }));
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+      const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" });
+      await p.waitForSelector("#tc-update-overlay.open", { timeout: 12000 });
+      ok(await p.evaluate(() => document.querySelectorAll("#tc-update-list li").length === 5 && !document.querySelector("#tc-update-overlay .tc-profile-create-close")), "apertura " + apertura + ": ventana incompleta o con botón de cerrar");
+      if (apertura === 3) { const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go"); await nav; }
+      await c2.close();
+    }
+  });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);
     await page.evaluate(() => sessionStorage.setItem("__tcT", "1"));
