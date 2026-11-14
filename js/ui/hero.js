@@ -279,13 +279,14 @@
           $heroPlayBtn.classList.remove("upcoming");
           $heroPlayBtn.style.cursor = "pointer";
 
+          var rp = typeof resumeInfoFor === "function" ? resumeInfoFor(m.id, m.type) : null;           // título a medias: el botón principal dice «Reanudar · N %» y abre ese episodio
           $heroPlayBtn.innerHTML =
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
             '<path d="M8 5v14l11-7z"/>' +
-            "</svg>Ver";
+            "</svg>" + (rp ? L("Reanudar", "Resume") + " · " + rp.pct + " %" : L("Ver", "Watch"));
 
           $heroPlayBtn.onclick = function () {
-            openPlayer(m.id, m.type, m.title, null, null, m.bg);
+            openPlayer(m.id, m.type, m.title, rp && rp.season ? rp.season : null, rp && rp.episode ? rp.episode : null, m.bg);
           };
         }
 

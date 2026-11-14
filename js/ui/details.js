@@ -8,19 +8,21 @@
     /** Recorta a n caracteres (corta en palabra y agrega «…»). */
 function clipText(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); if (t.length <= n) return t; var c = t.slice(0, n - 1), i = c.lastIndexOf(" "); return (i > n * 0.6 ? c.slice(0, i) : c).replace(/[\s,;:.\-–—]+$/, "") + "…"; }
 
-/** Descripción compacta (150 caracteres) con «ver más» al final para expandirla completa (y «ver menos» para volver a comprimirla). */
-function setOverview(full) {
-  var el = $("details-overview"); if (!el) return;
-  full = String(full || "").replace(/\s+/g, " ").trim();
+/** Texto compacto (n caracteres) con «ver más» al final para expandirlo completo (y «ver menos» para volver a comprimirlo). `breaks`: respeta los saltos de línea al expandir. */
+function setClamped(el, full, n, breaks) {
+  if (!el) return;
+  var plain = String(full || "").replace(/\s+/g, " ").trim(), shown = breaks ? String(full || "").trim() : plain;
   el.textContent = "";
-  var short = clipText(full, 150);
-  if (short === full) { el.textContent = full; return; }
+  var short = clipText(plain, n);
+  if (short === plain) { el.textContent = shown; return; }
   var txt = document.createElement("span"), btn = document.createElement("button"), open = false;
   btn.type = "button"; btn.className = "details-more";
-  function paint() { txt.textContent = open ? full + " " : short + " "; btn.textContent = open ? L("ver menos", "show less") : L("ver más", "show more"); btn.setAttribute("aria-expanded", open ? "true" : "false"); }
+  function paint() { txt.textContent = open ? shown + " " : short + " "; btn.textContent = open ? L("ver menos", "show less") : L("ver más", "show more"); btn.setAttribute("aria-expanded", open ? "true" : "false"); }
   btn.addEventListener("click", function () { open = !open; paint(); });
   el.appendChild(txt); el.appendChild(btn); paint();
 }
+/** Descripción de la ficha: 150 caracteres con «ver más». */
+function setOverview(full) { setClamped($("details-overview"), full, 150, false); }
 
 function openDetails(id, type) {
       id = Number(id);
@@ -366,7 +368,7 @@ function openDetails(id, type) {
             if (d.profile_path)
               $("actor-photo").src = IMG_W185 + d.profile_path;
             if (d.biography && d.biography.trim().length > 20)
-              $("actor-bio").textContent = shortBio(d.biography);
+              setClamped($("actor-bio"), d.biography, 150, true);                 // 150 caracteres y «ver más» (igual que la descripción de la ficha)
             else if (lang !== "en-US") {
               fetchAndRender("en-US");
               return;

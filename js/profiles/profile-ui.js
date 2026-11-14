@@ -233,7 +233,7 @@
       });
 
       if (localProfiles.length < 6) {
-        cards.push('<button type="button" class="tc-profile-card tc-profile-add-card" data-profile-action="create" aria-label="Agregar perfil"><span class="tc-profile-card-avatar tc-profile-add-initial" aria-hidden="true">+</span><span class="tc-profile-card-name">Agregar perfil</span><span class="tc-profile-active-label">Crear nuevo</span></button>');
+        cards.push('<button type="button" class="tc-profile-card tc-profile-add-card" data-profile-action="create" aria-label="Agregar perfil"><span class="tc-profile-card-avatar tc-profile-add-initial" aria-hidden="true">+</span><span class="tc-profile-card-name">' + L("Agregar perfil", "Add profile") + '</span><span class="tc-profile-active-label">' + L("Crear nuevo", "Create new") + '</span></button>');
       }
 
       grid.innerHTML = cards.join("");

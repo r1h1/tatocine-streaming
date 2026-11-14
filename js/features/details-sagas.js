@@ -41,12 +41,13 @@ decorate("openActor", function (original) {
     fetchTMDB("/person/" + actorId + "/combined_credits").then(function (d) {
       var seen = {}, list = ((d && d.cast) || []).filter(function (x) { var k = x.media_type + x.id; if (seen[k] || !x.poster_path || (x.media_type !== "movie" && x.media_type !== "tv") || x.adult) return false; seen[k] = 1; return (x.vote_count || 0) > 40; })
         .sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); }).slice(0, 14);
-      var host = document.querySelector("#actor-modal .actor-content");
+      var host = document.getElementById("actor-scroll") || document.querySelector("#actor-modal .actor-content");     // dentro del scroll de la ficha (antes quedaba fijo abajo)
       if (!list.length || !host) return;
       var box = document.createElement("div");
       box.id = "actor-films"; box.className = "actor-films";
       box.innerHTML = '<div class="details-cast-title">' + L("Conocido por", "Known for") + '</div><div class="details-cast">' + extrasCards(list).replace(/data-act="open-details"/g, 'data-act="actor-film"') + "</div>";
-      host.appendChild(box);
+      var legalFt = host.querySelector(".tc-modal-legal");
+      if (legalFt) host.insertBefore(box, legalFt); else host.appendChild(box);                   // antes del aviso legal del pie
     }).catch(function () { });
     return r;
   };

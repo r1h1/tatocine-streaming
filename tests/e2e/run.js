@@ -979,7 +979,7 @@ async function main() {
     const set = { head: await sty("#settings-modal .modal-header"), title: await sty("#settings-modal .modal-title"), close: await sty("#settings-modal .modal-close"), label: await sty("#settings-modal .settings-option .label"), row: await sty("#settings-modal .settings-option") };
     await p.evaluate(() => { closeSettings(); toggleMenu(); }); await p.waitForTimeout(400);
     const mn = { head: await sty("#mobile-menu .modal-header"), title: await sty("#mobile-menu .modal-title"), close: await sty("#mobile-menu .modal-close"), label: await sty("#mobile-menu .nav-item:not(.active) .label"), row: await sty("#mobile-menu .nav-item:not(.active)") };
-    for (const k of ["head", "title", "close", "label"]) { const strip = (o) => { const c = Object.assign({}, o); if (k === "title" || k === "label") delete c.w; return JSON.stringify(c); }; eq(strip(mn[k]), strip(set[k]), "«" + k + "» del menú debe verse igual que en Ajustes:"); }
+    for (const k of ["head", "title", "close", "label"]) { const strip = (o) => { const c = Object.assign({}, o); if (k === "title" || k === "label") delete c.w; if (k === "label") { c.fs = "base"; delete c.h; } return JSON.stringify(c); }; eq(strip(mn[k]), strip(set[k]), "«" + k + "» del menú debe verse igual que en Ajustes:"); }
     ok(mn.row.pad === set.row.pad && mn.row.bb === set.row.bb && mn.row.w === set.row.w, "las filas del menú no coinciden con las de Ajustes: " + JSON.stringify([mn.row, set.row]));
     await p.click('#mobile-menu .modal-close'); await p.waitForTimeout(400);
     ok(!(await p.evaluate(() => document.getElementById("mobile-menu").classList.contains("open") || document.documentElement.classList.contains("menu-lock"))), "la ✕ no cerró el menú");
@@ -1098,6 +1098,71 @@ async function main() {
     await enter(page); await page.evaluate(() => openDetails(603, "movie")); await page.waitForSelector("#details-real-content", { state: "visible", timeout: 10000 }); await page.waitForTimeout(500);
     const r = await page.evaluate(() => { const imgs = [...document.querySelectorAll("img")].filter((i) => !i.closest("#tc-splash") && !i.closest(".tc-welcome") && !i.closest(".top-nav") && i.getAttribute("src") !== ""); return { n: imgs.length, sin: imgs.filter((i) => !i.getAttribute("loading")).map((i) => i.className || i.alt || i.src.slice(-30)).slice(0, 8), sinDec: imgs.filter((i) => !i.getAttribute("decoding")).map((i) => i.className || i.src.slice(-30)).slice(0, 8), lazy: imgs.filter((i) => i.getAttribute("loading") === "lazy").length, eager: imgs.filter((i) => i.getAttribute("loading") === "eager").length }; });
     ok(r.n > 10 && r.sin.length === 0 && r.sinDec.length === 0 && r.lazy > r.eager && r.eager <= 16, "imágenes sin lazy/decoding: " + JSON.stringify(r));
+  });
+  await test("Inglés para un usuario NUEVO con el móvil en inglés: bienvenida (5 pasos, «Skip»), selector («Add profile») y descargo, sin una palabra en español", async (page, ctx) => {
+    const SP = () => { const out = new Set(), sp = /[áéíóúñ¿¡«»]|\b(de|del|la|el|los|las|tu|tus|para|con|sin|una|que|por|al|más|todo|esta|puedes|hasta|desde|cuando|solo|gracias|confiar|invitamos|aprender|usar|aplicativo|dando|siguiente|terminar|configurar|perfil|perfiles|elige|crea|bienvenido|atrás|saltar|aceptar|continuar|utilizar|cerrar|agregar|nuevo)\b/i, ignore = /Película \d+|Sinopsis de prueba|Serie|Tendencia|Actor \d|Prueba|Comedia|Misterio|Estrenada|Directora/;
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.textContent.trim(), e = n.parentElement; if (t.length < 2 || !e || /SCRIPT|STYLE/.test(e.tagName)) continue; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || r.width < 1 || r.height < 1) continue; if (sp.test(t) && !ignore.test(t)) out.add(t.slice(0, 80)); }
+      document.querySelectorAll("[title],[aria-label],[placeholder]").forEach((e) => { if (!e.offsetParent && getComputedStyle(e).position !== "fixed") return; ["title", "aria-label", "placeholder"].forEach((a) => { const t = e.getAttribute(a); if (t && sp.test(t) && !ignore.test(t)) out.add("@" + a + ": " + t.slice(0, 60)); }); }); return [...out]; };
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 900 }, locale: "en-US" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-welcome", { state: "visible" }); await p.waitForTimeout(700);
+    const bad = {};
+    for (let i = 0; i < 5; i++) { const r = await p.evaluate(SP); if (r.length) bad["paso " + (i + 1)] = r; if (i < 4) { await p.click('[data-tw="next"]'); await p.waitForTimeout(200); } }
+    eq(await p.evaluate(() => document.querySelector(".tw-slide.on h2").textContent.trim()), "Before you start", "último paso de la bienvenida:");
+    await p.click('[data-tw="next"]'); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.waitForTimeout(1000);
+    const r2 = await p.evaluate(SP); if (r2.length) bad.selector = r2;
+    ok(/Add profile/.test(await p.locator(".tc-profile-add-card").innerText()), "la tarjeta de agregar perfil debe decir «Add profile»");
+    await p.click('[data-profile-action="select"]'); await p.waitForSelector("#disclaimer-modal.open", { timeout: 10000 }); await p.waitForTimeout(400);
+    const r3 = await p.evaluate(SP); if (r3.length) bad.descargo = r3;
+    ok(Object.keys(bad).length === 0, "textos en español: " + JSON.stringify(bad));
+    await c2.close();
+  });
+  await test("Inglés en pantallas secundarias (estadísticas, calendario, resumen del mes, paleta, búsqueda, Películas/Series/Anime/Niños, Mi cine, listas, Legal, PIN): sin español", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 900 }, locale: "en-US" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await p.click('[data-profile-action="select"]');
+    await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 }); await p.waitForTimeout(500);
+    const SP = () => { const out = new Set(), sp = /[áéíóúñ¿¡«»]|\b(de|del|la|el|los|las|tu|tus|para|con|sin|una|que|por|al|más|todo|esta|puedes|hasta|desde|cuando|solo|recomendar|contenido|borrar|eliminar|preferidos|servidor|reproducir|películas|favoritos|restablecer|activar|desactivar|tamaño|mostrar|copiar|ajustes|perfil|inicio|niños|cambiar|menú|cerrar|actualización|cambios|actualizar|ahora|disponible|gracias|aceptar|continuar|saltar|agregar|crear|nuevo|nueva|lista|listas|vistas|vista|temporada|episodio|buscar|resultados|volver|guardar|cancelar|editar|compartir|escanear|importar|exportar)\b/i, ignore = /Película \d+|Sinopsis de prueba|Serie|Tendencia|Actor \d|Prueba|Comedia|Misterio|Estrenada|Filmografía|Biografía de prueba|ESP · Español|Ciudad|Directora/;
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.textContent.trim(), e = n.parentElement; if (t.length < 2 || !e || /SCRIPT|STYLE/.test(e.tagName)) continue; const r = e.getBoundingClientRect(), cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || r.width < 1 || r.height < 1) continue; if (sp.test(t) && !ignore.test(t)) out.add(t.slice(0, 70)); }
+      document.querySelectorAll("[title],[aria-label],[placeholder]").forEach((e) => { if (!e.offsetParent && getComputedStyle(e).position !== "fixed") return; ["title", "aria-label", "placeholder"].forEach((a) => { const t = e.getAttribute(a); if (t && sp.test(t) && !ignore.test(t)) out.add("@" + a + ": " + t.slice(0, 60)); }); }); return [...out]; };
+    const bad = {}, closeAll = () => { document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open")); document.querySelectorAll(".tc-profile-create-overlay.open").forEach((m) => { m.classList.remove("open"); m.setAttribute("aria-hidden", "true"); }); document.body.style.overflow = ""; };
+    const run = async (n, fn) => { try { await p.evaluate(fn); await p.waitForTimeout(650); const r = await p.evaluate(SP); if (r.length) bad[n] = r; } catch (e) { bad[n] = ["ERROR " + e.message.slice(0, 50)]; } await p.evaluate(closeAll); };
+    await run("estadísticas", () => openStats()); await run("calendario", () => openCalendar()); await run("resumen del mes", () => openWrapped()); await run("paleta", () => openCommandPalette());
+    await run("búsqueda", () => { document.getElementById("search-input").value = "matrix"; performSearch("matrix"); });
+    for (const v of ["movies", "series", "anime", "kids", "list"]) await run("vista " + v, new Function("switchView(\"" + v + "\")"));
+    await run("lista nueva", () => openListModal()); await run("legal", () => openLegalHub());
+    await run("PIN", () => askProfilePin({ id: "x", name: "Ana", pin: { h: "a", s: "b" } }, () => 0)); await run("maratón", () => startMarathon());
+    ok(Object.keys(bad).length === 0, "textos en español: " + JSON.stringify(bad));
+    await c2.close();
+  });
+  await test("Portada: si el título destacado está a medias, el botón principal dice «Reanudar · N %» y abre ese episodio", async (page) => {
+    await enter(page);
+    const r = await page.evaluate(() => {
+      const m = currentHeroMedia; continueWatching = [{ id: m.id, type: m.type, title: m.title, bg: m.bg, pct: 42, season: m.type === "tv" ? 3 : undefined, episode: m.type === "tv" ? 4 : undefined, timestamp: Date.now() }];
+      setHero(m); return { id: m.id, type: m.type };
+    });
+    await page.waitForTimeout(500);
+    const t = (await page.locator("#hero-play-btn").innerText()).trim();
+    ok(/Reanudar · 42 %/.test(t), "el botón de la portada debía decir «Reanudar · 42 %»: " + t);
+    await page.evaluate(() => { continueWatching = []; setHero(currentHeroMedia); }); await page.waitForTimeout(500);
+    eq((await page.locator("#hero-play-btn").innerText()).trim(), "Ver", "sin progreso el botón vuelve a «Ver»:");
+  });
+  await test("Ficha del actor: biografía de 150 caracteres con «ver más» (como la de Información) y «Conocido por» dentro del scroll (ya no fijo)", async (page) => {
+    await enter(page);
+    ok(await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("#mobile-menu .nav-item:not(.active) .label")).fontSize) === 17 && parseFloat(getComputedStyle(document.querySelector("#mobile-menu .nav-item:not(.active) .label")).fontSize) === parseFloat(getComputedStyle(document.querySelector("#settings-modal .settings-option .label")).fontSize) + 1), "las letras del menú deben medir 1 px más que las de Ajustes");
+    await page.evaluate(() => openActor(6193)); await page.waitForSelector("#actor-films", { timeout: 8000 }); await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      setClamped(document.getElementById("actor-bio"), "Una biografía larga. ".repeat(30), 150, true);
+      const scroll = document.getElementById("actor-scroll"), films = document.getElementById("actor-films"), bio = document.getElementById("actor-bio"), btn = bio.querySelector(".details-more");
+      return { inScroll: films.parentElement === scroll, legalAfter: films.nextElementSibling && films.nextElementSibling.classList.contains("tc-modal-legal"), pos: getComputedStyle(films).position, len: bio.textContent.length, btn: btn ? btn.textContent : null };
+    });
+    ok(r.inScroll && r.legalAfter && r.pos !== "fixed" && r.pos !== "sticky", "«Conocido por» sigue fijo: " + JSON.stringify(r));
+    ok(r.btn === "ver más" && r.len <= 150 + 12, "la biografía debía quedar en 150 caracteres con «ver más»: " + JSON.stringify(r));
+    await page.click("#actor-bio .details-more");
+    ok(await page.evaluate(() => document.getElementById("actor-bio").textContent.length > 200), "«ver más» no expandió la biografía");
+    await page.evaluate(() => closeActor());
   });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);

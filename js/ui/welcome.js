@@ -33,6 +33,8 @@ if (typeof i18nAdd === "function") i18nAdd({
   "Usa TatoCine con calma: hay descansos de uso para cuidar tu tiempo.": "Use TatoCine calmly: there are usage breaks to look after your time.",
   "Siempre puedes releer todo esto desde Legal.": "You can always read all this again from Legal."
 });
+// El primer párrafo se traduce por prefijo (no por texto exacto): si se edita la frase en index.html, la traducción sigue funcionando.
+if (typeof i18nRule === "function") i18nRule(/^Gracias por confiar en TatoCine, te invitamos[\s\S]*$/, "Thank you for trusting TatoCine. We invite you to learn how to use the app by tapping “Next” to finish setting up and discover how to use the free service.");
 
 function welcomeEl() { return document.getElementById("tc-welcome"); }
 function welcomeShow(i) {

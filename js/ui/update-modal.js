@@ -10,14 +10,14 @@ var TC_RELEASE_NOTES = {
     "Menú con el mismo diseño que Ajustes: Perfiles, Ajustes y Legal a un toque.",
     "App sin animaciones, más fluida, y pantalla de carga sin destellos ni tirones negros.",
     "Imágenes más livianas (WebP) con carga perezosa completa: gasta menos datos.",
-    "Dos servidores más en español latino (ESP4 y ESP5), tráiler de 20 segundos y compatibilidad con TV, Apple TV e isla dinámica."
+    "Dos servidores más (ESP4 y ESP5), tráiler de 20 s, compatibilidad con TV, Apple TV e isla dinámica y app completa en inglés."
   ],
   en: [
     "Redesigned My Cinema: summary, type filter, sorting and a Continue Watching row with progress bars.",
     "Menu with the same design as Settings: Profiles, Settings and Legal one tap away.",
     "No animations for a smoother app, and a loading screen without flashes or black jumps.",
     "Lighter images (WebP) with full lazy loading: uses less data.",
-    "Two more Latin-American Spanish servers (ESP4 and ESP5), a 20-second trailer and support for TVs, Apple TV and the Dynamic Island."
+    "Two more servers (ESP4 and ESP5), a 20-second trailer, support for TVs, Apple TV and the Dynamic Island, and a fully translated English app."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;

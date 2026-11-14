@@ -525,7 +525,7 @@ body.lite .hero.hero-loading *, body.rm .hero.hero-loading * { animation: none !
 }
 
 /* Conocido por (ficha del actor) */
-.actor-films { padding: 0 24px calc(24px + env(safe-area-inset-bottom)); flex: none; }
+.actor-films { padding: 0 24px 16px; flex: none; }
 .actor-content { overflow-y: auto; }
 
 /* ---------- Hora de dormir: pantalla completa con el fondo de «Buscando a Nemo» ---------- */

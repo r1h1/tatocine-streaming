@@ -8,7 +8,7 @@
 #mobile-menu .modal-body { width: 100%; max-width: 640px; margin: 0 auto; }
 #mobile-menu .nav-item { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 64px; margin: 0; padding: 14px 20px; border: 0; border-bottom: 1px solid rgba(255, 255, 255, .05); border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; transform: none; color: #fff; font: inherit; text-align: left; cursor: pointer; }
 #mobile-menu .nav-item .mm-text { flex: 1 1 auto; min-width: 0; }
-#mobile-menu .nav-item .label { font-size: calc(16px * var(--ts, 1)); font-weight: 600; color: #fff; }
+#mobile-menu .nav-item .label { font-size: calc(17px * var(--ts, 1)); font-weight: 600; color: #fff; }
 #mobile-menu .nav-item > svg:first-child { flex: 0 0 22px; width: 22px; height: 22px; color: #fff; }
 #mobile-menu .nav-item:hover, #mobile-menu .nav-item:focus-visible { background: rgba(255, 255, 255, .06); transform: none; border-color: rgba(255, 255, 255, .05); }
 #mobile-menu .nav-item.active { background: rgba(255, 255, 255, .1); box-shadow: inset 3px 0 0 #fff; }

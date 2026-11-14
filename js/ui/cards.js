@@ -15,6 +15,12 @@
       } catch (e) { }
       return 0;
     }
+/** Datos para «Reanudar» de un título a medias en este perfil ({ pct, season, episode }) o null. Los usan la portada y la ficha. */
+    function resumeInfoFor(id, type) {
+      var pct = resumePct(id, type); if (!pct) return null;
+      var m = (typeof continueWatching !== "undefined" ? continueWatching : []).filter(function (x) { return String(x.id) === String(id) && x.type === (type === "tv" ? "tv" : "movie"); })[0] || {};
+      return { pct: pct, season: type === "tv" ? m.season : null, episode: type === "tv" ? m.episode : null };
+    }
     function getCardHTML(i) {
       var s = isSaved(i);
       var cid = Number(i.id) || 0, ctype = i.type === "tv" ? "tv" : "movie";      // nunca se interpolan valores sin validar en los atributos
