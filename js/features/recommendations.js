@@ -57,6 +57,21 @@
       var typeShare = { movie: typeScore.movie / typeTotal, tv: typeScore.tv / typeTotal };
       var topLang = Object.keys(langScore).sort(function (a, b) { return langScore[b] - langScore[a]; })[0];
       var langShare = topLang && langTotal ? langScore[topLang] / langTotal : 0;
+      // Señales NEGATIVAS: géneros de lo que marcaste «no me gusta» y de lo que abandonaste (menos de 5 min, sin terminar, hace más de 3 días). Restan puntos
+      // a lo parecido (no lo prohíben: un gusto puede cambiar). Los títulos con «no me gusta» nunca se recomiendan.
+      var negW = {}, disliked = {}, wm = typeof watchedMap === "object" && watchedMap ? watchedMap : {};
+      Object.keys(wm).forEach(function (k) { var r = wm[k]; if (r && r.ur < 0) { disliked[r.type + ":" + r.id] = true; (r.g || []).forEach(function (id) { negW[id] = (negW[id] || 0) + 1; }); } });
+      items.forEach(function (it) { if (!it.done && (it.secs || 0) < 300 && now - (it.lastPlayedAt || now) > 3 * 86400000) (it.genreIds || []).forEach(function (id) { negW[id] = (negW[id] || 0) + 0.4; }); });
+      var negMax = Math.max.apply(null, [1].concat(Object.keys(negW).map(function (k) { return negW[k]; })));
+      // Resultado guardado en el dispositivo (6 h): si tus gustos no cambiaron, «Hecho para ti» y «Porque viste…» salen al instante y sin pedir nada a TMDB.
+      var recSig = (function () { var str = done.map(function (x) { return x.type + x.id + ":" + (x.done || 0) + ":" + Math.round((x.secs || 0) / 600); }).join("|") + "|" + myList.length + "|" + Object.keys(wm).length + "|" + (UI_EN ? "en" : "es"), h = 0x811c9dc5; for (var q = 0; q < str.length; q++) { h ^= str.charCodeAt(q); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); })();
+      var recCache = readLocalJSON(profileStorageKey("tatoRecsV1"), null);
+      if (recCache && recCache.sig === recSig && now - (recCache.ts || 0) < 6 * 3600000 && Array.isArray(recCache.picks) && recCache.picks.length) {
+        var mainC = insertPersonalRow(L("Hecho para ti", "Made for you"), recCache.picks, null, "");
+        var rowsC = $rowsContainer.querySelectorAll(".catalog-row"), anchorC = rowsC.length > 4 ? rowsC[3] : rowsC[rowsC.length - 1] || mainC;
+        (recCache.because || []).forEach(function (b) { if (b && b.title && Array.isArray(b.items) && b.items.length >= 6) anchorC = insertPersonalRow(b.title, b.items, anchorC, "because-row"); });
+        return;
+      }
       var seedCount = Math.max(2, Math.min(6, 1 + Math.ceil(n / 2)));
       var seeds = done.slice().sort(function (a, b) {
         function sc(x) { return tasteWeight(x) * recencyOf(x, 30); }
@@ -92,7 +107,7 @@
         if (typeof watchedList === "function") watchedList().forEach(function (x) { seen[x.type + ":" + x.id] = true; });
         var pool = {};
         function add(raw, type, source, seedIdx) {
-          if (!raw || !raw.id || seen[type + ":" + raw.id]) return;
+          if (!raw || !raw.id || seen[type + ":" + raw.id] || disliked[type + ":" + raw.id]) return;
           if (!(raw.backdrop_path || raw.poster_path)) return;
           var key = type + ":" + raw.id;
           if (!pool[key]) pool[key] = { raw: raw, type: type, seedHits: 0, discover: false, seeds: [] };
@@ -125,7 +140,8 @@
           var lang = topLang && c.raw.original_language === topLang ? 0.15 * langShare : 0;
           var yr = Number(String(c.raw.release_date || c.raw.first_air_date || "").slice(0, 4)) || 0, age = yr ? thisYear - yr : 99;
           var recent = age <= 2 ? 1 : age <= 5 ? 0.6 : age <= 10 ? 0.3 : 0;
-          var score = 1.4 * Math.min(1, sim) + Math.min(3, c.seedHits) * 0.55 + (c.discover ? 0.1 : 0) + quality * 0.8 + pop * 0.2 + typeShare[c.type] * 0.35 + lang + recent * 0.35;
+          var neg = g.length ? g.reduce(function (sum, id) { return sum + (negW[id] || 0); }, 0) / (g.length * negMax) : 0;   // 0…1: cuánto se parece a lo que no te gustó
+          var score = 1.4 * Math.min(1, sim) + Math.min(3, c.seedHits) * 0.55 + (c.discover ? 0.1 : 0) + quality * 0.8 + pop * 0.2 + typeShare[c.type] * 0.35 + lang + recent * 0.35 - 0.9 * neg;
           var mapped = c.type === "tv" ? mapTvResult(c.raw) : mapMovieResult(c.raw);
           if (mapped.isUpcoming) return null;
           mapped._tasteScore = score;
@@ -162,7 +178,8 @@
           .sort(function (a0, b0) { return b0._tasteScore - a0._tasteScore; }).slice(0, exploreN)
           .forEach(function (m0) { used[m0.type + ":" + m0.id] = true; picks.push(m0); });
         if (!picks.length) { releasePersonalSlot(); return; }
-        var main = insertPersonalRow("Hecho para ti", picks, null, "");
+        var main = insertPersonalRow(L("Hecho para ti", "Made for you"), picks, null, "");
+        var mini = function (m) { return { id: m.id, type: m.type, title: m.title, bg: m.bg, rating: m.rating, year: m.year, desc: m.desc, status: m.status }; }, cacheBecause = [];
         // "Porque viste X": recomendaciones directas del título finalizado más relevante.
         // Hasta dos filas por perfil: «Porque viste X» (título más relevante y el siguiente), «Porque guardaste X» o «Porque te gustó X»; sin repetir títulos entre filas.
         var shown = {}; Object.keys(used).forEach(function (k) { shown[k] = true; });
@@ -173,7 +190,9 @@
           rowItems.forEach(function (m) { shown[m.type + ":" + m.id] = true; });
           var prefix = i < seeds.length ? L("Porque viste ", "Because you watched ") : sd.fav ? L("Porque guardaste ", "Because you saved ") : L("Porque te gustó ", "Because you liked ");
           anchorRow = insertPersonalRow(prefix + sd.title, rowItems, anchorRow, "because-row");
+          cacheBecause.push({ title: prefix + sd.title, items: rowItems.map(mini) });
         });
+        try { safeStorageSet(profileStorageKey("tatoRecsV1"), JSON.stringify({ sig: recSig, ts: Date.now(), picks: picks.map(mini), because: cacheBecause })); } catch (e) { }
       }).catch(function () { });
     };
     function recencyOf(it, half) {

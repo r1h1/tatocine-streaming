@@ -5,11 +5,11 @@
      Los CSS/JS llevan ?v=<hash> y son inmutables, así que un cambio en el HTML se ve en la visita siguiente y las versiones nuevas del código llegan con el aviso «Actualizar».
    - Resto del shell (manifest, iconos, offline): caché primero.
    - Imágenes de TMDB (reenviando el Accept del navegador para recibir WebP, más liviano): caché primero (la URL de cada imagen no cambia nunca: así se ven al instante, sin gastar datos y también sin conexión), con tope de 1200.
-   - API de TMDB: caché AGRESIVA por tipo de dato (el trabajo lo hace el dispositivo, no el servidor). «Stale-while-revalidate»: con copia reciente se usa tal cual;
+   - API de TMDB: caché AGRESIVA y COMPRIMIDA (gzip con CompressionStream donde exista) por tipo de dato (el trabajo lo hace el dispositivo, no el servidor). «Stale-while-revalidate»: con copia reciente se usa tal cual;
      con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
      conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-ce1be61c";
+const VERSION = "5.6-66f385d2";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
@@ -168,17 +168,29 @@ self.addEventListener("fetch", (event) => {
         const res = await timeoutFetch(req, 10000);
         if (res.ok) {
           const headers = new Headers(res.headers);
-          headers.set("x-tc-cached-at", String(Date.now()));
-          const body = await res.clone().blob();
+          headers.set("x-tc-cached-at", String(Date.now())); headers.delete("content-length"); headers.delete("content-encoding");
+          let body;
+          if (typeof CompressionStream === "function") {                                   // guardada COMPRIMIDA (gzip): el JSON de TMDB ocupa ~5–8 veces menos en el dispositivo
+            try { body = await new Response(res.clone().body.pipeThrough(new CompressionStream("gzip"))).blob(); headers.set("x-tc-gz", "1"); } catch (e) { body = null; }
+          }
+          if (!body) { body = await res.clone().blob(); headers.delete("x-tc-gz"); }
           cache.put(req, new Response(body, { status: 200, headers })).then(() => trim(API_CACHE, MAX_API));
         }
         return res;
       };
+      /** Copia guardada lista para usar: si se guardó comprimida, se descomprime al vuelo (si el navegador no sabe, se pide a la red). */
+      const fromCache = (h) => {
+        if (!h || !h.headers.get("x-tc-gz")) return h;
+        if (typeof DecompressionStream !== "function") return null;
+        const hd = new Headers(h.headers); hd.delete("x-tc-gz"); hd.set("content-type", "application/json;charset=utf-8");
+        return new Response(h.body.pipeThrough(new DecompressionStream("gzip")), { status: 200, headers: hd });
+      };
       const tier = apiTier(url);
-      if (hit && age < tier.fresh) return hit;                                         // reciente: instantáneo, cero peticiones
-      if (hit && age < tier.max) { event.waitUntil(refresh().catch(() => null)); return hit; }       // algo viejo: se muestra ya y se actualiza detrás
+      const ready = fromCache(hit);
+      if (ready && age < tier.fresh) return ready;                                     // reciente: instantáneo, cero peticiones
+      if (ready && age < tier.max) { event.waitUntil(refresh().catch(() => null)); return ready; }    // algo viejo: se muestra ya y se actualiza detrás
       try { return await refresh(); }
-      catch (e) { if (hit && age < tier.max * 4) return hit; throw e; }
+      catch (e) { if (ready && age < tier.max * 4) return ready; throw e; }
     })());
   }
 });

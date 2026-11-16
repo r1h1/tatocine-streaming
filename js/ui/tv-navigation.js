@@ -6,10 +6,17 @@
  */
     // ---- Teclado, mando de TV y protección básica del código ----
     var FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]';
-    var LAYER_IDS = ["tc-pin-overlay", "tc-install-overlay", "tc-wizard-overlay", "tc-fav-overlay", "tc-list-overlay", "tc-profile-create-overlay", "stats-modal", "tc-profile-overlay", "actor-modal", "filters-modal", "settings-modal", "details-modal", "disclaimer-modal", "mobile-menu", "player-modal"];
+    var LAYER_IDS = ["tc-pin-overlay", "tc-install-overlay", "tc-wizard-overlay", "tc-fav-overlay", "tc-list-overlay", "tc-profile-create-overlay", "stats-modal", "tc-profile-overlay", "actor-modal", "filters-modal", "settings-modal", "details-modal", "disclaimer-modal", "mobile-menu", "player-modal", "tc-update-overlay", "tc-welcome", "tc-reset-overlay", "tc-adult-warn", "tc-qr-overlay", "tc-cmd-overlay", "legal-modal", "tc-adult-lock"];
+    /** La capa visible más alta (por z-index), sea la que sea: bienvenida, actualización, aviso legal, selector, cualquier ventana o diálogo. Con el mando, el foco
+     *  solo se mueve dentro de ella (antes la bienvenida y la actualización no estaban en la lista y las flechas movían el foco a la página de atrás). */
     function topLayer() {
-      for (var i = 0; i < LAYER_IDS.length; i++) { var el = $(LAYER_IDS[i]); if (el && el.classList.contains("open")) return el; }
-      return null;
+      var best = null, bz = -Infinity;
+      document.querySelectorAll(".modal.open, .tc-profile-create-overlay.open, .tc-kid-lock.open, .tc-welcome.open, #tc-profile-overlay.open").forEach(function (el) {
+        var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden") return;
+        var z = parseInt(cs.zIndex, 10); if (isNaN(z)) z = 0;
+        if (z >= bz) { bz = z; best = el; }
+      });
+      return best;
     }
     function closeV4Overlay() {
       if ($("tc-fav-overlay").classList.contains("open")) { closeFavPicker(); return true; }

@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <!-- Política de seguridad (CSP): SIN scripts en línea ni eval; solo recursos propios, TMDB (datos e imágenes) y reproductores externos en marcos. Sin plugins. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://image.tmdb.org; media-src 'self' blob: https:; connect-src 'self' https://api.themoviedb.org https://image.tmdb.org; frame-src https:; font-src 'self' data:; manifest-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
-  <script src="js/boot.js?v=07e30089"></script>
+  <script src="js/boot.js?v=28183931"></script>
   <script src="js/core/rate-limit.js?v=65a8b733"></script>
   <style>
     html.tc-picker-boot body { background: #000; }
@@ -96,6 +96,7 @@
   <link rel="stylesheet" href="css/23-safe-areas.css?v=f4a6f842" />
   <link rel="stylesheet" href="css/24-drawer.css?v=9f8a14b6" />
   <link rel="stylesheet" href="css/25-no-motion.css?v=ad053300" />
+  <link rel="stylesheet" href="css/26-player.css?v=bd37d2b3" />
   <script type="application/ld+json" id="site-structured-data">
 {
   "@context": "https://schema.org",
@@ -159,7 +160,7 @@
 
 <body>
   <div id="tc-splash" role="status" aria-label="Cargando TatoCine"><div class="tc-splash-bg" id="tc-splash-bg"></div><div class="tc-splash-center"><div class="tc-splash-logo"><img src="icons/icon-128.png" width="80" height="80" alt="" decoding="async" fetchpriority="high"></div><div class="tc-splash-name">TatoCine</div></div></div>
-  <script src="js/ui/splash.js?v=f011cfc4"></script>
+  <script src="js/ui/splash.js?v=2137e211"></script>
   <div class="modal tc-menu" id="mobile-menu">
     <div class="settings-content">
       <div class="modal-header">
@@ -359,13 +360,16 @@
         </div>
       </div>
       <div class="modal-body">
-        <div class="tv-controls" id="tv-controls">
-          <select id="season-select" class="tv-select"></select>
-          <select id="episode-select" class="tv-select"></select>
-          <button type="button" id="auto-next-toggle" class="auto-next-toggle on" data-h="h24"
-            title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Auto: ACTIVADO</button>
+        <div class="player-side" id="player-side">
+          <div class="tv-controls" id="tv-controls">
+            <select id="season-select" class="tv-select"></select>
+            <select id="episode-select" class="tv-select"></select>
+            <button type="button" id="auto-next-toggle" class="auto-next-toggle on" data-h="h24"
+              title="Avanza cuando el reproductor externo comunica que el capítulo terminó">Auto: ACTIVADO</button>
+          </div>
+          <div class="server-switcher" id="server-switcher"></div>
+          <p class="server-hint" id="server-hint">Si un servidor no carga, prueba con otro.</p>
         </div>
-        <div class="server-switcher" id="server-switcher"></div>
         <div class="player-container" id="player-view"></div>
       </div>
     </div>
@@ -1126,7 +1130,7 @@
   <script defer src="js/core/extend.js?v=6cfcf5d1"></script>
   <script defer src="js/core/actions.js?v=7d8d4bcc"></script>
   <script defer src="js/core/handlers.js?v=931eac9b"></script>
-  <script defer src="js/core/env.js?v=60422e0c"></script>
+  <script defer src="js/core/env.js?v=1abff96f"></script>
   <script defer src="js/core/fold.js?v=e0bfae7a"></script>
   <script defer src="js/core/errors.js?v=302fb3d7"></script>
   <script defer src="js/core/input-guard.js?v=35f2f82b"></script>
@@ -1161,14 +1165,14 @@
   <script defer src="js/i18n/i18n.js?v=3443952c"></script>
   <script defer src="js/core/storage-maintenance.js?v=feab3020"></script>
   <script defer src="js/features/watch-tracking.js?v=2327c686"></script>
-  <script defer src="js/features/recommendations.js?v=9095b79c"></script>
+  <script defer src="js/features/recommendations.js?v=f1074b62"></script>
   <script defer src="js/features/favorites-lists.js?v=bfe9e109"></script>
   <script defer src="js/features/stats.js?v=297a730e"></script>
   <script defer src="js/features/brands.js?v=f9e755be"></script>
   <script defer src="js/features/recent-searches.js?v=aef674bf"></script>
   <script defer src="js/profiles/profile-switch.js?v=70615535"></script>
   <script defer src="js/features/pwa-install.js?v=ffef29e1"></script>
-  <script defer src="js/ui/tv-navigation.js?v=cec91e33"></script>
+  <script defer src="js/ui/tv-navigation.js?v=02e5b410"></script>
   <script defer src="js/core/pwa.js?v=0add20d8"></script>
   <script defer src="js/features/details-favorite.js?v=a551f4c7"></script>
   <script defer src="js/features/watched.js?v=e76bfa59"></script>
@@ -1194,11 +1198,11 @@
   <script defer src="js/features/marathon.js?v=e578025f"></script>
   <script defer src="js/ui/scroll-lock.js?v=d98945af"></script>
   <script defer src="js/features/details-sagas.js?v=0a1462d1"></script>
-  <script defer src="js/features/legal-hub.js?v=53095c39"></script>
-  <script defer src="js/ui/update-modal.js?v=250473bd"></script>
+  <script defer src="js/features/legal-hub.js?v=4db9505f"></script>
+  <script defer src="js/ui/update-modal.js?v=cf84463c"></script>
   <script defer src="js/ui/menu-drawer.js?v=e4821cec"></script>
-  <script defer src="js/ui/welcome.js?v=0e21b08b"></script>
-  <script defer src="js/i18n/i18n-extra.js?v=62382b9a"></script>
+  <script defer src="js/ui/welcome.js?v=54537677"></script>
+  <script defer src="js/i18n/i18n-extra.js?v=82d473c3"></script>
   <script defer src="js/ui/legal-gate.js?v=93899219"></script>
   <script defer src="js/features/reset.js?v=4df5738f"></script>
   <script defer src="js/ui/undo.js?v=e1f06a78"></script>

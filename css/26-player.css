@@ -1,0 +1,28 @@
+/**
+ * TatoCine · css/26-player.css
+ * Ventana del reproductor. Pantallas grandes en horizontal (computadora, TV, tableta acostada): el VÍDEO A LA IZQUIERDA, arriba y lo más grande que quepa sin salirse
+ * de la pantalla, y a la derecha una columna (#player-side) con los servidores (2 por fila), un consejo, temporada/episodio y el aviso de terceros.
+ * Pantallas pequeñas o en vertical: como antes, todo apilado (temporada/episodio, servidores, consejo, vídeo y debajo el aviso): #player-side no crea caja
+ * (display: contents) y el orden lo da `order`.
+ */
+.server-hint { margin: 2px 0 10px; font-size: calc(13px * var(--ts, 1)); color: rgba(255, 255, 255, .62); text-align: center; }
+#player-modal .player-side { display: contents; }
+#player-modal .tv-controls { order: 1; }
+#player-modal .server-switcher { order: 2; }
+#player-modal .server-hint { order: 3; }
+#player-modal .player-container { order: 4; }
+#player-modal .player-notice { order: 5; }
+@media (min-width: 1024px) and (orientation: landscape) and (min-height: 480px) {
+  #player-modal .modal-body { display: grid !important; grid-template-columns: minmax(0, 1fr) clamp(260px, 24vw, 360px); column-gap: 28px; align-items: start !important; align-content: start; justify-content: stretch !important; width: 100%; max-width: 1760px; margin: 0 auto; padding: 18px max(28px, var(--sar)) 24px max(28px, var(--sal)) !important; box-sizing: border-box; }
+  #player-modal .player-container { grid-column: 1; grid-row: 1; align-self: start !important; justify-self: start !important; width: 100%; width: min(100%, calc((100vh - 150px) * 1.7778)); width: min(100%, calc((100dvh - 150px) * 1.7778)); max-width: none !important; max-height: none !important; margin: 0 !important; border-radius: 12px; }
+  #player-modal .player-side { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 12px; align-self: start; min-width: 0; }
+  #player-modal .server-switcher { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 !important; padding: 0 !important; width: 100%; justify-content: stretch; }
+  #player-modal .server-switcher .server-btn { width: 100%; min-width: 0; margin: 0; justify-content: flex-start; }
+  #player-modal .server-hint { margin: 0; text-align: left; }
+  #player-modal .tv-controls { flex-direction: column; align-items: stretch; gap: 8px; margin: 4px 0 0 !important; padding: 0 !important; width: 100%; order: 3; }
+  #player-modal .server-switcher { order: 1; }
+  #player-modal .server-hint { order: 2; }
+  #player-modal .player-notice { order: 4; }
+  #player-modal .tv-controls .tv-select, #player-modal .tv-controls .auto-next-toggle { width: 100%; max-width: none; }
+  #player-modal .player-notice { margin: 6px 0 0 !important; padding: 0 !important; text-align: left; max-width: none; font-size: calc(12.5px * var(--ts, 1)); }
+}

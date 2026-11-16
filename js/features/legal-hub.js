@@ -84,7 +84,8 @@ function legalFooterHTML(cls) {
   // Aviso de terceros debajo del iframe del reproductor (fuera del iframe y sin empujar la X fuera de pantalla)
   var view = $("player-view");
   if (view && !document.querySelector(".player-notice")) {
-    view.insertAdjacentHTML("afterend", '<aside class="player-notice" role="note">' + escapeHTML(L(
+    var side = document.getElementById("player-side");                                    // en pantallas grandes va en la columna derecha (css/26-player.css); en móvil, el orden la deja bajo el vídeo
+    (side || view).insertAdjacentHTML(side ? "beforeend" : "afterend", '<aside class="player-notice" role="note">' + escapeHTML(L(
       "TatoCine no controla, monetiza, muestra anuncios propios ni tiene injerencia alguna sobre el contenido aquí mostrado por los reproductores de terceros. Los sitios integrados son servicios de terceros y sus políticas, contenidos, licencias y disponibilidad dependen de sus operadores. TatoCine no cobra por los anuncios de esos proveedores ni garantiza la legitimidad del contenido incrustado. Recomendamos revisar la privacidad del navegador y utilizar herramientas de protección de rastreo de confianza, como Brave, si así lo prefieres.",
       "TatoCine does not control, monetize, show its own ads or have any say over the content shown here by third-party players. The embedded sites are third-party services and their policies, content, licenses and availability depend on their operators. TatoCine does not charge for those providers' ads nor guarantees the legitimacy of the embedded content. We recommend reviewing your browser privacy and using a trusted tracking-protection tool, such as Brave, if you wish.")) + "</aside>");
   }

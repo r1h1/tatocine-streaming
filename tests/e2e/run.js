@@ -1196,6 +1196,69 @@ async function main() {
     const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go", { timeout: 5000 }); await nav;
     await c2.close();
   });
+  await test("TV (Google TV / Android TV, TV Bro): se detecta, se ve al 90 % y TODO el primer uso se completa solo con el mando (OK y flechas): bienvenida, selector, aviso legal y portada", async (page, ctx) => {
+    for (const ua of ["Mozilla/5.0 (Linux; Android 12; MiTV-AXSO0 Build/SKQ1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Safari/537.36", "Mozilla/5.0 (Linux; Android 11; BRAVIA 4K VH2 Build/RTT3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0 Safari/537.36 TV Bro/1.8.7", "Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager", "Mozilla/5.0 (SMART-TV; LINUX; Tizen 6.0) AppleWebKit/537.36 (KHTML, like Gecko) 76.0.3809.146/6.0 TV Safari/537.36"]) {
+      const c2 = await ctx.browser().newContext({ viewport: { width: 960, height: 540 }, userAgent: ua, locale: "es-ES" });
+      if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+      await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; });
+      const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-welcome", { state: "visible" }); await p.waitForTimeout(500);
+      const tv = await p.evaluate(() => ({ tv: document.documentElement.classList.contains("tc-tv") && document.body.classList.contains("tv-mode"), meta: document.querySelector('meta[name="viewport"]').content, focus: document.activeElement && document.activeElement.className }));
+      ok(tv.tv && /initial-scale=0\.9/.test(tv.meta) && /tw-next/.test(tv.focus), ua.slice(0, 50) + ": " + JSON.stringify(tv));
+      for (let i = 0; i < 5; i++) { await p.keyboard.press("Enter"); await p.waitForTimeout(120); }
+      await p.waitForSelector("#tc-profile-overlay.open", { timeout: 8000 }); await p.waitForTimeout(300);
+      ok(/tc-profile-select-btn/.test(await p.evaluate(() => document.activeElement.className)), "el selector no tiene el foco en un perfil");
+      await p.keyboard.press("Enter"); await p.waitForSelector("#disclaimer-modal.open", { timeout: 8000 }); await p.waitForTimeout(250);
+      ok(/dc-accept/.test(await p.evaluate(() => document.activeElement.className)), "el aviso legal no tiene el foco en «Aceptar y continuar»");
+      await p.keyboard.press("Enter");
+      await p.waitForFunction(() => document.body.classList.contains("app-ready") && !document.getElementById("disclaimer-modal").classList.contains("open"), null, { timeout: 8000 });
+      await p.waitForTimeout(400); await p.keyboard.press("ArrowDown"); await p.waitForTimeout(200);
+      ok(await p.evaluate(() => document.activeElement && document.activeElement !== document.body && !!document.activeElement.offsetParent), "las flechas no mueven el foco en la portada");
+      await c2.close();
+    }
+    const c3 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+    await c3.addInitScript(() => { window.__TC_SPLASH_MS = 0; });
+    const p3 = await c3.newPage(); await p3.goto(url, { waitUntil: "domcontentloaded" }); await p3.waitForTimeout(400);
+    ok(await p3.evaluate(() => !document.documentElement.classList.contains("tc-tv") && /initial-scale=1/.test(document.querySelector('meta[name="viewport"]').content)), "una computadora no debe detectarse como TV ni escalarse");
+    await c3.close();
+  });
+  await test("Reproductor: en pantallas grandes el vídeo va a la izquierda (arriba, sin salirse) y servidores/temporada/aviso a la derecha; en móvil sigue apilado", async (page) => {
+    await enter(page);
+    for (const [w, h, type] of [[1920, 1080, "tv"], [1280, 800, "movie"], [390, 844, "movie"]]) {
+      await page.setViewportSize({ width: w, height: h });
+      await page.evaluate((t) => (t === "tv" ? openPlayer(1396, "tv", "Serie", 1, 1) : openPlayer(550, "movie", "Fight Club")), type);
+      await page.waitForSelector("#player-view iframe", { timeout: 8000 }); await page.waitForTimeout(400);
+      const r = await page.evaluate(() => { const g = (q) => { const e = document.querySelector(q); const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width }; }; return { p: g("#player-view"), s: g("#server-switcher"), n: g(".player-notice"), vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth }; });
+      if (w >= 1024) ok(r.p.r <= r.s.l && r.p.b <= r.vh && Math.abs(r.p.t - r.s.t) < 4 && r.n.l >= r.s.l - 1, w + ": el vídeo debía ir a la izquierda y caber en pantalla: " + JSON.stringify(r));
+      else ok(r.s.b <= r.p.t && r.p.b <= r.n.t && r.sw <= r.vw, w + ": en móvil debía seguir apilado (servidores, vídeo, aviso): " + JSON.stringify(r));
+      await page.evaluate(() => closePlayer()); await page.waitForTimeout(150);
+    }
+  });
+  await test("Caché de TMDB comprimida (gzip) en el Service Worker y recomendaciones guardadas: la segunda apertura no pide /recommendations y lo que tiene «no me gusta» nunca se recomienda", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 1280, height: 800 }, locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    let recReq = 0; const recUrls = []; c2.on("request", (r) => { if (/api\.themoviedb\.org.*\/recommendations/.test(r.url())) { recReq++; recUrls.push(r.url().replace(/api_key=[^&]+/, "k").slice(30, 110) + " " + (r.serviceWorker() ? "sw" : r.frame() ? "page" : "?")); } });
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); const now = Date.now();
+      localStorage.setItem("tatoProfile_main_tatoLocalAnalyticsV1", JSON.stringify({ items: [{ id: 603, type: "movie", title: "A", genreIds: [28, 18], secs: 5000, plays: 2, done: 1, lastPlayedAt: now - 86400000, lang: "en" }, { id: 604, type: "movie", title: "B", genreIds: [28, 53], secs: 3000, plays: 1, done: 0, lastPlayedAt: now - 3600000, lang: "en" }] })); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url + "?sw=1", { waitUntil: "load" });
+    await p.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 20000 });
+    if (await p.evaluate(() => document.getElementById("tc-profile-overlay").classList.contains("open"))) await p.click('[data-profile-action="select"]');
+    await p.waitForFunction(() => [...document.querySelectorAll(".personalized-row:not(.is-slot) .row-title")].some((e) => e.textContent === "Hecho para ti"), null, { timeout: 20000 });
+    await p.waitForTimeout(800);
+    const gz = await p.evaluate(async () => { const c = await caches.open("tatocine-api-v1"), ks = await c.keys(); if (!ks.length) return { n: 0 }; const r = await c.match(ks[0]); const back = await fetch(ks[0].url).then((x) => x.json()).then((j) => typeof j === "object").catch(() => false); return { n: ks.length, gz: r.headers.get("x-tc-gz"), back }; });
+    ok(gz.n > 0 && gz.gz === "1" && gz.back, "la caché de TMDB no está comprimida o no se lee: " + JSON.stringify(gz));
+    const cached = await p.evaluate(() => { const c = JSON.parse(localStorage.getItem("tatoProfile_main_tatoRecsV1") || "null"); return c && c.picks && c.picks.length; });
+    ok(cached > 0, "no se guardaron las recomendaciones en el dispositivo");
+    // «no me gusta» sobre el primer recomendado: tras recalcular nunca vuelve a salir
+    const banned = await p.evaluate(() => { const c = JSON.parse(localStorage.getItem("tatoProfile_main_tatoRecsV1")); const m = c.picks[0]; watchedMap[m.type + ":" + m.id] = { id: m.id, type: m.type, title: m.title, ur: -1, g: [28], ts: Date.now() }; saveWatched(); return m.type + ":" + m.id; });
+    recReq = 0; await p.reload({ waitUntil: "load" }); await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    await p.waitForFunction(() => [...document.querySelectorAll(".personalized-row:not(.is-slot) .row-title")].some((e) => e.textContent === "Hecho para ti"), null, { timeout: 20000 }); await p.waitForTimeout(500);
+    ok(await p.evaluate((k) => !JSON.parse(localStorage.getItem("tatoProfile_main_tatoRecsV1")).picks.some((m) => m.type + ":" + m.id === k), banned), "un título con «no me gusta» volvió a recomendarse");
+    const reqAfterChange = recReq; recReq = 0;
+    await p.reload({ waitUntil: "load" }); await p.waitForFunction(() => !!document.body && document.body.classList.contains("app-ready"), null, { timeout: 15000 });
+    await p.waitForFunction(() => [...document.querySelectorAll(".personalized-row:not(.is-slot) .row-title")].some((e) => e.textContent === "Hecho para ti"), null, { timeout: 20000 }); await p.waitForTimeout(800);
+    ok(reqAfterChange > 0 && recReq === 0, "con los gustos sin cambios no debía pedir /recommendations otra vez: " + reqAfterChange + " → " + recReq + " " + JSON.stringify(recUrls.slice(-3)));
+    await c2.close();
+  });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);
     await page.evaluate(() => sessionStorage.setItem("__tcT", "1"));

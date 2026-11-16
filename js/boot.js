@@ -44,6 +44,15 @@
       }
     }
   } catch (e) { }
+  // Televisores (Google TV / Android TV de TCL, Hisense, Xiaomi, Sony, Philips…; Fire TV; LG webOS; Samsung Tizen; navegadores como TV Bro): por el
+  // agente de usuario o, si el navegador no lo dice, porque no hay pantalla táctil ni ratón (solo el mando) en una pantalla grande.
+  try {
+    var ua = navigator.userAgent || "";
+    var tvUa = /SmartTV|SMART-TV|Tizen|Web0S|WebOS|HbbTV|NetCast|BRAVIA|VIDAA|Android ?TV|Google ?TV|Chromecast|CrKey|AFT[A-Z]|MiTV|MIBOX|Mi ?Box|TV ?Bro|Leanback|SonyDTV|Philips|Hisense|Toshiba|Sharp|Vizio|Roku|Xbox|PlayStation|; ?TV[;)]|Large Screen/i.test(ua) && !/iPhone|iPad|Mobile Safari|Mobile\//i.test(ua);
+    var mq = function (q) { try { return window.matchMedia && window.matchMedia(q).matches; } catch (e2) { return false; } };
+    var remoteOnly = mq("(any-pointer: none)") && mq("(hover: none)") && !("ontouchstart" in window) && !navigator.maxTouchPoints && (screen.width || 0) >= 900;
+    if (tvUa || remoteOnly || /[?&]tv=1/.test(location.search)) root.classList.add("tc-tv");
+  } catch (e) { }
   var needsPicker = !selected || selected !== active;
   window.__tcSkipPicker = !needsPicker;
   if (needsPicker) { root.classList.add("tc-picker-boot"); setTimeout(function () { root.classList.remove("tc-picker-boot"); }, 8000); }

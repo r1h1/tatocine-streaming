@@ -9,18 +9,18 @@
  */
 var TC_RELEASE_NOTES = {
   es: [
-    "Mi cine renovado: resumen, filtro por tipo, orden y «Continuar viendo» con barra de avance.",
-    "Menú con el mismo diseño que Ajustes: Perfiles, Ajustes y Legal a un toque.",
-    "App sin animaciones, más fluida, y pantalla de carga sin destellos ni tirones negros.",
-    "Imágenes más livianas (WebP) con carga perezosa completa: gasta menos datos.",
-    "Dos servidores más (ESP4 y ESP5), tráiler de 20 s, compatibilidad con TV, Apple TV e isla dinámica y app completa en inglés."
+    "Compatibilidad con Google TV y Android TV (TCL, Hisense, Xiaomi, Sony…), LG webOS y Samsung Tizen: todo se maneja con el mando.",
+    "Mejoras visuales: en la TV todo se ve al 90 %, más cómodo en pantallas grandes.",
+    "Reproductor rediseñado: en pantallas grandes, el vídeo a la izquierda y los servidores a la derecha.",
+    "Recomendaciones más precisas: aprenden de lo que no te gustó y se guardan en tu dispositivo.",
+    "Mejoras de rendimiento: caché comprimida, menos datos y una app sin animaciones."
   ],
   en: [
-    "Redesigned My Cinema: summary, type filter, sorting and a Continue Watching row with progress bars.",
-    "Menu with the same design as Settings: Profiles, Settings and Legal one tap away.",
-    "No animations for a smoother app, and a loading screen without flashes or black jumps.",
-    "Lighter images (WebP) with full lazy loading: uses less data.",
-    "Two more servers (ESP4 and ESP5), a 20-second trailer, support for TVs, Apple TV and the Dynamic Island, and a fully translated English app."
+    "Support for Google TV and Android TV (TCL, Hisense, Xiaomi, Sony…), LG webOS and Samsung Tizen: everything works with the remote.",
+    "Visual improvements: on TVs everything is shown at 90%, more comfortable on big screens.",
+    "Redesigned player: on big screens, the video on the left and the servers on the right.",
+    "More accurate recommendations: they learn from what you didn't like and are saved on your device.",
+    "Performance improvements: compressed cache, less data and an app without animations."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;

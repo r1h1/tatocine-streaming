@@ -47,6 +47,7 @@ function welcomeShow(i) {
   el.querySelector(".tw-back").style.visibility = welcomeIdx === 0 ? "hidden" : "visible";
   el.querySelector(".tw-next").textContent = last ? L("Elegir mi perfil", "Choose my profile") : L("Siguiente", "Next");
   var body = el.querySelector(".tw-body"); if (body) body.scrollTop = 0;
+  try { el.querySelector(".tw-next").focus({ preventScroll: true }); } catch (e) { }       // «Siguiente» con el foco: en TV basta con pulsar OK en el mando
 }
 function welcomeFinish() {
   var el = welcomeEl(); if (!el || !window.tcWelcomeOpen) return;

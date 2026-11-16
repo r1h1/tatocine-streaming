@@ -9,6 +9,7 @@
       : function (fn) { setTimeout(fn, 400); };
     var IS_LOCAL_DEV = /^(localhost|127\.0\.0\.1|\[::1\]|.*\.localhost)$/.test(location.hostname) || location.protocol === "file:";
     var IS_TV = /SmartTV|Tizen|Web0S|WebOS|HbbTV|NetCast|BRAVIA|VIDAA|Android TV|AFT[A-Z]|CrKey|GoogleTV|SMART-TV|Xbox|PlayStation|Roku|Hisense|Philips|SonyDTV|Toshiba/i.test(navigator.userAgent) || /[?&]tv=1/.test(location.search);
+    if (!IS_TV && document.documentElement.classList.contains("tc-tv")) IS_TV = true;          // detectado en js/boot.js (sin ratón ni pantalla táctil, o agente de TV)
     var IS_STANDALONE = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
     if (IS_TV) document.body.classList.add("tv-mode");
     if (IS_STANDALONE) document.body.classList.add("standalone");

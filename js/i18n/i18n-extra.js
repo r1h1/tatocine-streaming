@@ -4,7 +4,7 @@
  * El idioma de la app sale del perfil activo; los perfiles nuevos y el Invitado usan el idioma del dispositivo (deviceLang en profile-store.js).
  */
 if (typeof i18nAdd === "function") i18nAdd({
-  "Tu tiempo de hoy": "Your time today", "Saltar": "Skip",
+  "Tu tiempo de hoy": "Your time today", "Si un servidor no carga, prueba con otro.": "If a server doesn't load, try another one.", "Saltar": "Skip",
   "Recomendar contenido": "Recommendations", "Borrar historial": "Clear history", "Eliminar favoritos": "Remove favorites",
   "Tus preferidos se calculan localmente en este navegador.": "Your picks are calculated locally in this browser.",
   "Borrar preferidos": "Clear preferences",
