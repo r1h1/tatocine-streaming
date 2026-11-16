@@ -24,7 +24,7 @@ echo "SDK: $SDK · build-tools: $(basename "$BT") · plataforma: $(basename "$(d
 # 1) contenido web de producción (minificado, con respaldos para WebView viejo)
 node tools/package.js >/dev/null
 VERSION="$(node -e 'console.log(require("./dist/site/build.json").version)')"
-VCODE="$(date +%y%m%d%H)"                                 # crece en cada compilación: la TV acepta la APK nueva como actualización
+VCODE="$(( $(date +%s) / 60 ))"                            # minutos desde 1970: crece en CADA compilación (antes era por hora y dos APK de la misma hora empataban); > 26111615 de las primeras
 
 rm -rf "$OUT"; mkdir -p "$OUT/assets" "$OUT/gen" "$OUT/classes" "$OUT/dex"
 cp -r dist/site "$OUT/assets/site"

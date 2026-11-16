@@ -23,73 +23,73 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icons/icon-48.png",
+      "src": "icons/palomera/icon-48.png",
       "sizes": "48x48",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-72.png",
+      "src": "icons/palomera/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-96.png",
+      "src": "icons/palomera/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-128.png",
+      "src": "icons/palomera/icon-128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-144.png",
+      "src": "icons/palomera/icon-144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-152.png",
+      "src": "icons/palomera/icon-152.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/palomera/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-256.png",
+      "src": "icons/palomera/icon-256.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-384.png",
+      "src": "icons/palomera/icon-384.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/palomera/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/maskable-192.png",
+      "src": "icons/palomera/maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icons/maskable-512.png",
+      "src": "icons/palomera/maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -103,7 +103,7 @@
       "url": "./?tab=home&focus=search",
       "icons": [
         {
-          "src": "icons/icon-96.png",
+          "src": "icons/palomera/icon-96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -115,7 +115,7 @@
       "url": "./?tab=list",
       "icons": [
         {
-          "src": "icons/icon-96.png",
+          "src": "icons/palomera/icon-96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -127,7 +127,7 @@
       "url": "./?tab=series",
       "icons": [
         {
-          "src": "icons/icon-96.png",
+          "src": "icons/palomera/icon-96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -139,7 +139,7 @@
       "url": "./?tab=kids",
       "icons": [
         {
-          "src": "icons/icon-96.png",
+          "src": "icons/palomera/icon-96.png",
           "sizes": "96x96",
           "type": "image/png"
         }

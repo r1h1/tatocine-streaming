@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 TatoCine · tools/gen-icons.py
-Genera TODOS los iconos de la app (favicons 16/32/48, Apple Touch 180, PWA 48–512, maskable 192/512) a partir de icons/inspiration.jpeg.
+Genera TODOS los iconos de la app (favicons 16/32/48, Apple Touch 180, PWA 48–512, maskable 192/512) a partir de icons/inspiration.jpeg, en icons/palomera/.
 El original NO se publica ni se modifica. Requiere Pillow:  python3 tools/gen-icons.py
   · «any»: el sujeto ocupa ~76 % del lienzo.   · favicons pequeños: ~90 % (a 16 px hay que ver algo).
   · «maskable»: el sujeto queda dentro de la zona segura (círculo central del 80 % → sujeto ≤ 58 %), así ningún recorte del sistema lo corta.
@@ -11,7 +11,7 @@ from PIL import Image, ImageChops
 import os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "icons", "inspiration.jpeg")
-OUT = os.path.join(ROOT, "icons")
+OUT = os.path.join(ROOT, "icons", "palomera")       # carpeta nueva = URLs nuevas: ningún dispositivo reutiliza un icono viejo en caché (los iconos se sirven «immutable» 1 año)
 im = Image.open(SRC).convert("RGB")
 bg = im.getpixel((6, 6))                                              # color de fondo del dibujo
 diff = ImageChops.difference(im, Image.new("RGB", im.size, bg)).convert("L").point(lambda v: 255 if v > 28 else 0)

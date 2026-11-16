@@ -32,8 +32,8 @@ async function notifyRelease(it, when) {
   if (alertsSupported() && Notification.permission === "granted") {
     try {
       var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
-      if (reg && reg.showNotification) { await reg.showNotification(title, { body: body, tag: "tc-" + it.type + it.id + it.date, icon: "icons/icon-192.png", data: { url: url } }); return; }
-      new Notification(title, { body: body, tag: "tc-" + it.type + it.id + it.date, icon: "icons/icon-192.png" });
+      if (reg && reg.showNotification) { await reg.showNotification(title, { body: body, tag: "tc-" + it.type + it.id + it.date, icon: "icons/palomera/icon-192.png", data: { url: url } }); return; }
+      new Notification(title, { body: body, tag: "tc-" + it.type + it.id + it.date, icon: "icons/palomera/icon-192.png" });
       return;
     } catch (e) { }
   }

@@ -13,14 +13,14 @@ var TC_RELEASE_NOTES = {
     "Mejoras visuales: en la TV todo se ve al 90 %, más cómodo en pantallas grandes.",
     "Reproductor premium rediseñado: fondo negro limpio, servidores a la izquierda y el vídeo grande a la derecha, también en la TV.",
     "Recomendaciones más precisas: aprenden de lo que no te gustó y se guardan en tu dispositivo.",
-    "Mejoras de rendimiento: caché comprimida, menos datos y una app sin animaciones."
+    "Nuevo icono de la palomera en la web, la app instalada y la TV, y mejor rendimiento: caché comprimida y sin animaciones."
   ],
   en: [
     "Support for Google TV and Android TV (TCL, Hisense, Xiaomi, Sony…), LG webOS and Samsung Tizen: everything works with the remote.",
     "Visual improvements: on TVs everything is shown at 90%, more comfortable on big screens.",
     "Premium redesigned player: clean black background, servers on the left and a big video on the right, on TVs too.",
     "More accurate recommendations: they learn from what you didn't like and are saved on your device.",
-    "Performance improvements: compressed cache, less data and an app without animations."
+    "New popcorn icon on the web, the installed app and TV, plus better performance: compressed cache and no animations."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;
