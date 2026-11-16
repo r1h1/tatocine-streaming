@@ -48,7 +48,7 @@
   // agente de usuario o, si el navegador no lo dice, porque no hay pantalla táctil ni ratón (solo el mando) en una pantalla grande.
   try {
     var ua = navigator.userAgent || "";
-    var tvUa = /SmartTV|SMART-TV|Tizen|Web0S|WebOS|HbbTV|NetCast|BRAVIA|VIDAA|Android ?TV|Google ?TV|Chromecast|CrKey|AFT[A-Z]|MiTV|MIBOX|Mi ?Box|TV ?Bro|Leanback|SonyDTV|Philips|Hisense|Toshiba|Sharp|Vizio|Roku|Xbox|PlayStation|; ?TV[;)]|Large Screen/i.test(ua) && !/iPhone|iPad|Mobile Safari|Mobile\//i.test(ua);
+    var tvUa = /TatoCineTV|SmartTV|SMART-TV|Tizen|Web0S|WebOS|HbbTV|NetCast|BRAVIA|VIDAA|Android ?TV|Google ?TV|Chromecast|CrKey|AFT[A-Z]|MiTV|MIBOX|Mi ?Box|TV ?Bro|Leanback|SonyDTV|Philips|Hisense|Toshiba|Sharp|Vizio|Roku|Xbox|PlayStation|; ?TV[;)]|Large Screen/i.test(ua) && !/iPhone|iPad|Mobile Safari|Mobile\//i.test(ua);
     var mq = function (q) { try { return window.matchMedia && window.matchMedia(q).matches; } catch (e2) { return false; } };
     var remoteOnly = mq("(any-pointer: none)") && mq("(hover: none)") && !("ontouchstart" in window) && !navigator.maxTouchPoints && (screen.width || 0) >= 900;
     if (tvUa || remoteOnly || /[?&]tv=1/.test(location.search)) root.classList.add("tc-tv");

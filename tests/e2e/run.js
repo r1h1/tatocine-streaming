@@ -1259,6 +1259,26 @@ async function main() {
     ok(reqAfterChange > 0 && recReq === 0, "con los gustos sin cambios no debía pedir /recommendations otra vez: " + reqAfterChange + " → " + recReq + " " + JSON.stringify(recUrls.slice(-3)));
     await c2.close();
   });
+  await test("App de Android TV (GoogleTvTatoCine.apk): su agente «TatoCineTV» activa el modo TV y el botón Atrás del mando (tcHandleBack) cierra lo abierto, vuelve a Inicio y en el selector deja salir", async (page, ctx) => {
+    const c2 = await ctx.browser().newContext({ viewport: { width: 960, height: 540 }, userAgent: "Mozilla/5.0 (Linux; Android 14; MiTV) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0 Safari/537.36 TatoCineTV/1.0 (Android TV)", locale: "es-ES" });
+    if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
+    await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
+    const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 });
+    ok(await p.evaluate(() => document.documentElement.classList.contains("tc-tv")), "el agente TatoCineTV no activó el modo TV");
+    eq(await p.evaluate(() => tcHandleBack()), false, "en el selector del arranque, Atrás debe dejar salir de la app:");
+    await p.waitForFunction(() => document.activeElement && document.activeElement.classList.contains("tc-profile-select-btn"), null, { timeout: 5000 });   // el foco ya está en el perfil
+    await p.keyboard.press("Enter"); await p.waitForFunction(() => document.body.classList.contains("app-ready") && !document.getElementById("tc-profile-overlay").classList.contains("open"), null, { timeout: 15000 });
+    await p.waitForTimeout(1200);                                                     // deja pasar la revisión de enlaces directos del arranque (app.js, 300 ms + 600 ms)
+    await p.evaluate(() => openDetails(603, "movie")); await p.waitForSelector("#details-modal.open", { timeout: 8000 });
+    eq(await p.evaluate(() => tcHandleBack()), true, "con la ficha abierta, Atrás la cierra:"); await p.waitForTimeout(250);
+    ok(!(await p.evaluate(() => document.getElementById("details-modal").classList.contains("open"))), "Atrás no cerró la ficha");
+    await p.evaluate(() => switchView("movies")); await p.waitForTimeout(300);
+    eq(await p.evaluate(() => tcHandleBack()), true, "en otra sección, Atrás vuelve a Inicio:"); await p.waitForTimeout(300);
+    eq(await p.evaluate(() => currentView), "home", "sección tras Atrás:");
+    eq(await p.evaluate(() => { window.scrollTo(0, 0); return tcHandleBack(); }), false, "en Inicio arriba, Atrás ya no tiene nada que hacer (la app pide confirmar para salir):");
+    await p.evaluate(() => tcShowUpdate(() => 0)); eq(await p.evaluate(() => tcHandleBack()), true, "la actualización obligatoria no se salta con Atrás:");
+    await c2.close();
+  });
   await test("Restablecer a cero: pide confirmación (Cancelar no borra) y al confirmar borra cookies, localStorage, sessionStorage, cachés, IndexedDB y Service Worker", async (page) => {
     await enter(page);
     await page.evaluate(() => sessionStorage.setItem("__tcT", "1"));

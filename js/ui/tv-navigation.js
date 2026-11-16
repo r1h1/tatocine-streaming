@@ -118,3 +118,19 @@
   }
   window.addEventListener("gamepadconnected", function () { document.body.classList.add("tv-mode"); if (!timer) timer = requestAnimationFrame(poll); });
 })();
+
+/** Botón ATRÁS del mando en la app de Android TV (GoogleTvTatoCine.apk) y en navegadores de TV: cierra lo que esté abierto (como Esc); si no hay nada abierto y no se
+ *  está en Inicio, vuelve a Inicio; en Inicio desplazado, vuelve arriba. Devuelve false solo si ya no hay nada que hacer (la app nativa entonces ofrece salir).
+ *  La actualización obligatoria y el aviso legal sin aceptar «se tragan» el Atrás (no se pueden saltar). */
+window.tcHandleBack = function () {
+  try {
+    var layer = topLayer(), menu = document.getElementById("mobile-menu");
+    if (layer && layer.id === "tc-update-overlay") return true;
+    if (layer && layer.id === "tc-profile-overlay" && typeof profilePickerRequired !== "undefined" && profilePickerRequired) return false;   // selector al abrir: Atrás = salir de la app (como Netflix)
+    if (layer && layer.id === "disclaimer-modal" && layer.classList.contains("is-pending")) return true;
+    if (layer || (menu && menu.classList.contains("open"))) { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return true; }
+    if (typeof currentView !== "undefined" && currentView !== "home" && typeof switchView === "function") { switchView("home"); return true; }
+    if ((window.pageYOffset || 0) > 80) { if (window.tcScrollTop) window.tcScrollTop(); var hp = document.getElementById("hero-play-btn"); if (hp && hp.offsetParent) hp.focus({ preventScroll: true }); return true; }
+  } catch (e) { }
+  return false;
+};

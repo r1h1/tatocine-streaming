@@ -237,6 +237,14 @@
       }
 
       grid.innerHTML = cards.join("");
+      // TV / teclado: el foco empieza en el perfil actual (con el mando basta pulsar OK), salvo que ya haya algo enfocado dentro del selector
+      try {
+        var ov = document.getElementById("tc-profile-overlay");
+        if (ov && ov.classList.contains("open") && !window.tcWelcomeOpen && !ov.contains(document.activeElement) && (document.documentElement.classList.contains("tc-tv") || document.body.classList.contains("tv-mode"))) {
+          var first = grid.querySelector(".tc-profile-card.active .tc-profile-select-btn") || grid.querySelector(".tc-profile-select-btn");
+          if (first) first.focus({ preventScroll: true });
+        }
+      } catch (e) { }
 
       // Delegación de eventos: los botones dinámicos no dependen de onclick inline.
       // Así cada acción queda separada y nunca se confunde seleccionar con crear.

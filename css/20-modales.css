@@ -391,3 +391,6 @@ body:not(.hero-ready) #hero-content { visibility: hidden; }
 .tc-update-list li::before { content: ""; position: absolute; left: 4px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
 .tc-update .tc-profile-create-actions { margin-top: 4px; }
 .tc-update .tc-profile-create-btn { width: 100%; flex: 1 1 auto; }
+
+/* Bienvenida: fondo opaco (antes dejaba ver la portada «Cargando…» detrás, sobre todo en TV y en la app de Android) */
+#tc-welcome { background: #0a0a0a !important; }
