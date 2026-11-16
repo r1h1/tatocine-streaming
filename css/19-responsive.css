@@ -289,9 +289,6 @@ body.hero-trailer-on .hero-bg { opacity: 0 !important; transition: opacity .8s e
 #details-modal.has-accent .details-content { background: radial-gradient(130% 60% at 16% 0%, rgba(var(--accent-rgb), .55), transparent 66%), radial-gradient(70% 45% at 100% 100%, rgba(var(--accent-rgb), .22), transparent 70%), rgba(12, 12, 14, .94) !important; box-shadow: inset 0 3px 0 rgba(var(--accent-rgb), .9) !important; transition: background .6s ease; }
 #details-modal.has-accent .details-genres span, #details-modal.has-accent .details-meta span { border-color: rgba(var(--accent-rgb), .55); }
 #details-modal.has-accent .details-actions .hero-btn:not(.secondary) { box-shadow: 0 0 30px rgba(var(--accent-rgb), .5); }
-#player-modal .player-container { transition: box-shadow .9s ease; }
-#player-modal.has-accent .player-container { box-shadow: 0 0 160px 34px rgba(var(--accent-rgb), .55), 0 0 50px 4px rgba(var(--accent-rgb), .4); }
-#player-modal.has-accent { background: radial-gradient(90% 70% at 50% 40%, rgba(var(--accent-rgb), .22), rgba(0, 0, 0, .96) 70%); }
 .card img:not(.loaded) { transform: scale(1.06); }
 
 /* Esqueletos: un brillo que cruza (solo transform → barato para la GPU) en lugar del parpadeo */
@@ -491,8 +488,6 @@ body.lite .hero.hero-loading *, body.rm .hero.hero-loading * { animation: none !
 #settings-modal .modal-content, #settings-modal .settings-content { background: transparent; }
 
 /* ---------- Reproductor: el color del título tiñe TODO el modal, no solo el borde del vídeo ---------- */
-#player-modal.has-accent { background: radial-gradient(120% 100% at 50% 30%, rgba(var(--accent-rgb), .42), rgba(0, 0, 0, .97) 78%); }
-#player-modal.has-accent .modal-content, #player-modal.has-accent #player-view { background: transparent; }
 
 /* ---------- Botones con icono: tamaño estándar (alto 44 px, ancho al contenido) ---------- */
 .wiz-btn-ico, .cp-choice { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

@@ -1221,15 +1221,16 @@ async function main() {
     ok(await p3.evaluate(() => !document.documentElement.classList.contains("tc-tv") && /initial-scale=1/.test(document.querySelector('meta[name="viewport"]').content)), "una computadora no debe detectarse como TV ni escalarse");
     await c3.close();
   });
-  await test("Reproductor: en pantallas grandes el vídeo va a la izquierda (arriba, sin salirse) y servidores/temporada/aviso a la derecha; en móvil sigue apilado", async (page) => {
+  await test("Reproductor: en pantallas grandes (TV 960×540 incluida) el panel de servidores/temporada/aviso va a la izquierda y el vídeo a la derecha (arriba, sin salirse), fondo negro opaco sin resplandor; en móvil sigue apilado", async (page) => {
     await enter(page);
-    for (const [w, h, type] of [[1920, 1080, "tv"], [1280, 800, "movie"], [390, 844, "movie"]]) {
+    for (const [w, h, type] of [[1920, 1080, "tv"], [1280, 800, "movie"], [960, 540, "tv"], [390, 844, "movie"]]) {
       await page.setViewportSize({ width: w, height: h });
       await page.evaluate((t) => (t === "tv" ? openPlayer(1396, "tv", "Serie", 1, 1) : openPlayer(550, "movie", "Fight Club")), type);
       await page.waitForSelector("#player-view iframe", { timeout: 8000 }); await page.waitForTimeout(400);
-      const r = await page.evaluate(() => { const g = (q) => { const e = document.querySelector(q); const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width }; }; return { p: g("#player-view"), s: g("#server-switcher"), n: g(".player-notice"), vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth }; });
-      if (w >= 1024) ok(r.p.r <= r.s.l && r.p.b <= r.vh && Math.abs(r.p.t - r.s.t) < 4 && r.n.l >= r.s.l - 1, w + ": el vídeo debía ir a la izquierda y caber en pantalla: " + JSON.stringify(r));
+      const r = await page.evaluate(() => { const g = (q) => { const e = document.querySelector(q); const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width }; }; const pm = document.getElementById("player-modal"), pc = pm.querySelector(".player-container"); return { p: g("#player-view"), s: g("#server-switcher"), n: g(".player-notice"), vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, bg: getComputedStyle(pm).backgroundImage + "|" + getComputedStyle(pm).backgroundColor, sh: getComputedStyle(pc).boxShadow, acc: pm.classList.contains("has-accent") }; });
+      if (w >= 900) ok(r.s.r <= r.p.l && r.p.r <= r.vw && r.p.b <= r.vh && Math.abs(r.p.t - r.s.t) < 24 && r.n.l <= r.p.l && r.sw <= r.vw, w + ": el panel debía ir a la izquierda y el vídeo a la derecha, dentro de la pantalla: " + JSON.stringify(r));
       else ok(r.s.b <= r.p.t && r.p.b <= r.n.t && r.sw <= r.vw, w + ": en móvil debía seguir apilado (servidores, vídeo, aviso): " + JSON.stringify(r));
+      ok(!r.acc && r.sh === "none" && r.bg === "none|rgb(0, 0, 0)", w + ": el reproductor debía tener fondo negro opaco sin resplandor de color: " + JSON.stringify(r));
       await page.evaluate(() => closePlayer()); await page.waitForTimeout(150);
     }
   });

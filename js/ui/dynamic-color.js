@@ -1,8 +1,8 @@
 /**
  * TatoCine · js/ui/dynamic-color.js
  * Color dinámico: saca el color dominante de la imagen del título (una miniatura w92 de ~3 KB leída en un canvas de 16×16;
- * TMDB permite leerla porque sirve CORS) y lo usa como acento: brillo suave en la ficha y «modo cine» (resplandor ambiental)
- * alrededor del reproductor. No se usa en modo ligero ni con alto contraste. Guarda hasta 150 colores en memoria.
+ * TMDB permite leerla porque sirve CORS) y lo usa como acento: brillo suave en la ficha. El reproductor NO lo usa (fondo negro
+ * opaco, sin resplandor ni recuadro de color alrededor del vídeo). No se usa en modo ligero ni con alto contraste. Guarda hasta 150 colores en memoria.
  */
 var dcCache = {}, dcCount = 0;
 /** Pasa el color medio a un acento VIVO (misma tonalidad, saturación y luminosidad fijas) para que el brillo se vea siempre. */
@@ -58,15 +58,3 @@ decorate("renderDetailsExtras", function (original) {
   };
 });
 decorate("closeDetails", function (original) { return function () { var r = original.apply(this, arguments); setTimeout(function () { if (!$("details-modal").classList.contains("open")) applyAccent($("details-modal"), null); }, 400); return r; }; });
-decorate("openPlayer", function (original) {
-  return function (i, t, ti, season, episode, bg) {
-    var r = original.apply(this, arguments), pm = $("player-modal");
-    applyAccent(pm, null);
-    if (accentAllowed()) {
-      var path = bg && !/^http/.test(bg) ? bg : (detailsMedia && detailsMedia.id === i ? detailsMedia.bg : "");
-      if (path) dominantColor(path).then(function (rgb) { if (currentMedia && currentMedia.id === i) applyAccent(pm, rgb); });
-    }
-    return r;
-  };
-});
-decorate("closePlayer", function (original) { return function () { var r = original.apply(this, arguments); applyAccent($("player-modal"), null); return r; }; });
