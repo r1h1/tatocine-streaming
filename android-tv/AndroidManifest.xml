@@ -3,11 +3,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="app.tatocine.tv">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Búsqueda por voz con el micrófono del mando: se pide al usarla por primera vez (no al instalar). La TV no tiene micrófono propio: no se exige. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <!-- Televisor: aparece en la fila de apps de Google TV; no exige pantalla táctil (mando con cruceta) -->
     <!-- Búsqueda por voz: Android 11+ solo deja ver el reconocedor de voz del sistema (Google TV: micrófono del mando) si se declara aquí. Sin permiso de micrófono: graba el sistema, no la app. -->
     <queries>
         <intent>
             <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
     <uses-feature android:name="android.software.leanback" android:required="false" />

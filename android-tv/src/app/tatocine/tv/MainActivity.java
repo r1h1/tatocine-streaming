@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     private long lastBack;
     private final String token = java.util.UUID.randomUUID().toString();
     private PointerView pointer;
-    private boolean pointerOn, pointerHinted;
+    private boolean pointerOn;
     private float px, py;
     private long touchDown, lastMove;
     private boolean downPending, upPending;
@@ -350,6 +350,12 @@ public class MainActivity extends Activity {
         public boolean hasVoice() { return voiceAvailable(); }
 
         @android.webkit.JavascriptInterface
+        public void voiceStop(String t) {
+            if (!ok(t)) return;
+            runOnUiThread(new Runnable() { @Override public void run() { stopVoice(); } });
+        }
+
+        @android.webkit.JavascriptInterface
         public void voiceSearch(String t, final String lang) {
             if (!ok(t)) return;
             runOnUiThread(new Runnable() { @Override public void run() { startVoice(lang); } });
@@ -365,10 +371,6 @@ public class MainActivity extends Activity {
             int w = root.getWidth(), h = root.getHeight();
             px = clamp(fx, 0.02f, 0.98f) * (w > 0 ? w : 1920);
             py = clamp(fy, 0.02f, 0.98f) * (h > 0 ? h : 1080);
-            if (!pointerHinted) {
-                pointerHinted = true;
-                Toast.makeText(this, "Puntero activo: flechas para moverlo, OK para pulsar, Atrás para salir", Toast.LENGTH_LONG).show();
-            }
         }
         pointerOn = on;
         pointer.setVisibility(on ? View.VISIBLE : View.GONE);
@@ -577,15 +579,110 @@ public class MainActivity extends Activity {
         } catch (Throwable t) { return false; }
     }
 
+    // La TV no tiene micrófono propio: el audio llega por el micrófono del mando y solo lo sabe abrir el servicio de voz de Google TV (katniss).
+    // Se usa ese servicio DENTRO de la app (SpeechRecognizer): pide el permiso de micrófono la primera vez, el texto aparece en el buscador mientras se habla
+    // (resultados parciales) y al terminar se busca. Antes se abría la ventana de voz de Google como actividad y no devolvía el texto a la app.
+    private android.speech.SpeechRecognizer recognizer;
+    private String voiceLang = "es-419";
+    private boolean voiceFallbackTried;
+    static final int REQ_MIC = 42;
+
     void startVoice(String lang) {
+        voiceLang = lang != null && lang.startsWith("en") ? "en-US" : "es-419";
+        voiceFallbackTried = false;
+        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] { android.Manifest.permission.RECORD_AUDIO }, REQ_MIC);   // la ventana de permiso de Android
+            return;
+        }
+        startRecognizer();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] grants) {
+        super.onRequestPermissionsResult(req, perms, grants);
+        if (req != REQ_MIC) return;
+        if (grants.length > 0 && grants[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startRecognizer();
+        else voiceEvent("denied", null);
+    }
+
+    /** Servicio de reconocimiento: el de Google TV (katniss, el que abre el micrófono del mando) o, si no está, el predeterminado del sistema. */
+    private android.content.ComponentName recognizerComponent() {
+        try {
+            android.content.ComponentName other = null;
+            for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentServices(new android.content.Intent("android.speech.RecognitionService"), 0)) {
+                android.content.ComponentName c = new android.content.ComponentName(r.serviceInfo.packageName, r.serviceInfo.name);
+                if (r.serviceInfo.packageName.equals("com.google.android.katniss")) return c;
+                if (other == null) other = c;
+            }
+            return other;
+        } catch (Throwable t) { return null; }
+    }
+
+    private void startRecognizer() {
+        try {
+            stopRecognizer();
+            if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this)) { startVoiceActivity(); return; }
+            android.content.ComponentName comp = recognizerComponent();
+            recognizer = comp != null ? android.speech.SpeechRecognizer.createSpeechRecognizer(this, comp) : android.speech.SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(new android.speech.RecognitionListener() {
+                @Override public void onReadyForSpeech(Bundle b) { voiceEvent("ready", null); }
+                @Override public void onBeginningOfSpeech() { voiceEvent("speech", null); }
+                @Override public void onRmsChanged(float v) { }
+                @Override public void onBufferReceived(byte[] b) { }
+                @Override public void onEndOfSpeech() { voiceEvent("end", null); }
+                @Override public void onEvent(int t, Bundle b) { }
+                @Override public void onPartialResults(Bundle b) { String t = firstResult(b); if (t != null && t.length() > 0) voiceEvent("partial", t); }
+                @Override public void onResults(Bundle b) { String t = firstResult(b); stopRecognizer(); voiceResult(t == null ? "" : t); }
+                @Override public void onError(int code) {
+                    stopRecognizer();
+                    if (code == android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) { voiceEvent("denied", null); return; }
+                    if (code == android.speech.SpeechRecognizer.ERROR_NO_MATCH || code == android.speech.SpeechRecognizer.ERROR_SPEECH_TIMEOUT) { voiceResult(""); return; }
+                    if (!voiceFallbackTried) { voiceFallbackTried = true; startVoiceActivity(); return; }   // el servicio falló: ventana de voz del sistema
+                    voiceEvent("error", String.valueOf(code));
+                }
+            });
+            android.content.Intent i = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, voiceLang);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, voiceLang);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
+            recognizer.startListening(i);
+        } catch (Throwable t) {
+            stopRecognizer();
+            startVoiceActivity();
+        }
+    }
+
+    void stopVoice() {
+        try { if (recognizer != null) recognizer.stopListening(); } catch (Throwable ignored) { }
+    }
+
+    private void stopRecognizer() {
+        try { if (recognizer != null) { recognizer.cancel(); recognizer.destroy(); } } catch (Throwable ignored) { }
+        recognizer = null;
+    }
+
+    private static String firstResult(Bundle b) {
+        if (b == null) return null;
+        java.util.ArrayList<String> r = b.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+        return r != null && !r.isEmpty() ? r.get(0) : null;
+    }
+
+    /** Estado de la voz para la página: ready (escuchando), speech, partial (texto parcial), end, denied (sin permiso), error */
+    private void voiceEvent(String type, String text) {
+        web.evaluateJavascript("window.tcNativeVoiceEvent && window.tcNativeVoiceEvent(" + org.json.JSONObject.quote(type) + "," + (text == null ? "null" : org.json.JSONObject.quote(text)) + ");", null);
+    }
+
+    /** Respaldo: la ventana de voz del sistema (si el servicio de reconocimiento no está o falla) */
+    void startVoiceActivity() {
         android.content.Intent i = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        String l = lang != null && lang.startsWith("en") ? "en-US" : "es-419";
-        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, l);
-        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, l);
-        i.putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, l.startsWith("en") ? "What do you want to watch?" : "¿Qué quieres ver?");
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, voiceLang);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, voiceLang);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, voiceLang.startsWith("en") ? "What do you want to watch?" : "¿Qué quieres ver?");
         i.putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1);
-        // Sin el diálogo «Completar la acción mediante»: directo a la voz de Google TV (katniss, escucha por el micrófono del mando) o a la app de Google
         try {
             String pick = null;
             for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(i, 0)) {
@@ -615,6 +712,13 @@ public class MainActivity extends Activity {
         if (res == RESULT_OK && data != null) {
             java.util.ArrayList<String> r = data.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS);
             if (r != null && !r.isEmpty()) text = r.get(0);
+            if (text == null && data.getExtras() != null) {          // algunos servicios devuelven el texto con otra clave
+                for (String k : data.getExtras().keySet()) {
+                    Object v = data.getExtras().get(k);
+                    if (v instanceof java.util.ArrayList && !((java.util.ArrayList<?>) v).isEmpty() && ((java.util.ArrayList<?>) v).get(0) instanceof String) { text = (String) ((java.util.ArrayList<?>) v).get(0); break; }
+                    if (v instanceof String && k.toLowerCase(java.util.Locale.ROOT).contains("query")) { text = (String) v; break; }
+                }
+            }
         }
         voiceResult(text == null ? "" : text);          // "" = cancelado o no se entendió
     }
@@ -640,6 +744,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        stopRecognizer();
         if (web != null) {
             root.removeAllViews();
             web.destroy();

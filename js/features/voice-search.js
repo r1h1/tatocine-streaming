@@ -8,9 +8,9 @@
  *     (`tatoVoiceOff`) para no ofrecer algo que no funciona. Se puede volver a probar borrando los datos del sitio.
  *   - Si no hablas ("no-speech") solo se avisa, sin quitar nada.
  * No se guarda audio. Idioma según el perfil (ES / EN).
- * App de Google TV / Android TV (GoogleTvTatoCine.apk): el WebView de Android NO trae reconocimiento de voz (respondía «Permite el micrófono» sin pedir nada).
- * Ahí se usa el reconocimiento de voz DEL SISTEMA (TatoNative.voiceSearch → la ventana de voz de Google TV, que escucha por el micrófono del mando): la app
- * no graba nada ni necesita permiso de micrófono. El texto vuelve por window.tcNativeVoice(texto) y se busca.
+ * App de Google TV / Android TV (GoogleTvTatoCine.apk): el WebView de Android NO trae reconocimiento de voz. Ahí lo hace la app nativa con el servicio de voz
+ * de Google TV (micrófono del mando): la primera vez Android pide el permiso de micrófono; mientras hablas, el texto aparece en el buscador
+ * (window.tcNativeVoiceEvent("partial", texto)) y al terminar se busca (window.tcNativeVoice(texto)). Pulsar el micrófono otra vez deja de escuchar.
  */
 (async function voiceSearch() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -37,8 +37,28 @@
     showToast(why || L("La búsqueda por voz no está disponible en este navegador.", "Voice search isn't available in this browser."));
   }
   // Resultado de la voz del sistema (app de TV): null = no hay reconocedor, "" = cancelado o no se entendió
+  var placeholder = $searchInput.getAttribute("placeholder") || "";
+  function restorePh() { $searchInput.setAttribute("placeholder", placeholder); }
+  // Estado de la voz nativa: ready (escuchando), speech, partial (texto parcial en vivo), end, denied (sin permiso de micrófono), error
+  window.tcNativeVoiceEvent = function (type, text) {
+    if (type === "ready") {
+      listening = true; btn.classList.add("listening"); btn.setAttribute("aria-pressed", "true");
+      $searchInput.value = ""; $searchInput.setAttribute("placeholder", L("Escuchando… habla ahora", "Listening… speak now"));
+      announce(L("Escuchando", "Listening"));
+    } else if (type === "partial" && text) {
+      $searchInput.value = String(text).replace(/[<>]/g, "").slice(0, 80);          // la transcripción aparece en el buscador mientras hablas
+    } else if (type === "end") {
+      $searchInput.setAttribute("placeholder", L("Procesando…", "Processing…"));
+    } else if (type === "denied") {
+      stop(); restorePh();
+      showToast(L("Para buscar por voz, permite el micrófono: Ajustes de la TV → Apps → TatoCine → Permisos → Micrófono.", "To search by voice, allow the microphone: TV Settings → Apps → TatoCine → Permissions → Microphone."));
+    } else if (type === "error") {
+      stop(); restorePh();
+      showToast(L("La búsqueda por voz no respondió. Inténtalo de nuevo.", "Voice search didn't respond. Try again.") + (text ? " (" + text + ")" : ""));
+    }
+  };
   window.tcNativeVoice = function (text) {
-    stop();
+    stop(); restorePh();
     if (text === null) { showToast(L("La búsqueda por voz no está disponible en este televisor.", "Voice search isn't available on this TV.")); return; }
     text = String(text || "").replace(/[<>]/g, "").trim().slice(0, 80);
     if (!text) { showToast(L("No se entendió. Inténtalo de nuevo.", "Didn't catch that. Try again.")); return; }
@@ -48,6 +68,7 @@
   };
   btn.addEventListener("click", function () {
     if (NATIVE) {
+      if (listening) { try { TatoNative.voiceStop(window.__tcNT || ""); } catch (e) { } return; }       // pulsar otra vez: deja de escuchar y busca lo dicho
       listening = true; btn.classList.add("listening"); btn.setAttribute("aria-pressed", "true");
       try { TatoNative.voiceSearch(window.__tcNT || "", UI_LANG === "en" ? "en" : "es"); } catch (e) { stop(); }
       return;
