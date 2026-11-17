@@ -69,4 +69,8 @@ body.tv-mode *, body.tv-mode *::before, body.tv-mode *::after { backdrop-filter:
 body.tv-mode :focus { outline: 4px solid #fff !important; outline-offset: 3px; }       /* foco siempre visible aunque el navegador no conozca :focus-visible */
 body.tv-mode .top-nav { padding-left: max(40px, 3vw); padding-right: max(40px, 3vw); }  /* margen de seguridad contra el sobrebarrido de algunos televisores */
 body.tv-mode .card:focus, body.tv-mode .similar-card:focus, body.tv-mode .cast-item:focus, body.tv-mode .brand-tile:focus { z-index: 6; }
+/* TV: sin desenfoque (arriba) los paneles semitransparentes dejaban ver la portada detrás (p. ej. su título): fondos opacos */
+body.tv-mode #search-suggest.suggest-panel { background: #141416 !important; }
+body.tv-mode #details-modal.open { background: #000 !important; }                       /* el contenido (94 % opaco) ya no deja ver la portada */
+html.tc-pointer #player-modal :focus { outline: none !important; box-shadow: none !important; }   /* APK: con el puntero activo, sin aro de foco en el reproductor */
 html.no-focus-visible :focus { outline: 3px solid #fff; outline-offset: 3px; }          /* navegadores sin :focus-visible (Chromium < 86): el foco se ve con el teclado y el mando */

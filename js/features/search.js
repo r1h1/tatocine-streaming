@@ -102,6 +102,8 @@
     }
     $searchInput.addEventListener("change", function (e) {
       var q = e.target.value.trim();
+      var sp = document.getElementById("search-suggest");
+      if (q.length && IS_TV && sp && sp.classList.contains("open")) return;   // TV: se está bajando a las sugerencias; la búsqueda completa va con la tecla Buscar/Enter del teclado
       if (q.length === 0) {
         isSearching = false;
         try {

@@ -119,7 +119,10 @@ function addPeopleRow(q, run) {
     if (q.length < 2 || !suggestEnabled()) { hideSuggestions(); return; }
     suggestTimer = setTimeout(function () { showSuggestions(q); }, SUGGEST_DELAY);
   });
-  $searchInput.addEventListener("blur", function () { setTimeout(hideSuggestions, 150); });
+  // Se ocultan cuando el foco sale del buscador Y de la lista (con el mando de TV se baja del buscador a las sugerencias: antes se cerraban al instante)
+  function hideIfFocusLeft() { setTimeout(function () { var a = document.activeElement; if (a && (a === $searchInput || panel.contains(a))) return; hideSuggestions(); }, 150); }
+  $searchInput.addEventListener("blur", hideIfFocusLeft);
+  panel.addEventListener("focusout", hideIfFocusLeft);
   $searchInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { clearTimeout(suggestTimer); suggestRun++; hideSuggestions(); } });
   document.addEventListener("click", function (e) {
     var p = e.target.closest("#rows-container [data-person]");

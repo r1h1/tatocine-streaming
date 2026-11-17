@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -50,6 +51,13 @@ public class MainActivity extends Activity {
     private View fullView;
     private WebChromeClient.CustomViewCallback fullCallback;
     private long lastBack;
+    private final String token = java.util.UUID.randomUUID().toString();
+    private PointerView pointer;
+    private boolean pointerOn, pointerHinted;
+    private float px, py;
+    private long touchDown, lastMove;
+    private boolean downPending, upPending;
+    static final int REQ_VOICE = 41;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -60,10 +68,14 @@ public class MainActivity extends Activity {
         web = new WebView(this);
         web.setBackgroundColor(Color.BLACK);
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        pointer = new PointerView(this);
+        pointer.setVisibility(View.GONE);
+        root.addView(pointer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         hideSystemUi();
         preferHighestRefreshRate();
 
+        //@DEBUG@
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -115,6 +127,13 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onPageFinished(WebView view, String url) {
+                Uri u = url == null ? null : Uri.parse(url);
+                if (u != null && HOST.equals(u.getHost())) view.evaluateJavascript("window.__tcNT=" + org.json.JSONObject.quote(token) + ";", null);
+                setPointer(false, 0.5f, 0.5f);                    // una página nueva nunca hereda el puntero
+            }
+
+            @Override
             public boolean onRenderProcessGone(WebView view, android.webkit.RenderProcessGoneDetail detail) {
                 recreate();                          // si el motor del WebView se cae (poca memoria), la app se recupera sola
                 return true;
@@ -129,6 +148,7 @@ public class MainActivity extends Activity {
                 fullCallback = callback;
                 root.addView(view, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 web.setVisibility(View.GONE);
+                pointer.bringToFront();
                 hideSystemUi();
             }
 
@@ -156,20 +176,9 @@ public class MainActivity extends Activity {
             } catch (Throwable ignored) { }
         }
 
-        // Puente mínimo con la web: solo abre el teclado de la TV cuando se pulsa OK sobre un campo de texto (el WebView no lo abre con focus() desde JS).
-        web.addJavascriptInterface(new Object() {
-            @android.webkit.JavascriptInterface
-            public void showKeyboard() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (!web.hasFocus()) web.requestFocus();      // si ya tiene el foco NO se pide otra vez: el WebView lo tomaría como «entrar desde arriba» y movería el foco al menú
-                        if (imm != null) imm.showSoftInput(web, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
-                    }
-                });
-            }
-        }, "TatoNative");
+        // Puente con la web (TatoNative). addJavascriptInterface lo inyecta en TODOS los marcos, también en los reproductores de terceros: por eso cada acción
+        // exige un token aleatorio que solo recibe la página principal de la app (onPageFinished → evaluateJavascript, que corre solo en el marco principal).
+        web.addJavascriptInterface(new NativeBridge(), "TatoNative");
 
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
@@ -300,11 +309,314 @@ public class MainActivity extends Activity {
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         int k = e.getKeyCode();
+        if (pointerOn && pointerKey(e)) return true;
+        if (k == KeyEvent.KEYCODE_SEARCH) {                            // botón de búsqueda/voz de algunos mandos: búsqueda por voz de la app
+            if (e.getAction() == KeyEvent.ACTION_UP) startVoice(null);
+            return true;
+        }
         if ((k == KeyEvent.KEYCODE_ESCAPE || k == KeyEvent.KEYCODE_BUTTON_B) && fullView == null) {
             if (e.getAction() == KeyEvent.ACTION_UP) onBackPressed();
             return true;
         }
         return super.dispatchKeyEvent(e);
+    }
+
+    /** Puente JS. Todo lo que cambia algo pide el token de la página principal (los reproductores de terceros no lo tienen). */
+    final class NativeBridge {
+        private boolean ok(String t) { return t != null && token.equals(t); }
+
+        @android.webkit.JavascriptInterface
+        public void showKeyboard(String t) {
+            if (!ok(t)) return;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (!web.hasFocus()) web.requestFocus();      // si ya tiene el foco NO se pide otra vez: el WebView lo tomaría como «entrar desde arriba» y movería el foco al menú
+                    if (imm != null) imm.showSoftInput(web, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                }
+            });
+        }
+
+        /** Puntero virtual (reproductor): fx/fy = posición inicial en fracción de la pantalla. */
+        @android.webkit.JavascriptInterface
+        public void setPointer(String t, final boolean on, final double fx, final double fy) {
+            if (!ok(t)) return;
+            runOnUiThread(new Runnable() { @Override public void run() { MainActivity.this.setPointer(on, (float) fx, (float) fy); } });
+        }
+
+        /** ¿Hay reconocimiento de voz del sistema (Google TV: el micrófono del mando)? No cambia nada: no pide token. */
+        @android.webkit.JavascriptInterface
+        public boolean hasVoice() { return voiceAvailable(); }
+
+        @android.webkit.JavascriptInterface
+        public void voiceSearch(String t, final String lang) {
+            if (!ok(t)) return;
+            runOnUiThread(new Runnable() { @Override public void run() { startVoice(lang); } });
+        }
+    }
+
+    // ---------- Puntero virtual (solo en el reproductor) ----------
+    /** El vídeo va en un iframe de otro sitio: la página no puede mover el foco dentro de él. El puntero lo dibuja Android encima de todo (también en pantalla completa):
+     *  flechas = mover (acelera si se mantiene pulsada; en el borde desplaza), OK = toque en ese punto (llega al iframe como un dedo), Atrás = lo de siempre. */
+    void setPointer(boolean on, float fx, float fy) {
+        if (pointer == null) return;
+        if (on && !pointerOn) {
+            int w = root.getWidth(), h = root.getHeight();
+            px = clamp(fx, 0.02f, 0.98f) * (w > 0 ? w : 1920);
+            py = clamp(fy, 0.02f, 0.98f) * (h > 0 ? h : 1080);
+            if (!pointerHinted) {
+                pointerHinted = true;
+                Toast.makeText(this, "Puntero activo: flechas para moverlo, OK para pulsar, Atrás para salir", Toast.LENGTH_LONG).show();
+            }
+        }
+        pointerOn = on;
+        pointer.setVisibility(on ? View.VISIBLE : View.GONE);
+        pointer.bringToFront();
+        pointer.invalidate();
+        if (on) hover();
+    }
+
+    private static float clamp(float v, float a, float b) { return v < a ? a : (v > b ? b : v); }
+
+    /** true si la tecla la usó el puntero */
+    private boolean pointerKey(KeyEvent e) {
+        int k = e.getKeyCode(), a = e.getAction();
+        boolean ok = k == KeyEvent.KEYCODE_DPAD_CENTER || k == KeyEvent.KEYCODE_ENTER || k == KeyEvent.KEYCODE_NUMPAD_ENTER || k == KeyEvent.KEYCODE_BUTTON_A;
+        if (ok) {
+            if (a == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) {
+                long now = android.os.SystemClock.uptimeMillis();
+                if (now - lastMove > 1500) {                  // controles del reproductor ocultos: el primer clic solo los mostraba
+                    px += 1f; hover(); px -= 1f; hover();     // micro-movimiento: Chromium no avisa «mousemove» si el ratón no se movió
+                    downPending = true; upPending = false;
+                    root.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            downPending = false;
+                            touch(MotionEvent.ACTION_DOWN);
+                            if (upPending) { upPending = false; touch(MotionEvent.ACTION_UP); }
+                        }
+                    }, 450);                                      // los reproductores (Plyr…) tardan ~0,4 s en mostrar sus controles
+                } else touch(MotionEvent.ACTION_DOWN);
+                lastMove = now;
+            } else if (a == KeyEvent.ACTION_UP) {
+                if (downPending) upPending = true;
+                else touch(MotionEvent.ACTION_UP);
+            }
+            return true;
+        }
+        int dx = 0, dy = 0;
+        if (k == KeyEvent.KEYCODE_DPAD_LEFT) dx = -1;
+        else if (k == KeyEvent.KEYCODE_DPAD_RIGHT) dx = 1;
+        else if (k == KeyEvent.KEYCODE_DPAD_UP) dy = -1;
+        else if (k == KeyEvent.KEYCODE_DPAD_DOWN) dy = 1;
+        else return false;
+        if (a != KeyEvent.ACTION_DOWN) return true;
+        int w = root.getWidth(), h = root.getHeight();
+        float step = h * (0.015f + Math.min(e.getRepeatCount(), 15) * 0.005f);       // 1,5 % de la altura por pulsación (preciso para botones pequeños) y acelera hasta 9 % manteniendo pulsado
+        float nx = px + dx * step, ny = py + dy * step, m = 2f;
+        if (dy != 0 && (ny < m || ny > h - m)) scroll(dy);                             // en el borde: desplaza la página o el panel
+        if (dx != 0 && (nx < m || nx > w - m)) scroll(0, dx);
+        px = clamp(nx, m, w - m);
+        py = clamp(ny, m, h - m);
+        pointer.invalidate();
+        hover();
+        lastMove = android.os.SystemClock.uptimeMillis();
+        return true;
+    }
+
+    private MotionEvent pointerEvent(int action, int source, int toolType) { return pointerEvent(action, source, toolType, 0); }
+
+    private MotionEvent pointerEvent(int action, int source, int toolType, int buttons) {
+        long now = android.os.SystemClock.uptimeMillis();
+        MotionEvent.PointerProperties[] pp = { new MotionEvent.PointerProperties() };
+        pp[0].id = 0;
+        pp[0].toolType = toolType;
+        MotionEvent.PointerCoords[] pc = { new MotionEvent.PointerCoords() };
+        pc[0].x = px;
+        pc[0].y = py;
+        pc[0].pressure = 1f;
+        pc[0].size = 1f;
+        long down = action == MotionEvent.ACTION_DOWN ? now : (touchDown > 0 ? touchDown : now);
+        if (action == MotionEvent.ACTION_DOWN) touchDown = now;
+        return MotionEvent.obtain(down, now, action, 1, pp, pc, 0, buttons, 1f, 1f, 0, 0, source, 0);
+    }
+
+    private static java.lang.reflect.Method setActionButton;
+    private static boolean actionButtonTried, mouseOk = true;
+
+    /** MotionEvent.setActionButton no es público: sin él Chromium descarta el BUTTON_PRESS. Si el sistema no lo deja usar, se vuelve al toque de dedo. */
+    private static boolean withButton(MotionEvent ev) {
+        if (Build.VERSION.SDK_INT < 23) return false;
+        try {
+            if (!actionButtonTried) { actionButtonTried = true; setActionButton = MotionEvent.class.getMethod("setActionButton", int.class); }
+            if (setActionButton == null) return false;
+            setActionButton.invoke(ev, MotionEvent.BUTTON_PRIMARY);
+            return true;
+        } catch (Throwable t) { setActionButton = null; return false; }
+    }
+
+    private void generic(int action, int buttons) {
+        MotionEvent ev = pointerEvent(action, android.view.InputDevice.SOURCE_MOUSE, MotionEvent.TOOL_TYPE_MOUSE, buttons);
+        root.dispatchGenericMotionEvent(ev);
+        ev.recycle();
+    }
+
+    /** OK = clic en el punto del puntero, con la MISMA secuencia que un ratón real (salir del hover → bajar → pulsar botón → soltar → subir → hover). Es un clic de
+     *  RATÓN y no un toque: con un toque, muchos reproductores solo muestran u ocultan sus controles y el botón (pantalla completa, pausa…) no se pulsaba.
+     *  Si el sistema no permite marcar el botón del ratón, se usa el toque de dedo de siempre. */
+    private void touch(int action) {
+        int src = android.view.InputDevice.SOURCE_MOUSE, tool = MotionEvent.TOOL_TYPE_MOUSE;
+        if (mouseOk) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                MotionEvent press = pointerEvent(MotionEvent.ACTION_BUTTON_PRESS, src, tool, MotionEvent.BUTTON_PRIMARY);
+                if (withButton(press)) {
+                    generic(MotionEvent.ACTION_HOVER_EXIT, 0);
+                    MotionEvent down = pointerEvent(MotionEvent.ACTION_DOWN, src, tool, MotionEvent.BUTTON_PRIMARY);
+                    root.dispatchTouchEvent(down);
+                    down.recycle();
+                    root.dispatchTouchEvent(press);            // Chromium toma BUTTON_PRESS/RELEASE del flujo táctil del ratón (por la vía genérica lo ignoraba)
+                    press.recycle();
+                    return;
+                }
+                press.recycle();
+                mouseOk = false;                                    // sin setActionButton: toque de dedo
+            } else {
+                MotionEvent rel = pointerEvent(MotionEvent.ACTION_BUTTON_RELEASE, src, tool, 0);
+                withButton(rel);
+                root.dispatchTouchEvent(rel);
+                rel.recycle();
+                MotionEvent up = pointerEvent(MotionEvent.ACTION_UP, src, tool, 0);
+                root.dispatchTouchEvent(up);
+                up.recycle();
+                touchDown = 0;
+                generic(MotionEvent.ACTION_HOVER_ENTER, 0);
+                hover();
+                return;
+            }
+        }
+        MotionEvent ev = pointerEvent(action, android.view.InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER);
+        root.dispatchTouchEvent(ev);
+        ev.recycle();
+        if (action == MotionEvent.ACTION_UP) touchDown = 0;
+    }
+
+    /** Ratón «encima»: muchos reproductores muestran sus controles al mover el ratón */
+    private void hover() {
+        MotionEvent ev = pointerEvent(MotionEvent.ACTION_HOVER_MOVE, android.view.InputDevice.SOURCE_MOUSE, MotionEvent.TOOL_TYPE_MOUSE);
+        root.dispatchGenericMotionEvent(ev);
+        ev.recycle();
+    }
+
+    private void scroll(int dy) { scroll(dy, 0); }
+
+    private void scroll(int dy, int dx) {
+        MotionEvent.PointerCoords pc = new MotionEvent.PointerCoords();
+        pc.x = px; pc.y = py;
+        pc.setAxisValue(MotionEvent.AXIS_VSCROLL, -dy);
+        pc.setAxisValue(MotionEvent.AXIS_HSCROLL, dx);
+        MotionEvent.PointerProperties pp = new MotionEvent.PointerProperties();
+        pp.id = 0; pp.toolType = MotionEvent.TOOL_TYPE_MOUSE;
+        long now = android.os.SystemClock.uptimeMillis();
+        MotionEvent s = MotionEvent.obtain(now, now, MotionEvent.ACTION_SCROLL, 1, new MotionEvent.PointerProperties[] { pp }, new MotionEvent.PointerCoords[] { pc }, 0, 0, 1f, 1f, 0, 0, android.view.InputDevice.SOURCE_MOUSE, 0);
+        root.dispatchGenericMotionEvent(s);
+        s.recycle();
+    }
+
+    /** Flecha blanca con borde negro y sombra, del tamaño de un puntero de TV (3,4 % de la altura). */
+    final class PointerView extends View {
+        private final android.graphics.Paint fill = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private final android.graphics.Paint edge = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private final android.graphics.Path path = new android.graphics.Path();
+        private float built = -1;
+
+        PointerView(Context c) {
+            super(c);
+            setClickable(false);
+            setFocusable(false);
+            fill.setColor(Color.WHITE);
+            fill.setStyle(android.graphics.Paint.Style.FILL);
+            fill.setShadowLayer(6f, 2f, 3f, 0x99000000);
+            edge.setColor(Color.BLACK);
+            edge.setStyle(android.graphics.Paint.Style.STROKE);
+            edge.setStrokeJoin(android.graphics.Paint.Join.ROUND);
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);     // la sombra del Paint solo se dibuja en software (es una vista diminuta)
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent e) { return false; }
+
+        @Override
+        protected void onDraw(android.graphics.Canvas c) {
+            float s = getHeight() * 0.034f;
+            if (s != built) {
+                built = s;
+                path.reset();
+                path.moveTo(0, 0);
+                path.lineTo(0, s);
+                path.lineTo(s * 0.27f, s * 0.76f);
+                path.lineTo(s * 0.46f, s * 1.16f);
+                path.lineTo(s * 0.62f, s * 1.08f);
+                path.lineTo(s * 0.43f, s * 0.70f);
+                path.lineTo(s * 0.78f, s * 0.70f);
+                path.close();
+                edge.setStrokeWidth(Math.max(2f, s * 0.08f));
+            }
+            c.save();
+            c.translate(px, py);
+            c.drawPath(path, fill);
+            c.drawPath(path, edge);
+            c.restore();
+        }
+    }
+
+    // ---------- Búsqueda por voz con el micrófono del mando (reconocimiento de Google TV) ----------
+    private boolean voiceAvailable() {
+        try {
+            return !getPackageManager().queryIntentActivities(new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0).isEmpty();
+        } catch (Throwable t) { return false; }
+    }
+
+    void startVoice(String lang) {
+        android.content.Intent i = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        String l = lang != null && lang.startsWith("en") ? "en-US" : "es-419";
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, l);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, l);
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, l.startsWith("en") ? "What do you want to watch?" : "¿Qué quieres ver?");
+        i.putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        // Sin el diálogo «Completar la acción mediante»: directo a la voz de Google TV (katniss, escucha por el micrófono del mando) o a la app de Google
+        try {
+            String pick = null;
+            for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(i, 0)) {
+                String pkg = r.activityInfo.packageName;
+                if (pkg.equals("com.google.android.katniss")) { pick = pkg; break; }
+                if (pick == null && pkg.equals("com.google.android.googlequicksearchbox")) pick = pkg;
+                if (pick == null && !pkg.equals("com.google.android.tts")) pick = pkg;
+            }
+            if (pick != null) i.setPackage(pick);
+        } catch (Throwable ignored) { }
+        try {
+            startActivityForResult(i, REQ_VOICE);
+        } catch (Throwable t) {
+            voiceResult(null);
+        }
+    }
+
+    private void voiceResult(String text) {
+        web.evaluateJavascript("window.tcNativeVoice && window.tcNativeVoice(" + (text == null ? "null" : org.json.JSONObject.quote(text)) + ");", null);
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, android.content.Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req != REQ_VOICE) return;
+        String text = null;
+        if (res == RESULT_OK && data != null) {
+            java.util.ArrayList<String> r = data.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS);
+            if (r != null && !r.isEmpty()) text = r.get(0);
+        }
+        voiceResult(text == null ? "" : text);          // "" = cancelado o no se entendió
     }
 
     @Override

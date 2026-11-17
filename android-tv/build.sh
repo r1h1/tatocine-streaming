@@ -40,8 +40,15 @@ cp -r android-tv/res/. "$OUT/res/"
   --min-sdk-version 21 --target-sdk-version 35 --version-code "$VCODE" --version-name "$VERSION" --auto-add-overlay "$OUT/res.zip"
 
 # 4) Java → dex
+# TATO_DEBUG=1 → compilación de prueba con el inspector del WebView (chrome://inspect por ADB). NUNCA para publicar.
+mkdir -p "$OUT/src"
+if [ "${TATO_DEBUG:-0}" = 1 ]; then
+  sed 's|//@DEBUG@|WebView.setWebContentsDebuggingEnabled(true);|' android-tv/src/app/tatocine/tv/MainActivity.java > "$OUT/src/MainActivity.java"; echo "⚠ COMPILACIÓN DE PRUEBA (inspector activado)"
+else
+  cp android-tv/src/app/tatocine/tv/MainActivity.java "$OUT/src/MainActivity.java"
+fi
 javac -nowarn -Xlint:-options -source 8 -target 8 -bootclasspath "$PLATFORM" -d "$OUT/classes" \
-  android-tv/src/app/tatocine/tv/MainActivity.java "$OUT/gen/app/tatocine/tv/R.java"
+  "$OUT/src/MainActivity.java" "$OUT/gen/app/tatocine/tv/R.java"
 "$BT/d8" --release --min-api 21 --lib "$PLATFORM" --output "$OUT/dex" $(find "$OUT/classes" -name '*.class')
 (cd "$OUT/dex" && zip -q -j "$OUT/base.apk" classes.dex)
 

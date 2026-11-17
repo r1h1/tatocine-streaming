@@ -8,13 +8,20 @@
  *     (`tatoVoiceOff`) para no ofrecer algo que no funciona. Se puede volver a probar borrando los datos del sitio.
  *   - Si no hablas ("no-speech") solo se avisa, sin quitar nada.
  * No se guarda audio. Idioma según el perfil (ES / EN).
+ * App de Google TV / Android TV (GoogleTvTatoCine.apk): el WebView de Android NO trae reconocimiento de voz (respondía «Permite el micrófono» sin pedir nada).
+ * Ahí se usa el reconocimiento de voz DEL SISTEMA (TatoNative.voiceSearch → la ventana de voz de Google TV, que escucha por el micrófono del mando): la app
+ * no graba nada ni necesita permiso de micrófono. El texto vuelve por window.tcNativeVoice(texto) y se busca.
  */
 (async function voiceSearch() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var NATIVE = false;
+  try { NATIVE = !!(window.TatoNative && TatoNative.hasVoice && TatoNative.hasVoice()); } catch (e) { }
   var wrap = document.querySelector(".hero-content .search-wrap");
-  if (!SR || !wrap || !$searchInput) return;
-  try { if (localStorage.getItem("tatoVoiceOff") === "1") return; } catch (e) { }
-  try { if (navigator.brave && navigator.brave.isBrave && await navigator.brave.isBrave()) return; } catch (e) { }
+  if ((!SR && !NATIVE) || !wrap || !$searchInput) return;
+  if (!NATIVE) {
+    try { if (localStorage.getItem("tatoVoiceOff") === "1") return; } catch (e) { }
+    try { if (navigator.brave && navigator.brave.isBrave && await navigator.brave.isBrave()) return; } catch (e) { }
+  }
   var btn = document.createElement("button"), rec = null, listening = false, startTimer = null, capTimer = null, gotAudio = false, finalText = "";
   btn.type = "button";
   btn.className = "voice-btn";
@@ -29,7 +36,22 @@
     btn.remove();
     showToast(why || L("La búsqueda por voz no está disponible en este navegador.", "Voice search isn't available in this browser."));
   }
+  // Resultado de la voz del sistema (app de TV): null = no hay reconocedor, "" = cancelado o no se entendió
+  window.tcNativeVoice = function (text) {
+    stop();
+    if (text === null) { showToast(L("La búsqueda por voz no está disponible en este televisor.", "Voice search isn't available on this TV.")); return; }
+    text = String(text || "").replace(/[<>]/g, "").trim().slice(0, 80);
+    if (!text) { showToast(L("No se entendió. Inténtalo de nuevo.", "Didn't catch that. Try again.")); return; }
+    $searchInput.value = text;
+    announce(L("Buscando: " + text, "Searching: " + text));
+    performSearch(text);
+  };
   btn.addEventListener("click", function () {
+    if (NATIVE) {
+      listening = true; btn.classList.add("listening"); btn.setAttribute("aria-pressed", "true");
+      try { TatoNative.voiceSearch(window.__tcNT || "", UI_LANG === "en" ? "en" : "es"); } catch (e) { stop(); }
+      return;
+    }
     if (listening && rec) { try { rec.stop(); } catch (e) { } return; }
     rec = new SR();
     rec.lang = UI_LANG === "en" ? "en-US" : "es-ES";
