@@ -1196,14 +1196,14 @@ async function main() {
     const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go", { timeout: 5000 }); await nav;
     await c2.close();
   });
-  await test("TV (Google TV / Android TV, TV Bro): se detecta, se ve al 90 % y TODO el primer uso se completa solo con el mando (OK y flechas): bienvenida, selector, aviso legal y portada", async (page, ctx) => {
+  await test("TV (Google TV / Android TV, TV Bro): se detecta, se ve al 80 % y TODO el primer uso se completa solo con el mando (OK y flechas): bienvenida, selector, aviso legal y portada", async (page, ctx) => {
     for (const ua of ["Mozilla/5.0 (Linux; Android 12; MiTV-AXSO0 Build/SKQ1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Safari/537.36", "Mozilla/5.0 (Linux; Android 11; BRAVIA 4K VH2 Build/RTT3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0 Safari/537.36 TV Bro/1.8.7", "Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36 WebAppManager", "Mozilla/5.0 (SMART-TV; LINUX; Tizen 6.0) AppleWebKit/537.36 (KHTML, like Gecko) 76.0.3809.146/6.0 TV Safari/537.36"]) {
       const c2 = await ctx.browser().newContext({ viewport: { width: 960, height: 540 }, userAgent: ua, locale: "es-ES" });
       if (process.env.TMDB_MOCK) await require("./mock-tmdb").install(c2);
       await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; });
       const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" }); await p.waitForSelector("#tc-welcome", { state: "visible" }); await p.waitForTimeout(500);
       const tv = await p.evaluate(() => ({ tv: document.documentElement.classList.contains("tc-tv") && document.body.classList.contains("tv-mode"), meta: document.querySelector('meta[name="viewport"]').content, focus: document.activeElement && document.activeElement.className }));
-      ok(tv.tv && /initial-scale=0\.9/.test(tv.meta) && /tw-next/.test(tv.focus), ua.slice(0, 50) + ": " + JSON.stringify(tv));
+      ok(tv.tv && /initial-scale=0\.8/.test(tv.meta) && /tw-next/.test(tv.focus), ua.slice(0, 50) + ": " + JSON.stringify(tv));
       for (let i = 0; i < 5; i++) { await p.keyboard.press("Enter"); await p.waitForTimeout(120); }
       await p.waitForSelector("#tc-profile-overlay.open", { timeout: 8000 }); await p.waitForTimeout(300);
       ok(/tc-profile-select-btn/.test(await p.evaluate(() => document.activeElement.className)), "el selector no tiene el foco en un perfil");

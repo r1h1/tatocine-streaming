@@ -80,6 +80,12 @@
       display: inline-flex;
     }
 
+    /* Dentro de la APK (Google TV / Android TV) la app YA está instalada: nunca «Instalar» */
+    html.tc-native .tc-install-btn,
+    html.tc-native #install-option {
+      display: none !important;
+    }
+
     .continue-card.has-progress .card-overlay {
       padding-bottom: 24px;
     }

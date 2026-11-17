@@ -51,6 +51,8 @@
     var tvUa = /TatoCineTV|SmartTV|SMART-TV|Tizen|Web0S|WebOS|HbbTV|NetCast|BRAVIA|VIDAA|Android ?TV|Google ?TV|Chromecast|CrKey|AFT[A-Z]|MiTV|MIBOX|Mi ?Box|TV ?Bro|Leanback|SonyDTV|Philips|Hisense|Toshiba|Sharp|Vizio|Roku|Xbox|PlayStation|; ?TV[;)]|Large Screen/i.test(ua) && !/iPhone|iPad|Mobile Safari|Mobile\//i.test(ua);
     var mq = function (q) { try { return window.matchMedia && window.matchMedia(q).matches; } catch (e2) { return false; } };
     var remoteOnly = mq("(any-pointer: none)") && mq("(hover: none)") && !("ontouchstart" in window) && !navigator.maxTouchPoints && (screen.width || 0) >= 900;
+    if (/TatoCine(TV|App)\//.test(ua)) root.classList.add("tc-native");                       // dentro de la APK (ya instalada: sin botón «Instalar»)
+    if (/TatoCineTV\//.test(ua)) tvUa = true;                                                 // el WebView de Google TV dice «Mobile Safari» y antes NO se detectaba la TV
     if (tvUa || remoteOnly || /[?&]tv=1/.test(location.search)) root.classList.add("tc-tv");
   } catch (e) { }
   var needsPicker = !selected || selected !== active;

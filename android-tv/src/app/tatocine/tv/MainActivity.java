@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         hideSystemUi();
+        preferHighestRefreshRate();
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -155,6 +156,21 @@ public class MainActivity extends Activity {
             } catch (Throwable ignored) { }
         }
 
+        // Puente mínimo con la web: solo abre el teclado de la TV cuando se pulsa OK sobre un campo de texto (el WebView no lo abre con focus() desde JS).
+        web.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public void showKeyboard() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (!web.hasFocus()) web.requestFocus();      // si ya tiene el foco NO se pide otra vez: el WebView lo tomaría como «entrar desde arriba» y movería el foco al menú
+                        if (imm != null) imm.showSoftInput(web, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                    }
+                });
+            }
+        }, "TatoNative");
+
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
         web.requestFocus();
@@ -237,6 +253,25 @@ public class MainActivity extends Activity {
         web.setVisibility(View.VISIBLE);
         web.requestFocus();
         hideSystemUi();
+    }
+
+    /**
+     * 60 / 120 Hz: pide al televisor el modo de MAYOR frecuencia con la misma resolución (p. ej. 120 Hz si el panel lo tiene; si solo tiene 60 Hz se queda en 60).
+     * El WebView dibuja al ritmo de la pantalla (vsync), así el desplazamiento y el foco del mando van a 120 cuadros por segundo donde se pueda.
+     */
+    private void preferHighestRefreshRate() {
+        if (Build.VERSION.SDK_INT < 23) return;
+        try {
+            android.view.Display d = getWindowManager().getDefaultDisplay();
+            android.view.Display.Mode cur = d.getMode(), best = cur;
+            for (android.view.Display.Mode m : d.getSupportedModes()) {
+                if (m.getPhysicalWidth() == cur.getPhysicalWidth() && m.getPhysicalHeight() == cur.getPhysicalHeight() && m.getRefreshRate() > best.getRefreshRate() + 0.5f) best = m;
+            }
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.preferredDisplayModeId = best.getModeId();
+            lp.preferredRefreshRate = best.getRefreshRate();
+            getWindow().setAttributes(lp);
+        } catch (Throwable ignored) { }
     }
 
     private void hideSystemUi() {

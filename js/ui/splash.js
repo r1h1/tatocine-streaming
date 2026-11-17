@@ -5,12 +5,12 @@
  * algo bonito que mostrar: la portada lista, el selector de perfiles con sus tarjetas o la bienvenida. Dura siempre 1,5 s. No hace ninguna petición de red.
  */
 (function () {
-  // Televisores: todo se veía enorme al 100 %. Se muestra al 90 % con la escala inicial de la ventana (no con CSS zoom, que rompe los 100vh de las ventanas a
+  // Televisores: todo se veía enorme al 100 %. Se muestra al 80 % con la escala inicial de la ventana (no con CSS zoom, que rompe los 100vh de las ventanas a
   // pantalla completa). Lo respetan los navegadores de TV basados en Android WebView (TV Bro, Google TV, Android TV) y Chromium; ?tvscale=0 lo desactiva.
   try {
     if (document.documentElement.classList.contains("tc-tv") && !/[?&]tvscale=0/.test(location.search)) {
       var vm = document.querySelector('meta[name="viewport"]');
-      if (vm) vm.setAttribute("content", "width=device-width,initial-scale=0.9,viewport-fit=cover");
+      if (vm) vm.setAttribute("content", "width=device-width,initial-scale=0.8,viewport-fit=cover");
       document.documentElement.classList.add("tc-tv-scaled");
     }
   } catch (e0) { }

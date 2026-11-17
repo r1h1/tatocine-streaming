@@ -10,14 +10,14 @@
 var TC_RELEASE_NOTES = {
   es: [
     "Compatibilidad con Google TV y Android TV (TCL, Hisense, Xiaomi, Sony…), LG webOS y Samsung Tizen: todo se maneja con el mando.",
-    "Mejoras visuales: en la TV todo se ve al 90 %, más cómodo en pantallas grandes.",
+    "App de Google TV mejorada: todo se ve al 80 %, sin «Saltar al contenido» ni botón «Descargar», y el buscador ya no abre el teclado solo (se abre con OK).",
     "Reproductor premium rediseñado: fondo negro limpio, servidores a la izquierda y el vídeo grande a la derecha, también en la TV.",
     "Recomendaciones más precisas: aprenden de lo que no te gustó y se guardan en tu dispositivo.",
     "Nuevo icono de la palomera en la web, la app instalada y la TV, y mejor rendimiento: caché comprimida y sin animaciones."
   ],
   en: [
     "Support for Google TV and Android TV (TCL, Hisense, Xiaomi, Sony…), LG webOS and Samsung Tizen: everything works with the remote.",
-    "Visual improvements: on TVs everything is shown at 90%, more comfortable on big screens.",
+    "Improved Google TV app: everything is shown at 80%, no «Skip to content» or «Download» button, and search no longer pops up the keyboard by itself (press OK).",
     "Premium redesigned player: clean black background, servers on the left and a big video on the right, on TVs too.",
     "More accurate recommendations: they learn from what you didn't like and are saved on your device.",
     "New popcorn icon on the web, the installed app and TV, plus better performance: compressed cache and no animations."

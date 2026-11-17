@@ -34,17 +34,20 @@ function a11yFocusables(scope) {
   if (toasts) { toasts.setAttribute("role", "status"); toasts.setAttribute("aria-live", "polite"); }
   var main = document.querySelector("main");
   if (main && !main.id) main.id = "main-content";
-  var skip = document.createElement("a");
-  skip.className = "skip-link";
-  skip.href = "#rows-container";
-  skip.textContent = "Saltar al contenido";
-  skip.addEventListener("click", function (e) {
-    e.preventDefault();
-    var target = $("rows-container"), first = target && a11yFocusables(target)[0];
-    if (target) target.scrollIntoView();
-    if (first) first.focus();
-  });
-  document.body.insertBefore(skip, document.body.firstChild);
+  // En TV no se crea: el mando le daba el foco y salía «Saltar al contenido» arriba de la pantalla
+  if (!document.documentElement.classList.contains("tc-tv") && !document.body.classList.contains("tv-mode")) {
+    var skip = document.createElement("a");
+    skip.className = "skip-link";
+    skip.href = "#rows-container";
+    skip.textContent = "Saltar al contenido";
+    skip.addEventListener("click", function (e) {
+      e.preventDefault();
+      var target = $("rows-container"), first = target && a11yFocusables(target)[0];
+      if (target) target.scrollIntoView();
+      if (first) first.focus();
+    });
+    document.body.insertBefore(skip, document.body.firstChild);
+  }
 
   // 2) Foco al abrir / cerrar ventanas
   var layerIds = typeof LAYER_IDS !== "undefined" ? LAYER_IDS : A11Y_DIALOGS;

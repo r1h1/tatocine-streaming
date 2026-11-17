@@ -37,6 +37,38 @@
       });
       return out;
     }
+    /** Campo de texto de una línea (buscador, nombre de perfil, PIN…) */
+    function isTvTextInput(el) {
+      return !!el && el.tagName === "INPUT" && /^(text|search|tel|number|password|email|url|)$/.test(el.type || "");
+    }
+    // TV: al llegar con las flechas a un campo de texto NO se abre el teclado de la pantalla (antes salía solo y tapaba media app); se abre al pulsar OK.
+    // Si el foco llega por un toque o un clic (teléfono o ratón), el teclado sale como siempre.
+    if (IS_TV) {
+      var lastPointer = 0;
+      var tvKbAllowed = null;                                                            // campo en el que se pulsó OK: ahí sí sale el teclado
+      /** OK sobre el campo: lo vuelve editable y abre el teclado de la TV (en la APK, Android lo muestra con TatoNative; el WebView no lo abre solo con focus()). */
+      window.tvOpenKeyboard = function (el) {
+        if (el.getAttribute("data-tv-im") !== "1") return;                             // ya abierto (keydown y keyup llegan los dos)
+        el.readOnly = false; el.removeAttribute("data-tv-im");
+        el.blur(); tvKbAllowed = el; el.focus();                                          // tvKbAllowed DESPUÉS del blur (el focusout lo limpia) y antes del focus (el focusin no vuelve a bloquearlo)
+        try { if (window.TatoNative && TatoNative.showKeyboard) TatoNative.showKeyboard(); } catch (err) { }
+      };
+      // En el WebView de Android, con el campo en solo lectura el OK a veces llega solo como keyup
+      window.addEventListener("keyup", function (e) {
+        var el = document.activeElement;
+        if (e.key === "Enter" && isTvTextInput(el) && el.getAttribute("data-tv-im") === "1") { e.preventDefault(); tvOpenKeyboard(el); }
+      }, true);
+      document.addEventListener("pointerdown", function () { lastPointer = Date.now(); }, true);
+      document.addEventListener("focusin", function (e) {
+        var el = e.target;
+        if (isTvTextInput(el) && el !== tvKbAllowed && Date.now() - lastPointer > 800 && !el.readOnly) { el.readOnly = true; el.setAttribute("data-tv-im", "1"); }   // solo lectura: sin teclado y OK sí llega a la página (con inputmode=none el WebView se lo comía)
+      }, true);
+      document.addEventListener("focusout", function (e) {
+        var el = e.target;
+        if (el === tvKbAllowed && document.hasFocus()) tvKbAllowed = null;
+        if (el && el.getAttribute && el.getAttribute("data-tv-im") === "1") { el.readOnly = false; el.removeAttribute("data-tv-im"); }
+      }, true);
+    }
     function spatialMove(key) {
       var layer = topLayer();
       if (layer && layer.id === "player-modal") return false;
@@ -89,6 +121,16 @@
         e.preventDefault();
         ae.click();
         return;
+      }
+      // TV: un campo de texto (buscador) ya no atrapa el foco. ↑ ↓ siempre salen; ← → salen desde el borde del texto. OK abre el teclado de la TV.
+      if (IS_TV && isTvTextInput(ae) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        if (e.key === "Enter" && ae.getAttribute("data-tv-im") === "1") { e.preventDefault(); e.stopImmediatePropagation(); tvOpenKeyboard(ae); return; }
+        var len = (ae.value || "").length, s0 = ae.selectionStart, s1 = ae.selectionEnd, edge = s0 == null;
+        var leave = e.key === "ArrowUp" || e.key === "ArrowDown" || (e.key === "ArrowLeft" && (edge || (s0 === 0 && s1 === 0))) || (e.key === "ArrowRight" && (edge || (s0 === len && s1 === len)));
+        if (leave) {
+          if (spatialMove(e.key)) { e.preventDefault(); e.stopImmediatePropagation(); }
+          return;
+        }
       }
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         if (isTypingTarget(ae) || (document.body.classList.contains("cp-active") && !document.body.classList.contains("cp-details"))) return;     // «Decidir en pareja» usa ← → para responder
