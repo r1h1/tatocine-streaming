@@ -145,17 +145,29 @@
         if (start) { start.focus(); return true; }
         return false;
       }
+      // Distancia entre BORDES (no entre centros): lo que se superpone en el otro eje cuenta como «justo encima/al lado». Antes, desde «Ver», ↑ saltaba al menú
+      // porque el centro del buscador (muy ancho) quedaba lejos a la derecha; ahora va al buscador, que está encima.
       var cur = ae.getBoundingClientRect(), cx = cur.left + cur.width / 2, cy = cur.top + cur.height / 2, best = null, bestScore = Infinity;
+      var horiz = key === "ArrowLeft" || key === "ArrowRight";
       visibleFocusables(scope).forEach(function (c) {
-        if (c.el === ae) return;
-        var x = c.r.left + c.r.width / 2, y = c.r.top + c.r.height / 2, dx = x - cx, dy = y - cy, score;
-        if (key === "ArrowRight" && dx > 4) score = dx + 2.5 * Math.abs(dy);
-        else if (key === "ArrowLeft" && dx < -4) score = -dx + 2.5 * Math.abs(dy);
-        else if (key === "ArrowDown" && dy > 4) score = dy + 2.5 * Math.abs(dx);
-        else if (key === "ArrowUp" && dy < -4) score = -dy + 2.5 * Math.abs(dx);
+        if (c.el === ae || c.el.contains(ae) || ae.contains(c.el)) return;
+        var r = c.r, x = r.left + r.width / 2, y = r.top + r.height / 2, prim;
+        if (key === "ArrowRight") { if (x <= cx + 4) return; prim = r.left - cur.right; }
+        else if (key === "ArrowLeft") { if (x >= cx - 4) return; prim = cur.left - r.right; }
+        else if (key === "ArrowDown") { if (y <= cy + 4) return; prim = r.top - cur.bottom; }
+        else if (key === "ArrowUp") { if (y >= cy - 4) return; prim = cur.top - r.bottom; }
         else return;
+        var gap = horiz ? Math.max(0, Math.max(r.top, cur.top) - Math.min(r.bottom, cur.bottom))      // separación en el eje perpendicular (0 = se superponen)
+                        : Math.max(0, Math.max(r.left, cur.left) - Math.min(r.right, cur.right));
+        var off = horiz ? Math.abs(y - cy) : Math.abs(x - cx);                                         // desempate: el más alineado
+        var score = Math.max(prim, 0) + 3 * gap + 0.08 * off;
         if (score < bestScore) { bestScore = score; best = c.el; }
       });
+      // Al subir al menú superior, el foco va a la sección en la que estás (p. ej. «Inicio»), no a la que quede más cerca
+      if (key === "ArrowUp" && best && best.classList.contains("nav-item") && !ae.classList.contains("nav-item")) {
+        var act = best.parentNode && best.parentNode.querySelector(".nav-item.active");
+        if (act && act.offsetParent) best = act;
+      }
       if (!best) return false;
       best.focus({ preventScroll: true });
       try { best.scrollIntoView({ block: "center", inline: "center", behavior: "auto" }); } catch (e) { best.scrollIntoView(); }
@@ -188,9 +200,32 @@
         ae.click();
         return;
       }
+      // TV: listas del buscador (sugerencias y búsquedas recientes): ↑ ↓ recorren solo la lista (↑ desde la primera vuelve al buscador; ↓ en la última se queda,
+      // porque la lista tapa la portada) y «Borrar» se alcanza con → (antes ↑ desde la primera caía en «Borrar» y un OK borraba el historial).
+      var pnl = IS_TV && ae && ae.closest ? ae.closest("#recent-searches.open, #search-suggest.open") : null;
+      if (pnl && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) >= 0 && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        var items = Array.prototype.slice.call(pnl.querySelectorAll(".recent-item, .suggest-item")), idx = items.indexOf(ae), clr = pnl.querySelector("[data-clear]"), to = null;
+        if (e.key === "ArrowDown") {
+          to = idx < 0 ? items[0] : items[idx + 1];
+          if (!to) {                                                                          // ↓ en la última: se cierra la lista y se baja a la portada («Ver» o el primer botón activo)
+            pnl.classList.remove("open");
+            to = document.querySelector(".hero-actions .hero-btn:not([disabled])") || ae;
+          }
+        }
+        else if (e.key === "ArrowUp") to = idx > 0 ? items[idx - 1] : $searchInput;
+        else if (e.key === "ArrowRight") to = idx >= 0 && clr ? clr : ae;
+        else to = idx < 0 ? items[0] : ae;
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (to && to !== ae) to.focus({ preventScroll: true });
+        return;
+      }
       // TV: un campo de texto (buscador) ya no atrapa el foco. ↑ ↓ siempre salen; ← → salen desde el borde del texto. OK abre el teclado de la TV.
       if (IS_TV && isTvTextInput(ae) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         if (e.key === "Enter" && ae.getAttribute("data-tv-im") === "1") { e.preventDefault(); e.stopImmediatePropagation(); tvOpenKeyboard(ae); return; }
+        if (e.key === "ArrowDown" && ae.id === "search-input") {                          // ↓ desde el buscador: directo a la primera sugerencia o búsqueda reciente (no a «Borrar»)
+          var first = document.querySelector("#search-suggest.open .suggest-item, #recent-searches.open .recent-item");
+          if (first && first.offsetParent) { e.preventDefault(); e.stopImmediatePropagation(); first.focus({ preventScroll: true }); return; }
+        }
         var len = (ae.value || "").length, s0 = ae.selectionStart, s1 = ae.selectionEnd, edge = s0 == null;
         var leave = e.key === "ArrowUp" || e.key === "ArrowDown" || (e.key === "ArrowLeft" && (edge || (s0 === 0 && s1 === 0))) || (e.key === "ArrowRight" && (edge || (s0 === len && s1 === len)));
         if (leave) {
@@ -236,7 +271,8 @@ window.tcHandleBack = function () {
     if (layer && layer.id === "tc-update-overlay") return true;
     if (layer && layer.id === "tc-profile-overlay" && typeof profilePickerRequired !== "undefined" && profilePickerRequired) return false;   // selector al abrir: Atrás = salir de la app (como Netflix)
     if (layer && layer.id === "disclaimer-modal" && layer.classList.contains("is-pending")) return true;
-    var sp = document.getElementById("search-suggest");
+    var sp = document.getElementById("search-suggest"), rs = document.getElementById("recent-searches");
+    if (!layer && rs && rs.classList.contains("open") && rs.contains(document.activeElement)) { rs.classList.remove("open"); window.__tcNoRecentOnce = true; var si0 = document.getElementById("search-input"); if (si0) si0.focus({ preventScroll: true }); return true; }
     if (!layer && sp && sp.classList.contains("open")) { if (typeof hideSuggestions === "function") hideSuggestions(); var si = document.getElementById("search-input"); if (si) si.focus({ preventScroll: true }); return true; }
     if (layer || (menu && menu.classList.contains("open"))) { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return true; }
     if (typeof currentView !== "undefined" && currentView !== "home" && typeof switchView === "function") { switchView("home"); return true; }

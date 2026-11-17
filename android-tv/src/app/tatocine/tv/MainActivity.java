@@ -53,7 +53,29 @@ public class MainActivity extends Activity {
     private long lastBack;
     private final String token = java.util.UUID.randomUUID().toString();
     private PointerView pointer;
-    private boolean pointerOn;
+    private boolean pointerOn, pointerHidden;
+    private int revealKey = -1;
+    /** Pantalla completa: el puntero se oculta tras 3 s sin tocar el mando (como un ratón en YouTube o Netflix) */
+    private final Runnable hidePointer = new Runnable() {
+        @Override
+        public void run() {
+            if (!pointerOn || fullView == null || downPending) return;
+            pointerHidden = true;
+            pointer.setVisibility(View.GONE);
+            generic(MotionEvent.ACTION_HOVER_EXIT, 0);          // el ratón «sale»: el reproductor también oculta sus controles
+        }
+    };
+
+    private void schedulePointerHide() {
+        root.removeCallbacks(hidePointer);
+        if (pointerOn && fullView != null) root.postDelayed(hidePointer, 3000);
+    }
+
+    private void showPointerAgain() {
+        root.removeCallbacks(hidePointer);
+        pointerHidden = false;
+        if (pointerOn) { pointer.setVisibility(View.VISIBLE); pointer.bringToFront(); pointer.invalidate(); }
+    }
     private float px, py;
     private long touchDown, lastMove;
     private boolean downPending, upPending;
@@ -149,6 +171,7 @@ public class MainActivity extends Activity {
                 root.addView(view, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 web.setVisibility(View.GONE);
                 pointer.bringToFront();
+                schedulePointerHide();
                 hideSystemUi();
             }
 
@@ -255,12 +278,14 @@ public class MainActivity extends Activity {
 
     private void exitFullscreen() {
         if (fullView == null) return;
+        revealKey = -1;
         root.removeView(fullView);
         fullView = null;
         if (fullCallback != null) fullCallback.onCustomViewHidden();
         fullCallback = null;
         web.setVisibility(View.VISIBLE);
         web.requestFocus();
+        showPointerAgain();                                     // en el modal normal el puntero se ve siempre
         hideSystemUi();
     }
 
@@ -373,6 +398,9 @@ public class MainActivity extends Activity {
             py = clamp(fy, 0.02f, 0.98f) * (h > 0 ? h : 1080);
         }
         pointerOn = on;
+        pointerHidden = false;
+        revealKey = -1;
+        root.removeCallbacks(hidePointer);
         pointer.setVisibility(on ? View.VISIBLE : View.GONE);
         pointer.bringToFront();
         pointer.invalidate();
@@ -384,6 +412,22 @@ public class MainActivity extends Activity {
     /** true si la tecla la usó el puntero */
     private boolean pointerKey(KeyEvent e) {
         int k = e.getKeyCode(), a = e.getAction();
+        boolean nav = k == KeyEvent.KEYCODE_DPAD_LEFT || k == KeyEvent.KEYCODE_DPAD_RIGHT || k == KeyEvent.KEYCODE_DPAD_UP || k == KeyEvent.KEYCODE_DPAD_DOWN
+                || k == KeyEvent.KEYCODE_DPAD_CENTER || k == KeyEvent.KEYCODE_ENTER || k == KeyEvent.KEYCODE_NUMPAD_ENTER || k == KeyEvent.KEYCODE_BUTTON_A;
+        if (!nav) return false;
+        if (revealKey == k) {                                   // resto de la pulsación que solo mostró el puntero
+            if (a == KeyEvent.ACTION_UP) revealKey = -1;
+            return true;
+        }
+        if (pointerHidden && a == KeyEvent.ACTION_DOWN) {
+            showPointerAgain();
+            hover();
+            revealKey = k;
+            lastMove = android.os.SystemClock.uptimeMillis();
+            schedulePointerHide();
+            return true;
+        }
+        schedulePointerHide();
         boolean ok = k == KeyEvent.KEYCODE_DPAD_CENTER || k == KeyEvent.KEYCODE_ENTER || k == KeyEvent.KEYCODE_NUMPAD_ENTER || k == KeyEvent.KEYCODE_BUTTON_A;
         if (ok) {
             if (a == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) {

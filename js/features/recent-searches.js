@@ -15,6 +15,7 @@
     }
     function hideRecentSearches() { var p = $("recent-searches"); if (p) p.classList.remove("open"); }
     function showRecentSearches() {
+      if (window.__tcNoRecentOnce) { window.__tcNoRecentOnce = false; return; }       // Atrás del mando cerró la lista y devolvió el foco al buscador: no se reabre
       var p = $("recent-searches");
       if (!p || !recentSearches.length || $searchInput.value.trim()) { hideRecentSearches(); return; }
       p.innerHTML = '<div class="recent-head"><span>Búsquedas recientes</span><button type="button" data-clear="1">Borrar</button></div>' +
@@ -44,7 +45,10 @@
         performSearch(q);
       });
       $searchInput.addEventListener("focus", showRecentSearches);
-      $searchInput.addEventListener("blur", function () { setTimeout(hideRecentSearches, 120); });
+      // Se ocultan cuando el foco sale del buscador Y de la lista (con el mando de TV se baja del buscador a las búsquedas recientes)
+      function hideIfFocusLeft() { setTimeout(function () { var a = document.activeElement; if (a && (a === $searchInput || panel.contains(a))) return; hideRecentSearches(); }, 120); }
+      $searchInput.addEventListener("blur", hideIfFocusLeft);
+      panel.addEventListener("focusout", hideIfFocusLeft);
       $searchInput.addEventListener("input", function () { if ($searchInput.value.trim()) hideRecentSearches(); else showRecentSearches(); });
     })();
     decorate("performSearch", function (original) { return function (q) { rememberSearch(q); hideRecentSearches(); return original(q); }; });
