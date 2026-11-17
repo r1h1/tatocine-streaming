@@ -74,3 +74,9 @@ body.tv-mode #search-suggest.suggest-panel { background: #141416 !important; }
 body.tv-mode #details-modal.open { background: #000 !important; }                       /* el contenido (94 % opaco) ya no deja ver la portada */
 html.tc-pointer #player-modal :focus { outline: none !important; box-shadow: none !important; }   /* APK: con el puntero activo, sin aro de foco en el reproductor */
 html.no-focus-visible :focus { outline: 3px solid #fff; outline-offset: 3px; }          /* navegadores sin :focus-visible (Chromium < 86): el foco se ve con el teclado y el mando */
+
+/* Ventana de actualización: cierre «Y más… ¡Actualiza!» sin viñeta */
+#tc-update-list .tc-update-more { padding-left: 0; font-weight: 700; color: #fff; margin-top: 4px; }
+#tc-update-list .tc-update-more::before { content: none; display: none; }
+/* Portada en pantallas grandes (≥ 1200 px CSS): sus letras ~1 px más pequeñas que el resto (--ts-hero = --ts × 0,94, lo calcula accessibility-prefs.js) */
+@media (min-width: 1200px) { .hero .hero-content { --ts: var(--ts-hero, var(--ts, 1)); } }

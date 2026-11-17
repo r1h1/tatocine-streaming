@@ -353,7 +353,8 @@
       var newProfile = { id: id, name: name, kind: profileFormKind, lang: profileFormLang, createdAt: Date.now() };
       if (profileFormAvatar) newProfile.avatar = profileFormAvatar;
       if (pinResult.value) newProfile.pin = makePin(pinResult.value);
-      localProfiles.push(newProfile);
+      var gi = localProfiles.findIndex(function (p) { return p.guest || p.id === "guest"; });       // el nuevo va antes del Invitado (que siempre queda el último)
+      if (gi < 0) localProfiles.push(newProfile); else localProfiles.splice(gi, 0, newProfile);
       saveLocalProfiles();
       [
         ["tatoList", "[]"], ["tatoContinue", "[]"],

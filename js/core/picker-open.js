@@ -11,6 +11,8 @@ if (document.documentElement.classList.contains("tc-picker-boot")) {
     var grid = document.getElementById("tc-profile-grid"), list = null, active = "";
     try { list = JSON.parse(localStorage.getItem("tatoProfilesV1") || "null"); active = localStorage.getItem("tatoActiveProfileV1") || ""; } catch (e) { }
     if (!grid || !Array.isArray(list) || !list.length) return;
+    var rank = function (p) { return p && p.id === "main" ? 0 : (p && p.id === "guest" ? 2 : 1); };   // mismo orden que profile-store.js: Mi perfil, los creados, Invitado al final
+    list = list.map(function (p, i) { return { p: p, i: i }; }).sort(function (a, b) { return rank(a.p) - rank(b.p) || a.i - b.i; }).map(function (x) { return x.p; });
     var frag = document.createDocumentFragment();
     list.slice(0, 6).forEach(function (p) {
       if (!p || typeof p.name !== "string" || typeof p.id !== "string") return;

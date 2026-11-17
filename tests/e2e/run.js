@@ -169,7 +169,7 @@ async function main() {
     await page.waitForFunction(() => currentView === "list");
     await page.evaluate(() => showSettings());
     await page.evaluate(() => changeTextScale(1));
-    eq(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ts").trim()), "1.15", "--ts:");
+    eq(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ts").trim()), await page.evaluate(() => innerWidth >= 1200 ? "1.0063" : "1.15"), "--ts (115 %; en pantallas ≥ 1200 px × 0,875):");
     const fs1 = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector(".row-title, .hero-title")).fontSize));
     ok(fs1 > 0, "tamaño de texto");
     await page.evaluate(() => { toggleHighContrast(); toggleReduceMotion(); });
@@ -952,12 +952,12 @@ async function main() {
       await c2.close();
     }
   });
-  await test("Actualización obligatoria: ventana «¡Actualización disponible!» con «Cambios:» (5), sin ✕, que no se cierra con Esc, Tab ni tocando fuera, y con el botón «Actualizar ahora»", async (page) => {
+  await test("Actualización obligatoria: ventana «¡Actualización disponible!» con «Cambios:» (3 y «Y más… ¡Actualiza!», ≤ 250 caracteres), sin ✕, que no se cierra con Esc, Tab ni tocando fuera, y con el botón «Actualizar ahora»", async (page) => {
     await enter(page);
     await page.evaluate(() => { window.__upd = 0; tcShowUpdate(() => { window.__upd++; }); });
     await page.waitForSelector("#tc-update-overlay.open", { timeout: 3000 });
-    const r = await page.evaluate(() => ({ title: document.getElementById("tc-update-title").textContent, sub: document.querySelector(".tc-update-sub").textContent, n: document.querySelectorAll("#tc-update-list li").length, btn: document.getElementById("tc-update-go").textContent, closeBtns: document.querySelectorAll("#tc-update-overlay .tc-profile-create-close, #tc-update-overlay [data-act*='cancel'], #tc-update-overlay [data-act*='close']").length, z: +getComputedStyle(document.getElementById("tc-update-overlay")).zIndex }));
-    eq(r.title, "¡Actualización disponible!", "título:"); eq(r.sub, "Cambios:", "subtítulo:"); eq(r.n, 5, "cambios listados:"); eq(r.btn, "Actualizar ahora", "botón:"); eq(r.closeBtns, 0, "botones de cerrar:"); ok(r.z >= 100300, "debe ir por encima de todo: " + r.z);
+    const r = await page.evaluate(() => ({ title: document.getElementById("tc-update-title").textContent, sub: document.querySelector(".tc-update-sub").textContent, n: document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length, more: (document.querySelector("#tc-update-list .tc-update-more") || {}).textContent, chars: document.getElementById("tc-update-list").textContent.length, btn: document.getElementById("tc-update-go").textContent, closeBtns: document.querySelectorAll("#tc-update-overlay .tc-profile-create-close, #tc-update-overlay [data-act*='cancel'], #tc-update-overlay [data-act*='close']").length, z: +getComputedStyle(document.getElementById("tc-update-overlay")).zIndex }));
+    eq(r.title, "¡Actualización disponible!", "título:"); eq(r.sub, "Cambios:", "subtítulo:"); eq(r.n, 3, "cambios listados:"); eq(r.more, "Y más… ¡Actualiza!", "cierre:"); ok(r.chars <= 250, "las notas pasan de 250 caracteres: " + r.chars); eq(r.btn, "Actualizar ahora", "botón:"); eq(r.closeBtns, 0, "botones de cerrar:"); ok(r.z >= 100300, "debe ir por encima de todo: " + r.z);
     await page.keyboard.press("Escape"); await page.keyboard.press("Tab"); await page.mouse.click(5, 5); await page.waitForTimeout(250);
     ok(await page.evaluate(() => document.getElementById("tc-update-overlay").classList.contains("open") && document.activeElement === document.getElementById("tc-update-go")), "la ventana se cerró o perdió el foco");
     await page.click("#tc-update-go"); await page.waitForTimeout(200);
@@ -1056,8 +1056,8 @@ async function main() {
       fs.writeFileSync(swp, src.replace(vm[0], vm[0].replace(vm[1], "9.9-prueba")));
       await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
       await p.waitForSelector("#tc-update-overlay.open", { timeout: 20000 });
-      const r = await p.evaluate(() => ({ n: document.querySelectorAll("#tc-update-list li").length, toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|") }));
-      ok(r.n === 5 && !/versión nueva|new version/i.test(r.toast), "ventana sin 5 cambios o salió también el aviso pequeño: " + JSON.stringify(r));
+      const r = await p.evaluate(() => ({ n: document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length, toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|") }));
+      ok(r.n === 3 && !/versión nueva|new version/i.test(r.toast), "ventana sin 3 cambios o salió también el aviso pequeño: " + JSON.stringify(r));
       await p.click("#tc-update-go");
       await p.waitForFunction(async () => (await caches.keys()).some((k) => k.indexOf("9.9-prueba") > -1), null, { timeout: 20000 });
       await p.waitForFunction(() => !!document.body && !document.getElementById("tc-update-overlay").classList.contains("open"), null, { timeout: 20000 });
@@ -1151,7 +1151,7 @@ async function main() {
   });
   await test("Ficha del actor: biografía de 150 caracteres con «ver más» (como la de Información) y «Conocido por» dentro del scroll (ya no fijo)", async (page) => {
     await enter(page);
-    ok(await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("#mobile-menu .nav-item:not(.active) .label")).fontSize) === 17 && parseFloat(getComputedStyle(document.querySelector("#mobile-menu .nav-item:not(.active) .label")).fontSize) === parseFloat(getComputedStyle(document.querySelector("#settings-modal .settings-option .label")).fontSize) + 1), "las letras del menú deben medir 1 px más que las de Ajustes");
+    ok(await page.evaluate(() => { const ts = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ts")) || 1, m = parseFloat(getComputedStyle(document.querySelector("#mobile-menu .nav-item:not(.active) .label")).fontSize), a = parseFloat(getComputedStyle(document.querySelector("#settings-modal .settings-option .label")).fontSize); return Math.abs(m - 17 * ts) < 0.05 && Math.abs(m - a - ts) < 0.05; }), "las letras del menú deben medir 17 px × --ts y 1 px × --ts más que las de Ajustes");
     await page.evaluate(() => openActor(6193)); await page.waitForSelector("#actor-films", { timeout: 8000 }); await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
       setClamped(document.getElementById("actor-bio"), "Una biografía larga. ".repeat(30), 150, true);
@@ -1179,7 +1179,7 @@ async function main() {
       await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
       const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" });
       await p.waitForSelector("#tc-update-overlay.open", { timeout: 12000 });
-      ok(await p.evaluate(() => document.querySelectorAll("#tc-update-list li").length === 5 && !document.querySelector("#tc-update-overlay .tc-profile-create-close")), "apertura " + apertura + ": ventana incompleta o con botón de cerrar");
+      ok(await p.evaluate(() => document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length === 3 && !!document.querySelector("#tc-update-list .tc-update-more") && !document.querySelector("#tc-update-overlay .tc-profile-create-close")), "apertura " + apertura + ": ventana incompleta o con botón de cerrar");
       if (apertura === 3) { const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go"); await nav; }
       await c2.close();
     }
@@ -1325,7 +1325,7 @@ async function main() {
   await test("El perfil principal que se llamaba «Yo» pasa a llamarse «Mi perfil» (los demás nombres no se tocan)", async (page, ctx) => {
     await ctx.addInitScript(() => { try { if (!localStorage.getItem("__y")) { localStorage.setItem("__y", "1"); localStorage.setItem("tatoProfilesV1", JSON.stringify([{ id: "main", name: "Yo" }, { id: "p2", name: "Yo" }])); } } catch (e) { } });
     await page.goto(url, { waitUntil: "domcontentloaded" }); await page.waitForSelector("#tc-profile-overlay.open", { timeout: 15000 }); await page.waitForTimeout(1200);
-    eq(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1")).map((p) => p.id + ":" + p.name).join(",")), "main:Mi perfil,guest:Invitado,p2:Yo", "nombres guardados:");
+    eq(await page.evaluate(() => JSON.parse(localStorage.getItem("tatoProfilesV1")).map((p) => p.id + ":" + p.name).join(",")), "main:Mi perfil,p2:Yo,guest:Invitado", "nombres guardados (Invitado siempre al final):");
     eq(await page.locator(".tc-profile-card-name").first().innerText(), "Mi perfil", "nombre en la tarjeta:");
   });
   await test("Selector de perfiles: textos compactos y el perfil nuevo se llama «Mi perfil»", async (page) => {

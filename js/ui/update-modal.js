@@ -2,25 +2,21 @@
  * TatoCine · js/ui/update-modal.js
  * Ventana de ACTUALIZACIÓN OBLIGATORIA (reemplaza al aviso pequeño). Sale cuando el Service Worker ya descargó una versión nueva: «¡Actualización disponible!», «Cambios:» con los
  * 5 más importantes y un único botón «Actualizar ahora». No tiene ✕, no se cierra con Esc, ni tocando fuera, ni con Tab: así todos terminan en la versión nueva.
- * Cada versión nueva: actualiza TC_RELEASE_NOTES (5 cambios que valgan la pena mencionar). Si el botón no logra activar la versión nueva en 8 s, recarga la página.
+ * Cada versión nueva: actualiza TC_RELEASE_NOTES (los 3 cambios más importantes, resumidos: ≤ 250 caracteres en total contando «Y más… ¡Actualiza!»). Si el botón no logra activar la versión nueva en 8 s, recarga la página.
  * SIEMPRE que haya una versión nueva y no se haya actualizado, la ventana vuelve a salir en cada apertura (aunque se cierre la app o la pestaña sin actualizar): además del aviso del
  * Service Worker, la página compara su HUELLA (los ?v= de su index.html) con la de build.json (siempre sin caché) al abrir, al volver a la app y cada hora. La huella la calcula
  * tools/fp.js al estampar/empaquetar; aquí se calcula con el mismo algoritmo.
  */
 var TC_RELEASE_NOTES = {
   es: [
-    "Reproductor en la TV: aparece un puntero (flechas para moverlo, OK para pulsar) para usar el vídeo con el control; desaparece al cerrar.",
-    "Buscador con el control: baja con las flechas a las sugerencias y elige una; Atrás las cierra.",
-    "Búsqueda por voz con el micrófono del control de Google TV (sin permisos extra).",
-    "App de Google TV mejorada: todo se ve al 80 %, sin «Saltar al contenido» ni botón «Descargar», y el teclado sale solo al pulsar OK.",
-    "Recomendaciones más precisas, caché comprimida y mejor rendimiento en televisores."
+    "Google TV: puntero en el reproductor, sugerencias con el control y búsqueda por voz.",
+    "Perfiles en orden: el Invitado siempre al final.",
+    "Texto más cómodo en pantallas grandes y sin animaciones."
   ],
   en: [
-    "Player on TV: a pointer appears (arrows to move it, OK to click) so you can use the video with the remote; it disappears when you close it.",
-    "Search with the remote: move down with the arrows to the suggestions and pick one; Back closes them.",
-    "Voice search with the Google TV remote microphone (no extra permissions).",
-    "Improved Google TV app: everything at 80%, no «Skip to content» or «Download» button, and the keyboard only opens when you press OK.",
-    "More accurate recommendations, compressed cache and better performance on TVs."
+    "Google TV: pointer in the player, suggestions with the remote and voice search.",
+    "Profiles in order: Guest always last.",
+    "Easier-to-read text on big screens and no animations."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;
@@ -29,9 +25,10 @@ function tcShowUpdate(apply) {
   tcUpdateApply = typeof apply === "function" ? apply : function () { location.reload(); };
   if (tcUpdateOpen) return;
   tcUpdateOpen = true;
-  var notes = (typeof UI_EN !== "undefined" && UI_EN ? TC_RELEASE_NOTES.en : TC_RELEASE_NOTES.es).slice(0, 5);
+  var notes = (typeof UI_EN !== "undefined" && UI_EN ? TC_RELEASE_NOTES.en : TC_RELEASE_NOTES.es).slice(0, 3);
   var list = document.getElementById("tc-update-list"); list.textContent = "";
   notes.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; list.appendChild(li); });
+  var more = document.createElement("li"); more.className = "tc-update-more"; more.textContent = L("Y más… ¡Actualiza!", "And more… Update now!"); list.appendChild(more);
   document.getElementById("tc-update-title").textContent = L("¡Actualización disponible!", "Update available!");
   o.querySelector(".tc-update-sub").textContent = L("Cambios:", "Changes:");
   var go = document.getElementById("tc-update-go"); go.textContent = L("Actualizar ahora", "Update now"); go.disabled = false;

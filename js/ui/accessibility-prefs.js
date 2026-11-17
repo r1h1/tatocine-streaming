@@ -13,11 +13,26 @@ var a11yPrefs = (function () {
   if (!p || typeof p !== "object" || Array.isArray(p)) p = {};
   return { scale: A11Y_SCALES.includes(p.scale) ? p.scale : (typeof IS_TV !== "undefined" && IS_TV ? 115 : 100), hc: p.hc === true, rm: p.rm === true };
 })();
+/** Pantallas grandes (≥ 1200 px CSS: escritorio, laptop y TV): el texto se veía demasiado grande. 87,5 % ≈ 2 px menos en el texto normal (16 → 14, 14 → 12,3).
+ *  Teléfonos y tabletas sin cambios. Se recalcula al cambiar el tamaño de la ventana. */
+var A11Y_BIG_MQ = null;
+function a11yBigFactor() {
+  try {
+    if (!A11Y_BIG_MQ && window.matchMedia) {
+      A11Y_BIG_MQ = window.matchMedia("(min-width: 1200px)");
+      var re = function () { applyA11yPrefs(); };
+      if (A11Y_BIG_MQ.addEventListener) A11Y_BIG_MQ.addEventListener("change", re); else if (A11Y_BIG_MQ.addListener) A11Y_BIG_MQ.addListener(re);
+    }
+    return A11Y_BIG_MQ && A11Y_BIG_MQ.matches ? 87.5 : 100;
+  } catch (e) { return 100; }
+}
 function applyA11yPrefs() {
   var b = document.body;
   b.classList.toggle("hc", a11yPrefs.hc);
   b.classList.toggle("rm", a11yPrefs.rm);
-  document.documentElement.style.setProperty("--ts", String(a11yPrefs.scale / 100));      // multiplica todos los font-size (css: calc(Npx * var(--ts)))
+  var ts = Math.round(a11yPrefs.scale * a11yBigFactor()) / 10000;
+  document.documentElement.style.setProperty("--ts", String(ts));                         // multiplica todos los font-size (css: calc(Npx * var(--ts)))
+  document.documentElement.style.setProperty("--ts-hero", String(Math.round(ts * 9400) / 10000));   // portada en pantallas grandes: ~1 px menos (css/21-fluidez.css)
   var lbl = $("a11y-scale-label"), hc = $("a11y-hc-btn"), rm = $("a11y-rm-btn");
   if (lbl) lbl.textContent = a11yPrefs.scale + " %";
   if (hc) { hc.setAttribute("aria-pressed", String(a11yPrefs.hc)); hc.classList.toggle("on", a11yPrefs.hc); }

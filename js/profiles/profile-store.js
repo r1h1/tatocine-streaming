@@ -31,7 +31,7 @@
         if (p.id === "main" && p.name === "Yo") p.name = "Mi perfil";       // el perfil principal de usuarios anteriores se llamaba «Yo»: ahora se llama igual que el de los nuevos
         if (!p.pin || typeof p.pin.h !== "string" || typeof p.pin.s !== "string") delete p.pin;
       });
-      // «Invitado» existe siempre (no se edita ni se elimina y no guarda nada). El orden es: Yo, Invitado y los demás.
+      // «Invitado» existe siempre (no se edita ni se elimina y no guarda nada). El orden es: Mi perfil, los perfiles creados (en el orden en que se crearon) e Invitado AL FINAL.
       var guest = stored.find(function (p) { return p.id === "guest"; }) || { id: "guest", createdAt: Date.now() };
       guest.name = "Invitado";
       guest.kind = "adult";
@@ -39,7 +39,8 @@
       guest.lang = deviceLang();                          // Invitado: el idioma del dispositivo
       delete guest.pin;
       var others = stored.filter(function (p) { return p.id !== "guest"; }).slice(0, 5);   // 6 en total contando al Invitado
-      stored = others.slice(0, 1).concat([guest], others.slice(1));
+      others.sort(function (a, b) { return (a.id === "main" ? 0 : 1) - (b.id === "main" ? 0 : 1); });   // «Mi perfil» siempre primero (sort estable: el resto conserva su orden)
+      stored = others.concat([guest]);
       safeStorageSet(PROFILE_STORAGE_KEY, JSON.stringify(stored));
       var active = "";
       try { active = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY) || ""; } catch (e) { }
