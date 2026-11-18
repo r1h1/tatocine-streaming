@@ -61,6 +61,13 @@
       fetchTMDB("/search/multi", "&include_adult=false&query=" + encodeURIComponent(q))
         .then(function (d) {
           if (myId !== searchRequestId) return;
+          // Si lo buscado es una persona conocida («brad pitt», «leonardo di caprio»): sus películas y series, no documentales sobre ella
+          var top = (d.results || [])[0];
+          if (top && top.media_type === "person" && (top.popularity || 0) >= 5 && typeof openPersonCredits === "function" && !kidsContext()) {
+            var a = String(top.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, ""),
+              b = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+            if (a === b || (typeof SEARCH_INTENT !== "undefined" && a.length > 6 && SEARCH_INTENT.dist(a, b, 2) <= 2)) { openPersonCredits(top.id, top.name); return; }
+          }
           var m = (d.results || [])
             .filter(function (i) {
               return i.media_type === "movie" || i.media_type === "tv";
@@ -91,9 +98,14 @@
               startHeroCarousel(list);
             } else setSearchEmptyState(q);
           };
-          // En la sección Niños (o en un perfil infantil) solo se muestra contenido apto: se verifica la clasificación de TMDB.
-          if (kidsContext()) kidsFilterSearch(m).then(showSearchResults).catch(function () { showSearchResults([]); });
-          else showSearchResults(m);
+          var finish = function (list) {
+            // En la sección Niños (o en un perfil infantil) solo se muestra contenido apto: se verifica la clasificación de TMDB.
+            if (kidsContext()) kidsFilterSearch(list).then(showSearchResults).catch(function () { showSearchResults([]); });
+            else showSearchResults(list);
+          };
+          // Sin ninguna película ni serie: plan B (relleno, personajes, «título + actor», palabra clave) en js/features/search-smart.js
+          if (!m.length && typeof searchSmartFallback === "function") searchSmartFallback(q).then(finish).catch(function () { finish([]); });
+          else finish(m);
         })
         .catch(function () {
           if (myId !== searchRequestId) return;

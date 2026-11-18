@@ -210,6 +210,22 @@ async function main() {
     eq(disc.length, n, "un título no debe usar discover:");
   });
 
+  await test("Buscador plan B: «pelicula tony montana» (sin resultados tal cual) termina en Scarface por el personaje; los títulos normales no cambian", async (page) => {
+    await enter(page);
+    const asked = [];
+    await page.route(/api\.themoviedb\.org\/3\/search\/multi/, (route) => {
+      const q = new URL(route.request().url()).searchParams.get("query") || ""; asked.push(q);
+      if (/tony montana/i.test(q)) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ page: 1, total_pages: 1, results: [] }) });
+      return route.fallback();
+    });
+    await page.evaluate(() => performSearch("pelicula tony montana"));
+    await page.waitForFunction(() => [...document.querySelectorAll("#rows-container .card")].some((c) => /Scarface/.test(c.textContent)), null, { timeout: 10000 });
+    ok(asked.includes("Scarface"), "debía buscar el título del personaje: " + asked.join(" | "));
+    await page.evaluate(() => performSearch("Matrix"));
+    await page.waitForFunction(() => /Resultados para "Matrix"/.test((document.querySelector("#rows-container .row-title") || {}).textContent || ""), null, { timeout: 10000 });
+    ok(!asked.slice(asked.indexOf("Matrix")).includes("Scarface"), "Matrix no debía usar el plan B");
+  });
+
   await test("copia JSON: se sanea, y adulto→niño no se permite", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => {

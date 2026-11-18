@@ -56,7 +56,12 @@ function openPersonCredits(id, name) {
     if (my !== searchRequestId) return;
     function toCards(list) {
       var seen = {};
-      return list.filter(function (x) { return (x.media_type === "movie" || x.media_type === "tv") && (x.backdrop_path || x.poster_path); })
+      return list.filter(function (x) {
+        if (!((x.media_type === "movie" || x.media_type === "tv") && (x.backdrop_path || x.poster_path))) return false;
+        var g = x.genre_ids || [];                                                    // sin entrevistas, noticias ni realities, ni apariciones «como él mismo»
+        if (g.indexOf(10767) >= 0 || g.indexOf(10763) >= 0 || g.indexOf(10764) >= 0) return false;
+        return !/^(self|himself|herself|themselves|el mismo|ella misma|si mismo)\b/i.test(String(x.character || ""));
+      })
         .sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); })
         .filter(function (x) { var k = x.media_type + x.id; if (seen[k]) return false; seen[k] = true; return true; })
         .slice(0, 30).map(function (x) { return x.media_type === "tv" ? mapTvResult(x) : mapMovieResult(x); })

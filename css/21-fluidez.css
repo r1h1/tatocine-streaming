@@ -84,3 +84,7 @@ html.no-focus-visible :focus { outline: 3px solid #fff; outline-offset: 3px; }  
 /* Reproduciendo (html.tc-playing, lo pone js/player/player.js): el fondo queda tapado por el reproductor opaco; sin pintarlo, la TV y equipos modestos
    pierden muchos menos cuadros (medido en Google TV: la página pasa de ~62 % a ~35 % de CPU). visibility y no display/content-visibility: se conserva el scroll. */
 html.tc-playing #top-bar, html.tc-playing #main-content { visibility: hidden !important; }
+
+/* Encabezado (logo, menú, botones) en la WEB en pantallas grandes: con el texto al 87,5 % se veía pequeño en laptops (menú a ~13 px): ~2 px más
+   (--ts-head = --ts × 1,1525, ver accessibility-prefs.js). En la TV no cambia (ahí se ve bien con la escala al 80 %). */
+@media (min-width: 1200px) { html:not(.tc-tv) #top-bar { --ts: var(--ts-head, var(--ts, 1)); } }
