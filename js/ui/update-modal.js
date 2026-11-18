@@ -2,21 +2,17 @@
  * TatoCine · js/ui/update-modal.js
  * Ventana de ACTUALIZACIÓN OBLIGATORIA (reemplaza al aviso pequeño). Sale cuando el Service Worker ya descargó una versión nueva: «¡Actualización disponible!», «Cambios:» con los
  * 5 más importantes y un único botón «Actualizar ahora». No tiene ✕, no se cierra con Esc, ni tocando fuera, ni con Tab: así todos terminan en la versión nueva.
- * Cada versión nueva: actualiza TC_RELEASE_NOTES (los 3 cambios más importantes, resumidos: ≤ 250 caracteres en total contando «Y más… ¡Actualiza!»). Si el botón no logra activar la versión nueva en 8 s, recarga la página.
+ * Cada versión nueva: actualiza TC_RELEASE_NOTES (de 1 a 3 cambios importantes, resumidos: ≤ 250 caracteres en total contando «Y más… ¡Actualiza!»). Si el botón no logra activar la versión nueva en 8 s, recarga la página.
  * SIEMPRE que haya una versión nueva y no se haya actualizado, la ventana vuelve a salir en cada apertura (aunque se cierre la app o la pestaña sin actualizar): además del aviso del
  * Service Worker, la página compara su HUELLA (los ?v= de su index.html) con la de build.json (siempre sin caché) al abrir, al volver a la app y cada hora. La huella la calcula
  * tools/fp.js al estampar/empaquetar; aquí se calcula con el mismo algoritmo.
  */
 var TC_RELEASE_NOTES = {
   es: [
-    "Google TV: puntero en el reproductor, sugerencias con el control y búsqueda por voz.",
-    "Perfiles en orden: el Invitado siempre al final.",
-    "Texto más cómodo en pantallas grandes y sin animaciones."
+    "Mejoras en rendimiento: videos más fluidos y menos carga en televisores."
   ],
   en: [
-    "Google TV: pointer in the player, suggestions with the remote and voice search.",
-    "Profiles in order: Guest always last.",
-    "Easier-to-read text on big screens and no animations."
+    "Performance improvements: smoother videos and less load on TVs."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;

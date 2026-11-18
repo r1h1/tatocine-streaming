@@ -952,12 +952,12 @@ async function main() {
       await c2.close();
     }
   });
-  await test("Actualización obligatoria: ventana «¡Actualización disponible!» con «Cambios:» (3 y «Y más… ¡Actualiza!», ≤ 250 caracteres), sin ✕, que no se cierra con Esc, Tab ni tocando fuera, y con el botón «Actualizar ahora»", async (page) => {
+  await test("Actualización obligatoria: ventana «¡Actualización disponible!» con «Cambios:» (1 a 3 y «Y más… ¡Actualiza!», ≤ 250 caracteres), sin ✕, que no se cierra con Esc, Tab ni tocando fuera, y con el botón «Actualizar ahora»", async (page) => {
     await enter(page);
     await page.evaluate(() => { window.__upd = 0; tcShowUpdate(() => { window.__upd++; }); });
     await page.waitForSelector("#tc-update-overlay.open", { timeout: 3000 });
     const r = await page.evaluate(() => ({ title: document.getElementById("tc-update-title").textContent, sub: document.querySelector(".tc-update-sub").textContent, n: document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length, more: (document.querySelector("#tc-update-list .tc-update-more") || {}).textContent, chars: document.getElementById("tc-update-list").textContent.length, btn: document.getElementById("tc-update-go").textContent, closeBtns: document.querySelectorAll("#tc-update-overlay .tc-profile-create-close, #tc-update-overlay [data-act*='cancel'], #tc-update-overlay [data-act*='close']").length, z: +getComputedStyle(document.getElementById("tc-update-overlay")).zIndex }));
-    eq(r.title, "¡Actualización disponible!", "título:"); eq(r.sub, "Cambios:", "subtítulo:"); eq(r.n, 3, "cambios listados:"); eq(r.more, "Y más… ¡Actualiza!", "cierre:"); ok(r.chars <= 250, "las notas pasan de 250 caracteres: " + r.chars); eq(r.btn, "Actualizar ahora", "botón:"); eq(r.closeBtns, 0, "botones de cerrar:"); ok(r.z >= 100300, "debe ir por encima de todo: " + r.z);
+    eq(r.title, "¡Actualización disponible!", "título:"); eq(r.sub, "Cambios:", "subtítulo:"); ok(r.n >= 1 && r.n <= 3, "cambios listados (1 a 3): " + r.n); eq(r.more, "Y más… ¡Actualiza!", "cierre:"); ok(r.chars <= 250, "las notas pasan de 250 caracteres: " + r.chars); eq(r.btn, "Actualizar ahora", "botón:"); eq(r.closeBtns, 0, "botones de cerrar:"); ok(r.z >= 100300, "debe ir por encima de todo: " + r.z);
     await page.keyboard.press("Escape"); await page.keyboard.press("Tab"); await page.mouse.click(5, 5); await page.waitForTimeout(250);
     ok(await page.evaluate(() => document.getElementById("tc-update-overlay").classList.contains("open") && document.activeElement === document.getElementById("tc-update-go")), "la ventana se cerró o perdió el foco");
     await page.click("#tc-update-go"); await page.waitForTimeout(200);
@@ -1057,7 +1057,7 @@ async function main() {
       await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
       await p.waitForSelector("#tc-update-overlay.open", { timeout: 20000 });
       const r = await p.evaluate(() => ({ n: document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length, toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|") }));
-      ok(r.n === 3 && !/versión nueva|new version/i.test(r.toast), "ventana sin 3 cambios o salió también el aviso pequeño: " + JSON.stringify(r));
+      ok(r.n >= 1 && r.n <= 3 && !/versión nueva|new version/i.test(r.toast), "ventana sin 1 a 3 cambios o salió también el aviso pequeño: " + JSON.stringify(r));
       await p.click("#tc-update-go");
       await p.waitForFunction(async () => (await caches.keys()).some((k) => k.indexOf("9.9-prueba") > -1), null, { timeout: 20000 });
       await p.waitForFunction(() => !!document.body && !document.getElementById("tc-update-overlay").classList.contains("open"), null, { timeout: 20000 });
@@ -1179,7 +1179,7 @@ async function main() {
       await c2.addInitScript(() => { window.__TC_SPLASH_MS = 0; try { localStorage.setItem("tatoLegalAcceptedV2", "true"); localStorage.setItem("tatoWelcomeSeenV1", "1"); localStorage.setItem("tatoTourDone", "1"); } catch (e) { } });
       const p = await c2.newPage(); await p.goto(url, { waitUntil: "domcontentloaded" });
       await p.waitForSelector("#tc-update-overlay.open", { timeout: 12000 });
-      ok(await p.evaluate(() => document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length === 3 && !!document.querySelector("#tc-update-list .tc-update-more") && !document.querySelector("#tc-update-overlay .tc-profile-create-close")), "apertura " + apertura + ": ventana incompleta o con botón de cerrar");
+      ok(await p.evaluate(() => document.querySelectorAll("#tc-update-list li:not(.tc-update-more)").length >= 1 && !!document.querySelector("#tc-update-list .tc-update-more") && !document.querySelector("#tc-update-overlay .tc-profile-create-close")), "apertura " + apertura + ": ventana incompleta o con botón de cerrar");
       if (apertura === 3) { const nav = p.waitForNavigation({ timeout: 12000 }); await p.click("#tc-update-go"); await nav; }
       await c2.close();
     }

@@ -80,3 +80,7 @@ html.no-focus-visible :focus { outline: 3px solid #fff; outline-offset: 3px; }  
 #tc-update-list .tc-update-more::before { content: none; display: none; }
 /* Portada en pantallas grandes (≥ 1200 px CSS): sus letras ~1 px más pequeñas que el resto (--ts-hero = --ts × 0,94, lo calcula accessibility-prefs.js) */
 @media (min-width: 1200px) { .hero .hero-content { --ts: var(--ts-hero, var(--ts, 1)); } }
+
+/* Reproduciendo (html.tc-playing, lo pone js/player/player.js): el fondo queda tapado por el reproductor opaco; sin pintarlo, la TV y equipos modestos
+   pierden muchos menos cuadros (medido en Google TV: la página pasa de ~62 % a ~35 % de CPU). visibility y no display/content-visibility: se conserva el scroll. */
+html.tc-playing #top-bar, html.tc-playing #main-content { visibility: hidden !important; }

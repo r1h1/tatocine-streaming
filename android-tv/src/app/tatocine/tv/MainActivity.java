@@ -80,6 +80,12 @@ public class MainActivity extends Activity {
     private long touchDown, lastMove;
     private boolean downPending, upPending;
     static final int REQ_VOICE = 41;
+    private volatile String playerUrl;
+    private String userAgent;
+    /** Reproductores de terceros: animaciones infinitas (zoom lento del fondo, onda del botón «play») y desenfoques (backdrop-filter) que la TV recalcula en
+     *  cada cuadro. Medido en una Xiaomi MZTU0: con el reproductor abierto, la app pasaba de 3 % a 112 % de CPU solo por eso, y el vídeo perdía cuadros. */
+    static final String PLAYER_STYLE = "<style id=\"tatocine-tv\">*,*::before,*::after{animation:none!important;transition:none!important;"
+            + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important}</style>";
 
     @Override
     protected void onCreate(Bundle state) {
@@ -117,6 +123,7 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 21) s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         // En un televisor la web lo detecta (html.tc-tv: escala al 90 %, foco visible para el mando); en teléfonos y tabletas se usa como app normal
         s.setUserAgentString(s.getUserAgentString() + (isTv() ? " TatoCineTV/1.0 (Android TV)" : " TatoCineApp/1.0"));
+        userAgent = s.getUserAgentString();
 
         CookieManager cm = CookieManager.getInstance();
         cm.setAcceptCookie(true);
@@ -125,7 +132,9 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return asset(request.getUrl());
+                if (blocked(request.getUrl())) return emptyResponse(!request.isForMainFrame() && isDocument(request));
+                WebResourceResponse p = playerDocument(request);
+                return p != null ? p : asset(request.getUrl());
             }
 
             @SuppressWarnings("deprecation")
@@ -209,6 +218,95 @@ public class MainActivity extends Activity {
         if (state != null) web.restoreState(state);
         else web.loadUrl(START);
         if (!online()) Toast.makeText(this, "Sin conexión a Internet: el catálogo y los reproductores la necesitan.", Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Documento del reproductor (la URL exacta que avisó la página): se descarga aquí, se le añade PLAYER_STYLE en <head> y se entrega al WebView. Si algo no
+     * cuadra (redirección, error, otro tipo, página enorme…) devuelve null y el WebView lo carga como siempre: nunca se rompe la reproducción.
+     */
+    private WebResourceResponse playerDocument(WebResourceRequest r) {
+        String target = playerUrl;
+        if (target == null || r == null || r.isForMainFrame() || !"GET".equalsIgnoreCase(r.getMethod())) return null;
+        Uri u = r.getUrl();
+        if (u == null || !target.equals(u.toString())) return null;
+        playerUrl = null;                                                       // una sola vez por carga (las recargas internas del reproductor van normales)
+        java.net.HttpURLConnection c = null;
+        try {
+            c = (java.net.HttpURLConnection) new java.net.URL(target).openConnection();
+            c.setInstanceFollowRedirects(false);
+            c.setConnectTimeout(8000);
+            c.setReadTimeout(15000);
+            Map<String, String> h = r.getRequestHeaders();
+            if (h != null) for (Map.Entry<String, String> e : h.entrySet()) {
+                String k = e.getKey();
+                if (k == null || k.equalsIgnoreCase("Accept-Encoding") || k.equalsIgnoreCase("Host") || k.equalsIgnoreCase("Cookie")) continue;
+                c.setRequestProperty(k, e.getValue());
+            }
+            if (userAgent != null) c.setRequestProperty("User-Agent", userAgent);
+            if (h == null || !(h.containsKey("Referer") || h.containsKey("referer"))) c.setRequestProperty("Referer", "https://" + HOST + "/");   // referrerpolicy="origin"
+            String ck = CookieManager.getInstance().getCookie(target);
+            if (ck != null) c.setRequestProperty("Cookie", ck);
+            int code = c.getResponseCode();
+            Map<String, java.util.List<String>> rh = c.getHeaderFields();
+            java.util.List<String> set = rh.get("Set-Cookie");
+            if (set != null) for (String v : set) CookieManager.getInstance().setCookie(target, v);
+            String ct = c.getContentType();
+            if (code != 200 || ct == null || !ct.toLowerCase(java.util.Locale.ROOT).contains("text/html")) { c.disconnect(); return null; }
+            String cs = "utf-8";
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("charset=([\\w-]+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(ct);
+            if (m.find()) cs = m.group(1);
+            InputStream in = c.getInputStream();
+            java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[16384];
+            int n;
+            while ((n = in.read(buf)) > 0) { bo.write(buf, 0, n); if (bo.size() > 4 * 1024 * 1024) { c.disconnect(); return null; } }
+            in.close();
+            String html = new String(bo.toByteArray(), cs);
+            int hd = html.toLowerCase(java.util.Locale.ROOT).indexOf("<head");
+            int end = hd >= 0 ? html.indexOf('>', hd) : -1;
+            html = end >= 0 ? html.substring(0, end + 1) + PLAYER_STYLE + html.substring(end + 1) : PLAYER_STYLE + html;
+            Map<String, String> out = new HashMap<>();
+            for (Map.Entry<String, java.util.List<String>> e : rh.entrySet()) {
+                String k = e.getKey();
+                if (k == null || e.getValue() == null) continue;
+                String lk = k.toLowerCase(java.util.Locale.ROOT);
+                if (lk.startsWith("content-security-policy") || lk.equals("content-length") || lk.equals("content-encoding") || lk.equals("transfer-encoding") || lk.equals("set-cookie")) continue;
+                out.put(k, android.text.TextUtils.join(", ", e.getValue()));
+            }
+            return new WebResourceResponse("text/html", cs, 200, "OK", out, new ByteArrayInputStream(html.getBytes(cs)));
+        } catch (Throwable t) {
+            if (c != null) try { c.disconnect(); } catch (Throwable ignored) { }
+            return null;
+        }
+    }
+
+    /**
+     * Anuncios y rastreadores que cargan los reproductores de terceros (medido en la TV: ENG1 cargaba histats, dtscout, crwdcntrl, mrktmtrcs, onaudience; ESP5,
+     * premilkyway). Se responden vacíos: menos red y CPU en la TV. Solo dominios de publicidad/estadística conocidos: NUNCA los que sirven el vídeo.
+     */
+    static final String[] BLOCK = {
+            "premilkyway.com", "histats.com", "dtscout.com", "dtscdn.com", "crwdcntrl.net", "mrktmtrcs.net", "onaudience.com", "cloudflareinsights.com",
+            "doubleclick.net", "googlesyndication.com", "googleadservices.com", "google-analytics.com", "googletagmanager.com", "adservice.google.com",
+            "popads.net", "popcash.net", "propellerads.com", "adsterra.com", "a-ads.com", "exoclick.com", "juicyads.com", "onclickads.net", "adcash.com",
+            "hilltopads.net", "mgid.com", "taboola.com", "outbrain.com", "clickadu.com", "yandex.ru", "mc.yandex.com", "scorecardresearch.com", "quantserve.com"
+    };
+
+    static boolean blocked(Uri u) {
+        String h = u == null ? null : u.getHost();
+        if (h == null) return false;
+        h = h.toLowerCase(java.util.Locale.ROOT);
+        for (String b : BLOCK) if (h.equals(b) || h.endsWith("." + b)) return true;
+        return false;
+    }
+
+    static boolean isDocument(WebResourceRequest r) {
+        Map<String, String> h = r.getRequestHeaders();
+        String a = h == null ? null : (h.containsKey("Accept") ? h.get("Accept") : h.get("accept"));
+        return a != null && a.startsWith("text/html");
+    }
+
+    private WebResourceResponse emptyResponse(boolean html) {
+        return new WebResourceResponse(html ? "text/html" : "text/plain", "utf-8", 200, "OK", new HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
     }
 
     /** Archivos de la app servidos desde assets/site con su tipo correcto (el ?v= de las rutas se ignora). */
@@ -373,6 +471,13 @@ public class MainActivity extends Activity {
         /** ¿Hay reconocimiento de voz del sistema (Google TV: el micrófono del mando)? No cambia nada: no pide token. */
         @android.webkit.JavascriptInterface
         public boolean hasVoice() { return voiceAvailable(); }
+
+        /** URL del reproductor que la página va a cargar: SOLO ese documento recibe el estilo sin animaciones (playerDocument) */
+        @android.webkit.JavascriptInterface
+        public void playerUrl(String t, String url) {
+            if (!ok(t) || url == null || !url.startsWith("https://")) return;
+            playerUrl = url;
+        }
 
         @android.webkit.JavascriptInterface
         public void voiceStop(String t) {

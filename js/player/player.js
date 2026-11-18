@@ -311,6 +311,7 @@
       l.className = "player-loading";
       l.textContent = "Conectando con " + s.name + "...";
       var f = document.createElement("iframe");
+      try { if (window.TatoNative && TatoNative.playerUrl) TatoNative.playerUrl(window.__tcNT || "", u); } catch (eN) { }   // APK de TV: sin animaciones dentro del reproductor
       f.src = u;
       f.setAttribute(
         "allow",
@@ -343,6 +344,7 @@
       updateAutoNextButton();
       recordMediaStart(currentMedia, []);
       $modal.classList.add("open");
+      document.documentElement.classList.add("tc-playing");                      // el fondo (portada, filas: ~3000 nodos) deja de pintarse mientras se ve (css/21-fluidez.css)
       document.body.style.overflow = "hidden";
       $modalTitle.textContent = ti;
       $playerView.innerHTML = "";
@@ -433,6 +435,7 @@
       if (document.fullscreenElement && document.fullscreenElement !== document.documentElement && document.exitFullscreen)
         document.exitFullscreen().catch(function () { });
       $modal.classList.remove("open");
+      document.documentElement.classList.remove("tc-playing");
       $playerView.innerHTML = "";
       activePlayerFrame = null;
       document.body.style.overflow = "";
