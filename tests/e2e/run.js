@@ -184,6 +184,30 @@ async function main() {
     const rows = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option")].filter((e) => getComputedStyle(e).display !== "none").map((e) => e.querySelector(".label").textContent.trim()));
     ok(rows.join("|").includes("Copiar tus datos") && rows.join("|").includes("QR") && rows.length <= 4, "filas visibles para el niño: " + rows.join(", "));
     eq(await page.evaluate(() => { switchView("movies"); return currentView; }), "kids", "un perfil infantil solo ve Niños:");
+    // ESP5 (facilitoplay) muestra anuncios para adultos: nunca se ofrece ni se prueba en automático en un perfil infantil
+    const kidSrv = await page.evaluate(() => { const idx = SERVERS.findIndex((s) => s.adultAds); fb.tried = {}; const seen = []; let n; while ((n = nextServerIndex()) >= 0) { seen.push(SERVERS[n].name); fb.tried[n] = true; } fb.tried = {}; return { adult: SERVERS[idx].name, seen }; });
+    ok(kidSrv.adult === "ESP5" && !kidSrv.seen.includes("ESP5") && kidSrv.seen.length === 5, "el cambio automático del perfil infantil no debe pasar por ESP5: " + JSON.stringify(kidSrv));
+    await page.evaluate(() => openPlayer(8587, "movie", "El rey león"));
+    const opened = await page.waitForSelector("#server-switcher .server-btn", { timeout: 8000 }).then(() => true).catch(() => false);
+    if (opened) { const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim())); ok(!names.includes("ESP5") && names.includes("ESP1"), "botones del perfil infantil: " + names.join(",")); }
+  });
+
+  await test("Buscador por intención: «pelicuals de terror» y «peli de matar» muestran las mejores del género (TMDB discover) y su sugerencia; un título se busca como siempre", async (page) => {
+    await enter(page);
+    const disc = [];
+    page.on("request", (r) => { const u = r.url(); if (/api\.themoviedb\.org\/3\/discover\//.test(u)) disc.push(u); });
+    await page.evaluate(() => performSearch("pelicuals de terror"));
+    await page.waitForFunction(() => /Películas de terror/.test((document.querySelector("#rows-container .row-title") || {}).textContent || ""), null, { timeout: 10000 });
+    ok(disc.some((u) => /discover\/movie/.test(u) && /with_genres=27/.test(u)), "debía pedir discover/movie con género 27: " + disc.join(" "));
+    await page.evaluate(() => performSearch("peli de matar"));
+    await page.waitForFunction(() => /Películas de acción/.test((document.querySelector("#rows-container .row-title") || {}).textContent || ""), null, { timeout: 10000 });
+    await page.fill("#search-input", "series de risa");
+    await page.waitForSelector("#search-suggest.open [data-intent]", { timeout: 5000 });
+    ok(/Series de comedia/.test(await page.locator("#search-suggest [data-intent]").innerText()), "la sugerencia debía ser «Buscar: Series de comedia»");
+    const n = disc.length;
+    await page.evaluate(() => performSearch("Matrix"));
+    await page.waitForFunction(() => /Resultados para "Matrix"/.test((document.querySelector("#rows-container .row-title") || {}).textContent || ""), null, { timeout: 10000 });
+    eq(disc.length, n, "un título no debe usar discover:");
   });
 
   await test("copia JSON: se sanea, y adulto→niño no se permite", async (page) => {
@@ -300,7 +324,7 @@ async function main() {
     await page.waitForSelector("#player-view iframe", { timeout: 10000 });
     await page.click("#server-btn-1");
     await page.waitForFunction(() => document.querySelector("#server-btn-1").classList.contains("active"));
-    ok(await page.evaluate(() => (activePlayerFrame.src || "").includes("tukiplay")), "no cambió de servidor");
+    ok(await page.evaluate(() => (activePlayerFrame.src || "").includes("videoapi")), "no cambió de servidor");
     await page.evaluate(() => closePlayer());
   });
 
@@ -878,7 +902,7 @@ async function main() {
       await c2.close();
     } finally { delete process.env.TMDB_MOCK_DELAY; }
   });
-  await test("Servidores: los 6 (ESP1–ESP5 en español latino + ENG1) tienen URL https válida por ID de TMDB (película y serie), no se repiten y cada botón del reproductor carga su iframe con allowfullscreen", async (page) => {
+  await test("Servidores: los 6 (ESP1–ESP5 en español latino + ENG1, los que mejor funcionan primero) tienen URL https válida por ID de TMDB (película y serie), no se repiten y cada botón del reproductor carga su iframe con allowfullscreen", async (page) => {
     await enter(page);
     const info = await page.evaluate(() => SERVERS.map((s) => ({ name: s.name, movie: s.url(550, "movie"), tv: s.url(1399, "tv", 2, 5) })));
     eq(info.map((x) => x.name).join(","), "ESP1,ESP2,ESP3,ESP4,ESP5,ENG1", "servidores y orden:");
@@ -888,7 +912,7 @@ async function main() {
       ok(/\/1399\/2\/5/.test(x.tv), x.name + " debe llevar temporada 2 episodio 5: " + x.tv); hosts.add(new URL(x.movie).hostname);
     }
     eq(hosts.size, 6, "dominios distintos:");
-    ok(info.find((x) => x.name === "ESP4").movie.startsWith("https://videoapi.la/e/movie/550") && info.find((x) => x.name === "ESP5").movie === "https://facilitoplay.com/e/pelicula/550" && info.find((x) => x.name === "ESP5").tv === "https://facilitoplay.com/e/serie/1399/2/5", "patrones de VideoAPI / FacilitoPlay");
+    ok(info.find((x) => x.name === "ESP2").movie.startsWith("https://videoapi.la/e/movie/550") && info.find((x) => x.name === "ESP1").movie === "https://api.moviemaster.lat/e/movie/550?color=000000&lang=LAT&autoplay=1" && /tukiplay/.test(info.find((x) => x.name === "ESP3").movie) && /unlimplay/.test(info.find((x) => x.name === "ESP4").movie) && info.find((x) => x.name === "ESP5").movie === "https://facilitoplay.com/e/pelicula/550", "orden ESP1 moviemaster (latino), ESP2 videoapi, ESP3 tukiplay, ESP4 unlimplay, ESP5 facilitoplay: " + JSON.stringify(info));
     await page.evaluate(() => openPlayer(550, "movie", "Fight Club")); await page.waitForSelector("#server-switcher .server-btn", { timeout: 8000 });
     const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim()));
     ok(info.every((x) => names.some((n) => n.includes(x.name))), "faltan botones de servidor: " + JSON.stringify(names));

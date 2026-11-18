@@ -22,33 +22,20 @@
       globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>',
       star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
     };
+    // Servidores, de los que funcionan mejor a los que menos (revisados en una Google TV con El rey león 2019, TMDB 420818): videoapi traía la versión correcta;
+    // unlimplay a veces no carga o trae otra película y facilitoplay dio 404 con anuncios para adultos (por eso NO se ofrece en perfiles infantiles: adultAds).
+    // El cambio automático de servidor sigue este mismo orden.
     const SERVERS = [
       {
-        name: "ESP1",
+        name: "ESP1",                                  // MovieMaster (moviemaster.lat): latino obligatorio
         icon: icons.lightning,
         url: (i, t, s, e) =>
           t === "tv"
-            ? `https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?skin=minimal&color=000000&lang=LAT&autoplay=1`
-            : `https://api.moviemaster.lat/e/movie/${i}?skin=minimal&color=000000&lang=LAT&autoplay=1`,
+            ? `https://api.moviemaster.lat/e/tv/${i}/${s}/${e}?color=000000&lang=LAT&autoplay=1`
+            : `https://api.moviemaster.lat/e/movie/${i}?color=000000&lang=LAT&autoplay=1`,
       },
       {
-        name: "ESP2",
-        icon: icons.disc,
-        url: (i, t, s, e) =>
-          t === "tv"
-            ? `https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`
-            : `https://tukiplay.com/embed/movie/${i}?autoplay=1`,
-      },
-      {
-        name: "ESP3",
-        icon: icons.play,
-        url: (i, t, s, e) =>
-          t === "tv"
-            ? `https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`
-            : `https://unlimplay.com/f/embed/movie/${i}`,
-      },
-      {
-        name: "ESP4",                                  // VideoAPI (videoapi.la): embed público por ID de TMDB, películas y series
+        name: "ESP2",                                  // VideoAPI (videoapi.la): embed público por ID de TMDB, películas y series (antes ESP4)
         icon: icons.film,
         url: (i, t, s, e) =>
           t === "tv"
@@ -56,8 +43,25 @@
             : `https://videoapi.la/e/movie/${i}?autoplay=1`,
       },
       {
-        name: "ESP5",                                  // FacilitoPlay (facilitoplay.com): patrón público /e/pelicula y /e/serie por ID de TMDB
+        name: "ESP3",                                  // TukiPlay (tukiplay.com) (antes ESP2)
+        icon: icons.disc,
+        url: (i, t, s, e) =>
+          t === "tv"
+            ? `https://tukiplay.com/embed/tv/${i}/${s}/${e}?autoplay=1`
+            : `https://tukiplay.com/embed/movie/${i}?autoplay=1`,
+      },
+      {
+        name: "ESP4",                                  // UnLimPlay (unlimplay.com) (antes ESP3): a veces no carga o trae otra película
+        icon: icons.play,
+        url: (i, t, s, e) =>
+          t === "tv"
+            ? `https://unlimplay.com/f/embed/tv/${i}/${s}/${e}`
+            : `https://unlimplay.com/f/embed/movie/${i}`,
+      },
+      {
+        name: "ESP5",                                  // FacilitoPlay (facilitoplay.com): /e/pelicula y /e/serie por ID de TMDB; anuncios para adultos
         icon: icons.globe,
+        adultAds: true,
         url: (i, t, s, e) =>
           t === "tv"
             ? `https://facilitoplay.com/e/serie/${i}/${s}/${e}`
@@ -72,3 +76,23 @@
             : `https://vidsrc.sh/embed/movie/${i}`,
       },
     ];
+    // Nombres guardados con la lista anterior (servidor preferido y el que funcionó por título, en cada perfil): se traducen UNA vez a los nuevos.
+    // Antes: ESP2 tukiplay, ESP3 unlimplay, ESP4 videoapi, ESP5 facilitoplay.  Ahora: ESP2 videoapi, ESP3 tukiplay, ESP4 unlimplay, ESP5 facilitoplay.
+    (function migrateServerNames() {
+      try {
+        if (localStorage.getItem("tatoServersV2") === "1") return;
+        var MAP = { ESP2: "ESP3", ESP3: "ESP4", ESP4: "ESP2" };
+        for (var n = localStorage.length - 1; n >= 0; n--) {
+          var k = localStorage.key(n);
+          if (!k) continue;
+          if (/(^|_)tatoServer$/.test(k)) {
+            var v = String(localStorage.getItem(k) || "").replace(/"/g, "");
+            if (MAP[v]) localStorage.setItem(k, k === "tatoServer" ? JSON.stringify(MAP[v]) : MAP[v]);
+          } else if (/(^|_)tatoTitleServer$/.test(k)) {
+            var o = JSON.parse(localStorage.getItem(k) || "{}");
+            if (o && typeof o === "object") { Object.keys(o).forEach(function (t) { if (o[t] && MAP[o[t].s]) o[t].s = MAP[o[t].s]; }); localStorage.setItem(k, JSON.stringify(o)); }
+          }
+        }
+        localStorage.setItem("tatoServersV2", "1");
+      } catch (e) { }
+    })();

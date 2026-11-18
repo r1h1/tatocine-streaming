@@ -9,10 +9,12 @@
  */
 var TC_RELEASE_NOTES = {
   es: [
-    "Mejoras en rendimiento: videos más fluidos y menos carga en televisores."
+    "Mejoras en rendimiento: videos más fluidos y menos carga en televisores.",
+    "Buscador más inteligente: escribe «pelis de miedo» o «series de risa» y te muestra las mejores."
   ],
   en: [
-    "Performance improvements: smoother videos and less load on TVs."
+    "Performance improvements: smoother videos and less load on TVs.",
+    "Smarter search: type «scary movies» or «funny series» and get the best ones."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;

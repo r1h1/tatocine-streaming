@@ -351,6 +351,7 @@
       activePlayerFrame = null;
       prepareSimilarQueue(currentMedia);
       $serverSwitcher.innerHTML = SERVERS.map(function (s, x) {
+        if (s.adultAds && typeof isKidProfile === "function" && isKidProfile()) return "";      // perfiles infantiles: sin el servidor con anuncios para adultos
         var isPref = s.name === preferredServer ? "preferred" : "";
         return (
           '<button class="server-btn ' +

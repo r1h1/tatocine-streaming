@@ -1,7 +1,7 @@
 /**
  * TatoCine · js/player/player-robust.js
  * Reproductor más robusto (se añade con decorate(), sin editar player.js):
- *   1. Cambio automático de servidor: si el servidor elegido no termina de cargar en PLAYER_LOAD_TIMEOUT ms
+ *   1. Cambio automático de servidor: si el servidor elegido no termina de cargar en PLAYER_LOAD_TIMEOUT ms (8 s; antes 12)
  *      se prueba el siguiente (primero los de tu idioma) y se avisa con un mensaje. No toca el servidor
  *      predeterminado de los Ajustes.
  *   2. Memoria por título: se recuerda el último servidor que funcionó (o que elegiste a mano) para ESE título
@@ -11,7 +11,7 @@
  * Límite: un servidor caído que responde con una página de error también «carga»; solo se detectan los que no
  * responden o, en ESP1, los que cargan pero no arrancan el reproductor.
  */
-var PLAYER_LOAD_TIMEOUT = 12000, TITLE_SERVER_KEY = "tatoTitleServer", TITLE_SERVER_MAX = 200;
+var PLAYER_LOAD_TIMEOUT = 8000, TITLE_SERVER_KEY = "tatoTitleServer", TITLE_SERVER_MAX = 200;
 var titleServers = readLocalJSON(profileStorageKey(TITLE_SERVER_KEY), {});
 if (!titleServers || typeof titleServers !== "object" || Array.isArray(titleServers)) titleServers = {};
 var fb = { tried: {}, timer: null, manual: false, auto: false, silent: false, keepGlobal: true, current: null, fellBack: false };
@@ -39,7 +39,8 @@ function nextServerIndex() {
     var ra = /^ENG/.test(SERVERS[a].name) === en ? 0 : 1, rb = /^ENG/.test(SERVERS[b].name) === en ? 0 : 1;
     return ra - rb || a - b;
   });
-  for (var i = 0; i < order.length; i++) if (!fb.tried[order[i]]) return order[i];
+  var kid = typeof isKidProfile === "function" && isKidProfile();
+  for (var i = 0; i < order.length; i++) if (!fb.tried[order[i]] && !(kid && SERVERS[order[i]].adultAds)) return order[i];
   return -1;
 }
 function serverIsHealthy(i) {
