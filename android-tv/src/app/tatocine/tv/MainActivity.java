@@ -62,7 +62,19 @@ public class MainActivity extends Activity {
             if (!pointerOn || fullView == null || downPending) return;
             pointerHidden = true;
             pointer.setVisibility(View.GONE);
-            generic(MotionEvent.ACTION_HOVER_EXIT, 0);          // el ratón «sale»: el reproductor también oculta sus controles
+            // Si el ratón quedó sobre la barra de controles (p. ej. tras pulsar «pantalla completa»), muchos reproductores (videoapi) la dejan visible:
+            // se aparta al centro del vídeo y luego «sale», y el reproductor oculta sus controles. El puntero vuelve a su sitio al mostrarse.
+            float sx = px, sy = py;
+            hover();                                            // primero un movimiento donde está: la vista de pantalla completa (recién añadida) queda registrada bajo el ratón
+            px = -40f; py = -40f;                               // y luego fuera de la pantalla: Android le entrega la «salida» y el reproductor oculta sus controles (:hover)
+            hover();
+            generic(MotionEvent.ACTION_HOVER_EXIT, 0);
+            if (fullView != null) {
+                MotionEvent ex = pointerEvent(MotionEvent.ACTION_HOVER_EXIT, android.view.InputDevice.SOURCE_MOUSE, MotionEvent.TOOL_TYPE_MOUSE, 0);
+                fullView.dispatchGenericMotionEvent(ex);
+                ex.recycle();
+            }
+            px = sx; py = sy;
         }
     };
 
@@ -74,7 +86,7 @@ public class MainActivity extends Activity {
     private void showPointerAgain() {
         root.removeCallbacks(hidePointer);
         pointerHidden = false;
-        if (pointerOn) { pointer.setVisibility(View.VISIBLE); pointer.bringToFront(); pointer.invalidate(); }
+        if (pointerOn) { pointer.setVisibility(View.VISIBLE); pointer.bringToFront(); placePointer(); }
     }
     private float px, py;
     private long touchDown, lastMove;
@@ -85,7 +97,9 @@ public class MainActivity extends Activity {
     /** Reproductores de terceros: animaciones infinitas (zoom lento del fondo, onda del botón «play») y desenfoques (backdrop-filter) que la TV recalcula en
      *  cada cuadro. Medido en una Xiaomi MZTU0: con el reproductor abierto, la app pasaba de 3 % a 112 % de CPU solo por eso, y el vídeo perdía cuadros. */
     static final String PLAYER_STYLE = "<style id=\"tatocine-tv\">*,*::before,*::after{animation:none!important;transition:none!important;"
-            + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important}</style>";
+            + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important}</style>"
+            // En una TV no hay orientación que bloquear: screen.orientation.lock() rechaza y algunos reproductores abortan la pantalla completa. Se ignora el error.
+            + "<script>try{var so=screen.orientation;if(so&&so.lock){var l=so.lock.bind(so);so.lock=function(){return l.apply(null,arguments).catch(function(){})}}}catch(e){}</script>";
 
     @Override
     protected void onCreate(Bundle state) {
@@ -98,7 +112,7 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         pointer = new PointerView(this);
         pointer.setVisibility(View.GONE);
-        root.addView(pointer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        root.addView(pointer, new FrameLayout.LayoutParams(64, 64));                // se ajusta al tamaño de la flecha en placePointer()
         setContentView(root);
         hideSystemUi();
         preferHighestRefreshRate();
@@ -508,8 +522,18 @@ public class MainActivity extends Activity {
         root.removeCallbacks(hidePointer);
         pointer.setVisibility(on ? View.VISIBLE : View.GONE);
         pointer.bringToFront();
-        pointer.invalidate();
+        placePointer();
         if (on) hover();
+    }
+
+    /** El puntero es una vista del tamaño de la flecha que solo se DESPLAZA (translation: la GPU la mueve sin redibujar). Antes era una capa de pantalla
+     *  completa que se volvía a dibujar entera en cada pulsación de flecha. */
+    private void placePointer() {
+        int h = root.getHeight() > 0 ? root.getHeight() : 1080, size = Math.round(h * 0.034f * 1.3f) + 12;
+        ViewGroup.LayoutParams lp = pointer.getLayoutParams();
+        if (lp != null && (lp.width != size || lp.height != size)) { lp.width = size; lp.height = size; pointer.setLayoutParams(lp); pointer.invalidate(); }
+        pointer.setTranslationX(px);
+        pointer.setTranslationY(py);
     }
 
     private static float clamp(float v, float a, float b) { return v < a ? a : (v > b ? b : v); }
@@ -570,7 +594,7 @@ public class MainActivity extends Activity {
         if (dx != 0 && (nx < m || nx > w - m)) scroll(0, dx);
         px = clamp(nx, m, w - m);
         py = clamp(ny, m, h - m);
-        pointer.invalidate();
+        placePointer();
         hover();
         lastMove = android.os.SystemClock.uptimeMillis();
         return true;
@@ -699,7 +723,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onDraw(android.graphics.Canvas c) {
-            float s = getHeight() * 0.034f;
+            float s = (getHeight() - 12) / 1.3f;                // la vista mide la flecha (+ margen para la sombra)
             if (s != built) {
                 built = s;
                 path.reset();
@@ -714,7 +738,7 @@ public class MainActivity extends Activity {
                 edge.setStrokeWidth(Math.max(2f, s * 0.08f));
             }
             c.save();
-            c.translate(px, py);
+            c.translate(2, 2);
             c.drawPath(path, fill);
             c.drawPath(path, edge);
             c.restore();

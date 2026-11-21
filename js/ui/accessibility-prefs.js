@@ -33,6 +33,7 @@ function applyA11yPrefs() {
   var ts = Math.round(a11yPrefs.scale * a11yBigFactor()) / 10000;
   document.documentElement.style.setProperty("--ts", String(ts));                         // multiplica todos los font-size (css: calc(Npx * var(--ts)))
   document.documentElement.style.setProperty("--ts-hero", String(Math.round(ts * 9400) / 10000));   // portada en pantallas grandes: ~1 px menos (css/21-fluidez.css)
+  document.documentElement.style.setProperty("--ts-hero-web", String(Math.round(ts * 10500) / 10000));   // portada en la WEB (no TV), pantallas grandes: ~1,5 px más que antes
   document.documentElement.style.setProperty("--ts-head", String(Math.round(ts * 11525) / 10000));  // encabezado en la web (no TV) en pantallas grandes: ~2 px más (13 → 15 px)
   var lbl = $("a11y-scale-label"), hc = $("a11y-hc-btn"), rm = $("a11y-rm-btn");
   if (lbl) lbl.textContent = a11yPrefs.scale + " %";
