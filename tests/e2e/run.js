@@ -18,16 +18,15 @@ const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; cha
 
 function findBrowser() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
-  const cache = path.join(os.homedir(), ".cache/ms-playwright");
-  try {
+  for (const cache of [path.join(os.homedir(), ".cache/ms-playwright"), path.join(os.homedir(), "Library/Caches/ms-playwright")]) try {   // Linux / macOS
     for (const d of fs.readdirSync(cache).filter((x) => /^chromium-\d+$/.test(x)).sort().reverse()) {
-      for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome", "chrome-mac/Chromium.app/Contents/MacOS/Chromium", "chrome-win/chrome.exe"]) {
+      for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome", "chrome-mac/Chromium.app/Contents/MacOS/Chromium", "chrome-mac-arm64/Chromium.app/Contents/MacOS/Chromium", "chrome-mac-x64/Chromium.app/Contents/MacOS/Chromium", "chrome-win/chrome.exe"]) {
         const p = path.join(cache, d, sub);
         if (fs.existsSync(p)) return p;
       }
     }
   } catch (e) { }
-  for (const p of ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/brave-browser"]) if (fs.existsSync(p)) return p;
+  for (const p of ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium", "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser", "/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/brave-browser"]) if (fs.existsSync(p)) return p;
   throw new Error("No encuentro un navegador. Define CHROME_PATH.");
 }
 const serverHits = {};

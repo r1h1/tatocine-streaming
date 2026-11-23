@@ -7,7 +7,8 @@ Detalle técnico: `docs/ARCHITECTURE.md`; historial de cambios: `README.md` (ent
 
 TatoCine: app web de catálogo/reproducción (películas, series, anime, niños) **estática y sin backend** (HTML/CSS/JS clásico, sin build en el código
 fuente). Datos de TMDB (clave pública en `config.js`); el video viene de reproductores de terceros en iframe (`js/core/config.js` → `SERVERS`).
-Todo lo del usuario (perfiles, PIN, historial, listas, recomendaciones) vive en `localStorage` del dispositivo. Open source (MIT), repo
+Todo lo del usuario (perfiles, PIN, historial, listas, recomendaciones) vive en `localStorage` del dispositivo. Open source (**GPLv3**, ver
+`LICENSE`; gratuito y sin fines de lucro), autor Ma. Ing. Daniel Rivas (GitHub r1h1), repo
 `github.com/r1h1/tatocine-streaming`, rama `main`.
 
 Tres formas de uso, **las tres deben seguir funcionando siempre**:
@@ -15,6 +16,28 @@ Tres formas de uso, **las tres deben seguir funcionando siempre**:
 2. **PWA** instalada (móvil/escritorio), con Service Worker `sw.js`.
 3. **APK de Google TV / Android TV** (`android-tv/`, `GoogleTvTatoCine.apk`): WebView que sirve la web desde la propia APK. Se instala por ADB
    en la TV Xiaomi (Google TV) del dueño.
+
+## Puesta a punto en la MacBook (primera vez)
+
+El proyecto se movió de Linux (Ubuntu, `~/Desktop/Descargas/tato-cine`) a macOS. La memoria automática de Claude Code NO viaja: este archivo
+la reemplaza. Pasos (comprobar cada uno antes de dar algo por hecho):
+
+1. **Copiar a mano `~/TatoCine-firma/`** (keystore + `clave.txt`) desde la máquina anterior a `~/TatoCine-firma/` en la Mac. Imprescindible
+   para la APK (ver «APK de Google TV»). Antes de compilar: `ls ~/TatoCine-firma/tatocine-release.jks` debe existir.
+2. Herramientas: `xcode-select --install` (git, zip), Homebrew y luego
+   `brew install node gh android-platform-tools coreutils openjdk@21` (`coreutils` da `gtimeout`; `tools/tv-debug/tv.sh` lo usa solo).
+   Java: `export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"; export PATH="$JAVA_HOME/bin:$PATH"`.
+3. Android SDK sin Android Studio: `brew install --cask android-commandlinetools`, luego
+   `sdkmanager "build-tools;36.0.0" "platforms;android-36"` y `export ANDROID_HOME="$(brew --prefix)/share/android-commandlinetools"`
+   (con Android Studio sería `~/Library/Android/sdk`). Poner los `export` en `~/.zshrc`. `build.sh` toma el build-tools y la plataforma más nuevos.
+4. Clonar y entrar: `gh auth login` (cuenta **r1h1**) → `gh repo clone r1h1/tatocine-streaming && cd tatocine-streaming`.
+   `git config user.name r1h1` (el correo, el que el dueño use en GitHub).
+5. Dependencias solo de desarrollo: `(cd tools && npm i)` (esbuild para minificar el ZIP) y `(cd tests/e2e && npm i && npx playwright install chromium)`.
+   `tests/e2e/run.js` busca el navegador en `~/Library/Caches/ms-playwright`, Chrome/Chromium/Brave de `/Applications` o `CHROME_PATH`.
+6. Comprobar: `for t in tests/*.test.js; do node $t; done`, luego `node tools/package.js` y `TMDB_MOCK=1 E2E_ROOT=dist/site node tests/e2e/run.js`
+   (deben pasar todas: 96). Opcional: `bash android-tv/build.sh` y comparar la huella SHA-256 del certificado que imprime con la de abajo.
+7. Diferencias de macOS a recordar: `sed -i ''` (BSD) en vez de `sed -i`; en la Mac el Escritorio también es `~/Desktop`; la red local puede
+   no ser 192.168.0.x (ver la propia IP con `ipconfig getifaddr en0`).
 
 ## Reglas del dueño (obligatorias)
 
@@ -76,6 +99,8 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 
 - `build.sh`: aapt2 → javac → d8 → zipalign → apksigner. SDK en `$ANDROID_HOME` (por omisión `~/Android/Sdk`; **en macOS** suele ser
   `~/Library/Android/sdk` → `export ANDROID_HOME=~/Library/Android/sdk`). Necesita JDK 17+, build-tools y una plataforma android-*.
+- Huella del certificado de firma correcto (la que imprime `build.sh` al final, «V3.0 Signer: certificate SHA-256 digest»):
+  `96f325929fad7ef8c88dc21274d7a81cc98ba5403e22648986331f8876564e4c`. Si sale otra, la firma NO es la buena: no instalar.
 - **Firma**: keystore `~/TatoCine-firma/tatocine-release.jks` (alias `tatocine`, contraseña en `~/TatoCine-firma/clave.txt`; o `$TATO_KEYSTORE` /
   `$TATO_KEYPASS_FILE`). **Hay que copiar esa carpeta a mano a la máquina nueva** (no está en git): sin la misma firma la TV no acepta la
   actualización y habría que desinstalar (se pierden los datos de la TV). Si no existe, build.sh crea una nueva: **no dejar que pase**.
@@ -93,9 +118,19 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 
 ## Probar en la TV (ADB por red)
 
-- La IP de la TV **cambia** (fue .4, .2, .6 en 192.168.0.x): buscarla escaneando el puerto 5555 (o 8009) de la red local, luego
-  `adb connect IP:5555`. Si hay un emulador conectado, usar siempre `adb -s IP:5555`.
-- Instalar: `adb -s IP:5555 install -r ~/Desktop/GoogleTvTatoCine.apk` (solo tras «listo instala»).
+- TV: **Xiaomi MiTV-MZTU0** (Google TV, `adb devices -l` → `model:MiTV_MZTU0`), paquete `app.tatocine.tv`. La depuración por red (ADB) ya
+  está activada en la TV; si la Mac es un equipo nuevo, la TV pedirá **aceptar la huella** de la Mac la primera vez (alguien debe pulsar
+  «Permitir» con el mando).
+- La IP de la TV **cambia** (fue .4, .2, .6, .7 en 192.168.0.x; cambia al reiniciar el router). Buscarla por el puerto 5555 (o 8009):
+  Linux `for i in $(seq 1 254); do (timeout 0.6 bash -c "</dev/tcp/192.168.0.$i/5555" 2>/dev/null && echo $i) & done; wait`;
+  macOS `for i in $(seq 1 254); do (nc -z -G 1 192.168.0.$i 5555 2>/dev/null && echo $i) & done; wait`. Luego `adb connect IP:5555`.
+  Si hay un emulador o un teléfono conectado (en Linux había un Redmi por USB), usar siempre `adb -s IP:5555`.
+- Ver la versión instalada: `adb -s IP:5555 shell dumpsys package app.tatocine.tv | grep -E "versionCode|versionName"`.
+- Al abrir la app tras actualizar sale «¡Actualización disponible!» (normal: OK con el mando) y luego el selector de perfiles. En la TV hay
+  datos reales («Mi perfil» con Continuar viendo): **no reproducir ni borrar nada** al probar; cuidado con las teclas, OK sobre una tarjeta abre
+  el reproductor. Sin APK de depuración no hay CDP: probar con teclas + capturas (`adb exec-out screencap -p > x.png`).
+- Instalar: `adb -s IP:5555 install -r ~/Desktop/GoogleTvTatoCine.apk` (solo tras «listo instala»); abrir:
+  `adb -s IP:5555 shell monkey -p app.tatocine.tv -c android.intent.category.LAUNCHER 1`.
 - Depuración con CDP (APK con `TATO_DEBUG=1`): `TVIP=IP source tools/tv-debug/tv.sh`, luego `CON` (forward a localhost:9333), `js '<expr>'`
   (página principal), `node tools/tv-debug/cdpf.js` (iframes), `prof.js` (perfil de CPU), `k 22 23` (teclas: 19↑ 20↓ 21← 22→ 23 OK 4 Atrás),
   `foc` (foco actual), `shot nombre` (captura). macOS: `brew install android-platform-tools` y `brew install coreutils` (para `timeout`).
@@ -104,7 +139,8 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 ## Estado y decisiones ya tomadas (no re-discutir)
 
 - Versión actual 5.6 (la VERSION del SW es un hash de contenido). Última entrada del README: **5.33**.
-- Instalada en la TV: APK 5.6-736cfa72 (probado: orden de Inicio, tráiler, logotipo de TMDB en Legal). Última IP de la TV: 192.168.0.7.
+- Instalada en la TV: APK 5.6-736cfa72 (versionCode 29924563; probado: orden de Inicio, tráiler, logotipo de TMDB en Legal). Última IP de
+  la TV: 192.168.0.7. Último ZIP entregado: `tatocine-5.6-736cfa72.zip`. **No hay nada pendiente.**
 - Orden de Inicio: Continuar viendo → Nuevos episodios → Hecho para ti → Tendencias / Estrenos / Populares → Plataformas y estudios → filas
   perezosas (Top 10, mejor calificadas…, solo se piden al acercarse).
 - Tráiler de la portada: el dueño **lo quiere** (también en la TV). Por defecto «Siempre» en TV y equipos normales; en móviles modestos
@@ -117,5 +153,7 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
   (p. ej. ESP3/ESP4 con «Madre siniestra», TMDB 1400837) son del tercero: el cambio automático salta al siguiente.
 - `content-visibility` se midió peor en la TV: no usar. Ocultar el fondo bajo la ficha no mejoró nada medible.
 - «No me gusta» (👎 en la ficha) ya saca el título de las recomendaciones; «Liberar espacio» en Ajustes borra imágenes/datos temporales.
+- Auditoría externa (5.33): se tomó lo útil (orden de Inicio, tráiler en equipos modestos, caché según espacio, logotipo de TMDB, docs).
+  Si vuelve a pedir «mejorar con un análisis»: tomar solo lo que no rompa nada ni cambie el diseño, y decir qué se descartó y por qué.
 - **No hecho a propósito:** versión «Legacy TV» para Chromium < 68, barra inferior/menú nuevo (cambia el diseño), sincronización entre
   dispositivos, Watch Party, push (imposibles sin backend).

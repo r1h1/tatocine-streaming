@@ -5,6 +5,7 @@ S="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 TVIP=${TVIP:-192.168.0.6}
 ADB="${ADB_BIN:-adb} -s $TVIP:5555"                     # siempre con -s: si hay un emulador conectado, adb pide elegir
 mkdir -p "$S/tv"
+command -v timeout >/dev/null 2>&1 || timeout(){ if command -v gtimeout >/dev/null 2>&1; then gtimeout "$@"; else shift; "$@"; fi; }   # macOS: brew install coreutils → gtimeout
 k(){ for x in "$@"; do timeout 10 $ADB shell input keyevent $x; sleep ${D:-1.2}; done; }   # 19↑ 20↓ 21← 22→ 23 OK 4 Atrás
 js(){ timeout 20 node "$S/cdp.js" "$1"; }                # evalúa en la página principal de la APK (puerto 9333)
 foc(){ js '(function(){var a=document.activeElement;return a.tagName+"#"+a.id+"."+String(a.className).slice(0,25)+" ["+(a.textContent||a.placeholder||"").trim().replace(/\s+/g," ").slice(0,24)+"]"})()'; }
