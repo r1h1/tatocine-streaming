@@ -428,7 +428,6 @@
           var h = null;
           renderContinueRow();
           if (typeof reservePersonalSlot === "function") reservePersonalSlot();   // hueco de «Hecho para ti» (sin saltos)
-          renderBrandRow();                                       // orden: Continuar viendo → Plataformas y estudios → Hecho para ti (se inserta antes de la 1.ª fila del catálogo) → resto
           if (t.results && t.results.length) {
             var m = t.results.map(mapMovieResult);
             h = m[0];
@@ -439,6 +438,9 @@
           rowOrRetry("Próximos Estrenos", "/movie/upcoming", upQ, mapMovieResult, u);
           rowOrRetry("Películas Populares", "/movie/popular", "", mapMovieResult, p);
           rowOrRetry("Series Populares", "/tv/popular", "", mapTvResult, s);
+          // Orden: Continuar viendo → Nuevos episodios → Hecho para ti → catálogo (Tendencias, Estrenos, Populares) → Plataformas y estudios → resto.
+          // Lo personal va primero; las plataformas son exploración complementaria (sus logos se cargan solo al acercarse).
+          renderBrandRow();
           if (h) setHero(h);
           heroTop10("home", snapshot);
           renderLoadMore(t.total_pages || 1);

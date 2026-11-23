@@ -52,7 +52,10 @@ function renderLegalHub() {
     "<p>" + escapeHTML(L(
       "Los reproductores y servicios externos que aparecen en TatoCine son operados por terceros. TatoCine no controla sus servidores, disponibilidad, anuncios, privacidad, licencias ni el contenido que puedan mostrar. La integración de un iframe no constituye una verificación ni una garantía de que el contenido esté autorizado. Antes de utilizar un servicio externo, cada usuario debe revisar sus términos, avisos y la legislación aplicable. TatoCine no reclama derechos sobre contenido de terceros.",
       "The players and external services shown in TatoCine are operated by third parties. TatoCine does not control their servers, availability, ads, privacy, licenses or the content they may show. Embedding an iframe is neither a verification nor a guarantee that the content is authorized. Before using an external service, each user should review its terms, notices and the applicable law. TatoCine claims no rights over third-party content.")) + "</p>" +
-    "<p>" + escapeHTML(L("Este producto usa la API de TMDB, pero no está avalado ni certificado por TMDB.", "This product uses the TMDB API but is not endorsed or certified by TMDB.")) + "</p></section>";
+    "</section>" +
+    // Atribución de TMDB siempre visible: logotipo oficial (icons/tmdb/tmdb-logo.svg, de themoviedb.org/about/logos-attribution) + aviso exigido
+    '<p class="legal-tmdb"><img src="icons/tmdb/tmdb-logo.svg" alt="The Movie Database (TMDB)" width="164" height="21" loading="lazy" decoding="async"><span>' +
+    escapeHTML(L("Este producto usa la API de TMDB, pero no está avalado ni certificado por TMDB.", "This product uses the TMDB API but is not endorsed or certified by TMDB.")) + "</span></p>";
 }
 
 function openLegalHub() {

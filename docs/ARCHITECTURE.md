@@ -8,7 +8,7 @@ personal vive en `localStorage`; la única red es la API de TMDB y los reproduct
 ```text
 index.html                 Estructura de la interfaz + orden de carga (única fuente de verdad)
 config.js                  Configuración editable (clave de TMDB)
-css/                       Cascada numerada: 01-base … 19-responsive (los posteriores refinan a los anteriores)
+css/                       Cascada numerada: 01-base … 26-player (26 hojas; las posteriores refinan a las anteriores; el paquete las une en una)
 js/
   core/                    Servicios sin interfaz: config, storage, extend (decorate), env, state, tmdb, utils,
                            ui-utils, seo, events, storage-maintenance, performance, pwa
@@ -94,7 +94,10 @@ siguiente episodio · Ajustes (modo ligero, copia de seguridad) · móvil estrec
 - El reproductor es de terceros (iframe): no se controla audio, subtítulos, calidad, minuto exacto ni «saltar intro».
 - Sin servidor no hay sincronización entre dispositivos (solo copia de seguridad manual), ni Watch Party, ni notificaciones
   push: los avisos de nuevos episodios se calculan al abrir la app.
-- No hay pruebas automatizadas; la verificación es manual y con un navegador real.
+- Compatibilidad: el piso es Chromium 68 (LG webOS 5 y Samsung Tizen 5.5, televisores de 2020). Los televisores de 2018–2019
+  (Tizen 4/5 = Chromium 56/63, webOS 4 = Chromium 53) y anteriores quedan **por debajo** y no están garantizados; haría falta una
+  versión «Legacy TV» aparte (JS transpilado + polyfills), que no existe. La APK (`android-tv/`) solo sirve para Android TV / Google TV.
+- Pruebas: `tests/*.test.js` (Node, sin dependencias) y `tests/e2e/run.js` (Playwright); no sustituyen probar en el televisor real.
 
 ## Capa responsive (`css/19-responsive.css`)
 Última de la cascada. Define `--gutter` y `--card-w` con `clamp()` (móvil → TV 4K), alinea carruseles con los títulos, compacta la portada y el reproductor en móvil horizontal, difiere el pintado de filas fuera de pantalla (`content-visibility`) y quita desenfoques costosos en táctil.

@@ -9,7 +9,7 @@
      con copia algo vieja se muestra al instante y se actualiza en segundo plano; solo si es muy vieja o no hay copia va a la red (con la copia como respaldo sin
      conexión). Ficha, reparto, vídeos, actor, géneros: fresca 24 h / válida 14 días. Tendencias y estrenos: fresca 2 h / válida 2 días. Búsquedas: fresca 6 h / válida 3 días.
    - Nunca intercepta reproductores ni YouTube. */
-const VERSION = "5.6-eca03251";
+const VERSION = "5.6-e8fb4726";
 const SHELL_CACHE = "tatocine-shell-" + VERSION;
 const API_CACHE = "tatocine-api-v1";
 const IMG_CACHE = "tatocine-img-v1";
@@ -68,10 +68,26 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Topes según el espacio libre que informe el navegador (equipos con poco almacenamiento guardan menos; si no lo informa, los topes normales).
+let capScale = 1;
+try {
+  if (self.navigator && navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then((e) => {
+      const free = (e.quota || 0) - (e.usage || 0);
+      if (e.quota && free < 150e6) capScale = 0.35;
+      else if (e.quota && free < 400e6) capScale = 0.6;
+    }).catch(() => { });
+  }
+} catch (e) { }
+// Recortar lista TODAS las entradas de la caché: se hace como mucho cada 25 guardados por caché (antes, tras cada imagen), no en cada uno.
+const trimCount = {};
 async function trim(cacheName, max) {
+  trimCount[cacheName] = (trimCount[cacheName] || 0) + 1;
+  if (trimCount[cacheName] % 25 !== 1) return;
   const cache = await caches.open(cacheName);
   const keys = await cache.keys();
-  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
+  const cap = Math.round(max * capScale);
+  for (let i = 0; i < keys.length - cap; i++) await cache.delete(keys[i]);
 }
 
 function timeoutFetch(request, ms, preload) {

@@ -549,6 +549,26 @@ async function main() {
     const n = calls.length; await page.clock.runFor(120000);
     eq(await page.evaluate(() => currentHeroIndex), 9, "volvió al primero tras el décimo:"); eq(calls.length, n, "llamadas a TMDB tras llegar al décimo:");
   });
+  await test("Inicio: «Plataformas y estudios» va después del catálogo principal (lo personal primero)", async (page) => {
+    await enter(page); await page.waitForSelector("#rows-container .brand-row", { timeout: 15000 });
+    const order = await page.evaluate(() => [...document.querySelectorAll("#rows-container > .row")].map((r) => r.classList.contains("brand-row") ? "BRAND" : ((r.querySelector(".row-title") || {}).textContent || "").trim()));
+    const b = order.indexOf("BRAND");
+    for (const t of ["Tendencias de la semana", "Películas Populares", "Series Populares"]) { const i = order.indexOf(t); ok(i >= 0 && i < b, t + " debe ir antes de Plataformas: " + order.join(" | ")); }
+  });
+  await test("Tráiler de la portada: por defecto se respeta el modo ligero en móviles; «Siempre» elegido a mano lo salta", async (page) => {
+    await enter(page);
+    const r = await page.evaluate(() => {
+      const had = document.body.classList.contains("lite"), tv = IS_TV, pref = localStorage.getItem("tatoHeroTrailer");
+      document.body.classList.add("lite"); IS_TV = false; htMode = "on"; htExplicitOn = false;
+      const def = htWhyNot(); htExplicitOn = true; const explicit = htWhyNot();
+      IS_TV = true; htExplicitOn = false; const tvDef = htWhyNot();
+      IS_TV = tv; if (!had) document.body.classList.remove("lite"); htExplicitOn = pref === "on";
+      return { def, explicit, tvDef };
+    });
+    ok(/modo ligero|Lite mode/i.test(r.def), "por defecto en móvil ligero debería pausarse: " + r.def);
+    ok(!/modo ligero|Lite mode/i.test(r.explicit), "«Siempre» a mano no debe bloquearse por modo ligero: " + r.explicit);
+    ok(!/modo ligero|Lite mode/i.test(r.tvDef), "en la TV por defecto sigue el tráiler: " + r.tvDef);
+  });
   await test("Ajustes: Tu tiempo de hoy arriba de todo y después Instalar TatoCine, Copiar tus datos (QR) y (JSON)", async (page) => {
     await enter(page); await page.evaluate(() => showSettings()); await page.waitForTimeout(400);
     const labels = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option .label")].filter((e) => e.offsetParent).map((e) => e.textContent.trim()).slice(0, 4));
@@ -557,6 +577,8 @@ async function main() {
   await test("Legal: hub con 4 opciones, sitios de terceros desde SERVERS y enlaces seguros", async (page) => {
     await enter(page); await page.click('.nav-links [data-h="h8d"]'); await page.waitForSelector("#legal-modal.open");
     eq(await page.locator("#legal-body .settings-option").count(), 4, "opciones del hub:");
+    await page.waitForFunction(() => { const i = document.querySelector("#legal-body .legal-tmdb img"); return i && i.complete && i.naturalWidth > 0 && i.offsetParent; }, null, { timeout: 5000 });
+    ok(/not endorsed or certified by TMDB|no está avalado ni certificado por TMDB/.test(await page.locator("#legal-body .legal-tmdb").textContent()), "falta el aviso de TMDB junto al logotipo");
     await page.click('[data-act="legal-third"]');
     const hosts = await page.evaluate(() => [...document.querySelectorAll("#legal-third li")].map((x) => x.textContent));
     const servers = await page.evaluate(() => SERVERS.map((s) => new URL(s.url(1, "movie", 1, 1)).hostname));

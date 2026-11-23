@@ -10,6 +10,9 @@
  */
 var HT_KEY = "tatoHeroTrailer", HT_MAX_MS = 45000, htToken = 0, htTimer = null, htCache = {}, htWatch = null, htPlayingKey = "";
 var htMode = (function () { try { var v = localStorage.getItem(HT_KEY); return v === "auto" || v === "off" ? v : "on"; } catch (e) { return "on"; } })();     // por defecto SIEMPRE ("on") para todos los perfiles
+// «Siempre» elegido a mano en Ajustes salta el modo ligero. Por defecto (sin elegir nada) también en la TV, pero en móviles y equipos modestos
+// con el modo ligero automático (o activado a mano) se queda la imagen fija: un vídeo detrás de la portada pesa mucho en esos equipos.
+var htExplicitOn = (function () { try { return localStorage.getItem(HT_KEY) === "on"; } catch (e) { return false; } })();
 var htStatus = "";
 /** ¿Reproducir CON sonido? Sí si ya interactuaste con la página (el navegador solo lo permite así) y no lo silenciaste tú; si no, en silencio con el botón. */
 function htWantSound() { return true; }
@@ -17,7 +20,7 @@ function htRememberSound() { }
 /** Motivo por el que NO se reproduce el tráiler ahora ("" = se puede). `htWhyNotify` indica si conviene avisar al usuario (una vez por sesión). */
 var htWhyNotify = false;
 function htWhyNot() {
-  var forced = htMode === "on";
+  var forced = htMode === "on" && (htExplicitOn || (typeof IS_TV !== "undefined" && IS_TV && (typeof LITE_PREF === "undefined" || LITE_PREF !== "on")));
   htWhyNotify = false;
   if (htMode === "off") return L("Desactivado en Ajustes.", "Off in Settings.");
   if (document.body.classList.contains("legal-pending")) return "legal-pending";                    // sin aceptar el aviso legal no se reproduce nada (ni el tráiler de la portada)
@@ -26,7 +29,7 @@ function htWhyNot() {
   if (picker && picker.classList.contains("open")) return L("Hay que elegir perfil primero.", "Choose a profile first.");
   if (location.protocol === "file:") { htWhyNotify = true; return L("YouTube no permite reproducir desde un archivo local (file://). Abre TatoCine desde http://localhost o desde el sitio publicado.", "YouTube won't play from a local file (file://). Open TatoCine from http://localhost or the published site."); }
   if (document.body.classList.contains("rm")) { htWhyNotify = true; return L("«Reducir movimiento» está activado en Ajustes → Accesibilidad.", "“Reduce motion” is on in Settings → Accessibility."); }
-  if (document.body.classList.contains("lite") && !forced) { htWhyNotify = true; return L("El modo ligero está activado (Ajustes → Modo ligero). Pon «Siempre» para verlo igualmente.", "Lite mode is on (Settings → Lite mode). Choose “Always” to see it anyway."); }
+  if (document.body.classList.contains("lite") && !forced) { htWhyNotify = htMode !== "on"; if (htMode === "on") return L("El modo ligero lo pausa en este equipo para que vaya fluido. Desactiva el modo ligero en Ajustes o vuelve a elegir «Siempre» para verlo igualmente.", "Lite mode pauses it on this device so it stays smooth. Turn off Lite mode in Settings or choose “Always” again to see it anyway."); return L("El modo ligero está activado (Ajustes → Modo ligero). Pon «Siempre» para verlo igualmente.", "Lite mode is on (Settings → Lite mode). Choose “Always” to see it anyway."); }
   if (!(currentView === "home" || currentView === "movies" || currentView === "series" || currentView === "anime" || currentView === "kids" || isSearching)) return L("Solo en la portada de Inicio, Películas, Series, Anime y Niños.", "Only on the Home, Movies, Series, Anime and Kids hero.");
   if (htMode === "auto" && !(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches)) { htWhyNotify = true; return L("Está en «Solo con ratón» y este dispositivo no tiene ratón. Cámbialo a «Siempre» en Ajustes.", "It's set to “Mouse only” and this device has no mouse. Change it to “Always” in Settings."); }
   return "";
@@ -220,6 +223,7 @@ function htLabel() { return { on: L("Siempre", "Always"), auto: L("Solo con rat�
 function cycleHeroTrailer() {
   htMode = { on: "auto", auto: "off", off: "on" }[htMode];     // Siempre → Solo con ratón → Desactivado → Siempre
   try { localStorage.setItem(HT_KEY, htMode); } catch (e) { }
+  htExplicitOn = htMode === "on";
   htStatus = "";
   var el = $("hero-trailer-sub"); if (el) el.textContent = htLabel();
   htStop();

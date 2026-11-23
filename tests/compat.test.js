@@ -1,7 +1,7 @@
 /**
- * Compatibilidad: TatoCine apunta a navegadores de 2022 en adelante (Chrome/Edge/Firefox ≥ 100, Safari ≥ 15.4; ver .browserslistrc).
- * Esta prueba (a) comprueba que TODOS los .js se analizan como script clásico moderno y (b) rechaza APIs de JavaScript y
- * funciones de CSS que aún no existían en 2022 (se usarían sin avisar y romperían en navegadores algo viejos).
+ * Compatibilidad: el piso es Chromium 68 (LG webOS 5 / Samsung Tizen 5.5, 2020) y Safari 12 (ver .browserslistrc).
+ * Esta prueba (a) comprueba que TODOS los .js se analizan como script clásico y (b) rechaza APIs de JavaScript y
+ * funciones de CSS posteriores a ese piso sin detección (romperían en esos televisores y navegadores).
  * Ejecutar: node tests/compat.test.js
  */
 const fs = require("node:fs"), path = require("node:path"), vm = require("node:vm");
@@ -37,4 +37,4 @@ for (const file of walk(path.join(ROOT, "css"), ".css")) {
   for (const [re, why] of CSS_TOO_NEW) if (re.test(src)) bad.push(rel + ": usa " + why);
 }
 if (bad.length) { console.error("✗ compatibilidad:\n  " + bad.join("\n  ")); process.exit(1); }
-console.log("✓ compatibilidad 2022+: todos los .js se analizan y no hay APIs ni CSS posteriores a 2022");
+console.log("✓ compatibilidad Chromium 68+: todos los .js se analizan y no hay APIs ni CSS posteriores sin detección");
