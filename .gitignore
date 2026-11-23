@@ -4,3 +4,4 @@ Thumbs.db
 # ZIPs de producción generados por tools/package.js
 dist/
 node_modules/
+tools/tv-debug/tv/
