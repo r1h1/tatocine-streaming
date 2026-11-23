@@ -95,5 +95,5 @@ html.tc-playing #top-bar, html.tc-playing #main-content { visibility: hidden !im
 html.tc-app, html.tc-app body { touch-action: pan-x pan-y; }
 
 /* Atribución de TMDB en Legal (logotipo oficial + aviso), siempre visible */
-.legal-tmdb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 14px; font-size: .85em; opacity: .9; }
+.legal-tmdb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 0; padding: 8px 24px 28px; font-size: .85em; opacity: .9; }   /* mismo margen lateral que .legal-third: el cuerpo de Legal no tiene relleno */
 .legal-tmdb img { height: 21px; width: auto; flex: 0 0 auto; }

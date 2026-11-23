@@ -579,6 +579,8 @@ async function main() {
     eq(await page.locator("#legal-body .settings-option").count(), 4, "opciones del hub:");
     await page.waitForFunction(() => { const i = document.querySelector("#legal-body .legal-tmdb img"); return i && i.complete && i.naturalWidth > 0 && i.offsetParent; }, null, { timeout: 5000 });
     ok(/not endorsed or certified by TMDB|no está avalado ni certificado por TMDB/.test(await page.locator("#legal-body .legal-tmdb").textContent()), "falta el aviso de TMDB junto al logotipo");
+    const lx = await page.evaluate(() => { const i = document.querySelector("#legal-body .legal-tmdb img").getBoundingClientRect(), t = document.querySelector("#legal-body .settings-option .label").getBoundingClientRect(); return [Math.round(i.left), Math.round(t.left)]; });
+    ok(lx[0] >= 12 && Math.abs(lx[0] - lx[1]) <= 12, "el logotipo de TMDB debe alinearse con los textos de Legal (sin cortarse): " + lx);
     await page.click('[data-act="legal-third"]');
     const hosts = await page.evaluate(() => [...document.querySelectorAll("#legal-third li")].map((x) => x.textContent));
     const servers = await page.evaluate(() => SERVERS.map((s) => new URL(s.url(1, "movie", 1, 1)).hostname));

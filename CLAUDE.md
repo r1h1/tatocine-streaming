@@ -104,8 +104,7 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 ## Estado y decisiones ya tomadas (no re-discutir)
 
 - Versión actual 5.6 (la VERSION del SW es un hash de contenido). Última entrada del README: **5.33**.
-- **Pendiente:** instalar en la TV la APK 5.6-957c4d79 que está en el Escritorio, cuando el dueño diga «listo instala», y probar ahí: orden
-  de Inicio (Plataformas después del catálogo), tráiler en la portada y logotipo de TMDB en Legal.
+- Instalada en la TV: APK 5.6-736cfa72 (probado: orden de Inicio, tráiler, logotipo de TMDB en Legal). Última IP de la TV: 192.168.0.7.
 - Orden de Inicio: Continuar viendo → Nuevos episodios → Hecho para ti → Tendencias / Estrenos / Populares → Plataformas y estudios → filas
   perezosas (Top 10, mejor calificadas…, solo se piden al acercarse).
 - Tráiler de la portada: el dueño **lo quiere** (también en la TV). Por defecto «Siempre» en TV y equipos normales; en móviles modestos
