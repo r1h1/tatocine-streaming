@@ -134,14 +134,27 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 - Depuración con CDP (APK con `TATO_DEBUG=1`): `TVIP=IP source tools/tv-debug/tv.sh`, luego `CON` (forward a localhost:9333), `js '<expr>'`
   (página principal), `node tools/tv-debug/cdpf.js` (iframes), `prof.js` (perfil de CPU), `k 22 23` (teclas: 19↑ 20↓ 21← 22→ 23 OK 4 Atrás),
   `foc` (foco actual), `shot nombre` (captura). macOS: `brew install android-platform-tools` y `brew install coreutils` (para `timeout`).
-- Tras probar con la APK de depuración, **reinstalar la release** y limpiar los datos de prueba.
+- Medir servidores en la TV: `TVIP=IP bash tools/tv-debug/tvsrv.sh <tmdbId> "<título>" 0 3` (resolución, cuadros perdidos, búfer) y
+  `node tools/tv-debug/net.js 30` (dominios pedidos). En el PC: `tools/tv-debug/audit.js` (abajo).
+- **Datos reales de la TV al probar:** antes, respaldar `localStorage` (`js 'JSON.stringify(Object.assign({},localStorage))' > respaldo.json`);
+  al terminar, restaurarlo (`localStorage.clear()` + `setItem` de cada clave) y reiniciar la app. Así no queda «Continuar viendo» ni memoria
+  por título de las pruebas.
+- Tras probar con la APK de depuración, **reinstalar la release** (comprobar: `unzip -p <apk> classes.dex | grep -ac setWebContentsDebuggingEnabled` → 0).
+- `build.sh` no admite lambdas de Java (d8 falla con «Unable to find method metafactory» y deja la APK anterior): usar clases anónimas.
+- Si `adb` dice «unauthorized», en la TV salió el aviso de «Permitir depuración»: el dueño debe aceptarlo con el mando.
 
 ## Estado y decisiones ya tomadas (no re-discutir)
 
 - Versión actual 5.6 (la VERSION del SW es un hash de contenido). Última entrada del README: **5.34**.
-- Instalada en la TV: APK 5.6-a3fd171b (release, versionCode 29924964). Última IP de la TV: 192.168.0.7. Último ZIP: `tatocine-5.6-a3fd171b.zip`
-  (5.34: OP1–OP5, sin ENG1, sandbox en web/PWA). Las webs públicas tatocine/tatocine2/tatocine3.vercel.app siguen en 5.6-736cfa72 hasta que el dueño suba el ZIP.
-  En la web, OP5 con algunos títulos muestra «sandboxed embed is not allowed» (su reproductor interno rechaza sandbox): es el precio de cero ventanas porno.
+- **Producción = GitHub = TV** (24 nov 2026): versión **5.6-a3fd171b** en tatocine, tatocine2 y tatocine3.vercel.app (comprobado con
+  `curl <dominio>/build.json`), commit `af4ae7b` en `main`, APK release versionCode 29924964 instalada en la TV (IP 192.168.0.7).
+  **No hay nada pendiente.**
+- Auditoría de servidores (5.34, medido en TV y PC): La Odisea/F1 → OP1 720p estable, OP4 1080p, OP2 480p (arranca en pausa), OP3 480p
+  que se traba (pierde ~1/3 de cuadros en la TV), OP5 720p. *La sombra de la traición* (TMDB 73499) solo existe en 624×265 en OP1/OP3/OP4
+  (copia mala del tercero; OP2 no la tiene). *Yo Soy Rocky* (1286656, estreno nov 2026) es copia con subtítulos italianos quemados.
+  onlyflix.to usa vidapi.xyz, balance.medmedia03.wiki, nontongo y vidfast.vc (inglés): 3 con anuncios/rechazan sandbox, balance no reprodujo → ninguno añadido.
+- En la web, OP5 con algunos títulos muestra «sandboxed embed is not allowed» (su reproductor interno rechaza sandbox): es el precio de cero
+  ventanas porno; en la APK no hay sandbox (la app ya bloquea ventanas y salidas) y OP5 funciona con todo.
 - Orden de Inicio: Continuar viendo → Nuevos episodios → Hecho para ti → Tendencias / Estrenos / Populares → Plataformas y estudios → filas
   perezosas (Top 10, mejor calificadas…, solo se piden al acercarse).
 - Tráiler de la portada: el dueño **lo quiere** (también en la TV). Por defecto «Siempre» en TV y equipos normales; en móviles modestos
