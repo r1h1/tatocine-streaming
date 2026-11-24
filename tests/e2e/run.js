@@ -183,12 +183,15 @@ async function main() {
     const rows = await page.evaluate(() => [...document.querySelectorAll("#settings-modal .settings-option")].filter((e) => getComputedStyle(e).display !== "none").map((e) => e.querySelector(".label").textContent.trim()));
     ok(rows.join("|").includes("Copiar tus datos") && rows.join("|").includes("QR") && rows.length <= 4, "filas visibles para el niño: " + rows.join(", "));
     eq(await page.evaluate(() => { switchView("movies"); return currentView; }), "kids", "un perfil infantil solo ve Niños:");
-    // ESP5 (facilitoplay) muestra anuncios para adultos: nunca se ofrece ni se prueba en automático en un perfil infantil
+    // OP5 (facilitoplay) muestra anuncios para adultos: nunca se ofrece ni se prueba en automático en un perfil infantil
     const kidSrv = await page.evaluate(() => { const idx = SERVERS.findIndex((s) => s.adultAds); fb.tried = {}; const seen = []; let n; while ((n = nextServerIndex()) >= 0) { seen.push(SERVERS[n].name); fb.tried[n] = true; } fb.tried = {}; return { adult: SERVERS[idx].name, seen }; });
-    ok(kidSrv.adult === "ESP5" && !kidSrv.seen.includes("ESP5") && kidSrv.seen.length === 5, "el cambio automático del perfil infantil no debe pasar por ESP5: " + JSON.stringify(kidSrv));
+    ok(kidSrv.adult === "OP5" && !kidSrv.seen.includes("OP5") && kidSrv.seen.length === 4, "el cambio automático del perfil infantil no debe pasar por OP5: " + JSON.stringify(kidSrv));
     await page.evaluate(() => openPlayer(8587, "movie", "El rey león"));
     const opened = await page.waitForSelector("#server-switcher .server-btn", { timeout: 8000 }).then(() => true).catch(() => false);
-    if (opened) { const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim())); ok(!names.includes("ESP5") && names.includes("ESP1"), "botones del perfil infantil: " + names.join(",")); }
+    if (opened) { const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim())); ok(!names.includes("OP5") && names.includes("OP1"), "botones del perfil infantil: " + names.join(",")); }
+    // Aunque OP5 fuera el preferido (o el recordado para el título), un perfil infantil empieza en OP1
+    const kidStart = await page.evaluate(() => { closePlayer(); safeStorageSet(profileStorageKey("tatoServer"), "OP5"); openPlayer(8587, "movie", "El rey león"); const f = document.querySelector("#player-view iframe"); const r = f ? new URL(f.src).hostname : ""; closePlayer(); safeStorageSet(profileStorageKey("tatoServer"), "OP1"); return r; });
+    ok(!/facilitoplay/.test(kidStart), "el perfil infantil arrancó en OP5: " + kidStart);
   });
 
   await test("Buscador por intención: «pelicuals de terror» y «peli de matar» muestran las mejores del género (TMDB discover) y su sugerencia; un título se busca como siempre", async (page) => {
@@ -228,7 +231,7 @@ async function main() {
   await test("copia JSON: se sanea, y adulto→niño no se permite", async (page) => {
     await enter(page);
     const r = await page.evaluate(() => {
-      const s = sanitizeBackupData({ tatoList: JSON.stringify([{ id: 1, type: "movie", title: "<img src=x onerror=alert(1)>", bg: '/a.jpg"onload="x' }, { id: "x", type: "movie" }]) }, ["ESP1"]);
+      const s = sanitizeBackupData({ tatoList: JSON.stringify([{ id: 1, type: "movie", title: "<img src=x onerror=alert(1)>", bg: '/a.jpg"onload="x' }, { id: "x", type: "movie" }]) }, ["OP1"]);
       localProfiles.push({ id: "k9", name: "N", kind: "kid", lang: "es", createdAt: Date.now() });
       return { title: s.clean.tatoList[0].title, bg: s.clean.tatoList[0].bg, n: s.clean.tatoList.length, kidTargets: importTargets("kid").length, adultTargets: importTargets("adult").map((p) => p.kind) };
     });
@@ -941,26 +944,52 @@ async function main() {
       await c2.close();
     } finally { delete process.env.TMDB_MOCK_DELAY; }
   });
-  await test("Servidores: los 6 (ESP1–ESP5 en español latino + ENG1, los que mejor funcionan primero) tienen URL https válida por ID de TMDB (película y serie), no se repiten y cada botón del reproductor carga su iframe con allowfullscreen", async (page) => {
+  await test("Servidores: los 5 (OP1–OP5, sin ENG1) tienen URL https válida por ID de TMDB (película y serie), no se repiten y cada botón del reproductor carga su iframe con allowfullscreen y sandbox SIN ventanas emergentes (cero anuncios)", async (page) => {
     await enter(page);
     const info = await page.evaluate(() => SERVERS.map((s) => ({ name: s.name, movie: s.url(550, "movie"), tv: s.url(1399, "tv", 2, 5) })));
-    eq(info.map((x) => x.name).join(","), "ESP1,ESP2,ESP3,ESP4,ESP5,ENG1", "servidores y orden:");
+    eq(info.map((x) => x.name).join(","), "OP1,OP2,OP3,OP4,OP5", "servidores y orden:");
     const hosts = new Set();
     for (const x of info) {
       for (const u of [x.movie, x.tv]) { const w = new URL(u); eq(w.protocol, "https:", x.name + " debe ser https:"); ok(w.pathname.includes("550") || w.pathname.includes("1399"), x.name + " no lleva el ID de TMDB: " + u); }
       ok(/\/1399\/2\/5/.test(x.tv), x.name + " debe llevar temporada 2 episodio 5: " + x.tv); hosts.add(new URL(x.movie).hostname);
     }
-    eq(hosts.size, 6, "dominios distintos:");
-    ok(info.find((x) => x.name === "ESP2").movie.startsWith("https://videoapi.la/e/movie/550") && info.find((x) => x.name === "ESP1").movie === "https://api.moviemaster.lat/e/movie/550?color=000000&lang=LAT&autoplay=1" && /tukiplay/.test(info.find((x) => x.name === "ESP3").movie) && /unlimplay/.test(info.find((x) => x.name === "ESP4").movie) && info.find((x) => x.name === "ESP5").movie === "https://facilitoplay.com/e/pelicula/550", "orden ESP1 moviemaster (latino), ESP2 videoapi, ESP3 tukiplay, ESP4 unlimplay, ESP5 facilitoplay: " + JSON.stringify(info));
+    eq(hosts.size, 5, "dominios distintos:");
+    ok(info.find((x) => x.name === "OP2").movie.startsWith("https://videoapi.la/e/movie/550") && info.find((x) => x.name === "OP1").movie === "https://api.moviemaster.lat/e/movie/550?color=000000&lang=LAT&autoplay=1" && /tukiplay/.test(info.find((x) => x.name === "OP3").movie) && /unlimplay/.test(info.find((x) => x.name === "OP4").movie) && info.find((x) => x.name === "OP5").movie === "https://facilitoplay.com/e/pelicula/550", "orden ESP1 moviemaster (latino), ESP2 videoapi, ESP3 tukiplay, ESP4 unlimplay, ESP5 facilitoplay: " + JSON.stringify(info));
     await page.evaluate(() => openPlayer(550, "movie", "Fight Club")); await page.waitForSelector("#server-switcher .server-btn", { timeout: 8000 });
     const names = await page.evaluate(() => [...document.querySelectorAll("#server-switcher .server-btn")].map((b) => b.textContent.trim()));
     ok(info.every((x) => names.some((n) => n.includes(x.name))), "faltan botones de servidor: " + JSON.stringify(names));
     for (const x of info) {
       await page.evaluate((n) => { [...document.querySelectorAll("#server-switcher .server-btn")].find((b) => b.textContent.includes(n)).click(); }, x.name); await page.waitForTimeout(250);
-      const f = await page.evaluate(() => { const i = document.querySelector("#player-view iframe"); return i ? { src: i.src, fs: i.allowFullscreen, allow: i.getAttribute("allow") } : null; });
+      const f = await page.evaluate(() => { const i = document.querySelector("#player-view iframe"); return i ? { src: i.src, fs: i.allowFullscreen, allow: i.getAttribute("allow"), sb: i.getAttribute("sandbox") } : null; });
       ok(f && f.src === x.movie && f.fs && /fullscreen/.test(f.allow), x.name + ": iframe incorrecto " + JSON.stringify(f));
+      ok(f.sb && /allow-scripts/.test(f.sb) && !/allow-popups|allow-top-navigation/.test(f.sb), x.name + ": el iframe debe ir con sandbox sin ventanas emergentes: " + f.sb);
     }
     await page.evaluate(() => closePlayer());
+  });
+  await test("Reproductor: si OP2 (videoapi) muestra «Contenido no disponible» (no envía «vidapi-player»), se cambia solo de servidor; OP1 que avisa con «mm:hello» se queda", async (page) => {
+    await page.route("https://videoapi.la/**", (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>No disponible</title><h1>Contenido no disponible</h1>" }));
+    await page.route("https://api.moviemaster.lat/**", (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html><script>parent.postMessage('mm:hello','*')</script>ok" }));
+    await page.route(/unlimplay|tukiplay|facilitoplay/, (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html>x" }));
+    await enter(page);
+    const r = await page.evaluate(async () => {
+      PLAYER_LOAD_TIMEOUT = 1200; PLAYER_SLOW_TIMEOUT = 2400;
+      safeStorageSet(profileStorageKey("tatoServer"), "OP2"); preferredServer = "OP2";
+      openPlayer(550, "movie", "Fight Club");
+      const first = new URL(document.querySelector("#player-view iframe").src).hostname;
+      await new Promise((ok) => setTimeout(ok, 4500));
+      const now = new URL(document.querySelector("#player-view iframe").src).hostname;
+      closePlayer(); PLAYER_LOAD_TIMEOUT = 8000; PLAYER_SLOW_TIMEOUT = 20000; safeStorageSet(profileStorageKey("tatoServer"), "OP1");
+      try { localStorage.removeItem(profileStorageKey("tatoTitleServer")); } catch (e) { }
+      return { first, now };
+    });
+    eq(r.first, "videoapi.la", "debía empezar en OP2:"); eq(r.now, "api.moviemaster.lat", "tras «no disponible» debe pasar a OP1 (y quedarse):");
+  });
+  await test("Servidores: los nombres guardados ESP1–ESP5 pasan a OP1–OP5 y ENG1 a OP1 (preferido y memoria por título), una sola vez", async (page) => {
+    await enter(page);
+    await page.evaluate(() => { localStorage.removeItem("tatoServersV3"); localStorage.setItem(profileStorageKey("tatoServer"), "ENG1"); localStorage.setItem(profileStorageKey("tatoTitleServer"), JSON.stringify({ "movie:1": { s: "ESP5", t: Date.now() }, "tv:2": { s: "ENG1", t: Date.now() }, "movie:3": { s: "ESP4", t: Date.now() } })); });
+    await page.reload({ waitUntil: "domcontentloaded" }); await page.waitForFunction(() => typeof profileStorageKey === "function" && localStorage.getItem("tatoServersV3") === "1", null, { timeout: 15000 });
+    const r = await page.evaluate(() => { const t = JSON.parse(localStorage.getItem(profileStorageKey("tatoTitleServer")) || "{}"); const out = [localStorage.getItem(profileStorageKey("tatoServer")), (t["movie:1"] || {}).s, (t["tv:2"] || {}).s, (t["movie:3"] || {}).s].join(","); localStorage.setItem(profileStorageKey("tatoServer"), "OP1"); localStorage.removeItem(profileStorageKey("tatoTitleServer")); return out; });
+    eq(r, "OP1,OP5,OP1,OP4", "migración:");
   });
   await test("Navegadores viejos SIN aspect-ratio (Chromium < 88, TV 2019–2020, Safari < 15, Apple TV): reproductor 16:9, tarjetas 16:9 y avatares cuadrados con el bloque de respaldo", async (page, ctx) => {
     const tmp = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "tc-legacy-"));

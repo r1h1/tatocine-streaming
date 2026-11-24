@@ -3,6 +3,7 @@
 # Requiere: adb (Linux: platform-tools; macOS: brew install android-platform-tools) y la APK de depuración (TATO_DEBUG=1) para CDP.
 S="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 TVIP=${TVIP:-192.168.0.6}
+[ -z "$ADB_BIN" ] && ! command -v adb >/dev/null 2>&1 && [ -x "$HOME/platform-tools-dl/platform-tools/adb" ] && ADB_BIN="$HOME/platform-tools-dl/platform-tools/adb"
 ADB="${ADB_BIN:-adb} -s $TVIP:5555"                     # siempre con -s: si hay un emulador conectado, adb pide elegir
 mkdir -p "$S/tv"
 command -v timeout >/dev/null 2>&1 || timeout(){ if command -v gtimeout >/dev/null 2>&1; then gtimeout "$@"; else shift; "$@"; fi; }   # macOS: brew install coreutils → gtimeout

@@ -22,12 +22,13 @@
       globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>',
       star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
     };
+    // Nombres OP1–OP5 (antes ESP1–ESP5; ver migrateServerNamesV3).
     // Servidores, de los que funcionan mejor a los que menos (revisados en una Google TV con El rey león 2019, TMDB 420818): videoapi traía la versión correcta;
     // unlimplay a veces no carga o trae otra película y facilitoplay dio 404 con anuncios para adultos (por eso NO se ofrece en perfiles infantiles: adultAds).
     // El cambio automático de servidor sigue este mismo orden.
     const SERVERS = [
       {
-        name: "ESP1",                                  // MovieMaster (moviemaster.lat): latino obligatorio
+        name: "OP1",                                  // MovieMaster (moviemaster.lat): latino obligatorio
         icon: icons.lightning,
         url: (i, t, s, e) =>
           t === "tv"
@@ -35,7 +36,7 @@
             : `https://api.moviemaster.lat/e/movie/${i}?color=000000&lang=LAT&autoplay=1`,
       },
       {
-        name: "ESP2",                                  // VideoAPI (videoapi.la): embed público por ID de TMDB, películas y series (antes ESP4)
+        name: "OP2",                                  // VideoAPI (videoapi.la): embed público por ID de TMDB, películas y series (antes ESP4)
         icon: icons.film,
         url: (i, t, s, e) =>
           t === "tv"
@@ -43,7 +44,7 @@
             : `https://videoapi.la/e/movie/${i}?autoplay=1`,
       },
       {
-        name: "ESP3",                                  // TukiPlay (tukiplay.com) (antes ESP2)
+        name: "OP3",                                  // TukiPlay (tukiplay.com) (antes ESP2)
         icon: icons.disc,
         url: (i, t, s, e) =>
           t === "tv"
@@ -51,7 +52,7 @@
             : `https://tukiplay.com/embed/movie/${i}?autoplay=1`,
       },
       {
-        name: "ESP4",                                  // UnLimPlay (unlimplay.com) (antes ESP3): a veces no carga o trae otra película
+        name: "OP4",                                  // UnLimPlay (unlimplay.com) (antes ESP3): a veces no carga o trae otra película
         icon: icons.play,
         url: (i, t, s, e) =>
           t === "tv"
@@ -59,7 +60,7 @@
             : `https://unlimplay.com/f/embed/movie/${i}`,
       },
       {
-        name: "ESP5",                                  // FacilitoPlay (facilitoplay.com): /e/pelicula y /e/serie por ID de TMDB; anuncios para adultos
+        name: "OP5",                                  // FacilitoPlay (facilitoplay.com): /e/pelicula y /e/serie por ID de TMDB; anuncios para adultos
         icon: icons.globe,
         adultAds: true,
         url: (i, t, s, e) =>
@@ -67,14 +68,9 @@
             ? `https://facilitoplay.com/e/serie/${i}/${s}/${e}`
             : `https://facilitoplay.com/e/pelicula/${i}`,
       },
-      {
-        name: "ENG1",
-        icon: icons.server,
-        url: (i, t, s, e) =>
-          t === "tv"
-            ? `https://vidsrc.sh/embed/tv/${i}/${s}/${e}`
-            : `https://vidsrc.sh/embed/movie/${i}`,
-      },
+      // ENG1 (vidsrc.sh) se QUITÓ en nov 2026: inyectaba un falso «Confirm you're not a robot» con un QR (publicidad engañosa desde dominios
+      // aleatorios), cargaba rastreadores (histats, crwdcntrl, onaudience…) y no acepta sandbox. Política de TatoCine: cero anuncios y rastreadores.
+      // Quien lo tenía como preferido o recordado vuelve a ESP1 (los nombres se validan contra esta lista).
     ];
     // Nombres guardados con la lista anterior (servidor preferido y el que funcionó por título, en cada perfil): se traducen UNA vez a los nuevos.
     // Antes: ESP2 tukiplay, ESP3 unlimplay, ESP4 videoapi, ESP5 facilitoplay.  Ahora: ESP2 videoapi, ESP3 tukiplay, ESP4 unlimplay, ESP5 facilitoplay.
@@ -94,5 +90,25 @@
           }
         }
         localStorage.setItem("tatoServersV2", "1");
+      } catch (e) { }
+    })();
+    // Nov 2026: ESP1–ESP5 pasan a llamarse OP1–OP5 (mismo orden y mismos sitios) y ENG1 se quitó (publicidad engañosa). Se traduce UNA vez lo guardado
+    // en cada perfil (servidor preferido y memoria por título). Va DESPUÉS de la migración V2, que sigue usando los nombres ESP.
+    (function migrateServerNamesV3() {
+      try {
+        if (localStorage.getItem("tatoServersV3") === "1") return;
+        var to = function (v) { return /^ESP[1-5]$/.test(v) ? "OP" + v.slice(3) : v === "ENG1" ? "OP1" : v; };
+        for (var n = localStorage.length - 1; n >= 0; n--) {
+          var k = localStorage.key(n);
+          if (!k) continue;
+          if (/(^|_)tatoServer$/.test(k)) {
+            var v = String(localStorage.getItem(k) || "").replace(/"/g, ""), w = to(v);
+            if (w !== v) localStorage.setItem(k, k === "tatoServer" ? JSON.stringify(w) : w);
+          } else if (/(^|_)tatoTitleServer$/.test(k)) {
+            var o = JSON.parse(localStorage.getItem(k) || "{}");
+            if (o && typeof o === "object") { Object.keys(o).forEach(function (t) { if (o[t] && o[t].s) o[t].s = to(o[t].s); }); localStorage.setItem(k, JSON.stringify(o)); }
+          }
+        }
+        localStorage.setItem("tatoServersV3", "1");
       } catch (e) { }
     })();

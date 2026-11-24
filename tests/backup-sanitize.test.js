@@ -1,7 +1,7 @@
 /** Pruebas del saneado de copias de seguridad: `node tests/backup-sanitize.test.js` (sin dependencias). */
 const assert = require("node:assert");
 const B = require("../js/features/backup-sanitize.js");
-const SERVERS = ["ESP1", "ESP2", "ESP3", "ESP4", "ESP5", "ENG1"];
+const SERVERS = ["OP1", "OP2", "OP3", "OP4", "OP5"];
 const clean = (data) => B.sanitizeBackupData(data, SERVERS);
 const j = JSON.stringify;
 let n = 0;
@@ -12,12 +12,12 @@ ok("una copia normal se conserva", () => {
     tatoList: j([{ id: 603, type: "movie", title: "Matrix", bg: "/abc123.jpg", rating: 8.2, year: "1999", list: "lab12" }, { id: 1399, type: "tv", title: "Juego de Tronos", bg: "/xyz987.jpg" }]),
     tatoFavLists: j([{ id: "lab12", name: "Terror" }]),
     tatoContinue: j([{ id: 1399, type: "tv", title: "GoT", bg: "/xyz987.jpg", season: "2", episode: 5, timestamp: 1700000000000 }]),
-    tatoServer: j("ESP2"), tatoAutoNextEpisode: "true",
+    tatoServer: j("OP2"), tatoAutoNextEpisode: "true",
   });
   assert.strictEqual(r.clean.tatoList.length, 2);
   assert.strictEqual(r.clean.tatoList[0].list, "lab12");
   assert.strictEqual(r.clean.tatoContinue[0].season, "2");
-  assert.strictEqual(r.clean.tatoServer, "ESP2");
+  assert.strictEqual(r.clean.tatoServer, "OP2");
   assert.strictEqual(r.clean.tatoAutoNextEpisode, true);
 });
 

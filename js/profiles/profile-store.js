@@ -51,7 +51,7 @@
         ["tatoList", "[]"],
         ["tatoContinue", "[]"],
         ["tatoLocalAnalyticsV1", '{"items":[]}'],
-        ["tatoServer", '"ESP1"'],
+        ["tatoServer", '"OP1"'],
         ["tatoAutoNextEpisode", "true"]
       ];
       legacy.forEach(function (pair) {
@@ -92,7 +92,7 @@
     var UI_LANG = (function () { var p = getActiveProfile(); return p && p.lang === "en" ? "en" : "es"; })();
     var UI_EN = UI_LANG === "en";
     var TMDB_LANG = UI_EN ? "en-US" : "es-MX";
-    function defaultServerFor(lang) { return lang === "en" ? "ENG1" : "ESP1"; }
+    function defaultServerFor(lang) { return "OP1"; }      // sin ENG1 (quitado por publicidad engañosa): OP1 también tiene la versión «Subtitulado» (audio original)
     // ---- Perfiles infantiles, PIN y seguridad local ----
     function isGuestProfile() { var p = getActiveProfile(); return !!p && !!p.guest; }
     /** Solo un perfil adulto (no Niño ni Invitado) administra perfiles. */

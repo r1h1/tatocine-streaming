@@ -289,6 +289,7 @@
     }
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     function playEmbed(i, b) {
+      if (SERVERS[i] && SERVERS[i].adultAds && typeof isKidProfile === "function" && isKidProfile()) { i = 0; b = document.getElementById("server-btn-0") || b; }   // perfiles infantiles: jamás OP5
       var s = SERVERS[i];
       $playerView.innerHTML = "";
       activePlayerFrame = null;
@@ -318,6 +319,12 @@
         "autoplay; fullscreen; picture-in-picture; encrypted-media",
       );
       f.setAttribute("referrerpolicy", "origin");
+      // Política de TatoCine: cero anuncios. Todos los reproductores van con sandbox SIN allow-popups ni allow-top-navigation: no pueden abrir
+      // ventanas (OP5 abría anuncios para adultos y de apuestas) ni sacar al usuario de TatoCine. Medido en nov 2026: OP1–OP5 reproducen igual.
+      // Un servidor que no lo acepte se marca con noSandbox en SERVERS (hoy ninguno). Para TODOS los perfiles.
+      // En la app de TV NO hace falta (y algunos reproductores internos de OP5 lo rechazan: «sandboxed embed is not allowed»): la APK ya bloquea
+      // ventanas emergentes (setSupportMultipleWindows false) y cualquier salida de TatoCine (shouldOverrideUrlLoading), más su lista BLOCK.
+      if (!s.noSandbox && !window.TatoNative) f.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-presentation");
       f.setAttribute("allowfullscreen", ""); f.allowFullscreen = true; f.setAttribute("webkitallowfullscreen", ""); f.style.border = "0";
       f.onload = function () {
         l.style.display = "none";
@@ -370,6 +377,7 @@
         return s.name === preferredServer;
       });
       var startIdx = preferredIdx >= 0 ? preferredIdx : 0;
+      if (SERVERS[startIdx] && SERVERS[startIdx].adultAds && typeof isKidProfile === "function" && isKidProfile()) startIdx = 0;   // perfil infantil: nunca empieza en OP5 (aunque fuera el preferido o el recordado)
       if (t === "tv") {
         $tvControls.classList.add("active");
         fetchTMDB("/tv/" + i)

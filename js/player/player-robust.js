@@ -7,11 +7,14 @@
  *   2. Memoria por título: se recuerda el último servidor que funcionó (o que elegiste a mano) para ESE título
  *      y se usa la próxima vez; el resto de títulos siguen con tu servidor predeterminado.
  *   3. Al cambiar de episodio se mantiene el servidor que está funcionando (antes volvía al inicial).
- * Un servidor «sano»: ESP1 cuando envía sus mensajes «mm:…»; los demás cuando su iframe termina de cargar.
- * Límite: un servidor caído que responde con una página de error también «carga»; solo se detectan los que no
- * responden o, en ESP1, los que cargan pero no arrancan el reproductor.
+ * Un servidor «sano»: OP1 cuando envía sus mensajes «mm:…» y OP2 (videoapi) con «bridge_ready» (source «vidapi-player»; su página de
+ * «Contenido no disponible» no envía nada → se pasa al siguiente); los demás cuando su iframe termina de cargar.
+ * Si la página de OP1/OP2 ya cargó pero el mensaje no llegó en 8 s (TV con la caché fría: medido 8 s o más), se espera hasta 20 s antes de cambiar.
+ * Orden del cambio automático (FALLBACK_ORDER, medido en la TV y el PC, nov 2026): OP1 720p estable → OP4 1080p → OP2 480p → OP3 480p que
+ * se traba → OP5 (anuncios; con sandbox). La app de TV además avisa al instante («tc-player-unavailable») si el documento dice «no disponible».
+ * Límite: un servidor sin mensajes que responde con una página de error también «carga».
  */
-var PLAYER_LOAD_TIMEOUT = 8000, TITLE_SERVER_KEY = "tatoTitleServer", TITLE_SERVER_MAX = 200;
+var PLAYER_LOAD_TIMEOUT = 8000, PLAYER_SLOW_TIMEOUT = 20000, FALLBACK_ORDER = ["OP1", "OP4", "OP2", "OP3", "OP5"], TITLE_SERVER_KEY = "tatoTitleServer", TITLE_SERVER_MAX = 200;
 var titleServers = readLocalJSON(profileStorageKey(TITLE_SERVER_KEY), {});
 if (!titleServers || typeof titleServers !== "object" || Array.isArray(titleServers)) titleServers = {};
 var fb = { tried: {}, timer: null, manual: false, auto: false, silent: false, keepGlobal: true, current: null, fellBack: false };
@@ -35,9 +38,10 @@ function persistedServerName() {
 /** Siguiente servidor sin probar, empezando por los del idioma del perfil. */
 function nextServerIndex() {
   var en = UI_LANG === "en";
+  function rank(x) { var r = FALLBACK_ORDER.indexOf(SERVERS[x].name); return r < 0 ? 99 + x : r; }
   var order = SERVERS.map(function (s, x) { return x; }).sort(function (a, b) {
     var ra = /^ENG/.test(SERVERS[a].name) === en ? 0 : 1, rb = /^ENG/.test(SERVERS[b].name) === en ? 0 : 1;
-    return ra - rb || a - b;
+    return ra - rb || rank(a) - rank(b);
   });
   var kid = typeof isKidProfile === "function" && isKidProfile();
   for (var i = 0; i < order.length; i++) if (!fb.tried[order[i]] && !(kid && SERVERS[order[i]].adultAds)) return order[i];
@@ -53,28 +57,47 @@ function armPlayerWatchdog(i) {
   if (!frame) return;
   var healthy = false, host = "";
   try { host = new URL(frame.src).hostname; } catch (e) { }
-  var speaks = /(^|\.)moviemaster\.lat$/.test(host);       // ESP1 avisa con mensajes «mm:…»: ahí sí se puede comprobar que funciona
+  var mm = /(^|\.)moviemaster\.lat$/.test(host), va = /(^|\.)videoapi\.la$/.test(host);
+  var speaks = mm || va;                                   // OP1 («mm:…») y OP2 («vidapi-player») avisan: ahí sí se puede comprobar que funciona
+  var loaded = false, slowWait = false;
   function ok() { if (!healthy) { healthy = true; clearTimeout(fb.timer); serverIsHealthy(i); } }
   // Un iframe que carga una página de error también dispara `load`: por eso, donde hay mensajes, solo ellos cuentan.
-  if (!speaks) frame.addEventListener("load", ok);
+  frame.addEventListener("load", function () { loaded = true; if (!speaks) ok(); });
   window.addEventListener("message", function onMsg(e) {
     if (activePlayerFrame !== frame) { window.removeEventListener("message", onMsg); return; }
     if (e.source !== frame.contentWindow) return;
     var d = e.data, type = typeof d === "string" ? d : (d && typeof d.type === "string" ? d.type : "");
-    if (speaks ? /^mm:/.test(type) : true) { ok(); window.removeEventListener("message", onMsg); }
+    if (!speaks || (mm && /^mm:/.test(type)) || (va && d && d.source === "vidapi-player")) { ok(); window.removeEventListener("message", onMsg); }
   });
-  (function check() {
+  function check() {
     fb.timer = setTimeout(function () {
       if (healthy || activePlayerFrame !== frame || !$modal.classList.contains("open")) return;
       if (document.hidden) { check(); return; }                                        // pestaña en segundo plano: no se juzga
+      // La página ya cargó pero el aviso no llegó: puede ser la caché fría de la TV (descarga de su reproductor). Se espera hasta PLAYER_SLOW_TIMEOUT.
+      if (speaks && loaded && !slowWait) { slowWait = true; fb.timer = setTimeout(switchNow, PLAYER_SLOW_TIMEOUT - PLAYER_LOAD_TIMEOUT); return; }
+      switchNow();
+    }, PLAYER_LOAD_TIMEOUT);
+  }
+  check();
+  function switchNow(why) {
+      if (document.hidden && !healthy && activePlayerFrame === frame) { check(); return; }
+      if (healthy || activePlayerFrame !== frame || !$modal.classList.contains("open")) return;
       if (navigator.onLine === false) { showToast(L("Sin conexión: revisa tu internet", "Offline: check your connection")); return; }
       var next = nextServerIndex();
       if (next < 0) { showToast(L("Ningún servidor respondió. Prueba de nuevo en unos minutos.", "No server responded. Try again in a few minutes.")); return; }
-      showToast(L(SERVERS[i].name + " no respondió; probando " + SERVERS[next].name + "…", SERVERS[i].name + " did not respond; trying " + SERVERS[next].name + "…"));
+      showToast(why === "missing"
+        ? L(SERVERS[i].name + " no tiene este título; probando " + SERVERS[next].name + "…", SERVERS[i].name + " doesn't have this title; trying " + SERVERS[next].name + "…")
+        : L(SERVERS[i].name + " no respondió; probando " + SERVERS[next].name + "…", SERVERS[i].name + " did not respond; trying " + SERVERS[next].name + "…"));
       fb.auto = true;
       playEmbed(next, document.getElementById("server-btn-" + next));
-    }, PLAYER_LOAD_TIMEOUT);
-  })();
+  }
+  // App de TV: el documento del reproductor dice «no disponible» → se cambia ya (sin esperar 8 s)
+  window.addEventListener("tc-player-unavailable", function onBad(e) {
+    if (activePlayerFrame !== frame) { window.removeEventListener("tc-player-unavailable", onBad); return; }
+    if (e.detail && e.detail !== frame.src) return;
+    window.removeEventListener("tc-player-unavailable", onBad);
+    if (!healthy) { clearTimeout(fb.timer); switchNow("missing"); }
+  });
 }
 
 decorate("setPreferredServer", function (original) {

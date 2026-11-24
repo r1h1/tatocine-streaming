@@ -55,7 +55,7 @@ la reemplaza. Pasos (comprobar cada uno antes de dar algo por hecho):
   anteriores** al reemplazarlos.
 - **Orígenes de prueba**: el dueño abre en su Chrome los servidores locales que yo levanto, y sus datos reales pueden quedar ahí. Usar un
   **puerto nuevo** en cada tanda, no escribir en `localStorage` de un origen con datos, apagar los servidores al terminar.
-- Limpiar en la TV los datos de prueba que deje (servidor preferido → ESP1, memoria por título, etc.).
+- Limpiar en la TV los datos de prueba que deje (servidor preferido → OP1, memoria por título, etc.; o restaurar el respaldo de localStorage).
 
 ## Estructura
 
@@ -138,9 +138,10 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 
 ## Estado y decisiones ya tomadas (no re-discutir)
 
-- Versión actual 5.6 (la VERSION del SW es un hash de contenido). Última entrada del README: **5.33**.
-- Instalada en la TV: APK 5.6-736cfa72 (versionCode 29924563; probado: orden de Inicio, tráiler, logotipo de TMDB en Legal). Última IP de
-  la TV: 192.168.0.7. Último ZIP entregado: `tatocine-5.6-736cfa72.zip`. **No hay nada pendiente.**
+- Versión actual 5.6 (la VERSION del SW es un hash de contenido). Última entrada del README: **5.34**.
+- Instalada en la TV: APK 5.6-a3fd171b (release, versionCode 29924964). Última IP de la TV: 192.168.0.7. Último ZIP: `tatocine-5.6-a3fd171b.zip`
+  (5.34: OP1–OP5, sin ENG1, sandbox en web/PWA). Las webs públicas tatocine/tatocine2/tatocine3.vercel.app siguen en 5.6-736cfa72 hasta que el dueño suba el ZIP.
+  En la web, OP5 con algunos títulos muestra «sandboxed embed is not allowed» (su reproductor interno rechaza sandbox): es el precio de cero ventanas porno.
 - Orden de Inicio: Continuar viendo → Nuevos episodios → Hecho para ti → Tendencias / Estrenos / Populares → Plataformas y estudios → filas
   perezosas (Top 10, mejor calificadas…, solo se piden al acercarse).
 - Tráiler de la portada: el dueño **lo quiere** (también en la TV). Por defecto «Siempre» en TV y equipos normales; en móviles modestos
@@ -149,8 +150,14 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
 - Escala de texto: `--ts` (×0,875 en ≥1200 px), `--ts-hero` (TV ×0,94), `--ts-hero-web` (×1,05), `--ts-head` (×1,1525) en `accessibility-prefs.js`.
 - Navegación con mando: `js/ui/tv-navigation.js` (`spatialMove` por distancia de bordes, `visibleFocusables` con `checkVisibility`).
 - Buscador: `search-intent.js` (intención → TMDB /discover) y `search-smart.js` (personajes → título, persona + título, palabra clave).
-- Servidores: orden en `SERVERS` con migración `tatoServersV2`; `adultAds` se filtra en perfiles infantiles. Problemas de un servidor concreto
-  (p. ej. ESP3/ESP4 con «Madre siniestra», TMDB 1400837) son del tercero: el cambio automático salta al siguiente.
+- **Política: CERO anuncios, analíticas, rastreadores, bloatware o malware.** Un servidor que inyecte publicidad engañosa o scripts maliciosos
+  se quita (así salió ENG1/vidsrc.sh en 5.34). En web y PWA todos los iframes del reproductor llevan `sandbox` sin `allow-popups` ni `allow-top-navigation`
+  (marcar `noSandbox` solo si un servidor no funciona con él y el dueño lo acepta). La APK además bloquea dominios (`BLOCK`) y avisa «tc-player-unavailable».
+- Servidores **OP1–OP5** (antes ESP1–ESP5; migraciones `tatoServersV2` y `tatoServersV3`): OP1 moviemaster (avisa `mm:hello`), OP2 videoapi
+  (avisa `vidapi-player`/`bridge_ready`; si no tiene el título muestra «Contenido no disponible»), OP3 tukiplay (480p, se traba), OP4 unlimplay
+  (1080p), OP5 facilitoplay (`adultAds`: nunca en perfiles infantiles). Cambio automático: `FALLBACK_ORDER` en `player-robust.js`.
+- Auditoría de servidores: `tools/tv-debug/audit.js` (Playwright, iframe servido como tatocine.vercel.app, mide videoWidth/búfer)
+  y en la TV `cdpf.js` con `getVideoPlaybackQuality()`. La calidad mala de un título suele ser la copia del tercero (medir antes de culpar al código).
 - `content-visibility` se midió peor en la TV: no usar. Ocultar el fondo bajo la ficha no mejoró nada medible.
 - «No me gusta» (👎 en la ficha) ya saca el título de las recomendaciones; «Liberar espacio» en Ajustes borra imágenes/datos temporales.
 - Auditoría externa (5.33): se tomó lo útil (orden de Inicio, tráiler en equipos modestos, caché según espacio, logotipo de TMDB, docs).

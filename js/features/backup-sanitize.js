@@ -105,7 +105,10 @@ var BK_SANITIZERS = {
   tatoRecentSearches: function (raw) { return bkArr(raw).map(function (q) { return bkText(q, 60); }).filter(Boolean).slice(0, 8); }
 };
 var BK_REPLACE = {
-  tatoServer: function (raw, ctx) { return typeof raw === "string" && ctx.servers.includes(raw) ? raw : undefined; },
+  tatoServer: function (raw, ctx) {
+    if (typeof raw === "string" && /^ESP[1-5]$/.test(raw)) raw = "OP" + raw.slice(3);           // copias anteriores a nov 2026 (ESP1–ESP5 → OP1–OP5)
+    return typeof raw === "string" && ctx.servers.includes(raw) ? raw : undefined;
+  },
   tatoAutoNextEpisode: function (raw) { return typeof raw === "boolean" ? raw : undefined; }
 };
 

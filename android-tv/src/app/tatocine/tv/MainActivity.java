@@ -276,6 +276,11 @@ public class MainActivity extends Activity {
             while ((n = in.read(buf)) > 0) { bo.write(buf, 0, n); if (bo.size() > 4 * 1024 * 1024) { c.disconnect(); return null; } }
             in.close();
             String html = new String(bo.toByteArray(), cs);
+            // Página de «no disponible» (p. ej. videoapi sin ese título): se avisa a TatoCine para que pase al siguiente servidor sin esperar.
+            if (html.length() < 20000 && (html.contains("Contenido no disponible") || html.contains("no está disponible") || html.contains("Content not available"))) {
+                final String bad = target;
+                runOnUiThread(new Runnable() { @Override public void run() { try { web.evaluateJavascript("window.dispatchEvent(new CustomEvent('tc-player-unavailable',{detail:" + org.json.JSONObject.quote(bad) + "}))", null); } catch (Throwable ignored) { } } });
+            }
             int hd = html.toLowerCase(java.util.Locale.ROOT).indexOf("<head");
             int end = hd >= 0 ? html.indexOf('>', hd) : -1;
             html = end >= 0 ? html.substring(0, end + 1) + PLAYER_STYLE + html.substring(end + 1) : PLAYER_STYLE + html;
@@ -302,7 +307,9 @@ public class MainActivity extends Activity {
             "premilkyway.com", "histats.com", "dtscout.com", "dtscdn.com", "crwdcntrl.net", "mrktmtrcs.net", "onaudience.com", "cloudflareinsights.com",
             "doubleclick.net", "googlesyndication.com", "googleadservices.com", "google-analytics.com", "googletagmanager.com", "adservice.google.com",
             "popads.net", "popcash.net", "propellerads.com", "adsterra.com", "a-ads.com", "exoclick.com", "juicyads.com", "onclickads.net", "adcash.com",
-            "hilltopads.net", "mgid.com", "taboola.com", "outbrain.com", "clickadu.com", "yandex.ru", "mc.yandex.com", "scorecardresearch.com", "quantserve.com"
+            "hilltopads.net", "mgid.com", "taboola.com", "outbrain.com", "clickadu.com", "yandex.ru", "mc.yandex.com", "scorecardresearch.com", "quantserve.com",
+            // Medido en la TV y el PC (nov 2026): anuncios de ESP5 (ventanas para adultos/apuestas) y de ESP4
+            "bulldozerefficientvista.com", "darnobedienceupscale.com", "bashirian.biz", "servetraff.com", "adtrafficquality.google", "mc.yandex.ru"
     };
 
     static boolean blocked(Uri u) {

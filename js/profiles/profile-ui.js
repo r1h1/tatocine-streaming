@@ -196,7 +196,7 @@
         return;
       }
       var kindChanged = previous.kind !== profile.kind || previous.lang !== profile.lang;
-      // Al cambiar de idioma el servidor por defecto cambia: ESP1 (español) / ENG1 (inglés).
+      // Al cambiar de idioma se reinicia el servidor por defecto (hoy OP1 para todos; ENG1 se quitó).
       if (previous.lang !== profile.lang) safeStorageSet("tatoProfile_" + profile.id + "_tatoServer", defaultServerFor(profile.lang));
       var editedId = profile.id;
       closeProfileCreateModal();
@@ -358,7 +358,7 @@
       saveLocalProfiles();
       [
         ["tatoList", "[]"], ["tatoContinue", "[]"],
-        ["tatoLocalAnalyticsV1", '{"items":[]}'], ["tatoServer", '"ESP1"'],
+        ["tatoLocalAnalyticsV1", '{"items":[]}'], ["tatoServer", '"OP1"'],
         ["tatoAutoNextEpisode", "true"]
       ].forEach(function (pair) { safeStorageSet("tatoProfile_" + id + "_" + pair[0], pair[1]); });
       safeStorageSet("tatoProfile_" + id + "_tatoServer", defaultServerFor(profileFormLang));
