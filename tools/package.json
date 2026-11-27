@@ -2,5 +2,10 @@
   "name": "tatocine-tools",
   "private": true,
   "description": "Herramientas de empaquetado (no se publican). esbuild solo minifica los archivos del ZIP; si no está instalado, tools/package.js empaqueta sin minificar.",
-  "devDependencies": { "esbuild": "0.25.0" }
+  "devDependencies": {
+    "esbuild": "0.25.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.0": true
+  }
 }
