@@ -4,7 +4,7 @@
  * pie legal global al final de cada vista y de las ventanas con scroll, y aviso de terceros debajo del reproductor.
  * La lista de sitios de terceros se genera desde SERVERS (js/core/config.js): si se agrega o quita un servidor, esta pantalla se actualiza sola.
  */
-var LEGAL_REPO = "https://github.com/r1h1/tatocine-streaming", LEGAL_AUTHOR_URL = "https://github.com/r1h1/", LEGAL_AUTHOR = "Ma. Ing. Daniel Rivas";
+var LEGAL_REPO = "https://github.com/r1h1/tatocine-streaming", LEGAL_AUTHOR_URL = "https://github.com/r1h1/", LEGAL_AUTHOR = "Ma. Ing. Daniel Rivas, Guatemala";
 
 if (typeof i18nAdd === "function") i18nAdd({
   "Legal": "Legal",

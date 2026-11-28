@@ -33,6 +33,16 @@ const DIRS = ["css", "js", "icons"], SKIP = new Set(["icons/inspiration.jpeg"]);
 function copy(rel) { const from = path.join(ROOT, rel), to = path.join(SITE, rel); fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(from, to); }
 function walk(dir) { return fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }).flatMap((f) => { const rel = dir + "/" + f.name; return f.isDirectory() ? walk(rel) : [rel]; }); }
 ROOT_FILES.forEach((f) => { if (fs.existsSync(path.join(ROOT, f))) copy(f); });
+// Clave de TMDB: en git va un marcador ("xxxxxxxxx"); la real vive FUERA del repo (~/TatoCine-firma/tmdb-key.txt, o $TMDB_API_KEY) y se mete
+// solo en el paquete. Un ZIP con el marcador da «clave del catálogo no válida» (401) en producción: aquí se niega a empaquetar.
+(function tmdbKey() {
+  const file = process.env.TATO_TMDB_KEY_FILE || path.join(require("os").homedir(), "TatoCine-firma", "tmdb-key.txt");
+  const key = (process.env.TMDB_API_KEY || (fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "")).trim();
+  const cfg = path.join(SITE, "config.js"); let s = fs.readFileSync(cfg, "utf8");
+  if (/^[0-9a-f]{32}$/i.test(key)) s = s.replace(/TMDB_API_KEY:\s*"[^"]*"/, 'TMDB_API_KEY: "' + key + '"');
+  if (!/TMDB_API_KEY:\s*"[0-9a-f]{32}"/i.test(s)) { console.error("✗ config.js del paquete NO tiene una clave real de TMDB (solo el marcador). Pon la clave en " + file + " o en $TMDB_API_KEY."); process.exit(1); }
+  fs.writeFileSync(cfg, s);
+})();
 DIRS.forEach((d) => walk(d).filter((r) => !SKIP.has(r) && !/\.(map|md)$/.test(r)).forEach(copy));
 const all = (dir, ext) => walk(dir).filter((r) => r.endsWith(ext) && fs.existsSync(path.join(SITE, r)));
 const rd = (rel) => fs.readFileSync(path.join(SITE, rel), "utf8"), wr = (rel, s) => fs.writeFileSync(path.join(SITE, rel), s);

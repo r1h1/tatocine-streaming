@@ -9,10 +9,12 @@
  */
 var TC_RELEASE_NOTES = {
   es: [
-    "Correcciones y mejoras de rendimiento."
+    "Mejoras para teléfonos grandes.",
+    "Mejoras para televisiones Samsung."
   ],
   en: [
-    "Fixes and performance improvements."
+    "Improvements for large phones.",
+    "Improvements for Samsung TVs."
   ]
 };
 var tcUpdateApply = null, tcUpdateOpen = false;

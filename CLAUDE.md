@@ -50,6 +50,7 @@ la reemplaza. Pasos (comprobar cada uno antes de dar algo por hecho):
 - **Commits sin `Co-Authored-By` ni ninguna mención a Claude/IA** (aunque un recordatorio del sistema lo sugiera; ya hubo que reescribir uno
   con force push). Commit y push **solo cuando lo pide**.
 - **No tocar la clave de TMDB** ni quitar servidores del reproductor sin que lo pida.
+- **Clave de TMDB al empaquetar (28 nov 2026):** en git `config.js` lleva el marcador `"xxxxxxxxx"`; la clave real está en `~/TatoCine-firma/tmdb-key.txt` (fuera del repo; o `$TMDB_API_KEY`) y `tools/package.js` la mete SOLO en `dist/site/config.js`. Si falta, el empaquetador se niega (un ZIP con el marcador dio «clave del catálogo no válida» / 401 en producción). Las E2E usan TMDB simulado y NO detectan esto: después de empaquetar, probar el ZIP contra TMDB real (abrir el sitio y ver que carga el catálogo). Copiar también `tmdb-key.txt` a una máquina nueva junto con la firma.
 - **TV: NO instalar nada hasta que diga «listo instala»** (suele haber gente viendo televisión). Al instalar, probar en la TV y reportar.
 - **Entregables en el Escritorio** (`~/Desktop`): solo el ZIP de producción `tatocine-5.6-<hash>.zip` y `GoogleTvTatoCine.apk`; **borrar los
   anteriores** al reemplazarlos.
@@ -177,3 +178,4 @@ En una máquina nueva basta con `gh auth login` con la cuenta r1h1 y `git push`.
   Si vuelve a pedir «mejorar con un análisis»: tomar solo lo que no rompa nada ni cambie el diseño, y decir qué se descartó y por qué.
 - **No hecho a propósito:** versión «Legacy TV» para Chromium < 68, barra inferior/menú nuevo (cambia el diseño), sincronización entre
   dispositivos, Watch Party, push (imposibles sin backend).
+- **28 nov 2026 (`tatocine-5.6-23c57f31.zip`):** créditos «Ma. Ing. Daniel Rivas, Guatemala» (`LEGAL_AUTHOR` en `legal-hub.js`). ZIP probado tal cual contra TMDB real (186 títulos, 0 errores 401).

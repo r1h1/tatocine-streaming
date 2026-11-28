@@ -570,3 +570,7 @@ body.tc-profile-screen-open .tc-profile-overlay { z-index: 100000; }
 /* Perfil: en todos los tamaños solo se muestra la inicial en un círculo (el nombre completo va en el título y en el lector de pantalla) */
 .tc-profile-trigger-name { display: none !important; }
 .tc-profile-trigger { padding: 4px !important; gap: 0 !important; }
+/* Navegador de TV Samsung (Tizen) / LG (webOS): con una ventana abierta la página puede desplazarse (el puntero del control desplaza la página)
+   y js/ui/scroll-lock.js pasa ese movimiento al contenido de la ventana. El relleno da espacio para desplazar aunque la página sea corta. */
+html.tc-tvweb.modal-lock, html.tc-tvweb.modal-lock body { overflow: auto !important; }
+html.tc-tvweb.modal-lock body::after { content: ""; display: block; height: 400vh; }
